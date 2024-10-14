@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tra Cứu Từ Điển</title>
+
+    <!-- Thêm style CSS -->
+    <style>
+        /* Căn giữa khung plugin cả theo chiều dọc và ngang */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f4f4f4;
+        }
+
+        /* Khung tra cứu từ điển lớn hơn và căn giữa */
+        #plugin-frame {
+            width: 80%; /* Chiếm 80% chiều rộng của trang */
+            max-width: 1200px; /* Giới hạn tối đa 1200px */
+            height: 600px; /* Chiều cao cố định cho khung plugin */
+            border: 2px solid #ccc; /* Đường viền nhẹ nhàng cho khung */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Đổ bóng để nhìn nổi bật hơn */
+            background-color: white; /* Màu nền cho khung */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="plugin-frame">
+        <!-- Khung plugin sẽ nằm ở đây và được căn giữa -->
+    </div>
+
+    <!-- Đoạn mã JavaScript của Laban -->
+    <script id="lbdict_plugin_frame" type="text/javascript">
+        !function () {
+            var h = {
+                s: "https://dict.laban.vn",
+                w: 1000, /* Chiều rộng của plugin */
+                h: 600,  /* Chiều cao của plugin */
+                hl: 2,   /* Ngôn ngữ hiển thị */
+                th: 3    /* Chế độ giao diện */
+            };
+
+            function loadScript(t, e) {
+                var n = document.createElement("script");
+                n.type = "text/javascript";
+                if (n.readyState) {
+                    n.onreadystatechange = function () {
+                        if ("loaded" === n.readyState || "complete" === n.readyState) {
+                            n.onreadystatechange = null;
+                            e();
+                        }
+                    };
+                } else {
+                    n.onload = function () {
+                        e();
+                    };
+                }
+                n.src = t;
+                var q = document.getElementById("plugin-frame"); /* Thay đổi vị trí gắn plugin */
+                q.parentNode.insertBefore(n, q);
+            }
+
+            setTimeout(function () {
+                loadScript("https://stc-laban.zdn.vn/dictionary/js/plugin/lbdictplugin.frame.min.js", function () {
+                    lbDictPluginFrame.init(h);
+                });
+            }, 1000);
+        }();
+    </script>
+
+</body>
+
+</html>

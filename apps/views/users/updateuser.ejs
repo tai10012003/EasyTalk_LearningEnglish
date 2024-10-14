@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update User</title>
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="user-container">
+                        <h1 class="user-title">Update User</h1>
+
+                        <form action="/users/update/<%= user._id %>" method="POST" class="form-user">
+                            <div class="user-form-group">
+                                <label for="username">Username:</label>
+                                <input type="text" id="username" name="username" value="<%= user.username %>" class="user-form-control" required>
+                            </div>
+
+                            <div class="user-form-group">
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" value="<%= user.email %>" class="user-form-control" required>
+                            </div>
+
+                            <!-- Role Dropdown -->
+                            <div class="user-form-group">
+                                <label for="role">Role:</label>
+                                <div class="custom-dropdown">
+                                    <div class="dropdown-btn" id="dropdown-btn-role"><%= user.role %></div>
+                                    <ul class="dropdown-content" id="dropdown-content-role">
+                                        <li data-value="user" <%= user.role === 'user' ? 'selected' : '' %>>User</li>
+                                        <li data-value="admin" <%= user.role === 'admin' ? 'selected' : '' %>>Admin</li>
+                                    </ul>
+                                    <input type="hidden" id="role" name="role" value="<%= user.role %>">
+                                </div>
+                            </div>
+
+                            <!-- Active Dropdown -->
+                            <div class="user-form-group">
+                                <label for="active">Active:</label>
+                                <div class="custom-dropdown">
+                                    <div class="dropdown-btn" id="dropdown-btn-active"><%= user.active %></div>
+                                    <ul class="dropdown-content" id="dropdown-content-active">
+                                        <li data-value="active" <%= user.active === 'active' ? 'selected' : '' %>>Active</li>
+                                        <li data-value="locked" <%= user.active === 'locked' ? 'selected' : '' %>>Locked</li>
+                                    </ul>
+                                    <input type="hidden" id="active" name="active" value="<%= user.active %>">
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn-submit-user">Update User</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const dropdownRoleBtn = document.getElementById("dropdown-btn-role");
+            const dropdownRoleContent = document.getElementById("dropdown-content-role");
+            const roleInput = document.getElementById("role");
+
+            const dropdownActiveBtn = document.getElementById("dropdown-btn-active");
+            const dropdownActiveContent = document.getElementById("dropdown-content-active");
+            const activeInput = document.getElementById("active");
+
+            // Dropdown cho Role
+            dropdownRoleBtn.addEventListener("click", function () {
+                dropdownRoleContent.style.display = dropdownRoleContent.style.display === "block" ? "none" : "block";
+            });
+
+            dropdownRoleContent.addEventListener("click", function (e) {
+                if (e.target.tagName === "LI") {
+                    dropdownRoleBtn.textContent = e.target.textContent;
+                    roleInput.value = e.target.getAttribute("data-value");
+                    dropdownRoleContent.style.display = "none";
+                }
+            });
+
+            // Dropdown cho Active
+            dropdownActiveBtn.addEventListener("click", function () {
+                dropdownActiveContent.style.display = dropdownActiveContent.style.display === "block" ? "none" : "block";
+            });
+
+            dropdownActiveContent.addEventListener("click", function (e) {
+                if (e.target.tagName === "LI") {
+                    dropdownActiveBtn.textContent = e.target.textContent;
+                    activeInput.value = e.target.getAttribute("data-value");
+                    dropdownActiveContent.style.display = "none";
+                }
+            });
+
+            // Ẩn dropdown khi click ra ngoài
+            window.addEventListener("click", function (e) {
+                if (!dropdownRoleBtn.contains(e.target) && !dropdownRoleContent.contains(e.target)) {
+                    dropdownRoleContent.style.display = "none";
+                }
+                if (!dropdownActiveBtn.contains(e.target) && !dropdownActiveContent.contains(e.target)) {
+                    dropdownActiveContent.style.display = "none";
+                }
+            });
+        });
+    </script>
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+
+</html>

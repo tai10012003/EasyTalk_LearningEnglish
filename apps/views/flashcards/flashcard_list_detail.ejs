@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Flashcards Page</title>
+    <link rel="icon" href="/static/images/favicon2.png">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+        <!-- Animate CSS -->
+        <link rel="stylesheet" href="/static/css/animate.css">
+        <!-- Owl Carousel CSS -->
+        <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+        <!-- Themify Icons -->
+        <link rel="stylesheet" href="/static/css/themify-icons.css">
+        <!-- Flaticon CSS -->
+        <link rel="stylesheet" href="/static/css/flaticon.css">
+        <!-- Font Awesome CSS -->
+        <link rel="stylesheet" href="/static/css/magnific-popup.css">
+        <!-- Swiper CSS -->
+        <link rel="stylesheet" href="/static/css/slick.css">
+
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+        
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/static/css/flashcard_list.css"
+    />
+  </head>
+
+  <body>
+    <%- include('../partials/menu.ejs') %>
+    <div class="container flashcard-container">
+      <div class="custom-container d-flex justify-content-center my-4">
+        <div class="content">
+          <div class="row align-items-center">
+            <div class="col-md-8">
+              <h2 class="my-4">Flashcards: <%= flashcardList.name %></h2>
+            </div>
+            <div class="mb-3" hidden>
+              <input
+                type="text"
+                id="flashcard-list-id"
+                value="<%= flashcardList._id %>"
+              />
+            </div>
+            <div class="col-md-4 d-flex justify-content-end">
+              <div class="d-flex">
+                <button
+                  class="btn btn-primary mx-2 flashcard-list-action-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target="#editFlashcardListModal"
+                >
+                  Chỉnh sửa
+                </button>
+                <button
+                  class="btn btn-primary mx-2 flashcard-list-action-btn"
+                  data-bs-toggle="modal"
+                  data-bs-target="#addFlashcardModal"
+                >
+                  Thêm từ mới
+                </button>
+                <button class="btn btn-danger mx-2 flashcard-list-action-btn">
+                  Xoá
+                </button>
+              </div>
+            </div>
+          </div>
+  
+          <div class="alert alert-success" style="margin: 10px 0 20px 0;">
+            Chú ý: nếu như list từ vựng của bạn là tiếng Trung, Nhật, hay Hàn,
+            click vào nút chỉnh sửa để thay đổi ngôn ngữ. Audio mặc định là tiếng
+            Anh-Anh và Anh-Mỹ. Các ngôn ngữ khác chỉ hỗ trợ trên máy tính.
+          </div>
+          <p><%= flashcardList.description %></p>
+          <a
+            class="btn btn-outline-primary btn-lg btn-block mb-4 w-100"
+            href="/flashcards/flashcardlist/<%= flashcardList._id %>/review"
+            >Luyện tập flashcards</a
+          >
+  
+          <div class="row text-center mb-4 border py-2 studying-process-row">
+            <div class="col-md-4">
+              <h3><%= flashcards.length %></h3>
+              <p>Tổng số từ</p>
+            </div>
+            <div class="col-md-4">
+              <h3>0</h3>
+              <p>Đã học</p>
+            </div>
+            <div class="col-md-4">
+              <h3><%= flashcards.length %></h3>
+              <p>Cần ôn tập</p>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <div class="custom-container mt-4">
+        <div class="row">
+          <div class="col-12">
+            <!-- Thông tin về tổng số từ -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <div>
+                <h3>Danh sách từ vựng</h3>
+              </div>
+            </div>
+  
+            <!-- Danh sách flashcard -->
+            <% flashcards.forEach(flashcard=> { %>
+  
+            <div class="flashcard-item">
+              <h5>
+                <%= flashcard.word %>
+                <em class="pronunciation">(<%= flashcard.pronunciation %>)</em>
+                <span class="audio-icons">
+                  <i class="bi bi-volume-up"></i>
+                </span>
+              </h5>
+              <!-- Nút chỉnh sửa kích hoạt modal -->
+              <button
+                href="#"
+                class="btn btn-light update-flashcard-btn"
+                data-flashcard-id="<%= flashcard._id %>"
+                data-bs-toggle="modal"
+                data-bs-target="#editFlashcardModal-<%= flashcard._id %>"
+              >
+                <i class="bi bi-pencil-square ms-2"></i>
+              </button>
+              <div
+                class="modal fade"
+                id="editFlashcardModal-<%= flashcard._id %>"
+                tabindex="-1"
+                aria-labelledby="editFlashcardModalLabel-<%= flashcard._id %>"
+                aria-hidden="true"
+              >
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5
+                        class="modal-title"
+                        id="editFlashcardModalLabel-<%= flashcard._id %>"
+                      >
+                        Chỉnh sửa flashcard
+                      </h5>
+                      <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Close"
+                      >
+                        <i class="bi bi-x-lg"></i>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                      <form
+                        id="editFlashcardForm-<%= flashcard._id %>"
+                        class="edit-flashcard-form"
+                        data-flashcard-id="<%= flashcard._id %>"
+                      >
+                        <div class="mb-3">
+                          <label
+                            for="word-<%= flashcard._id %>"
+                            class="form-label"
+                            >Từ vựng</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="word-<%= flashcard._id %>"
+                            value="<%= flashcard.word %>"
+                            required
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label
+                            for="meaning-<%= flashcard._id %>"
+                            class="form-label"
+                            >Định nghĩa</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="meaning-<%= flashcard._id %>"
+                            value="<%= flashcard.meaning %>"
+                            required
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label for="pos-<%= flashcard._id %>" class="form-label"
+                            >Từ loại</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="pos-<%= flashcard._id %>"
+                            value="<%= flashcard.pos %>"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label
+                            for="pronunciation-<%= flashcard._id %>"
+                            class="form-label"
+                            >Phát âm</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="pronunciation-<%= flashcard._id %>"
+                            value="<%= flashcard.pronunciation %>"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label
+                            for="exampleSentence-<%= flashcard._id %>"
+                            class="form-label"
+                            >Ví dụ</label
+                          >
+                          <textarea
+                            class="form-control"
+                            id="exampleSentence-<%= flashcard._id %>"
+                            rows="4"
+                            maxlength="500"
+                          >
+  <%= flashcard.exampleSentence %></textarea
+                          >
+                        </div>
+                        <div class="mb-3">
+                          <label
+                            for="image-<%= flashcard._id %>"
+                            class="form-label"
+                            >Hình ảnh</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="image-<%= flashcard._id %>"
+                            value="<%= flashcard.image %>"
+                          />
+                        </div>
+                        <div class="mb-3">
+                          <label
+                            for="audio-<%= flashcard._id %>"
+                            class="form-label"
+                            >Âm thanh</label
+                          >
+                          <input
+                            type="text"
+                            class="form-control"
+                            id="audio-<%= flashcard._id %>"
+                            value="<%= flashcard.audio %>"
+                          />
+                        </div>
+                      </form>
+                    </div>
+                    <div class="modal-footer">
+                      <button
+                        type="button"
+                        class="btn btn-secondary"
+                        data-bs-dismiss="modal"
+                      >
+                        Đóng
+                      </button>
+                      <button
+                        type="submit"
+                        class="btn btn-primary"
+                        onclick="saveFlashcard('<%= flashcard._id %>')"
+                      >
+                        Lưu
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+  
+              <!-- Nút chỉnh sửa di chuyển lên góc phải -->
+              <p class="definition">
+                <strong>Định nghĩa:</strong>
+                <%= flashcard.meaning %>
+              </p>
+              <p class="example">
+                <strong>Ví dụ:</strong>
+                <%= flashcard.exampleSentence %>
+              </p>
+  
+              <!-- Nút xóa flashcard -->
+              <button
+                type="button"
+                class="btn delete-flashcard-btn delete-icon"
+                data-flashcard-id="<%= flashcard._id %>"
+              >
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+  
+            <% }) %>
+  
+            <!-- Kiểm tra danh sách trống -->
+            <% if (flashcards.length===0) { %>
+            <p>Không có flashcards nào trong danh sách này.</p>
+            <% } %>
+          </div>
+        </div>
+      </div>
+      <!-- Modal thêm từ mới -->
+      <div
+        class="modal fade"
+        id="addFlashcardModal"
+        tabindex="-1"
+        aria-labelledby="addFlashcardModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="addFlashcardModalLabel">Thêm từ mới</h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              >
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="newFlashcardForm">
+                <div class="mb-3">
+                  <label for="word" class="form-label">Từ vựng</label>
+                  <input type="text" class="form-control" id="word" required />
+                </div>
+                <div class="mb-3">
+                  <label for="meaning" class="form-label">Định nghĩa</label>
+                  <input type="text" class="form-control" id="meaning" required />
+                </div>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="pos" class="form-label">Từ loại</label>
+                      <input type="text" class="form-control" id="pos" />
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="mb-3">
+                      <label for="pronunciation" class="form-label"
+                        >Phát âm</label
+                      >
+                      <input
+                        type="text"
+                        class="form-control"
+                        id="pronunciation"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label for="exampleSentence" class="form-label">Ví dụ</label>
+                  <textarea
+                    class="form-control"
+                    id="exampleSentence"
+                    rows="4"
+                    maxlength="500"
+                    placeholder="Thêm ví dụ"
+                    required
+                  ></textarea>
+                </div>
+                <div class="mb-3">
+                  <label for="image" class="form-label">
+                    <i class="bi bi-card-image"></i>
+                    Hình ảnh (tuỳ chọn)</label
+                  >
+                  <input type="file" class="form-control" id="image" />
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                form="newFlashcardForm"
+              >
+                Lưu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Modal chỉnh sửa thông tin flashcardlist-->
+      <div
+        class="modal fade"
+        id="editFlashcardListModal"
+        tabindex="-1"
+        aria-labelledby="editFlashcardListModalLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="editFlashcardListModalLabel">
+                Chỉnh sửa list từ
+              </h5>
+              <button
+                type="button"
+                class="btn-close"
+                data-bs-dismiss="modal"
+                aria-label="Close"
+              >
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div class="modal-body">
+              <form id="editFlashCardListForm">
+                <div class="mb-3">
+                  <label for="name" class="form-label">Tên</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="name"
+                    required
+                    value="<%= flashcardList.name %>"
+                  />
+                </div>
+                <div class="mb-3">
+                  <label for="description" class="form-label">Mô tả</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="description"
+                    required
+                    value="<%= flashcardList.description %>"
+                  />
+                </div>
+              </form>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary"
+                data-bs-dismiss="modal"
+              >
+                Đóng
+              </button>
+              <button
+                type="submit"
+                class="btn btn-primary"
+                form="editFlashCardListForm"
+              >
+                Lưu
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%- include('../partials/footer.ejs') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/js/flashcard_list.js"></script>
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+  </body>
+</html>

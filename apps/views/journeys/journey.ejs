@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Journey List</title>
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/road.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+    <!-- CSS cho modal -->
+    <style>
+        /* Modal container */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .modal-content h3 {
+            text-align: center;
+        }
+        /* Close button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Form styling */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .btn-submit {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <%- include('../admin/partials/menu.ejs') %>
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="journey-container">
+                        <h1 class="text-center journey-title">JOURNEY LIST</h1>
+                
+                        <!-- Nút để mở modal -->
+                        <div class="text-right mb-3">
+                            <button class="btn btn-primary" id="openModal">+ Add New Journey</button>
+                        </div>
+                
+                        <!-- Modal để thêm Journey -->
+                        <div id="journeyModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close" id="closeModal">&times;</span>
+                                <h3>Thêm Hành Trình Mới</h3>
+                                <form id="journeyForm">
+                                    <div class="form-group">
+                                        <label for="journeyTitle">Tiêu đề hành trình: </label>
+                                        <input type="text" id="journeyTitle" class="form-control" placeholder="Nhập tiêu đề hành trình">
+                                    </div>
+                                    <input type="hidden" id="createdAt" value="<%= new Date().toISOString() %>"> <!-- Ngày tạo tự động -->
+                                    <button type="submit" class="btn-submit">Thêm</button>
+                                </form>
+                            </div>
+                        </div>
+                            <!-- Modal để sửa Journey -->
+                        <div id="editJourneyModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close" id="closeEditModal">&times;</span>
+                                <h3>Sửa Hành Trình</h3>
+                                <form id="editJourneyForm">
+                                    <input type="hidden" id="editJourneyId"> <!-- Lưu id của journey -->
+                                    <div class="form-group">
+                                        <label for="editJourneyTitle">Tiêu đề hành trình: </label>
+                                        <input type="text" id="editJourneyTitle" class="form-control" placeholder="Nhập tiêu đề mới">
+                                    </div>
+                                    <button type="submit" class="btn-submit">Lưu</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Danh sách journey (chưa có nội dung ở đây) -->
+                        <table class="table table-bordered journey-table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Title</th>
+                                    <th>Gates</th>
+                                    <th>Created At</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="journeyList">
+                                <% journeys.forEach((journey, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td><%= journey.title %></td>
+                                        <td><%= journey.gates.length %> Gates</td> <!-- Hiển thị số lượng Gates -->
+                                        <td><%= new Date(journey.createdAt).toLocaleString('vi-VN', {
+                                            day: '2-digit',
+                                            month: '2-digit',
+                                            year: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                            hour12: false
+                                        }) %></td>
+                                        <td>
+                                            <button class="btn btn-warning btn-edit" data-id="<%= journey._id %>" data-title="<%= journey.title %>">Sửa</button>
+                                            <button class="btn btn-danger btn-delete" data-id="<%= journey._id %>">Xóa</button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>                                                        
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hiển thị modal thêm Journey
+        const modal = document.getElementById("journeyModal");
+        const openModalBtn = document.getElementById("openModal");
+        const closeModalBtn = document.getElementById("closeModal");
+
+        openModalBtn.onclick = function () {
+            modal.style.display = "flex";
+        }
+
+        closeModalBtn.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        // Xử lý thêm Journey
+        document.getElementById("journeyForm").onsubmit = function (e) {
+            e.preventDefault();
+
+            const title = document.getElementById("journeyTitle").value;
+
+            if (title) {
+                // Gửi yêu cầu AJAX đến server để thêm Journey
+                fetch('/admin/journey/add', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title: title })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+
+                        // Thêm Journey vào bảng mà không cần tải lại trang
+                        const journeyList = document.getElementById("journeyList");
+                        const newRow = document.createElement("tr");
+
+                        // Tạo số thứ tự dựa trên số lượng hàng hiện có
+                        const rowCount = journeyList.rows.length + 1;
+
+                        const createdAt = new Date().toLocaleString('vi-VN', {
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false
+                        });
+
+                        newRow.innerHTML = `
+                            <td>${rowCount}</td>
+                            <td>${title}</td>
+                            <td>0 Gates</td> <!-- Hiển thị số lượng gates mặc định là 0 -->
+                            <td>${createdAt}</td>
+                            <td>
+                                <button class="btn btn-warning btn-edit" data-id="${data._id}" data-title="${title}">Sửa</button>
+                                <button class="btn btn-danger btn-delete" data-id="${data._id}">Xóa</button>
+                            </td>
+                        `;
+                        journeyList.appendChild(newRow);
+
+                        // Đóng modal và reset form
+                        modal.style.display = "none";
+                        document.getElementById("journeyForm").reset();
+                    } else if (data.error) {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Failed to add Journey");
+                });
+            } else {
+                alert("Vui lòng nhập tiêu đề hành trình!");
+            }
+        };
+
+        // Hiển thị modal sửa Journey
+        const editModal = document.getElementById("editJourneyModal");
+        const closeEditModalBtn = document.getElementById("closeEditModal");
+
+        closeEditModalBtn.onclick = function () {
+            editModal.style.display = "none"; // Đóng modal khi bấm "X"
+        }
+
+        window.onclick = function (event) {
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+        }
+
+        document.querySelectorAll(".btn-edit").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const journeyId = this.getAttribute("data-id");
+                const journeyTitle = this.getAttribute("data-title");
+
+                document.getElementById("editJourneyId").value = journeyId;
+                document.getElementById("editJourneyTitle").value = journeyTitle;
+                
+                editModal.style.display = "flex";
+            });
+        });
+
+        // Xử lý form sửa tiêu đề Journey
+        document.getElementById("editJourneyForm").onsubmit = function (e) {
+            e.preventDefault();
+
+            const journeyId = document.getElementById("editJourneyId").value;
+            const newTitle = document.getElementById("editJourneyTitle").value;
+
+            if (newTitle) {
+                // Gửi yêu cầu AJAX để cập nhật tiêu đề
+                fetch(`/admin/journey/update/${journeyId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ title: newTitle })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message) {
+                        alert(data.message);
+
+                        // Cập nhật đúng cột tiêu đề trong bảng
+                        const journeyRow = document.querySelector(`button[data-id="${journeyId}"]`).parentElement.parentElement;
+                        journeyRow.cells[1].innerText = newTitle; // Cập nhật cột thứ 2 (cột Title)
+
+                        // Đóng modal và reset form
+                        editModal.style.display = "none";
+                        document.getElementById("editJourneyForm").reset();
+                    } else if (data.error) {
+                        alert(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Failed to update Journey");
+                });
+            } else {
+                alert("Vui lòng nhập tiêu đề mới!");
+            }
+        };
+
+        // Xử lý xóa Journey
+        document.querySelectorAll(".btn-delete").forEach(btn => {
+            btn.addEventListener("click", function () {
+                const journeyId = this.getAttribute("data-id");
+
+                if (confirm("Bạn có chắc muốn xóa hành trình này?")) {
+                    // Gửi yêu cầu AJAX để xóa Journey
+                    fetch(`/admin/journey/delete/${journeyId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.message) {
+                            alert(data.message);
+
+                            // Xóa hàng khỏi bảng
+                            this.parentElement.parentElement.remove();
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        alert("Failed to delete Journey");
+                    });
+                }
+            });
+        });
+
+
+
+    </script>
+    
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+
+</html>

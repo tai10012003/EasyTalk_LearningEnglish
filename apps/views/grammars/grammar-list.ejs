@@ -1,0 +1,179 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Grammar Lessons</title>
+        <link rel="icon" href="/static/images/favicon2.png">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+        <!-- Animate CSS -->
+        <link rel="stylesheet" href="/static/css/animate.css">
+        <!-- Owl Carousel CSS -->
+        <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+        <!-- Themify Icons -->
+        <link rel="stylesheet" href="/static/css/themify-icons.css">
+        <!-- Flaticon CSS -->
+        <link rel="stylesheet" href="/static/css/flaticon.css">
+        <!-- Font Awesome CSS -->
+        <link rel="stylesheet" href="/static/css/magnific-popup.css">
+        <!-- Swiper CSS -->
+        <link rel="stylesheet" href="/static/css/slick.css">
+
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+        
+        <style>
+            .grammars-container {
+                margin: 140px auto 50px auto; /* Trung tâm trên trang */
+            }
+            h2 {
+                color: #333; /* Màu chữ tiêu đề */
+                margin-bottom: 30px; /* Khoảng cách dưới tiêu đề */
+                text-align: center;
+                font-weight: bold;
+            }
+            .grammar-card {
+                margin-bottom: 20px; /* Khoảng cách giữa các bài học */
+                border: 1px solid #e0e0e0; /* Viền xung quanh */
+                border-radius: 8px; /* Bo góc cho thẻ */
+                padding: 10px; /* Padding bên trong thẻ */
+                background-color: #fff; /* Màu nền trắng cho thẻ */
+                transition: box-shadow 0.3s; /* Hiệu ứng chuyển đổi khi hover */
+            }
+            .grammar-card:hover {
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Đổ bóng khi hover */
+            }
+            .grammars-title h4{
+                font-weight: bold; /* Chữ đậm cho tiêu đề */
+                font-size: 20px; /* Kích thước chữ lớn hơn */
+            }
+            .grammar-description p {
+                color: #333;
+            }
+            .grammar-image {
+                border-radius: 8px; /* Bo góc cho hình ảnh */
+            }
+            .detail-link {
+                font-size: 17px;
+                display: inline-block; /* Hiển thị dưới dạng khối */
+                margin-top: 10px; /* Khoảng cách trên liên kết */
+                color: #006fe6; /* Màu sắc liên kết */
+                text-decoration: none; /* Bỏ gạch chân */
+                font-weight: bold; /* Chữ đậm cho liên kết */
+                transition: color 0.3s; /* Hiệu ứng chuyển đổi màu sắc */
+                text-decoration: underline;
+            }
+            .detail-link:hover {
+                color:red; /* Màu khi hover */
+                text-decoration: underline;
+            }
+            .blog_right_sidebar {
+                position: sticky;
+                top: 100px; /* Khoảng cách từ đỉnh của sidebar tới đỉnh trình duyệt */
+                max-height: calc(100vh - 100px);
+                overflow: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <%- include('../partials/menu.ejs') %>
+        <div class="container grammars-container">
+            <div class="row mt-3">
+                <div class="col-lg-8 mb-5 mb-lg-0">
+                    <div class="blog_left_sidebar">
+                        <% grammars.forEach((grammar) => { %>
+                            <div class="col-md-12 grammar-card">
+                                <div class="row g-0">
+                                    <div class="col-md-4">
+                                        <% if (grammar.images && grammar.images.length > 0) { %>
+                                            <img src="/static/images/grammar/<%= grammar.images[0] %>" alt="<%= grammar.name %>" style="width: 300px;">
+                                        <% } else { %>
+                                            <p>No Image Available</p> <!-- Hoặc hiển thị một hình ảnh mặc định -->
+                                        <% } %>
+                                    </div>
+                                    <div class="col-md-8 card-body">
+                                        <div class="grammars-title">
+                                            <h4><%= grammar.title %></h4>   
+                                        </div>
+                                        <div class="grammar-description">
+                                            <p><%= grammar.description.length > 120 ? grammar.description.substring(0, 120) + '...' : grammar.description %></p>
+                                        </div>                                        
+                                        <a href="/grammar/detail/<%= grammar._id %>" class="detail-link">Xem chi tiết</a>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                        <% }) %>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="blog_right_sidebar">
+                        <aside class="single_sidebar_widget search_widget">
+                            <h3 class="widget_title">TÌM KIẾM BÀI NGỮ PHÁP</h3>
+                            <form action="#">
+                               <div class="form-group">
+                                  <div class="input-group mb-3">
+                                     <input type="text" class="form-control" placeholder='Tìm bài ngữ pháp'
+                                        onfocus="this.placeholder = ''" onblur="this.placeholder = 'Search Keyword'">
+                                     <div class="input-group-append">
+                                        <button class="btn" type="button"><i class="ti-search"></i></button>
+                                     </div> 
+                                  </div>
+                               </div>
+                               <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit">TÌM KIẾM</button>
+                            </form>
+                         </aside>
+                         <aside class="single_sidebar_widget popular_post_widget">
+                            <h3 class="widget_title">BÀI NGỮ PHÁP GẦN NHẤT</h3>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_1.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>From life was you fish...</h3>
+                                    </a>
+                                    <p>January 12, 2019</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_2.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>The Amazing Hubble</h3>
+                                    </a>
+                                    <p>02 Hours ago</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_3.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>Astronomy Or Astrology</h3>
+                                    </a>
+                                    <p>03 Hours ago</p>
+                                </div>
+                            </div>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <%- include('../partials/footer.ejs') %>
+        
+        <!-- Scripts -->
+        <script src="/static/js/jquery-1.12.1.min.js"></script>
+        <script src="/static/js/popper.min.js"></script>
+        <script src="/static/js/bootstrap.min.js"></script>
+        <script src="/static/js/jquery.magnific-popup.js"></script>
+        <script src="/static/js/swiper.min.js"></script>
+        <script src="/static/js/masonry.pkgd.js"></script>
+        <script src="/static/js/owl.carousel.min.js"></script>
+        <script src="/static/js/jquery.nice-select.min.js"></script>
+        <script src="/static/js/slick.min.js"></script>
+        <script src="/static/js/jquery.counterup.min.js"></script>
+        <script src="/static/js/waypoints.min.js"></script>
+        <script src="/static/js/custom.js"></script>
+    </body>
+    </html>

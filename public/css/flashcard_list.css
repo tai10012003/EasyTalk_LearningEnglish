@@ -1,0 +1,63 @@
+.flashcard-container {
+    margin: 110px auto;
+    max-width: 1000px;
+    padding: 20px 50px 50px 50px;
+    border: 1px solid #e1e1e1;
+}
+.flashcard-list-action-btn {
+    font-size: 13px;
+    padding: 10px;
+}
+
+.flashcard-item {
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    background-color: #f8f9fa;
+    position: relative;
+}
+
+.flashcard-item h5 {
+    font-weight: bold;
+}
+
+.flashcard-item .definition,
+.flashcard-item .example {
+    margin-bottom: 10px;
+}
+
+.flashcard-item .actions {
+    text-align: right;
+}
+
+.delete-icon {
+    color: red;
+    cursor: pointer;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.audio-icons {
+    margin-left: 10px;
+}
+
+.update-flashcard-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.custom-container {
+    max-width: 832px;
+    margin: 0 auto;
+}
+
+.studying-process-row {
+    border-radius: 10px;
+}
+
+.pronunciation {
+    font-style: italic;
+}

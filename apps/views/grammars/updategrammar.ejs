@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Grammar</title>
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container grammar-update-container">
+                        <h1 class="text-center grammar-update-title">Update Grammar Lesson</h1>
+                
+                        <!-- Grammar Update Form -->
+                        <form action="/admin/grammar/update/<%= grammar._id %>" method="POST" class="form-grammar" enctype="multipart/form-data">
+                            
+                            <!-- Title Input -->
+                            <div class="form-group">
+                                <label for="title">Title:</label>
+                                <input type="text" id="title" name="title" value="<%= grammar.title %>" class="form-control" required>
+                            </div>
+                
+                            <!-- Description Textarea -->
+                            <div class="form-group">
+                                <label for="description">Description:</label>
+                                <textarea id="description" name="description" class="form-control" required><%= grammar.description %></textarea>
+                            </div>
+                
+                            <!-- Content Textarea -->
+                            <div class="form-group">
+                                <label for="content">Content (Text with Image/Video Links):</label>
+                                <textarea id="content" name="content" class="form-control" rows="10" required><%= grammar.content %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="createdAt">Created at: </label>
+                                <p style="color: #333; font-weight: bold;"><span id="createdAt"></span></p>
+                            </div>
+                            <div class="form-group">
+                                <label for="image">Current Image:</label><br>
+                                <img src="/static/images/grammar/<%= grammar.images %>" alt="<%= grammar.name %>" style="max-width: 200px; max-height: 200px;"><br><br> <!-- Hiển thị ảnh hiện tại -->
+                                <label for="image">Upload New Image:</label>
+                                <input type="file" id="image" name="image" accept="image/*"> <!-- Thêm trường tải lên ảnh mới -->
+                            </div>
+                            <!-- Submit Button -->
+                            <button type="submit" class="btn btn-primary btn-submit-grammar">Cập nhật</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- JS Files -->
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+
+    <!-- Script to set current time -->
+    <script>
+        document.getElementById('createdAt').innerHTML = new Date().toLocaleString('en-GB', {
+            timeZone: 'Asia/Ho_Chi_Minh', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit'
+        });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create an Account</title>
+    <link rel="stylesheet" href="/static/css/main.css"> <!-- Link your CSS file -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .register-wrapper {
+            display: flex;
+            width: 100%;
+            max-width: 900px; /* Tổng chiều rộng cho cả container */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        .register-container {
+            flex: 1;
+            padding: 40px;
+            margin-right: 20px;
+        }
+
+        .register-container h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .register-tab {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .register-tab a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 0 10px;
+        }
+
+        .register-tab a.active {
+            font-weight: bold;
+            text-decoration: underline;
+        }
+
+        .register-form-group {
+            margin-bottom: 15px;
+        }
+
+        .register-input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-top: 8px;
+            box-sizing: border-box;
+        }
+
+        .register-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        .register-btn:hover {
+            background-color: #0056b3;
+        }
+
+        .register-or-divider {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .register-or-divider span {
+            margin: 0 10px;
+            color: #aaa;
+        }
+
+        .register-divider {
+            height: 1px;
+            background-color: #ddd;
+            flex-grow: 1;
+        }
+
+        .register-social-login-section {
+            margin-top: 20px;
+        }
+
+        .register-social-login-buttons a {
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 4px;
+            color: white;
+            margin-bottom: 10px;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .register-social-login-buttons a:hover {
+            opacity: 0.9;
+        }
+
+        .register-google {
+            background-color: #db4a39;
+        }
+
+        .register-facebook {
+            background-color: #3b5998;
+        }
+
+        .register-footer-text {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .register-footer-text a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        /* Phần linh vật */
+        .mascot-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .mascot-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+
+        /* Media query cho màn hình nhỏ */
+        @media screen and (max-width: 768px) {
+            .register-wrapper {
+                flex-direction: column;
+                max-width: 100%; /* Đảm bảo toàn bộ chiều rộng trên màn hình nhỏ */
+            }
+
+            .register-container {
+                margin-right: 0;
+                padding: 20px;
+            }
+
+            .mascot-container {
+                margin-top: 20px;
+                background-color: #fff;
+            }
+
+            .mascot-container img {
+                max-width: 70%; /* Điều chỉnh kích thước của linh vật trên màn hình nhỏ */
+                margin: 0 auto;
+            }
+
+            .register-btn {
+                padding: 10px; /* Giảm padding để phù hợp với màn hình nhỏ */
+            }
+
+            .register-input {
+                padding: 10px;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .mascot-container img {
+                max-width: 60%; /* Điều chỉnh nhỏ hơn nữa cho màn hình rất nhỏ */
+            }
+
+            .register-container {
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="register-wrapper">
+        <!-- Form Đăng Ký -->
+        <div class="register-container">
+            <h1>Create an Account</h1>
+
+            <form action="/register" method="POST">
+                <div class="register-form-group">
+                    <label for="username">Name: </label>
+                    <input type="text" class="register-input" id="username" name="username" placeholder="Please enter your name" required>
+                </div>
+
+                <div class="register-form-group">
+                    <label for="email">Email: </label>
+                    <input type="email" class="register-input" id="email" name="email" placeholder="Please enter your email" required>
+                </div>
+
+                <div class="register-form-group">
+                    <label for="password">Password: </label>
+                    <input type="password" class="register-input" id="password" name="password" placeholder="Please enter password" required>
+                </div>
+
+                <div class="register-form-group">
+                    <label for="confirmPassword">Confirm Password: </label>
+                    <input type="password" class="register-input" id="confirmPassword" name="confirmPassword" placeholder="Please confirm password" required>
+                </div>
+
+                <button type="submit" class="register-btn">Register</button>
+            </form>
+
+            <div class="register-or-divider">
+                <div class="register-divider"></div>
+                <span>Or</span>
+                <div class="register-divider"></div>
+            </div>
+
+            <div class="register-social-login-section">
+                <div class="register-social-login-buttons">
+                    <a href="#" class="register-google">Login with Google</a>
+                    <a href="#" class="register-facebook">Login with Facebook</a>
+                </div>
+            </div>
+
+            <p class="register-footer-text">Have an account already? <a href="/login">Please login here</a></p>
+        </div>
+
+        <!-- Linh Vật -->
+        <div class="mascot-container">
+            <img src="/static/images/mascot.png" alt="Mascot">
+        </div>
+    </div>
+</body>
+
+</html>

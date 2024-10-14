@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Luyện tập</title>
+    <link rel="icon" href="/static/images/favicon2.png">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+        <!-- Animate CSS -->
+        <link rel="stylesheet" href="/static/css/animate.css">
+        <!-- Owl Carousel CSS -->
+        <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+        <!-- Themify Icons -->
+        <link rel="stylesheet" href="/static/css/themify-icons.css">
+        <!-- Flaticon CSS -->
+        <link rel="stylesheet" href="/static/css/flaticon.css">
+        <!-- Font Awesome CSS -->
+        <link rel="stylesheet" href="/static/css/magnific-popup.css">
+        <!-- Swiper CSS -->
+        <link rel="stylesheet" href="/static/css/slick.css">
+
+        <!-- Custom Styles -->
+        <link rel="stylesheet" href="/static/css/style.css">
+        <link rel="stylesheet" href="/static/css/main.css">
+        
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="/static/css/flashcard_review.css"
+    />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
+      rel="stylesheet"
+    />
+  </head>
+
+  <body>
+    <%- include('../partials/menu.ejs') %>
+    <div class="container flashcard-container">
+      <div class="custom-container d-flex flex-column justify-content-center my-4">
+        <div class="content">
+          <div class="row align-items-center">
+            <div class="col-md-12">
+              <h2 class="my-4">Luyện tập: <%= flashcardList.name %></h2>
+            </div>
+            <div class="col-md-12">
+              <button
+                class="btn btn-outline-danger btn-lg btn-block mb-4 w-100"
+                onclick="exitReviewing()"
+              >
+                <i class="bi bi-calendar-x"></i> Dừng học list từ này
+              </button>
+            </div>
+          </div>
+        </div>
+  
+        <!-- Flashcard Section -->
+        <div
+          class="custom-container mt-4 d-flex justify-content-center align-items-center"
+        >
+          <div
+            id="flashcard-wrapper"
+            class="flashcard"
+            onclick="flipCard()"
+          ></div>
+        </div>
+  
+        <!-- Navigation Buttons -->
+        <div class="d-flex justify-content-center mt-4">
+          <div class="row">
+            <div class="col-md-4">
+              <button class="btn custom-btn mx-2" onclick="prevCard()">
+                Prev
+              </button>
+            </div>
+            <div class="col-md-4">
+              <button
+                class="btn custom-btn mx-2"
+                onclick="removeCurrentFlashcard()"
+              >
+                Loại từ này khỏi list
+              </button>
+            </div>
+            <div class="col-md-4">
+              <button class="btn custom-btn mx-2" onclick="nextCard()">
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <%- include('../partials/footer.ejs') %>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      const flashcards = JSON.parse(`<%- JSON.stringify(flashcards) %>`);
+
+      let currentCardIndex = 0;
+
+      function shuffleFlashcardList(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1)); // Chọn phần tử ngẫu nhiên
+          [array[i], array[j]] = [array[j], array[i]]; // Hoán đổi vị trí
+        }
+        return array;
+      }
+
+      function removeCurrentFlashcard() {
+        if (flashcards.length > 0) {
+          flashcards.splice(currentCardIndex, 1); // Xóa phần tử hiện tại khỏi danh sách
+          if (currentCardIndex >= flashcards.length) {
+            currentCardIndex = flashcards.length - 1; // Cập nhật chỉ số khi phần tử cuối cùng bị xóa
+          }
+          displayCard(currentCardIndex); // Hiển thị flashcard tiếp theo
+        }
+      }
+
+      const shuffleFlashcards = shuffleFlashcardList(flashcards);
+      function displayCard(index) {
+        const flashcard = shuffleFlashcards[index];
+        const flashcardElement = document.getElementById("flashcard-wrapper");
+        console.log(shuffleFlashcards);
+
+        const imageHTML = flashcard.image
+          ? `<img src="${flashcard.image}" alt="Image">`
+          : "";
+
+        flashcardElement.innerHTML = `
+        <div class="flashcard-inner">
+          <!-- Front of the flashcard -->
+          <div class="flashcard-front">
+            <div class="word">
+              <strong>${flashcard.word}</strong>
+            </div>
+            <div class="d-flex justify-content-center align-items-center">
+              <button class="btn btn-light btn-sm mx-2" onclick="playPronou(event)">
+                <i class="bi bi-volume-up"></i>
+              </button>
+              <em class="pronunciation">(${flashcard.pos || "N/A"}) ${
+          flashcard.pronunciation || ""
+        }</em>
+            </div>
+            <i class="bi bi-arrow-repeat btn-flip"></i>
+          </div>
+
+          <!-- Back of the flashcard -->
+          <div class="flashcard-back">
+            <div>
+              <p><strong>Định nghĩa:</strong> ${flashcard.meaning}</p>
+              <p><strong>Ví dụ:</strong>
+                <ul>${
+                  flashcard.exampleSentence
+                    ? flashcard.exampleSentence
+                        .split(".")
+                        .map((example) => `<li>${example}</li>`)
+                        .join("")
+                    : ""
+                }</ul>
+              </p>
+            </div>
+            
+             ${imageHTML}
+            <i class="bi bi-arrow-repeat btn-flip"></i>
+          </div>
+        </div>
+      `;
+
+        // Đảm bảo thẻ mới không bị lật khi hiển thị
+        flashcardElement.classList.remove("is-flipped");
+      }
+
+      function nextCard() {
+        if (currentCardIndex < flashcards.length - 1) {
+          currentCardIndex++;
+          displayCard(currentCardIndex);
+        }
+      }
+
+      function prevCard() {
+        if (currentCardIndex > 0) {
+          currentCardIndex--;
+          displayCard(currentCardIndex);
+        }
+      }
+
+      // Hiển thị flashcard đầu tiên khi tải trang
+      window.onload = () => {
+        displayCard(currentCardIndex);
+      };
+
+      function playPronou(event) {
+        event.stopPropagation();
+        console.log("Playing UK pronunciation");
+      }
+
+      function flipCard() {
+        const card = document.getElementById("flashcard-wrapper");
+        card.classList.toggle("is-flipped");
+      }
+
+      function exitReviewing() {
+        const userConfirmed = window.confirm(
+          "Bạn có chắc chắn muốn dừng học và thoát khỏi danh sách từ này?"
+        );
+        if (userConfirmed) {
+          window.history.replaceState(null, null, window.location.href);
+          window.location.href = "/flashcards";
+        }
+      }
+    </script>
+            <script src="/static/js/jquery-1.12.1.min.js"></script>
+            <script src="/static/js/popper.min.js"></script>
+            <script src="/static/js/bootstrap.min.js"></script>
+            <script src="/static/js/jquery.magnific-popup.js"></script>
+            <script src="/static/js/swiper.min.js"></script>
+            <script src="/static/js/masonry.pkgd.js"></script>
+            <script src="/static/js/owl.carousel.min.js"></script>
+            <script src="/static/js/jquery.nice-select.min.js"></script>
+            <script src="/static/js/slick.min.js"></script>
+            <script src="/static/js/jquery.counterup.min.js"></script>
+            <script src="/static/js/waypoints.min.js"></script>
+            <script src="/static/js/custom.js"></script>
+  </body>
+</html>

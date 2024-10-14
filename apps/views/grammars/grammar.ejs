@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar List</title>
+
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container grammar-container" id="grammar-list">
+                        <h1 class="text-center grammar-title">GRAMMAR LIST</h1>
+                        <div class="text-right mb-3">
+                            <a href="/admin/grammar/add" class="btn btn-primary">+ Add New Grammar Lesson</a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered grammar-table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Image</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <% grammars.forEach((grammar, index) => { %>
+                                    <tr>
+                                        <td><%= index + 1 %></td>
+                                        <td>
+                                            <% if (grammar.images && grammar.images.length > 0) { %>
+                                            <img src="/static/images/grammar/<%= grammar.images[0] %>" alt="<%= grammar.name %>" style="width: 100px; height: auto;">
+                                            <% } else { %>
+                                            <p>No Image Available</p>
+                                            <% } %>
+                                        </td>
+                                        <td><%= grammar.title %></td>
+                                        <td><%= grammar.description %></td>
+                                        <td>
+                                            <%= new Date(grammar.createdAt).toLocaleString('vi-VN', {
+                                                day: '2-digit',
+                                                month: '2-digit',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                                hour12: false
+                                            }) %>
+                                        </td>
+                                        <td>
+                                            <a href="/admin/grammar/update/<%= grammar._id %>" class="btn btn-warning btn-sm">Update</a>
+                                            <form action="/admin/grammar/delete/<%= grammar._id %>" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this grammar lesson?');">
+                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                    <% }) %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>  
+        <!-- End Content -->
+    </div>
+
+    <!-- JS Files -->
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pronunciation Exercise List</title>
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container pronunciation-container" id="pronunciation-exercise-list">
+                        <h1 class="text-center pronunciation-title">PRONUNCIATION EXERCISE LIST</h1>
+                        <a href="/admin/pronunciation-exercise/add" class="btn btn-primary btn-pronunciation-add">+ Add New Pronunciation Exercise</a>
+                        <table class="table table-bordered pronunciation-table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="pronunciation-header">#</th>
+                                    <th class="pronunciation-header">Title</th>
+                                    <th class="pronunciation-header">Questions</th>
+                                    <th class="pronunciation-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% pronunciationexercises.forEach((exercise, index) => { %>
+                                    <tr class="pronunciation-row">
+                                        <td class="pronunciation-cell"><%= index + 1 %></td>
+                                        <td class="pronunciation-cell"><%= exercise.title %></td>
+                                        <td class="pronunciation-cell"><%= exercise.questions.length %> Questions</td>
+                                        <td class="pronunciation-cell">
+                                            <a href="/admin/pronunciation-exercise/update/<%= exercise._id %>" class="btn btn-warning btn-pronunciation-update">Update</a>
+                                            <form action="/admin/pronunciation-exercise/delete/<%= exercise._id %>" method="POST" style="display:inline-block;" onsubmit="return confirm('Are you sure you want to delete this exercise?');">
+                                                <button type="submit" class="btn btn-danger btn-pronunciation-delete">Delete</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+</html>

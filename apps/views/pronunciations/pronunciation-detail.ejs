@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/static/images/favicon2.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #fcfcfc; /* Thay đổi màu nền cho mềm mại hơn */
+        }
+        h2 {
+            color: #2c3e50;
+            font-weight: bold;
+            border-bottom: 3px solid #2980b9; /* Thêm đường viền dưới cho tiêu đề */
+            padding-bottom: 10px;
+            font-size: 28px;
+        }
+        .container_lesson {
+            margin: 20px auto 50px auto;
+        }
+        h4 {
+            border-bottom: 2px solid #2980b9;
+            padding-bottom: 10px;
+            color: #34495e;
+            font-weight: bold;
+            font-size: 23px;
+        }
+        .example-item {
+            background-color: #ecf0f1; /* Thay đổi màu nền cho phần ví dụ */
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Thêm bóng đổ */
+            transition: transform 0.2s;
+        }
+        .btn-primary {
+            background-color: #0000;
+            border: none;
+            color: #fff;
+            font-weight: bold;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .btn-primary:hover {
+            background-color: #fff;
+            color: #000000;
+            border: 1px solid #2980b9;
+        }
+        .lead {
+            color: #2c3e50;
+            font-size: 17px;
+            font-weight: bold;
+        }
+        .content-item p {
+            color: #333;
+            font-size: 17px;
+            line-height: 2;
+        }
+        .content-item img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 15px;
+            border-radius: 5px; /* Bo góc cho hình ảnh */
+        }
+        .content-item iframe {
+            width: 100%;
+            height: 400px;
+            margin-bottom: 15px;
+            border-radius: 5px; /* Bo góc cho iframe */
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 15px;
+            text-align: left;
+            font-size: 17px;
+            border: 1px solid #ddd;
+        }
+        th {
+            text-align: center;
+            background-color: #2980b9;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        tr:hover {
+            background-color: #ddd;
+        }
+        .btn-dark {
+            position: relative;
+            overflow: hidden;
+            transition: color 0.4s, border-color 0.4s;
+            color: white;
+            z-index: 1;
+        }
+
+        .btn-dark::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            transition: left 0.7s;
+            z-index: -1;
+        }
+
+        .btn-dark:hover::before{
+            left: 0;
+        }
+
+        .btn-dark:hover {
+            color: #000000;
+            border-color: #333;
+        }   
+        .blog_right_sidebar {
+            position: sticky;
+            top: 100px;
+            max-height: calc(100vh - 100px);
+            overflow: auto;
+        }
+        /* Slider for "Các bài học khác" */
+        .other-lessons-slider {
+            margin-top: 20px;
+        }
+        .lesson-box {
+            background-color: #e5ecee;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+            margin-right: 20px;
+        }
+        .lesson-box img {
+            max-width: 100%;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        .lesson-box h5 {
+            font-weight: bold;
+            font-size: 18px;
+            color: #2c3e50;
+        }
+        .lesson-desc {
+            font-size: 14px;
+            color: black;
+        }
+        .btn-link {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        .btn-link:hover {
+            color: #1f78c1;
+            text-decoration: underline;
+        }
+        /* Comment Section */
+        .comment-section {
+            margin-top: 20px;
+            background-color: #f7f9fc;  /* Màu nền nhạt hơn, tạo cảm giác sạch sẽ */
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid #e0e7ff;  /* Đường viền màu xanh nhạt */
+        }
+
+        .comment-box textarea {
+            border-radius: 5px;
+            border: 1px solid #d1d5db;  /* Màu viền nhạt */
+            background-color: #ffffff;
+            padding: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s ease; /* Hiệu ứng khi hover */
+        }
+
+        .comment-box textarea:focus {
+            border-color: #6366f1;  /* Viền xanh khi người dùng tương tác */
+            outline: none;
+        }
+
+        .comment-box button {
+            background-color: #6366f1; /* Màu nút xanh tím nhạt */
+            border-color: #6366f1;
+            color: white;
+            transition: background-color 0.3s ease;
+        }
+
+        .comment-box button:hover {
+            background-color: #4f46e5; /* Đổi màu khi hover */
+        }
+
+        .comment-list {
+            margin-top: 20px;
+        }
+
+        .comment-item {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng nhẹ */
+            margin-bottom: 15px;
+            border-left: 4px solid #6366f1; /* Đường viền trái màu xanh tím */
+        }
+
+        .comment-item strong {
+            color: #1f2937; /* Màu chữ đậm hơn */
+            font-size: 16px;
+        }
+
+        .comment-item small {
+            color: #6b7280; /* Màu chữ nhẹ nhàng hơn */
+            font-size: 12px;
+        }
+
+        .comment-item p {
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #374151; /* Màu chữ tối hơn để dễ đọc */
+        }
+
+
+    </style>    
+</head>
+<body>
+    <%- include('../partials/menu.ejs') %>
+    <section class="blog_area section_padding">
+        <div class="container container_lesson">
+            <div class="row">
+                <div class="col-lg-8 mb-5 mb-lg-0">
+                    <div class="blog_left_sidebar">
+                        <h2 class="text-center mb-4"><%= pronunciation.title %></h2>
+                        <p style="color: #333; font-weight: bold;">Ngày đăng: <span id="createdAt"></span></p>
+                        <p class="lead mb-4"> <%= pronunciation.description %></p>
+                
+                        <!-- Content Section -->
+                        <section class="my-4">
+                            <div class="content-item mb-4">
+                                <%- pronunciation.content %>
+                            </div>
+                        </section>
+                        <!-- Các bài học khác -->
+                        <h4 class="mt-3">Các bài học khác</h4>
+                        <div class="other-lessons-slider">
+                            <div class="item">
+                                <div class="lesson-box">
+                                    <img src="/static/images/lesson/lesson_1.png" alt="Lesson 1">
+                                    <h5>Lesson 1: Present Simple</h5>
+                                    <p class="lesson-desc">Học về thì hiện tại đơn với các ví dụ chi tiết.</p>
+                                    <a href="/lessons/lesson-1" class="btn btn-link">Xem thêm</a> <!-- Nút Xem thêm -->
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="lesson-box">
+                                    <img src="/static/images/lesson/lesson_2.png" alt="Lesson 2">
+                                    <h5>Lesson 2: Relative Clause</h5>
+                                    <p class="lesson-desc">Tìm hiểu về mệnh đề quan hệ trong câu.</p>
+                                    <a href="/lessons/lesson-2" class="btn btn-link">Xem thêm</a>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="lesson-box">
+                                    <img src="/static/images/lesson/lesson_3.png" alt="Lesson 3">
+                                    <h5>Lesson 3: Conditional Sentence</h5>
+                                    <p class="lesson-desc">Câu điều kiện và cách sử dụng đúng ngữ pháp.</p>
+                                    <a href="/lessons/lesson-3" class="btn btn-link">Xem thêm</a>
+                                </div>
+                            </div>
+                            <div class="item">
+                                <div class="lesson-box">
+                                    <img src="/static/images/lesson/lesson_4.png" alt="Lesson 4">
+                                    <h5>Lesson 4: Wish and If only</h5>
+                                    <p class="lesson-desc">Thực hành cấu trúc wish và if only trong câu.</p>
+                                    <a href="/lessons/lesson-4" class="btn btn-link">Xem thêm</a>
+                                </div>
+                            </div>
+                        </div>
+                        <h4 style="margin-top: 70px;">Bình luận</h4>
+                        <div class="comment-section">
+                            <div class="comment-box">
+                                <textarea class="form-control" rows="4" placeholder="Viết bình luận..."></textarea>
+                                <button class="btn btn-primary mt-2">Gửi bình luận</button>
+                            </div>
+                            <div class="comment-list mt-4">
+                                <div class="comment-item">
+                                    <p><strong>Lê Dương Chí Bảo</strong>: Bài học rất hay và bổ ích. Cảm ơn!</p>
+                                    <small>3 giờ trước</small>
+                                </div>
+                                <div class="comment-item">
+                                    <p><strong>Phạm Tuấn Kiệt</strong>: Mình vẫn chưa hiểu lắm về phần này.</p>
+                                    <small>5 giờ trước</small>
+                                </div>
+                            </div>
+                        </div>    
+                        <a href="/pronunciation" class="btn btn-dark mt-3">Back to Pronunciation List</a>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="blog_right_sidebar">
+                        <aside class="single_sidebar_widget search_widget">
+                            <h3 class="widget_title">TÌM KIẾM</h3>
+                            <form action="#">
+                               <div class="form-group">
+                                  <div class="input-group mb-3">
+                                     <input type="text" class="form-control" placeholder='Tìm từ khóa'
+                                        onfocus="this.placeholder = ''" onblur="this.placeholder = 'Search Keyword'">
+                                     <div class="input-group-append">
+                                        <button class="btn" type="button"><i class="ti-search"></i></button>
+                                     </div> 
+                                  </div>
+                               </div>
+                               <button class="button rounded-0 primary-bg text-white w-100 btn_1" type="submit">TÌM KIẾM</button>
+                            </form>
+                         </aside>
+                         <aside class="single_sidebar_widget popular_post_widget">
+                            <h3 class="widget_title">BÀI PHÁT ÂM LIÊN QUAN</h3>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_1.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>From life was you fish...</h3>
+                                    </a>
+                                    <p>January 12, 2019</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_2.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>The Amazing Hubble</h3>
+                                    </a>
+                                    <p>02 Hours ago</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_3.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>Astronomy Or Astrology</h3>
+                                    </a>
+                                    <p>03 Hours ago</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_4.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>Asteroids telescope</h3>
+                                    </a>
+                                    <p>01 Hours ago</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_1.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>From life was you fish...</h3>
+                                    </a>
+                                    <p>January 12, 2019</p>
+                                </div>
+                            </div>
+                            <div class="media post_item">
+                                <img src="/static/images/post/post_3.png" alt="post">
+                                <div class="media-body">
+                                    <a href="single-blog.html">
+                                        <h3>Astronomy Or Astrology</h3>
+                                    </a>
+                                    <p>03 Hours ago</p>
+                                </div>
+                            </div>
+                        </aside>
+                        <aside class="single_sidebar_widget tag_cloud_widget">
+                            <h4 class="widget_title">Tags</h4>
+                            <ul class="list">
+                                <li>
+                                    <a href="#">present simple</a>
+                                </li>
+                                <li>
+                                    <a href="#">relative clause</a>
+                                </li>
+                                <li>
+                                    <a href="#">condition sense</a>
+                                </li>
+                                <li>
+                                    <a href="#">wish</a>
+                                </li>
+                                <li>
+                                    <a href="#">model verb</a>
+                                </li>
+                                <li>
+                                    <a href="#">word form</a>
+                                </li>
+                                <li>
+                                    <a href="#">preposition</a>
+                                </li>
+                                <li>
+                                    <a href="#">reported speed</a>
+                                </li>
+                            </ul>
+                        </aside>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <%- include('../partials/footer.ejs') %>
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+    <script>
+        document.getElementById('createdAt').innerHTML = new Date().toLocaleString('en-GB', {
+            timeZone: 'Asia/Ho_Chi_Minh', 
+            day: 'numeric', 
+            month: 'long', 
+            year: 'numeric', 
+            hour: '2-digit', 
+            minute: '2-digit'
+        });
+
+    </script>
+    <script>
+        $(document).ready(function(){
+            $('.other-lessons-slider').slick({
+                slidesToShow: 3,      // Hiển thị 3 bài học cùng lúc
+                slidesToScroll: 1,    // Cuộn 1 bài học mỗi lần
+                autoplay: true,       // Tự động chạy
+                autoplaySpeed: 2000,  // Thời gian giữa các slide (2 giây)
+                dots: true,           // Hiển thị các chấm điều hướng
+                arrows: true,         // Hiển thị nút điều hướng
+                responsive: [
+                    {
+                        breakpoint: 768,  // Trên màn hình nhỏ (như mobile)
+                        settings: {
+                            slidesToShow: 1, // Hiển thị 1 bài học
+                            slidesToScroll: 1
+                        }
+                    },
+                    {
+                        breakpoint: 1024, // Trên màn hình trung bình (như tablet)
+                        settings: {
+                            slidesToShow: 2, // Hiển thị 2 bài học
+                            slidesToScroll: 1
+                        }
+                    }
+                ]
+            });
+        });
+    </script>    
+</body>
+</html>

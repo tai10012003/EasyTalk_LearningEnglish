@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= exercise.title %></title>
+    <!-- Bootstrap và jQuery -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+    <link rel="icon" href="/static/images/favicon2.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="/static/css/animate.css">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <!-- Themify Icons -->
+    <link rel="stylesheet" href="/static/css/themify-icons.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="/static/css/flaticon.css">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="/static/css/slick.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style>
+        .exercises-container {
+            margin: 105px auto 30px auto;
+            max-width: 800px;
+            min-width: 300px;
+            padding: 25px;
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        @media (max-width: 768px) {
+            .exercises-container {
+                width: 80%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .exercises-container {
+                width: 95%;
+                padding: 10px;
+            }
+        }
+        .form-check {
+            padding-left: 0;
+        }
+        .form-check-label {
+            display: block;
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            background-color: #fff;
+        }
+        .form-check-input {
+            display: none;
+        }
+        .form-check-input:checked + .form-check-label {
+            border-color: rgb(82, 82, 166);
+            font-weight: bold;
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .explanation {
+            border: 1px solid cadetblue;
+            line-height: 1.8;
+            padding: 10px;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        .correct-answer {
+            background-color: #aceebb !important;
+            font-weight: bold !important;
+        }
+        .incorrect-answer {
+            background-color: #eab3b8 !important;
+            font-weight: bold !important;
+        }
+        .btn {
+            width: 100%;
+        }
+        .result-content {
+            text-align: center;
+        }
+        .result-content p{
+            margin: 20px 0;
+            color: black;
+            font-size: 16px;
+        }
+        .result-number {
+            font-weight: bold;
+            color: black;
+            font-size: 16px;
+        }
+        .result-percentage {
+            font-size: 16px;
+            color: #17a2b8;
+        }
+        .result-icon {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .result-icon img {
+            width: 200px;
+            height: auto;
+        }
+
+        /* Phần bên phải - thời gian và danh sách câu hỏi */
+        .sidebar {
+            margin: 105px auto 30px auto;
+            padding: 25px;
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .time-remaining {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .question-list {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+        }
+
+        .question-list button {
+            background-color: #fff;
+            color: #333;
+            border: 1px solid black;
+            padding: 5px;
+            font-size: 13px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .question-list button.active {
+            background-color: #6c757d;
+        }
+
+        .question-list button:hover {
+            background-color: #0057b3;
+            color: white;
+        }
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            width: 100%;
+        }
+        .history-item {
+            margin-bottom: 20px;
+        }
+        .history-item h5 {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .history-item p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .speak-button {
+            border: 1px solid #9ba0a6;
+            background-color: #ffffff;
+        }
+
+    </style>
+</head>
+<body>
+    <%- include('../partials/menu.ejs') %>
+    <div class="container">
+        <div class="row">
+            <!-- Cột bên trái: câu hỏi -->
+            <div class="col-md-8">
+                <div class=" exercises-container">
+                    <div id="exerciseCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
+                        <div class="carousel-inner">
+                            <% exercise.questions.forEach((question, index) => { %>
+                                <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                    <div class="question-card p-3" data-correct-answer="<%= question.correctAnswer %>" data-explanation="<%= question.explanation %>" data-type="<%= question.type %>">
+                                        <% if (question.type === 'multiple-choice') { %>
+                                            <h4 class="question-title">Chọn đáp án đúng:</h4>
+                                        <% } else if (question.type === 'fill-in-the-blank') { %>
+                                            <h4 class="question-title">Điền vào chỗ trống:</h4>
+                                        <% } else if (question.type === 'translation') { %>
+                                            <h4 class="question-title">Dịch câu dưới đây:</h4>
+                                        <% } %>
+                                        <h5 style="margin-top: 12px; line-height: 1.8"; id="ques-<%= index %>">
+                                            <button class="speak-button btn-sm btn-outline mr-2" data-text="<%= question.question %>">🔊</button>
+                                            <%= index + 1 %>. <%= question.question %>
+                                        </h5> 
+                                        <form id="question-form-<%= index %>" class="question-form mt-4">
+                                            <% if (question.type === 'multiple-choice') { %>
+                                                <div class="form-check">
+                                                    <% question.options.forEach((option) => { %>
+                                                        <input class="form-check-input" type="radio" name="answer" value="<%= option %>" id="option-<%= option %>-<%= index %>">
+                                                        <label class="form-check-label" for="option-<%= option %>-<%= index %>">
+                                                            <%= option %>
+                                                        </label>
+                                                    <% }) %>
+                                                </div>
+                                            <% } else if (question.type === 'fill-in-the-blank' || question.type === 'translation') { %>
+                                                <textarea class="form-control question-input" name="answer" rows="4" placeholder="Nhập câu trả lời của bạn"></textarea>
+                                            <% } %>
+                                            <div class="explanation mt-4" style="display: none;"></div>
+                                            <button type="button" class="btn btn-success submit-answer mt-4" data-index="<%= index %>">Kiểm tra</button>
+                                        </form>
+            
+                                        <hr>
+                                        <div class="d-flex justify-content-between mt-3">
+                                            <button class="btn btn-secondary prev-slide" type="button" data-slide="prev" <%= index === 0 ? 'disabled' : '' %>>Quay lại</button>
+                                            <button class="btn btn-secondary next-slide ml-5" type="button" data-slide="next" <%= index === exercise.questions.length - 1 ? 'disabled' : '' %>>Tiếp theo</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            <% }) %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="sidebar">
+                    <!-- Thời gian còn lại hoặc đã làm -->
+                    <div class="time-remaining text-center">
+                        <span id="timeLabel">Thời gian còn lại:</span> <span id="time">20:00</span>
+                    </div>
+                    
+                    <!-- Nút nộp bài -->
+                    <button id="submitQuizBtn" class="btn btn-primary submit-btn mb-4">Nộp bài</button>
+                    
+                    <!-- Danh sách câu hỏi -->
+                    <h5 id="questionListTitle">Danh sách câu hỏi:</h5>
+                    <div class="question-list mt-3">
+                        <% exercise.questions.forEach((question, index) => { %>
+                            <button class="question-number" id="question-btn-<%= index %>" data-index="<%= index %>"><%= index + 1 %></button>
+                        <% }) %>
+                    </div>
+                    
+                    <!-- Thời gian đã làm và nút xem lịch sử -->
+                    <div id="completed-info" style="display: none; text-align: center;">
+                        <h4>Thời gian đã làm: <span id="completedTime"></span></h4>
+                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn">Xem lịch sử</button>
+                    </div>
+                   <!-- Bootstrap Modal để hiển thị lịch sử -->
+                    <div class="modal fade" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="historyModalLabel">Lịch sử các câu hỏi đã làm</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body" id="historyContent">
+                            <!-- Nội dung lịch sử sẽ được thêm vào đây -->
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+  
+                </div>
+            </div>            
+        </div>
+    </div>
+    <%- include('../partials/footer.ejs') %>
+    <script>
+        $(document).ready(function() {
+            // Đếm ngược thời gian làm bài
+            let timeRemaining = 20 * 60; // Thời gian 60 phút (đơn vị: giây)
+            let timer; // Biến lưu trữ timer để có thể dừng khi cần
+            // Bắt đầu đếm ngược thời gian khi trang tải
+            function startTimer() {
+                timer = setInterval(() => {
+                    let minutes = Math.floor(timeRemaining / 60);
+                    let seconds = timeRemaining % 60;
+                    seconds = seconds < 10 ? '0' + seconds : seconds;
+                    $('#time').text(minutes + ":" + seconds);
+                    timeRemaining--;
+
+                    if (timeRemaining < 0) {
+                        clearInterval(timer);
+                        alert("Hết giờ làm bài!");
+                        $('#submitQuizBtn').click(); // Tự động nộp bài khi hết giờ
+                    }
+                }, 1000);
+            }
+            
+            startTimer();
+            $('.speak-button').click(function() {
+                const textToSpeak = $(this).data('text'); // Lấy nội dung từ thuộc tính data-text
+                speakText(textToSpeak);
+            });
+
+            function speakText(text) {
+                if ('speechSynthesis' in window) {
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'en-US'; // Bạn có thể thay đổi ngôn ngữ nếu cần
+                    window.speechSynthesis.speak(utterance);
+                } else {
+                    alert('Trình duyệt của bạn không hỗ trợ Speech Synthesis.');
+                }
+            }
+            $('.question-number').click(function() {
+                const index = $(this).data('index');
+                $('#exerciseCarousel').carousel(index);
+            });
+            
+            let totalQuestions = $('.question-card').length;
+            let answeredQuestions = 0;
+            let correctAnswers = 0;
+            
+            $('.submit-answer').click(function() {
+                const index = $(this).data('index');
+                const questionCard = $(this).closest('.question-card');
+                const questionType = questionCard.data('type');
+                const correctAnswer = questionCard.data('correct-answer');
+                const explanation = questionCard.data('explanation');
+
+                let answer = '';
+
+                if (questionType === 'multiple-choice') {
+                    const selectedOption = $(`input[name="answer"]:checked`, `#question-form-${index}`);
+                    if (selectedOption.length > 0) {
+                        answer = selectedOption.val();
+                    } else {
+                        alert("Vui lòng chọn một đáp án.");
+                        return;
+                    }
+                } else if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
+                    answer = $(`textarea[name="answer"]`, `#question-form-${index}`).val().trim();
+                    if (answer === '') {
+                        alert("Vui lòng nhập câu trả lời.");
+                        return;
+                    }
+                }
+
+                if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
+                    const answerElement = $(`textarea[name="answer"]`, `#question-form-${index}`);
+                    answerElement.removeClass('correct-answer incorrect-answer');
+                    if (answer === correctAnswer) {
+                        answerElement.addClass('correct-answer');
+                        questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
+                        $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
+                        correctAnswers++;
+                    } else {
+                        answerElement.addClass('incorrect-answer');
+                        questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}. <br> Giải thích: ${explanation}`).show();
+                        $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
+                    }
+                } else if (questionType === 'multiple-choice') {
+                    if (answer === correctAnswer) {
+                        $(`input[name="answer"]:checked + .form-check-label`, `#question-form-${index}`).addClass('correct-answer');
+                        questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
+                        $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
+                        correctAnswers++;
+                    } else {
+                        $(`input[name="answer"]:checked + .form-check-label`, `#question-form-${index}`).addClass('incorrect-answer');
+                        $(`input[name="answer"][value="${correctAnswer}"] + .form-check-label`, `#question-form-${index}`).addClass('correct-answer');
+                        questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}.<br> Giải thích: ${explanation}`).show();
+                        $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
+                    }
+                }
+                $(`#question-form-${index} input, #question-form-${index} textarea`).prop('disabled', true).addClass('disabled');
+                $(this).prop('disabled', true).addClass('disabled');
+            });
+            // Khi người dùng bấm nút "Nộp bài"
+            $('#submitQuizBtn').click(function() {
+                if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
+                    clearInterval(timer);
+                    const timeTaken = 20 * 60 - timeRemaining;
+                    const minutesTaken = Math.floor(timeTaken / 60);
+                    const secondsTaken = timeTaken % 60;
+
+                    $('#completedTime').text(`${minutesTaken}:${secondsTaken < 10 ? '0' + secondsTaken : secondsTaken}`);
+                    $('.time-remaining, .question-list, #submitQuizBtn, #questionListTitle').hide();
+                    $('#completed-info').show();
+                    showResultScreen()
+                }
+            });
+            function showResultScreen() {
+                const percentageCorrect = (correctAnswers / totalQuestions) * 100;
+                const iconSrc = percentageCorrect >= 50 ? '/static/images/iconhappy.png' : '/static/images/iconsad.png';
+                const resultHtml = `
+                    <div class="result-screen text-center">
+                        <h2 class="text-center">Kết quả bài Luyện tập ngữ pháp</h2>
+                        <div class="row">
+                            <div class="col-md-6 result-content">
+                                <p>Tổng số câu: <span class="result-number">${totalQuestions}</span></p>
+                                <p>Số câu đúng: <span class="result-number correct">${correctAnswers}</span></p>
+                                <p>Số câu sai: <span class="result-number incorrect">${totalQuestions - correctAnswers}</span></p>
+                                <p>Tỷ lệ đúng: <span class="result-percentage">${percentageCorrect.toFixed(2)}%</span></p>
+                            </div>
+                            <div class="col-md-6 text-center result-icon">
+                                <img src="${iconSrc}" alt="Icon kết quả">
+                            </div>
+                        </div>
+                        <div class="d-flex flex-column align-items-center mt-3">
+                            <button class="btn btn-danger" style="width: 200px; margin-bottom: 10px;" onclick="location.reload()">Làm lại</button>
+                            <button class="btn btn-secondary" style="width: 200px;" onclick="location.href='/grammar-exercise'">Thoát</button>
+                        </div>
+                    </div>
+                `;
+
+                $('.exercises-container').html(resultHtml);
+            }
+            $('#viewHistoryBtn').click(function() {
+                let historyHtml = '';
+
+                // Duyệt qua tất cả các câu hỏi và lấy thông tin
+                $('.question-card').each(function(index) {
+                    const questionText = $(this).find('h5').text();
+                    const correctAnswer = $(this).data('correct-answer');
+                    const userAnswer = $(`#question-form-${index} input:checked`).val() || $(`#question-form-${index} textarea`).val();
+                    const explanation = $(this).data('explanation');
+
+                    // Tạo HTML cho lịch sử từng câu hỏi
+                    historyHtml += `
+                        <div class="history-item">
+                            <h5>Câu ${index + 1}: ${questionText}</h5>
+                            <p>Đáp án của bạn: <strong>${userAnswer ? userAnswer : 'Chưa trả lời'}</strong></p>
+                            <p>Đáp án đúng: <strong>${correctAnswer}</strong></p>
+                            <p>Giải thích: ${explanation}</p>
+                            <hr>
+                        </div>
+                    `;
+                });
+
+                // Chèn nội dung vào modal
+                $('#historyContent').html(historyHtml);
+
+                // Hiển thị modal
+                $('#historyModal').modal('show');
+            });
+
+            $('.next-slide').click(function() {
+                $('#exerciseCarousel').carousel('next');
+            });
+
+            $('.prev-slide').click(function() {
+                $('#exerciseCarousel').carousel('prev');
+            });
+            // Tăng câu hỏi hiện tại
+            $('#exerciseCarousel').on('slid.bs.carousel', function() {
+                const currentIndex = $('#exerciseCarousel .carousel-item.active').index();
+                $('#current-question').text(currentIndex + 1);
+
+                // Vô hiệu hóa nút "Quay lại" khi ở câu đầu tiên
+                $('.prev-slide').prop('disabled', currentIndex === 0);
+                // Vô hiệu hóa nút "Tiếp theo" khi ở câu cuối cùng
+                $('.next-slide').prop('disabled', currentIndex === $('.carousel-item').length - 1);
+            });
+        });
+    </script>
+    
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>   
+</body>
+</html>

@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT - Practice English</title>
+    <link rel="icon" href="/static/images/favicon2.png">
+    <link rel="icon" href="/static/images/favicon2.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <!-- animate CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/animate.css">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/owl.carousel.min.css">
+    <!-- themify CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/themify-icons.css">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/flaticon.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/magnific-popup.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.min.css">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/slick.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <!-- Custom CSS -->
+    <style>
+
+        /* Căn giữa chat-container */
+        .chat-container {
+            margin: 120px auto; /* Trung tâm trên trang */
+            max-width: 800px; /* Đặt giá trị max-width để giới hạn chiều rộng khi hiển thị trên màn hình lớn */
+            min-width: 300px; /* Đặt giá trị min-width để đảm bảo nó không quá hẹp trên màn hình nhỏ */
+            padding: 25px; /* Thêm padding để nội dung không sát viền */
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1); /* Thêm bóng để nổi bật hơn */
+            border-radius: 8px; /* Bo góc cho container */
+            background-color: #fff; /* Màu nền trắng cho container */
+        }
+
+        .chat-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .chat-header h3 {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .chat-box {
+            background-color: #f7f7f7;
+            border-radius: 10px;
+            padding: 20px;
+            height: 60vh;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+
+        .chat-message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-message p {
+            margin: 0;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+            word-wrap: break-word;
+        }
+
+        .user-message p {
+            background-color: #d1e7ff;
+            color: #004085;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .bot-message p {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        /* Căn chỉnh input và nút gửi */
+        .chat-input-area {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Khoảng cách giữa input và nút gửi */
+        }
+
+        .chat-input {
+            width: calc(100% - 60px); /* Đảm bảo cân đối với nút gửi */
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        .send-btn {
+            background-image: linear-gradient(45deg, #007bff, #00c6ff);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            background-image: linear-gradient(45deg, #0056b3, #0096c7);
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Animation for fading in elements */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message p {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Avatar styling */
+        .chat-message img {
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+        }
+
+        .user-message img {
+            margin-left: 10px;
+            margin-right: 0;
+        }
+
+    </style>
+</head>
+
+<body>
+    <%- include('partials/menu.ejs') %>
+    <div class="container chat-container">
+        <div class="chat-header">
+            <h3>Chat with AI - Practice English</h3>
+        </div>
+        <div id="chatBox" class="chat-box">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="chat-input-area">
+            <input id="messageInput" type="text" class="chat-input" placeholder="Type your message...">
+            <button id="sendBtn" class="send-btn"><i class="fa fa-paper-plane"></i></button>
+        </div>
+    </div>
+    <%- include('partials/footer.ejs') %>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const sendBtn = document.getElementById('sendBtn');
+            const messageInput = document.getElementById('messageInput');
+            const chatBox = document.getElementById('chatBox');
+
+            // Hàm để thêm tin nhắn vào hộp chat
+            function appendMessage(sender, message, type) {
+                const messageElement = document.createElement('div');
+                messageElement.classList.add('chat-message', type);
+
+                const avatar = document.createElement('img');
+                avatar.src = type === 'user-message' ? '/static/images/user.png' : '/static/images/AI_chat.png';
+
+                const messageContent = document.createElement('p');
+                messageContent.innerHTML = `<strong>${sender}:</strong> ${message}`;
+
+                messageElement.appendChild(avatar);
+                messageElement.appendChild(messageContent);
+
+                chatBox.appendChild(messageElement);
+                chatBox.scrollTop = chatBox.scrollHeight; // Tự động cuộn xuống cuối
+            }
+
+            // Gửi yêu cầu đến API ChatGPT
+            async function sendMessage() {
+                const userMessage = messageInput.value;
+
+                if (!userMessage) {
+                    alert("Please enter a message");
+                    return;
+                }
+
+                appendMessage('You', userMessage, 'user-message'); // Hiển thị tin nhắn người dùng
+
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ message: userMessage }),
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        appendMessage('ChatGPT', data.response, 'bot-message'); // Hiển thị phản hồi từ ChatGPT
+                    } else {
+                        appendMessage('Error', data.error || 'Something went wrong', 'bot-message');
+                    }
+                } catch (error) {
+                    appendMessage('Error', 'Failed to send message', 'bot-message');
+                }
+
+                // Xóa nội dung trong input sau khi gửi
+                messageInput.value = '';
+            }
+
+            // Gửi tin nhắn khi nhấn nút gửi
+            sendBtn.addEventListener('click', sendMessage);
+
+            // Gửi tin nhắn khi nhấn phím Enter
+            messageInput.addEventListener('keypress', function (event) {
+                if (event.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+    </script>
+
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <!-- popper js -->
+    <script src="/static/js/popper.min.js"></script>
+    <!-- bootstrap js -->
+    <script src="/static/js/bootstrap.min.js"></script>
+    <!-- easing js -->
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <!-- swiper js -->
+    <script src="/static/js/swiper.min.js"></script>
+    <!-- swiper js -->
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <!-- particles js -->
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <!-- swiper js -->
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <!-- custom js -->
+    <script src="/static/js/custom.js"></script>
+
+</body>
+
+</html>
