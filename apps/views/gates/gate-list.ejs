@@ -116,7 +116,6 @@
             font-weight: bold;
             margin-top: 20px;
             text-align: center;
-            transition: background 0.3s ease, box-shadow 0.3s ease;
         }
 
         .btn-primary:hover {
@@ -211,7 +210,7 @@
             color: #fff;
             padding: 10px 20px;
             border-radius: 20px;
-            transition: background-color 0.3s ease;
+            transition: background-color 0.2s ease;
         }
 
         .btn-upgrade:hover {
@@ -255,6 +254,17 @@
             font-size: 16px;
             color: #000000;
         }
+        .unlocked {
+            border-color: #4caf50; /* Màu xanh lá để biểu thị đã mở khóa */
+            background-color: #e0ffe0;
+        }
+
+        .locked {
+            border-color: #f44336; /* Màu đỏ để biểu thị bị khóa */
+            background-color: #fcfcfc;
+            opacity: 0.6;
+        }
+
     </style>
 </head>
 <body>
@@ -266,11 +276,11 @@
                     <h4>Thành tích của bạn</h4>
                     <ul class="achievement-list">
                         <li>Điểm KN: 1800</li>
-                        <li>Hành trình đã hoàn thành: 5</li>
-                        <li>Chặng đã hoàn thành: 20</li>
-                    </ul>
+                        <li>Cổng đã hoàn thành: <%= completedGates %></li>
+                        <li>Chặng đã hoàn thành: <%= completedStages %></li>
+                    </ul>                    
                     <hr>
-                    
+    
                     <!-- Nhiệm vụ hàng ngày -->
                     <h4>Nhiệm vụ hàng ngày</h4>
                     <ul class="daily-tasks">
@@ -279,7 +289,7 @@
                         <li><i class="fas fa-check-circle"></i> Thực hành 10 phút giao tiếp</li>
                     </ul>
                     <hr>
-                    
+    
                     <!-- Nâng cấp EasyTalk Pro -->
                     <div class="upgrade-section">
                         <h4>Nâng cấp EasyTalk Pro</h4>
@@ -287,36 +297,41 @@
                         <button class="btn btn-info btn-upgrade">Xem chi tiết</button>
                     </div>
                 </div>
-            </div>            
+            </div>
             <div class="col-md-6">
                 <h2 class="journey-title">Hành trình: <%= journey.title %></h2>
                 <div class="row justify-content-center">
                     <% if (journey.gates.length > 0) { %>
                         <% journey.gates.forEach(gate => { %>
-                            <!-- Gate card -->
                             <div class="col-12 mb-3">
-                                <div class="gate-card">
+                                <div class="gate-card <%= userProgress && userProgress.unlockedGates.includes(gate._id.toString()) ? 'unlocked' : 'locked' %>">
                                     <h5 class="gate-title"><%= gate.title %></h5>
                                     <p class="card-text text-center">Số lượng chặng: <%= gate.stages.length %></p>
                                 </div>
-    
-                                <!-- Stages outside gate, now vertically aligned -->
-                                <% if (gate.stages.length > 0) { %>
-                                    <div class="stage-list-container">
-                                        <% gate.stages.forEach(stage => { %>
-                                            <!-- Stage card -->
-                                            <div class="stage-card">
-                                                <h6 class="stage-title"><%= stage.title %></h6>
-                                                <!-- Nút vào học -->
-                                                <a href="/stage/detail/<%= stage._id %>" class="btn btn-primary" onclick="return confirmStageAction()">VÀO HỌC</a>
-                                            </div>                                    
-                                        <% }) %>
-                                    </div>                                    
+                        
+                                <!-- Kiểm tra nếu cổng đã mở khóa trong UserProgress -->
+                                <% if (userProgress && userProgress.unlockedGates.includes(gate._id.toString())) { %>
+                                    <% if (gate.stages.length > 0) { %>
+                                        <div class="stage-list-container">
+                                            <% gate.stages.forEach(stage => { %>
+                                                <div class="stage-card <%= userProgress.unlockedStages.includes(stage._id.toString()) ? 'unlocked' : 'locked' %>">
+                                                    <h6 class="stage-title"><%= stage.title %></h6>
+                                                    <% if (userProgress.unlockedStages.includes(stage._id.toString())) { %>
+                                                        <a href="/stage/detail/<%= stage._id %>" class="btn btn-primary"  onclick="return confirmStageAction()">VÀO HỌC</a>
+                                                    <% } else { %>
+                                                        <button class="btn btn-primary" disabled>KHÓA</button>
+                                                    <% } %>
+                                                </div>
+                                            <% }) %>
+                                        </div>
+                                    <% } else { %>
+                                        <p class="text-center">Chưa có chặng nào trong cổng này.</p>
+                                    <% } %>
                                 <% } else { %>
-                                    <p class="text-center">Chưa có chặng nào trong cổng này.</p>
+                                    <p class="text-center">Cổng này đã bị khóa</p>
                                 <% } %>
                             </div>
-                        <% }) %>
+                        <% }) %>                                                                     
                     <% } else { %>
                         <p>Chưa có Gates nào trong hành trình này.</p>
                     <% } %>
@@ -356,7 +371,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div>    
     <%- include('../partials/footer.ejs') %>
     <script>
         function confirmStageAction() {

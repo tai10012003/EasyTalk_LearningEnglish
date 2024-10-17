@@ -39,6 +39,10 @@ const stageSchema = new Schema({
         ref: 'Gate',  // Tham chiếu tới gate
         required: true
     },
+    sortOrder: {
+        type: Number,
+        default: 0 // Used to determine the order of stages
+    },
     questions: {
         type: [questionSchema],  // Danh sách câu hỏi
         required: true

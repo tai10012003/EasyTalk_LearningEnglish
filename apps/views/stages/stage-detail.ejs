@@ -89,11 +89,50 @@
             font-weight: bold;
         }
         /* Hide the 'Next' button initially */
-        .next-slide {
+        .next-slide, .complete-stage {
             display: none;
             margin-top: 20px;
             width: 100%;
             padding: 10px;
+        }
+
+        .result-content {
+            text-align: center;
+        }
+        .result-content p{
+            margin: 20px 0;
+            color: black;
+            font-size: 16px;
+        }
+        .result-number {
+            font-weight: bold;
+            color: black;
+            font-size: 16px;
+        }
+        .result-percentage {
+            font-size: 16px;
+            color: #17a2b8;
+        }
+        .result-icon {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .result-icon img {
+            width: 200px;
+            height: auto;
+        }
+
+        .result-screen {
+            margin: 105px auto 30px auto;
+            max-width: 800px;
+            padding: 25px;
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+            position: relative;
+            display: none;
         }
     </style>
 </head>
@@ -138,7 +177,7 @@
                                                             <%= option %>
                                                         </label>
                                                     <% }) %>
-                                                </div>
+                                                </div>  
                                             <% } else { %>
                                                 <textarea class="form-control question-input" name="answer" rows="4" placeholder="Nhập câu trả lời của bạn"></textarea>
                                             <% } %>
@@ -147,6 +186,7 @@
 
                                             <!-- Next button appears after checking answer -->
                                             <button type="button" class="btn btn-secondary next-slide mt-4" data-slide="next" data-index="<%= index %>">Tiếp theo</button>
+                                            <button class="btn btn-primary complete-stage mt-4" data-index="<%= index %>">Hoàn thành</button>
                                         </form>
                                     </div>
                                 </div>
@@ -154,10 +194,29 @@
                         </div>
                     </div>
                 </div>
+                <div class="result-screen text-center">
+                    <h2 class="text-center">Kết quả chặng của bạn</h2>
+                    <div class="row">
+                        <div class="col-md-6 result-content">
+                            <p>Tổng số câu: <span class="result-number" id="total-questions"></span></p>
+                            <p>Số câu đúng: <span class="result-number correct" id="correct-answers"></span></p>
+                            <p>Số câu sai: <span class="result-number incorrect" id="wrong-answers"></span></p>
+                            <p>Tỷ lệ đúng: <span class="result-percentage" id="correct-percentage"></span>%</p>
+                        </div>
+                        <div class="col-md-6 text-center result-icon">
+                            <img src="" id="result-icon" alt="Icon kết quả">
+                        </div>
+                    </div>
+                    <div class="d-flex flex-column align-items-center mt-3">
+                        <button class="btn btn-danger" style="width: 200px; margin-bottom: 10px;" onclick="location.reload()">Làm lại</button>
+                        <button class="btn btn-secondary" style="width: 200px;" onclick="location.href='/journey'">Thoát</button>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
-
+    
     <%- include('../partials/footer.ejs') %>
     <script src="/static/js/jquery-1.12.1.min.js"></script>
     <script src="/static/js/popper.min.js"></script>
@@ -173,6 +232,9 @@
     <script src="/static/js/custom.js"></script>
     <script>
         $(document).ready(function() {
+            let correctAnswers = 0;
+            let totalQuestions = $('.question-card').length;
+            let currentQuestion = 0;
             let isTestCompleted = false;
 
             // Handle submit answer
@@ -202,24 +264,26 @@
 
                 // Check the answer and display the explanation
                 if (userAnswer === correctAnswer) {
-                    questionCard.find(`input[name="answer"]:checked + .form-check-label`).addClass('correct-answer');
+                    correctAnswers++; // Increment the count of correct answers
                     questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
+                    questionCard.find(`input[name="answer"]:checked + .form-check-label`).addClass('correct-answer');
+                    questionCard.find(`textarea[name="answer"]`).addClass('correct-answer');
                 } else {
-                    if (questionType === 'multiple-choice') {
-                        questionCard.find(`input[name="answer"]:checked + .form-check-label`).addClass('incorrect-answer');
-                        questionCard.find(`input[name="answer"][value="${correctAnswer}"] + .form-check-label`).addClass('correct-answer');
-                    } else {
-                        questionCard.find(`textarea[name="answer"]`).addClass('incorrect-answer');
-                    }
                     questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}.<br> Giải thích: ${explanation}`).show();
+                    questionCard.find(`input[name="answer"]:checked + .form-check-label`).addClass('incorrect-answer');
+                    questionCard.find(`input[name="answer"][value="${correctAnswer}"] + .form-check-label`).addClass('correct-answer');
+                    questionCard.find(`textarea[name="answer"]`).addClass('incorrect-answer');
                 }
 
                 // Disable inputs after submitting the answer
                 $(`#question-form-${index} input, #question-form-${index} textarea`).prop('disabled', true).addClass('disabled');
                 $(this).prop('disabled', true).addClass('disabled');
 
-                // Show "Next" button after checking the answer
-                $(this).siblings('.next-slide').show();
+                if (index < totalQuestions - 1) {
+                    $(this).siblings('.next-slide').show();
+                } else {
+                    $(this).siblings('.complete-stage').show();
+                }
             });
 
             // Handle next-slide click
@@ -227,17 +291,12 @@
                 $('#stageCarousel').carousel('next');
             });
 
-            // Update progress bar as questions are answered
-            $('.next-slide').click(function() {
-                const totalQuestions = $('.question-card').length;
+            // Update progress bar after answering questions
+            $('.next-slide, .complete-stage').click(function() {
                 let progressStep = 100 / totalQuestions;
                 let currentProgress = $('#progressBar').width() / $('.progress').width() * 100;
                 currentProgress += progressStep;
                 $('#progressBar').css('width', `${currentProgress}%`);
-
-                if (currentProgress >= 100) {
-                    isTestCompleted = true; // Mark the test as completed
-                }
             });
 
             // Handle exit button
@@ -246,16 +305,63 @@
                     window.location.href = '/journey'; // Redirect to the homepage or any other desired page
                 }
             });
+            $('.complete-stage').click(async function(event) {
+                event.preventDefault();
+                event.stopPropagation();
 
-            // Warn user if they try to leave the page without completing the test
-            $(window).on('beforeunload', function(e) {
-                if (!isTestCompleted) {
-                    const message = 'Bạn có chắc chắn muốn thoát? Bạn sẽ mất toàn bộ bài kiểm tra nếu thoát.';
-                    e.preventDefault(); // Some browsers require this for the dialog to show
-                    return message; // Standard return for modern browsers
+                const stageId = "<%= stage._id %>"; // Lấy ID của chặng hiện tại
+
+                try {
+                    // Gửi yêu cầu POST đến server để mở khóa chặng
+                    const response = await fetch(`/stage/complete/${stageId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    const data = await response.json();
+                    if (response.ok) {
+                        // Hiển thị thông báo và kết quả sau khi hoàn thành thành công
+                        alert(data.message);
+                        showResultScreen(); // Gọi hàm hiển thị trang kết quả
+                    } else {
+                        // Xử lý lỗi nếu API trả về lỗi
+                        alert(data.error || 'Không thể mở khóa chặng.');
+                    }
+                } catch (error) {
+                    alert('Đã xảy ra lỗi. Vui lòng thử lại sau.');
                 }
+
+                // Đảm bảo không có hành vi nào khác xảy ra sau sự kiện này
+                return false; // Chặn thêm các hành vi sau
             });
+
+
+
+            // Hiển thị trang kết quả
+            function showResultScreen() {
+                // Ẩn trang câu hỏi
+                $('.stage-container').hide();
+                // Hiển thị trang kết quả
+                $('.result-screen').show();
+
+                // Tính toán kết quả
+                let wrongAnswers = totalQuestions - correctAnswers;
+                let correctPercentage = (correctAnswers / totalQuestions) * 100;
+                let iconSrc = correctPercentage >= 50 ? '/static/images/iconhappy.png' : '/static/images/iconsad.png';
+
+                // Cập nhật thông tin kết quả
+                $('#total-questions').text(totalQuestions);
+                $('#correct-answers').text(correctAnswers);
+                $('#wrong-answers').text(wrongAnswers);
+                $('#correct-percentage').text(correctPercentage.toFixed(2));
+                $('#result-icon').attr('src', iconSrc);
+
+                // Đánh dấu bài kiểm tra đã hoàn thành
+                isTestCompleted = true;
+            }
         });
     </script>    
 </body>
-</html>
+</html> 

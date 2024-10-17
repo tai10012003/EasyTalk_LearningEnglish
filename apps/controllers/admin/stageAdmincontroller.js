@@ -29,7 +29,7 @@ router.get("/add", async (req, res) => {
 
 // Route để thêm một Stage mới
 router.post("/add", async (req, res) => {
-    const { title, gateId, questions } = req.body;
+    const { title, gateId, isLocked, questions } = req.body;
 
     // Kiểm tra xem gate có tồn tại không
     try {
@@ -42,6 +42,7 @@ router.post("/add", async (req, res) => {
         const newStage = new Stage({
             title,
             gate: gateId,
+            isLocked: isLocked,
             questions: questions.map(question => ({
                 question: question.question,
                 type: question.type,
@@ -79,36 +80,32 @@ router.get("/update/:id", async (req, res) => {
     }
 });
 
-// Route để cập nhật thông tin Stage
 router.post("/update/:id", async (req, res) => {
-    const { title, gateId, questions } = req.body;
-
     try {
-        // Tìm stage cần cập nhật
-        const stage = await Stage.findById(req.params.id);
+        const stageId = req.params.id;
+        const { title, gateId, isLocked, questions } = req.body; // Lấy dữ liệu từ req.body
+
+        // Kiểm tra xem stage có tồn tại không
+        const stage = await Stage.findById(stageId);
         if (!stage) {
-            return res.status(404).send("Stage not found.");
+            return res.status(404).send("Chặng không tồn tại.");
         }
 
-        // Cập nhật thông tin stage
+        // Cập nhật dữ liệu cho stage
         stage.title = title;
         stage.gate = gateId;
-        stage.questions = questions.map(question => ({
-            question: question.question,
-            type: question.type,
-            options: question.options || [],
-            correctAnswer: question.correctAnswer,
-            explanation: question.explanation
-        }));
+        stage.isLocked = isLocked === "true"; // Chuyển đổi giá trị từ chuỗi sang Boolean
+        stage.questions = questions;
 
         await stage.save();
 
         res.redirect("/admin/stage");
     } catch (err) {
-        console.error(err);
-        res.status(400).send("Error updating stage.");
+        console.error("Error updating stage:", err);
+        res.status(500).send("Đã xảy ra lỗi khi cập nhật chặng.");
     }
 });
+
 
 // Route để xóa một Stage
 router.post("/delete/:id", async (req, res) => {

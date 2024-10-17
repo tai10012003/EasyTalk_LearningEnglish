@@ -9,7 +9,11 @@ const journeySchema = new Schema({
     gates: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Gate'
-    }]
+    }],
+    isLocked: {
+        type: Boolean,
+        default: true // By default, all journeys are locked
+    }
 }, { timestamps: true });
 
 const Journey = mongoose.model('Journey', journeySchema);

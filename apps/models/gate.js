@@ -15,7 +15,7 @@ const gateSchema = new Schema({
         ref: 'Journey',
         required: true
     },
-    sortOrder: {  // This field will control the order of the gates
+    sortOrder: {
         type: Number,
         default: 0
     }

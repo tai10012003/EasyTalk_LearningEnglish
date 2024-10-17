@@ -18,7 +18,7 @@ router.get('/', async (req, res) => {
 
 // Thêm Gate mới
 router.post('/add', async (req, res) => {
-    const { name, journeyId } = req.body;
+    const { name, journeyId, isLocked } = req.body;
 
     try {
         // Kiểm tra xem Journey có tồn tại không
@@ -31,6 +31,7 @@ router.post('/add', async (req, res) => {
         const newGate = new Gate({
             title: name,
             journey: journeyId,
+            isLocked: isLocked === "true", // Chuyển đổi giá trị từ chuỗi sang Boolean
             stages: [],  // stages mặc định là mảng rỗng
             createdAt: new Date()
         });
@@ -51,7 +52,7 @@ router.post('/add', async (req, res) => {
 
 // Sửa Gate
 router.post('/update/:id', async (req, res) => {
-    const { name, journeyId } = req.body;
+    const { name, journeyId, isLocked } = req.body;
 
     try {
         // Tìm Gate theo ID
@@ -82,6 +83,7 @@ router.post('/update/:id', async (req, res) => {
         // Cập nhật thông tin Gate
         gate.title = name;
         gate.journey = journeyId;
+        gate.isLocked = isLocked; // Lưu giá trị isLocked
         await gate.save();
 
         return res.status(200).json({ message: 'Gate updated successfully!' });
@@ -90,6 +92,7 @@ router.post('/update/:id', async (req, res) => {
         return res.status(500).json({ error: 'Failed to update Gate' });
     }
 });
+
 
 // Xóa Gate
 router.post('/delete/:id', async (req, res) => {
