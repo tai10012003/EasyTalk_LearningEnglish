@@ -260,7 +260,7 @@
                 <div class="achievement-panel">
                     <h4>Thành tích của bạn</h4>
                     <ul class="achievement-list">
-                        <li>Điểm KN: 1800</li>
+                        <li>Điểm KN: <%= userProgress.experiencePoints %></li>
                         <li>Cổng đã hoàn thành: <%= completedGates %></li>
                         <li>Chặng đã hoàn thành: <%= completedStages %></li>
                     </ul>
@@ -309,7 +309,6 @@
                 </div>
             </div>
 
-            <!-- Right Panel: Leaderboard -->
             <div class="col-md-3">
                 <div class="leaderboard-panel">
                     <h4>Bảng xếp hạng</h4>
@@ -321,22 +320,12 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td>Đinh Cao Toàn</td>
-                                <td>2500</td>
-                            </tr>
-                            <tr>
-                                <td>Lê Dương Chí Bảo</td>
-                                <td>2400</td>
-                            </tr>
-                            <tr>
-                                <td>Phạm Tuấn Kiệt</td>
-                                <td>2300</td>
-                            </tr>
-                            <tr>
-                                <td>Tô Hoàng Tuấn</td>
-                                <td>2200</td>
-                            </tr>
+                            <% leaderboard.forEach(entry => { %>
+                                <tr>
+                                    <td><%= entry.user.username %></td>  <!-- Hiển thị tên người học -->
+                                    <td><%= entry.experiencePoints %></td>  <!-- Hiển thị điểm KN -->
+                                </tr>
+                            <% }) %>
                         </tbody>
                     </table>
                 </div>

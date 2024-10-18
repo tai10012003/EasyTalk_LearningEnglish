@@ -202,6 +202,7 @@
                             <p>Số câu đúng: <span class="result-number correct" id="correct-answers"></span></p>
                             <p>Số câu sai: <span class="result-number incorrect" id="wrong-answers"></span></p>
                             <p>Tỷ lệ đúng: <span class="result-percentage" id="correct-percentage"></span>%</p>
+                            <p>Điểm KN của bạn: <span class="result-number" id="experiencePoints"><%= userProgress.experiencePoints%></span></p>
                         </div>
                         <div class="col-md-6 text-center result-icon">
                             <img src="" id="result-icon" alt="Icon kết quả">
@@ -209,7 +210,7 @@
                     </div>
                     <div class="d-flex flex-column align-items-center mt-3">
                         <button class="btn btn-danger" style="width: 200px; margin-bottom: 10px;" onclick="location.reload()">Làm lại</button>
-                        <button class="btn btn-secondary" style="width: 200px;" onclick="location.href='/journey'">Thoát</button>
+                        <button class="btn btn-secondary" style="width: 200px;" onclick="location.href='/journey/detail/<%= stage.gate.journey._id %>'">Thoát</button>
                     </div>
                 </div>
 
@@ -324,6 +325,10 @@
                     if (response.ok) {
                         // Hiển thị thông báo và kết quả sau khi hoàn thành thành công
                         alert(data.message);
+                        // Cập nhật điểm KN ngay lập tức trên giao diện
+                        const currentExperiencePoints = parseInt($('#experiencePoints').text());
+                        const newExperiencePoints = currentExperiencePoints + 10; // Giả sử mỗi chặng là 10 điểm KN
+                        $('#experiencePoints').text(newExperiencePoints);
                         showResultScreen(); // Gọi hàm hiển thị trang kết quả
                     } else {
                         // Xử lý lỗi nếu API trả về lỗi

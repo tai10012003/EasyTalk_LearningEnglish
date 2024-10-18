@@ -40,14 +40,18 @@ router.get("/", async (req, res) => {
         // Tính số cổng và chặng đã hoàn thành
         const completedGates = unlockedGates.length;
         const completedStages = unlockedStages.length;
-
+        const leaderboard = await UserProgress.find()
+            .populate('user')  // Liên kết để lấy thông tin người dùng
+            .sort({ experiencePoints: -1 })  // Sắp xếp theo điểm KN
+            .limit(10);  // Lấy top 10 người học
         res.render("journeys/journey-list", {
             journeys,
             userProgress,
             totalStages,
             totalGates,
             completedGates,
-            completedStages
+            completedStages,
+            leaderboard
         });
     } catch (err) {
         console.error("Lỗi khi tải danh sách hành trình:", err);
@@ -73,7 +77,6 @@ router.get("/journey/detail/:id", async (req, res) => {
         if (!journey) {
             return res.status(404).send("Hành trình không tồn tại.");
         }
-
         // Lấy thông tin tiến trình của người dùng
         let userProgress = await UserProgress.findOne({ user: userId });
         if (!userProgress) {
@@ -116,7 +119,6 @@ router.get("/journey/detail/:id", async (req, res) => {
         const userprogress = await UserProgress.findOne({ user: userId })
             .populate('unlockedGates')
             .populate('unlockedStages');
-
         // Nếu không có tiến trình, thiết lập giá trị mặc định
         const unlockedGates = userprogress ? userprogress.unlockedGates : [];
         const unlockedStages = userprogress ? userprogress.unlockedStages : [];
@@ -124,9 +126,13 @@ router.get("/journey/detail/:id", async (req, res) => {
         // Tính số cổng và chặng đã hoàn thành
         const completedGates = unlockedGates.length;
         const completedStages = unlockedStages.length;
+        const leaderboard = await UserProgress.find()
+            .populate('user')  // Liên kết để lấy thông tin người dùng
+            .sort({ experiencePoints: -1 })  // Sắp xếp theo điểm KN
+            .limit(10);  // Lấy top 10 người học
 
         // Truyền journey và userProgress vào template
-        res.render("gates/gate-list", { journey, userProgress, userprogress, completedGates, completedStages });
+        res.render("gates/gate-list", { journey, userProgress, userprogress, completedGates, completedStages,leaderboard });
     } catch (err) {
         res.status(500).send("Đã xảy ra lỗi khi tải chi tiết hành trình.");
     }

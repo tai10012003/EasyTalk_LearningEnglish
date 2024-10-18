@@ -8,13 +8,16 @@ const UserProgress = require("../models/userprogress");
 // Route để hiển thị chi tiết chặng
 router.get("/stage/detail/:id", async (req, res) => {
     try {
+        const userId = req.user._id;
+        // Lấy thông tin UserProgress của người dùng
+        const userProgress = await UserProgress.findOne({ user: userId });
         // Tìm chặng theo ID và liên kết với cổng mà nó thuộc về
         const stage = await Stage.findById(req.params.id).populate("gate");
         if (!stage) {
             return res.status(404).send("Chặng không tồn tại.");
         }
         // Render trang chi tiết chặng
-        res.render("stages/stage-detail", { stage });
+        res.render("stages/stage-detail", { stage,userProgress  });
     } catch (err) {
         res.status(500).send("Đã xảy ra lỗi khi tải chi tiết chặng.");
     }
@@ -40,7 +43,7 @@ router.post("/stage/complete/:id", async (req, res) => {
 
         // Nếu chặng chưa được mở khóa, thêm vào danh sách đã mở khóa
         if (!userProgress.unlockedStages.includes(stageId)) {
-            userProgress.unlockedStages.push(stageId);
+            userProgress.unlockedStages.push(stageId);  
         }
 
         // Tìm tất cả các chặng trong cổng hiện tại, để xác định chặng kế bên
@@ -71,7 +74,8 @@ router.post("/stage/complete/:id", async (req, res) => {
                 }
             }
         }
-
+        const pointsPerStage = 10; // Ví dụ: mỗi chặng hoàn thành được cộng 10 điểm
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + pointsPerStage;
         // Lưu cập nhật UserProgress
         await userProgress.save();
 

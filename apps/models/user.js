@@ -30,18 +30,6 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Journey'
     },
-    completedStages: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Stage'
-    }],
-    completedGates: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Gate'
-    }],
-    completedJourneys: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Journey'
-    }]
   },
   {
     timestamps: true,
