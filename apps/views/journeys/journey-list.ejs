@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hành Trình Học Tập</title>
+    <script src="/static/js/authentication.js"></script>
+    <link rel="icon" href="/static/images/favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="/static/css/animate.css">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <!-- Themify Icons -->
+    <link rel="stylesheet" href="/static/css/themify-icons.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="/static/css/flaticon.css">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="/static/css/slick.css">    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+
+    <style>
+        body {
+            background-color: #fff;
+        }
+        .journey-container {
+            margin: 110px auto 50px auto;
+            padding: 20px;
+        }
+
+         /* Card styling with vibrant colors */
+         .journey-card {
+            width: 70%; /* Adjust width */
+            margin: 0 auto 30px auto; /* Center and space between cards */
+            padding: 10px;
+            background-color: #fff; /* Light background for contrast */
+            border-radius: 12px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for 3D effect */
+            border: 2px solid #d87a99;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Hover effect to make the card more interactive */
+        .journey-card:hover {
+            transform: translateY(-8px); /* Elevate the card */
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); /* Increase shadow for hover */
+            border-color:   #69f0ae; /* Change border on hover */
+        }
+
+        /* Card title with custom font and vibrant color */
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #333; /* Dark color for readability */
+            text-align: center;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        /* Button styles with gradient and hover effects */
+        .btn-primary {
+            display: block;
+            width: 50%;
+            padding: 8px;
+            background-image: linear-gradient(45deg, #f1447d, #3278f1);
+            border: none;
+            color: #fff;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-top: 30px;
+            text-align: center;
+            transition: background 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Shadow on hover */
+            border: 1px solid #d87a99;
+            color: #333;
+        }
+
+        /* Media query for responsiveness */
+        @media (max-width: 768px) {
+            .journey-card {
+                width: 90%; /* Adjust width for smaller screens */
+            }
+        }
+        .progress-container {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        /* Label hiển thị phần trăm hoàn thành */
+        .progress-label {
+            font-size: 0.9rem;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        /* Thanh progress */
+        .progress {
+            height: 20px;
+            background-color: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Thanh progress-bar hiển thị mức độ hoàn thành */
+        .progress-bar {
+            background-image: linear-gradient(45deg, #69f0ae, #448aff);
+            transition: width 0.4s ease;
+            height: 100%;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        .achievement-panel,
+        .leaderboard-panel {
+            position: -webkit-sticky; /* For Safari */
+            position: sticky;
+            top: 95px; /* Khoảng cách từ trên đầu khi bắt đầu dính */
+            z-index: 100; /* Đảm bảo nó nằm trên các thành phần khác */
+        }
+        /* Styling for left panel - Achievement */
+        .achievement-panel {
+            background-color: #fff;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border-left: 2px solid sandybrown; /* Chỉ áp dụng cho border trái */
+            border-right: 2px solid sandybrown; /* Chỉ áp dụng cho border phải */
+        }
+
+        .achievement-panel h4 {
+            font-weight: 700;
+            font-size: 20px;
+            color: #ed3535;
+            text-align: center;
+            margin: 30px 0 25px 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .achievement-list 
+        .daily-tasks {
+            list-style: none;
+            padding: 0;
+        }
+
+        .achievement-list li 
+        .daily-tasks li {
+            margin-bottom: 10px;
+            font-size: 16px;
+            color: #000000;
+            background-color: #d9ecff;
+            padding: 10px;
+            border-radius: 8px;
+        }
+        .achievement-list,
+        .daily-tasks {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .achievement-list li,
+        .daily-tasks li {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #000000;
+        }
+
+        .upgrade-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .upgrade-section h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ed3535;
+            text-align: center;
+            margin: 30px 0 25px 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .upgrade-section p {
+            font-size: 16px;
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .btn-upgrade {
+            background-color: #4487fa;
+            border: none;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-upgrade:hover {
+            background-color: #044efc;
+        }
+        /* Styling for right panel - Leaderboard */
+        .leaderboard-panel {
+            height: calc(100vh - 50px); /* Adjust height based on the viewport */
+            overflow-y: auto; /* Enable scrolling within the panel if the content is taller */
+            background-color: #fff;
+            padding: 10px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+            border-left: 2px solid rgb(238, 190, 0); /* Chỉ áp dụng cho border trái */
+            border-right: 2px solid rgb(238, 190, 0); /* Chỉ áp dụng cho border phải */
+        }
+
+        .leaderboard-panel h4 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #ed3535;
+            text-align: center;
+            margin: 30px 0 25px 0;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .leaderboard-table {
+            width: 100%;
+            text-align: center;
+        }
+
+        .leaderboard-table th, .leaderboard-table td {
+            padding: 10px;
+            border-bottom: 1px solid #e1e1e1;
+        }
+
+        .leaderboard-table th {
+            background-color: #eeeeee;
+        }
+
+        .leaderboard-table td {
+            font-size: 16px;
+            color: #000000;
+        }
+
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/menu.ejs') %>
+
+    <div class="container journey-container">
+        <div class="row">
+            <!-- Left Panel: Achievement -->
+            <div class="col-md-3">
+                <div class="achievement-panel">
+                    <h4>Thành tích của bạn</h4>
+                    <ul id="achievement-list" class="achievement-list">
+                        <!-- Nội dung sẽ được render động -->
+                    </ul>
+                    <hr>
+                    <h4>Nhiệm vụ hàng ngày</h4>
+                    <ul class="daily-tasks">
+                        <li><i class="fas fa-check-circle"></i> Hoàn thành 1 chặng</li>
+                        <li><i class="fas fa-check-circle"></i> Học từ vựng mới: 5 từ</li>
+                        <li><i class="fas fa-check-circle"></i> Thực hành 10 phút giao tiếp</li>
+                    </ul>
+                    <hr>
+                    <div class="upgrade-section">
+                        <h4>Nâng cấp EasyTalk Pro</h4>
+                        <p>Nâng cấp để có trải nghiệm tốt hơn và truy cập không giới hạn các tính năng.</p>
+                        <button class="btn btn-info btn-upgrade">Xem chi tiết</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Journey List -->
+            <div class="col-md-6">
+                <h2 class="text-center mt-5 mb-5">HÀNH TRÌNH HỌC TẬP CỦA BẠN</h2>
+                <div id="journey-list" class="row justify-content-center">
+                    <!-- Danh sách hành trình sẽ được render động -->
+                </div>
+            </div>
+
+            <!-- Right Panel: Leaderboard -->
+            <div class="col-md-3">
+                <div class="leaderboard-panel">
+                    <h4>Bảng xếp hạng</h4>
+                    <table id="leaderboard-table" class="leaderboard-table">
+                        <thead>
+                            <tr>
+                                <th>Người học</th>
+                                <th>Điểm KN</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Bảng xếp hạng sẽ được render động -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+
+    <!-- Script để gọi API và hiển thị dữ liệu -->
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const response = await fetch('/journey/api', {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`, // Thêm token vào Authorization header
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json(); 
+                const journeyList = document.getElementById('journey-list');
+                journeyList.innerHTML = ""; // Clear any previous content
+                data.journeys.forEach(journey => {
+                    const journeyCard = document.createElement('div');
+                    journeyCard.classList.add('col-md-12', 'mb-4');
+                    const progressPercentage = journey.progressPercentage || 0;
+                    journeyCard.innerHTML = `
+                        <div class="card journey-card">
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                            <h5 class="card-title">${journey.title}</h5>
+                                <div class="progress-container">
+                                    <div class="progress-label">
+                                    Hoàn thành: <span>${progressPercentage.toFixed(2)}%</span>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" role="progressbar" style="width: ${progressPercentage}%;" aria-valuenow="${progressPercentage}" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <a href="/journey/detail/${journey._id}" class="btn btn-primary">TIẾP TỤC</a>
+                        </div>
+                        </div>
+                    `;
+                    journeyList.appendChild(journeyCard);
+                });
+
+                // Hiển thị Thành tích của người dùng
+                const achievementList = document.getElementById('achievement-list');
+                achievementList.innerHTML = `
+                    <li>Điểm KN: ${data.userProgress.experiencePoints}</li>
+                    <li>Cổng đã hoàn thành: ${data.completedGates}</li>
+                    <li>Chặng đã hoàn thành: ${data.completedStages}</li>
+                `;
+
+                // Hiển thị bảng xếp hạng
+                const leaderboardTable = document.getElementById('leaderboard-table').querySelector('tbody');
+                leaderboardTable.innerHTML = ""; // Clear any previous content
+                data.leaderboard.forEach(entry => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${entry.username}</td>
+                        <td>${entry.experiencePoints}</td>
+                    `;
+                    leaderboardTable.appendChild(row);
+                });
+
+            } catch (error) {
+                console.error("Lỗi khi tải dữ liệu:", error);
+            }
+        });
+    </script>
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+</body>
+
+</html>

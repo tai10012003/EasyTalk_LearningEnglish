@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar List</title>
+    <script src="/static/js/checkadmin.js"></script>
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container grammar-container" id="grammar-list">
+                        <h1 class="text-center grammar-title">GRAMMAR LIST</h1>
+                        <div class="text-right mb-3">
+                            <a href="/admin/grammar/add" class="btn btn-primary">+ Add New Grammar Lesson</a>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-bordered grammar-table">
+                                <thead class="thead-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Image</th>
+                                        <th>Title</th>
+                                        <th>Description</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="grammar-table-body">
+                                    <!-- Grammar rows will be populated here via JavaScript -->
+                                </tbody>
+                            </table>
+
+                            <!-- Pagination Controls -->
+                            <nav aria-label="Page navigation">
+                                <ul class="pagination justify-content-center" id="pagination-controls">
+                                    <!-- Pagination links will be populated here via JavaScript -->
+                                </ul>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>  
+        <!-- End Content -->
+    </div>
+
+    <!-- JS Files -->
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+
+    <!-- Custom script to fetch grammar data from API and render it -->
+    <script>
+        function fetchGrammars(page = 1) {
+            $.ajax({
+                url: `/admin/grammar/api/grammar-list?page=${page}`,
+                method: 'GET',
+                success: function (data) {
+                    const { grammars, currentPage, totalPages } = data;
+                    const tableBody = $("#grammar-table-body");
+                    tableBody.empty();
+                    if (grammars.length > 0) {
+                        grammars.forEach((grammar, index) => {
+                            const createdAt = new Date(grammar.createdAt).toLocaleDateString('vi-VN', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric',
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                hour12: false
+                            });
+
+                            const grammarRow = `
+                            <tr>
+                                <td>${(page - 1) * 2 + index + 1}</td>
+                                <td>
+                                    ${grammar.images
+                                        ? `<img src="data:image/png;base64,${grammar.images.toString('base64')}" alt="${grammar.title}" style="width: 150px; height: auto;">`
+                                        : 'No Image Available'}
+                                </td>
+                                <td>${grammar.title}</td>
+                                <td>${grammar.description}</td>
+                                <td>${createdAt}</td>
+                                <td>
+                                    <a href="/admin/grammar/update?id=${grammar._id}" class="btn btn-warning btn-sm">Update</a>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteGrammar('${grammar._id}')">Delete</button>
+                                </td>
+                            </tr>`;
+                            tableBody.append(grammarRow);
+
+                        });
+                    } else {
+                        tableBody.append('<tr><td colspan="6">No grammar lessons found.</td></tr>');
+                    }
+                    renderPagination(currentPage, totalPages);
+                },
+                error: function (error) {
+                    console.error("Error fetching grammar list:", error);
+                }
+            });
+        }
+        // Render pagination controls
+        function renderPagination(currentPage, totalPages) {
+            const paginationControls = $("#pagination-controls");
+            paginationControls.empty();
+            if (currentPage > 1) {
+                paginationControls.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="fetchGrammars(${currentPage - 1})">&laquo;</a>
+                    </li>
+                `);
+            }
+            for (let i = 1; i <= totalPages; i++) {
+                paginationControls.append(`
+                    <li class="page-item ${currentPage === i ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="fetchGrammars(${i})">${i}</a>
+                    </li>
+                `);
+            }
+            if (currentPage < totalPages) {
+                paginationControls.append(`
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="fetchGrammars(${currentPage + 1})">&raquo;</a>
+                    </li>
+                `);
+            }
+        }
+        // Hàm xóa bài ngữ pháp
+        function deleteGrammar(grammarId) {
+            if (confirm("Are you sure you want to delete this grammar lesson?")) {
+                $.ajax({
+                    url: `/admin/grammar/api/grammar/${grammarId}`,
+                    method: 'DELETE',
+                    success: function (data) {
+                        alert("Grammar deleted successfully");
+                        fetchGrammars(); // Gọi lại hàm fetch để cập nhật danh sách sau khi xóa
+                    },
+                    error: function (error) {
+                        console.error("Error deleting grammar:", error);
+                        alert("Error deleting grammar");
+                    }
+                });
+            }
+        }
+
+        // Fetch grammars when the page is loaded
+        $(document).ready(function () {
+            fetchGrammars();
+        });
+    </script>
+</body>
+
+</html>

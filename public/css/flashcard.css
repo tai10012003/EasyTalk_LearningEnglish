@@ -1,0 +1,178 @@
+.flashcard-container {
+    margin: 130px auto 50px auto;
+    max-width: 1000px;
+    padding: 20px 50px 50px 50px;
+    border: 1px solid #e1e1e1;
+}
+
+.flashcard-container .my-4 {
+    text-align: center;
+}
+
+.flashcard {
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    background-color: #efefefdd;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    padding: 20px;
+    height: 100%; /* Đảm bảo chiều cao bằng nhau giữa các flashcards */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Chia khoảng cách hợp lý giữa các phần tử trong flashcard */
+}
+
+.flashcard:hover {
+    background-color: #f9f9f9; 
+    box-shadow: 0 16px 16px rgba(0, 0, 0, 0.1); 
+    border-color: #cccccc; 
+    transform: translateY(-5px);
+}
+
+.flashcard-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.flashcard-content {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.flashcard-user .avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+}
+
+.flashcard-review-status {
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.flashcard-review-status .text-danger {
+    font-weight: bold;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    font-size: 1rem;
+    padding: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
+
+/* Responsive: Điều chỉnh cho màn hình nhỏ hơn */
+@media (max-width: 768px) {
+    .flashcard-container {
+        padding: 20px 10px;
+    }
+
+    .flashcard {
+        margin-bottom: 20px;
+    }
+
+    .flashcard-title {
+        font-size: 1.1rem;
+    }
+
+    .flashcard-content, 
+    .flashcard-review-status {
+        font-size: 0.8rem;
+    }
+}
+/* Thiết kế lại modal-body */
+.modal-body {
+    padding: 25px 30px;
+    background-color: #f7f9fc;  /* Màu nền nhạt hơn cho trải nghiệm nhẹ nhàng */
+    border-radius: 10px;  /* Bo tròn các góc */
+    box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.1);  /* Hiệu ứng đổ bóng mềm mại */
+}
+
+/* Nhãn (label) */
+.modal-body .form-label {
+    font-weight: 600;  /* Đậm hơn để nổi bật */
+    font-size: 1rem;
+    color: #333;  /* Màu tối giúp dễ đọc hơn */
+    margin-bottom: 5px;
+}
+
+/* Input và textarea */
+.modal-body .form-control {
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    background-color: #ffffff;  /* Màu nền trắng sạch sẽ */
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.modal-body .form-control:focus {
+    border-color: #007bff;  /* Màu xanh dương khi được focus */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.25);  /* Hiệu ứng shadow khi focus */
+    outline: none;  /* Loại bỏ viền outline mặc định */
+}
+
+/* Textarea */
+.modal-body textarea.form-control {
+    resize: none;
+}
+
+/* Màu văn bản nhắc nhở */
+.modal-body .form-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+/* Nút trong footer */
+.modal-footer {
+    padding: 15px 30px;
+    background-color: #f1f3f5;  /* Màu nền footer */
+    border-top: 1px solid #dee2e6;  /* Viền trên footer */
+    display: flex;
+    justify-content: flex-end;  /* Canh phải cho các nút */
+    gap: 10px;
+}
+
+/* Nút hành động */
+.modal-footer .btn {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 50px;  /* Bo tròn các nút */
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+/* Nút Lưu (Primary) */
+.modal-footer .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+}
+
+.modal-footer .btn-primary:hover {
+    background-color: #0056b3;
+    transform: scale(1.05);  /* Phóng to nhẹ khi hover */
+}
+
+/* Nút Đóng (Secondary) */
+.modal-footer .btn-secondary {
+    background-color: #6c757d;
+    border-color: #6c757d;
+    color: #fff;
+}
+
+.modal-footer .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: scale(1.05);
+}

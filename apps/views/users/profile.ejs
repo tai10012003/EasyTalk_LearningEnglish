@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link rel="icon" href="/static/images/favicon2.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <style>
+        .profile-wrapper {
+            margin: 105px auto 50px auto;
+            max-width: 800px;
+            padding: 40px;
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .profile-wrapper h1 {
+            font-size: 30px;
+            margin-bottom: 40px;
+            font-weight: bold;
+            color: #333;
+            text-align: center;
+        }
+
+        .profile-detail {
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .profile-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            width: 100%;
+            justify-content: space-between;
+            max-width: 500px;
+        }
+
+        .profile-item h3 {
+            font-size: 18px;
+            color: #666;
+            text-transform: uppercase;
+            margin-right: 20px;
+            flex-basis: 30%;
+            text-align: left;
+        }
+
+        .profile-item p {
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+            flex-basis: 70%;
+            text-align: left;
+            margin: 0;
+        }
+
+        .profile-item input {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            display: none; /* Hide input fields until edit is clicked */
+        }
+
+        .btn-edit-profile, .btn-cancel {
+            background-color: #328509;
+            color: #ffffff;
+            border: 1px solid #328509;
+            border-radius: 5px;
+            padding: 12px 30px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 30px;
+            transition: all 0.3s ease;
+            display: inline-block;
+        }
+
+        .btn-edit-profile:hover, .btn-cancel:hover {
+            background-color: #ffffff;
+            color: #328509;
+            border: 1px solid #328509;
+        }
+
+        .btn-container {
+            text-align: center;
+        }
+
+        @media screen and (max-width: 768px) {
+            .profile-wrapper {
+                padding: 30px;
+            }
+
+            .profile-avatar {
+                width: 120px;
+                height: 120px;
+            }
+
+            .profile-detail h3 {
+                font-size: 16px;
+            }
+
+            .profile-detail p {
+                font-size: 14px;
+            }
+
+            .btn-edit-profile, .btn-cancel {
+                padding: 10px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <%- include('../partials/menu.ejs') %>
+    <div class="container profile-wrapper">
+        <h1>Welcome, <%= user.username %></h1>
+        <div class="profile-detail">
+            <div class="profile-item">
+                <h3>Name:</h3>
+                <p id="username-display"><%= user.username %></p>
+                <input type="text" id="username-input" value="<%= user.username %>" style="display:none;">
+            </div>
+
+            <div class="profile-item">
+                <h3>Email:</h3>
+                <p id="email-display"><%= user.email %></p>
+                <input type="email" id="email-input" value="<%= user.email %>" style="display:none;">
+            </div>
+
+            <div class="profile-item">
+                <h3>Role:</h3>
+                <p id="role-display"><%= user.role %></p>
+            </div>
+        </div>
+        <div class="btn-container">
+            <button class="btn-edit-profile" id="edit-btn" onclick="toggleEdit()">Edit Profile</button>
+            <button class="btn-edit-profile" id="save-btn" onclick="saveChanges()" style="display:none;">Save</button>
+            <button class="btn-cancel ml-4" id="cancel-btn" onclick="cancelEdit()" style="display:none;">Cancel</button>
+        </div>
+    </div>
+    <%- include('../partials/footer.ejs') %>
+    
+    <script>
+        let originalUsername = "<%= user.username %>";
+        let originalEmail = "<%= user.email %>";
+
+        function toggleEdit() {
+            document.getElementById("username-display").style.display = 'none';
+            document.getElementById("email-display").style.display = 'none';
+
+            document.getElementById("username-input").style.display = 'block';
+            document.getElementById("email-input").style.display = 'block';
+
+            document.getElementById("edit-btn").style.display = 'none';
+            document.getElementById("save-btn").style.display = 'inline-block';
+            document.getElementById("cancel-btn").style.display = 'inline-block';
+        }
+
+        function cancelEdit() {
+            document.getElementById("username-display").style.display = 'block';
+            document.getElementById("email-display").style.display = 'block';
+
+            document.getElementById("username-input").style.display = 'none';
+            document.getElementById("email-input").style.display = 'none';
+
+            // Reset giá trị input về giá trị ban đầu
+            document.getElementById("username-input").value = originalUsername;
+            document.getElementById("email-input").value = originalEmail;
+
+            document.getElementById("edit-btn").style.display = 'inline-block';
+            document.getElementById("save-btn").style.display = 'none';
+            document.getElementById("cancel-btn").style.display = 'none';
+        }
+
+        function saveChanges() {
+            var username = document.getElementById("username-input").value;
+            var email = document.getElementById("email-input").value;
+
+            // Gửi thông tin đã cập nhật qua AJAX
+            fetch('/profile/update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: username,
+                    email: email
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Nếu thành công, cập nhật lại giao diện
+                if (data.success) {
+                    document.getElementById("username-display").innerText = username;
+                    document.getElementById("email-display").innerText = email;
+
+                    document.getElementById("username-display").style.display = 'block';
+                    document.getElementById("email-display").style.display = 'block';
+                    document.getElementById("username-input").style.display = 'none';
+                    document.getElementById("email-input").style.display = 'none';
+
+                    document.getElementById("edit-btn").style.display = 'inline-block';
+                    document.getElementById("save-btn").style.display = 'none';
+                    document.getElementById("cancel-btn").style.display = 'none';
+
+                    alert("Profile updated successfully!"); // Thông báo thành công
+                } else {
+                    alert("An error occurred while updating your profile.");
+                }
+            })
+            .catch(err => {
+                console.error("Error: ", err);
+            });
+        }
+    </script>
+</body>
+
+</html>

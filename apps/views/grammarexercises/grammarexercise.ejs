@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammar Exercise List</title>
+    <script src="/static/js/checkadmin.js"></script>
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container grammar-container" id="grammar-exercise-list">
+                        <h1 class="text-center grammar-title">GRAMMAR EXERCISE LIST</h1>
+                        <a href="/admin/grammar-exercise/add" class="btn btn-primary btn-grammar-add">+ Add New Grammar Exercise</a>
+                        <table class="table table-bordered grammar-table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th class="grammar-header">#</th>
+                                    <th class="grammar-header">Title</th>
+                                    <th class="grammar-header">Questions</th>
+                                    <th class="grammar-header">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="grammarTableBody">
+                                <!-- Nội dung bài tập ngữ pháp sẽ được thêm ở đây -->
+                            </tbody>
+                        </table>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="pagination-controls">
+                                <!-- Pagination links will be populated here via JavaScript -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script to Fetch Data from API -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Bắt đầu với trang đầu tiên
+            fetchGrammarExercises(1);
+        });
+
+        // Hàm lấy danh sách bài tập từ API
+        function fetchGrammarExercises(page = 1) {
+            fetch(`/admin/grammar-exercise/api/grammar-exercise?page=${page}&limit=2`) // Lấy dữ liệu với phân trang
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.data.length > 0) {
+                        const grammarTableBody = document.getElementById("grammarTableBody");
+                        grammarTableBody.innerHTML = ''; // Xóa nội dung cũ
+
+                        data.data.forEach((exercise, index) => {
+                            const row = document.createElement('tr');
+                            row.classList.add('grammar-row');
+
+                            row.innerHTML = `
+                                <td class="grammar-cell">${(page - 1) * 2 + index + 1}</td>
+                                <td class="grammar-cell">${exercise.title}</td>
+                                <td class="grammar-cell">${exercise.questions.length} Questions</td>
+                                <td class="grammar-cell">
+                                    <a href="/admin/grammar-exercise/update/${exercise._id}" class="btn btn-warning btn-grammar-update">Update</a>
+                                    <button class="btn btn-danger btn-grammar-delete" onclick="deleteGrammarExercise('${exercise._id}')">Delete</button>
+                                </td>
+                            `;
+                            grammarTableBody.appendChild(row);
+                        });
+
+                        // Gọi hàm để hiển thị phân trang
+                        renderPagination(data.currentPage, data.totalPages);
+                    } else {
+                        document.getElementById("grammarTableBody").innerHTML = '<tr><td colspan="4" class="text-center">No grammar exercises found</td></tr>';
+                    }
+                })
+                .catch(error => console.error('Error fetching grammar exercises:', error));
+        }
+
+        function renderPagination(currentPage, totalPages) {
+            const paginationControls = document.getElementById("pagination-controls");
+            
+            if (!paginationControls) {
+                console.error("Pagination controls element not found");
+                return; // Dừng lại nếu không tìm thấy phần tử
+            }
+
+            paginationControls.innerHTML = ''; // Xóa các nút phân trang cũ
+
+            // Thêm nút "Previous" nếu trang hiện tại lớn hơn 1
+            if (currentPage > 1) {
+                paginationControls.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="fetchGrammarExercises(${currentPage - 1})">&laquo; Previous</a>
+                    </li>
+                `;
+            }
+
+            // Thêm nút số trang
+            for (let i = 1; i <= totalPages; i++) {
+                paginationControls.innerHTML += `
+                    <li class="page-item ${i === currentPage ? 'active' : ''}">
+                        <a class="page-link" href="#" onclick="fetchGrammarExercises(${i})">${i}</a>
+                    </li>
+                `;
+            }
+
+            // Thêm nút "Next" nếu trang hiện tại nhỏ hơn tổng số trang
+            if (currentPage < totalPages) {
+                paginationControls.innerHTML += `
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="fetchGrammarExercises(${currentPage + 1})">Next &raquo;</a>
+                    </li>
+                `;
+            }
+        }
+
+
+        // Function to delete grammar exercise
+        function deleteGrammarExercise(id) {
+            if (confirm('Are you sure you want to delete this exercise?')) {
+                fetch(`/admin/grammar-exercise/delete/${id}`, {
+                    method: 'DELETE',
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Grammar exercise deleted successfully!');
+                        window.location.reload(); // Reload the page after successful deletion
+                    } else {
+                        alert('Error deleting grammar exercise: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting grammar exercise:', error);
+                    alert('An error occurred while deleting the grammar exercise.');
+                });
+            }
+        }
+
+    </script>
+
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+</html>

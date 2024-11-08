@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gate List</title>
+    <script src="/static/js/checkadmin.js"></script>
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/road.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+    <style>
+        /* Modal container */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* Modal content */
+        .modal-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 400px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .modal-content h3 {
+            text-align: center;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .btn-submit {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <%- include('../admin/partials/menu.ejs') %>
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container gate-container">
+                        <h1 class="text-center gate-title">GATE LIST</h1>
+
+                        <!-- Add New Gate Button -->
+                        <div class="text-right mb-3">
+                            <button class="btn btn-primary" id="openGateModal">+ Add New Gate</button>
+                        </div>
+
+                        <!-- Add Gate Modal -->
+                        <div id="gateModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close" id="closeGateModal">&times;</span>
+                                <h3>Add New Gate</h3>
+                                <form id="gateForm">
+                                    <div class="form-group">
+                                        <label for="gateName">Gate Title:</label>
+                                        <input type="text" id="gateName" class="form-control" placeholder="Enter gate title" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="journeySelect">Select Journey:</label>
+                                        <select id="journeySelect" class="form-control" required>
+                                            <% journeys.forEach(journey => { %>
+                                                <option value="<%= journey._id %>"><%= journey.title %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn-submit">Add</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Edit Gate Modal -->
+                        <div id="editGateModal" class="modal">
+                            <div class="modal-content">
+                                <span class="close" id="closeEditGateModal">&times;</span>
+                                <h3>Edit Gate</h3>
+                                <form id="editGateForm">
+                                    <input type="hidden" id="editGateId">
+                                    <div class="form-group">
+                                        <label for="editGateName">Gate Title:</label>
+                                        <input type="text" id="editGateName" class="form-control" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="editJourneySelect">Select Journey:</label>
+                                        <select id="editJourneySelect" class="form-control" required>
+                                            <% journeys.forEach(journey => { %>
+                                                <option value="<%= journey._id %>"><%= journey.title %></option>
+                                            <% }) %>
+                                        </select>
+                                    </div>
+                                    <button type="submit" class="btn-submit">Save</button>
+                                </form>
+                            </div>
+                        </div>
+
+                        <!-- Gate List Table -->
+                        <table class="table table-bordered gate-table">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Gate Title</th>
+                                    <th>Journey</th>
+                                    <th>Stages</th>
+                                    <th>Created At</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="gateList">
+                                <!-- Dynamic content from API will load here -->
+                            </tbody>
+                        </table>
+
+                        <!-- Pagination Controls -->
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination justify-content-center" id="pagination-controls">
+                                <!-- Dynamic pagination controls will load here -->
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+
+    <script>
+        let currentPage = 1;
+        const pageLimit = 10;
+    
+        function fetchGates(page = 1) {
+            $.ajax({
+                url: `/admin/gate/api/gate-list?page=${page}&limit=${pageLimit}`,
+                method: 'GET',
+                success: function (data) {
+                    const { gates, currentPage, totalPages } = data;
+                    const gateList = $("#gateList");
+                    gateList.empty();
+    
+                    if (gates && gates.length > 0) {
+                        gates.forEach((gate, index) => {
+                            const createdAt = new Date(gate.createdAt).toLocaleDateString('vi-VN', {
+                                day: '2-digit', month: '2-digit', year: 'numeric',
+                                hour: '2-digit', minute: '2-digit', hour12: false
+                            });
+    
+                            gateList.append(`
+                                <tr>
+                                    <td>${(page - 1) * pageLimit + index + 1}</td>
+                                    <td>${gate.title}</td>
+                                    <td>${gate.journeyInfo ? gate.journeyInfo.title : "No Journey"}</td>
+                                    <td>${gate.stages.length || 0} Stages</td> <!-- Sử dụng journey.gateCount -->
+                                    <td>${createdAt}</td>
+                                    <td>
+                                        <button class="btn btn-warning btn-edit" data-id="${gate._id}" data-title="${gate.title}" data-journey="${gate.journeyInfo ? gate.journeyInfo._id : ""}">Edit</button>
+                                        <button class="btn btn-danger btn-delete" data-id="${gate._id}">Delete</button>
+                                    </td>
+                                </tr>
+                            `);
+                        });
+                    } else {
+                        gateList.append(`<tr><td colspan="6" class="text-center">No gates found</td></tr>`);
+                    }
+    
+                    renderPagination(currentPage, totalPages);
+                    bindEditDeleteEvents();
+                },
+                error: function (error) {
+                    console.error("Error fetching gates:", error);
+                    alert("Failed to load gates.");
+                }
+            });
+        }
+    
+        // Render pagination controls
+        function renderPagination(currentPage, totalPages) {
+            const paginationControls = $("#pagination-controls");
+            paginationControls.empty();
+            if (currentPage > 1) {
+                paginationControls.append(`<li class="page-item"><a class="page-link" href="#" onclick="fetchGates(${currentPage - 1})">&laquo;</a></li>`);
+            }
+            for (let i = 1; i <= totalPages; i++) {
+                paginationControls.append(`<li class="page-item ${currentPage === i ? 'active' : ''}"><a class="page-link" href="#" onclick="fetchGates(${i})">${i}</a></li>`);
+            }
+            if (currentPage < totalPages) {
+                paginationControls.append(`<li class="page-item"><a class="page-link" href="#" onclick="fetchGates(${currentPage + 1})">&raquo;</a></li>`);
+            }
+        }
+    
+        // Open and close modals
+        $("#openGateModal").on("click", () => $("#gateModal").css("display", "flex"));
+        $("#closeGateModal").on("click", () => $("#gateModal").css("display", "none"));
+        $("#closeEditGateModal").on("click", () => $("#editGateModal").css("display", "none"));
+    
+        // Handle adding gate
+        $("#gateForm").on("submit", function (e) {
+            e.preventDefault();
+            const title = $("#gateName").val();
+            const journeyId = $("#journeySelect").val();
+            $.post('/admin/gate/add', { title, journeyId }, function (data) {
+                alert(data.message);
+                $("#gateModal").css("display", "none");
+                $("#gateForm")[0].reset();
+                fetchGates(currentPage);
+            }).fail(function (error) {
+                alert("Failed to add gate");
+            });
+        });
+    
+        // Edit and delete event handlers
+        function bindEditDeleteEvents() {
+            $(".btn-edit").on("click", function () {
+                const gateId = $(this).data("id");
+                const title = $(this).data("title");
+                const journeyId = $(this).data("journey");
+                $("#editGateId").val(gateId);
+                $("#editGateName").val(title);
+                $("#editJourneySelect").val(journeyId);
+                $("#editGateModal").css("display", "flex");
+            });
+    
+            $("#editGateForm").on("submit", function (e) {
+                e.preventDefault();
+                const gateId = $("#editGateId").val();
+                const newTitle = $("#editGateName").val();
+                const newJourneyId = $("#editJourneySelect").val();
+    
+                $.ajax({
+                    url: `/admin/gate/update/${gateId}`,
+                    method: "POST",
+                    contentType: "application/json",
+                    data: JSON.stringify({ title: newTitle, journeyId: newJourneyId }),
+                    success: function (data) {
+                        alert(data.message);
+                        $("#editGateModal").css("display", "none");
+                        fetchGates(currentPage);
+                    },
+                    error: function (error) {
+                        console.error("Error updating gate:", error);
+                        alert("Failed to update gate");
+                    }
+                });
+            });
+    
+            $(".btn-delete").on("click", function () {
+                const gateId = $(this).data("id");
+                if (confirm("Are you sure you want to delete this gate?")) {
+                    $.ajax({
+                        url: `/admin/gate/delete/${gateId}`,
+                        method: 'POST',
+                        success: function (data) {
+                            alert(data.message);
+                            fetchGates(currentPage);
+                        },
+                        error: function () {
+                            alert("Failed to delete gate");
+                        }
+                    });
+                }
+            });
+        }
+    
+        // Initial fetch on page load
+        $(document).ready(function () {
+            fetchGates(currentPage);
+        });
+    </script>    
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+
+</html>

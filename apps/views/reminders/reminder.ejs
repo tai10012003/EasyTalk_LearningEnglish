@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nhắc Nhở Học Tập</title>
+    <script src="/static/js/authentication.js"></script>
+    <link rel="icon" href="/static/images/favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="/static/css/animate.css">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <!-- Themify Icons -->
+    <link rel="stylesheet" href="/static/css/themify-icons.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="/static/css/flaticon.css">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="/static/css/slick.css">    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <style>
+        .reminder-container {
+            max-width: 600px;
+            margin-top: 140px;
+            margin-bottom: 50px;
+        }
+        .reminder-header {
+            font-weight: bold;
+            color: #343a40;
+            text-align: center;
+        }
+        .modal-custom .modal-content {
+            border-radius: 10px;
+        }
+        .reminder-list {
+            margin-top: 30px;
+        }
+        .reminder-card {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+        .reminder-info {
+            margin-bottom: 10px;
+        }
+        .reminder-info p {
+          margin: 10px 0;
+        }
+        .btn-add-reminder {
+            border-radius: 20px;
+            font-weight: bold;
+        }
+        .btn-edit-reminder {
+            background-color: #ffc107;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin-right: 10px;
+        }
+        .btn-delete-reminder {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+        }
+        .btn-edit-reminder:hover {
+            background-color: #e0a800;
+        }
+        .btn-delete-reminder:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+  <%- include('../partials/menu.ejs') %>
+    <div class="container reminder-container">
+        <h2 class="reminder-header">Nhắc Nhở Học Tập</h2>
+        <button class="btn btn-success btn-block w-100 mt-4 btn-add-reminder" data-bs-toggle="modal" data-bs-target="#addReminderModal">Thêm Nhắc Nhở</button>
+        
+        <div id="remindersList" class="reminder-list"></div>
+    </div>
+
+    <!-- Modal Thêm Reminder -->
+    <div class="modal fade modal-custom" id="addReminderModal" tabindex="-1" aria-labelledby="addReminderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addReminderModalLabel">Thêm Nhắc Nhở</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addReminderForm">
+                        <div class="mb-3">
+                            <label for="addEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="addEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addReminderTime" class="form-label">Thời Gian Nhắc Nhở</label>
+                            <input type="datetime-local" class="form-control" id="addReminderTime" required>
+                        </div>
+                        <div class="mb-3">
+                          <label for="addAdditionalInfo" class="form-label">Nội Dung Nhắc Nhở</label>
+                          <textarea id="addAdditionalInfo" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="addFrequency" class="form-label">Tần Suất</label>
+                            <select id="addFrequency" class="form-control">
+                                <option value="hàng ngày">Hàng ngày</option>
+                                <option value="hàng tuần">Hàng tuần</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-secondary w-100">Thêm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Chỉnh Sửa Reminder -->
+    <div class="modal fade modal-custom" id="editReminderModal" tabindex="-1" aria-labelledby="editReminderModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="editReminderModalLabel">Chỉnh Sửa Nhắc Nhở</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                  <form id="editReminderForm">
+                      <input type="hidden" id="editReminderId">
+                      <div class="mb-3">
+                          <label for="editEmail" class="form-label">Email</label>
+                          <input type="email" class="form-control" id="editEmail" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="editReminderTime" class="form-label">Thời Gian Nhắc Nhở</label>
+                          <input type="datetime-local" class="form-control" id="editReminderTime" required>
+                      </div>
+                      <div class="mb-3">
+                        <label for="editAdditionalInfo" class="form-label">Nội Dung Nhắc Nhở</label>
+                        <textarea id="editAdditionalInfo" class="form-control" rows="3"></textarea>
+                      </div>
+                      <div class="mb-3">
+                          <label for="editFrequency" class="form-label">Tần Suất</label>
+                          <select id="editFrequency" class="form-control">
+                              <option value="hàng ngày">Hàng ngày</option>
+                              <option value="hàng tuần">Hàng tuần</option>
+                          </select>
+                      </div>
+                      <button type="submit" class="btn btn-secondary w-100">Cập Nhật</button>
+                  </form>
+              </div>
+          </div>
+      </div>
+    </div>
+    <%- include('../partials/footer.ejs') %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+        <!-- Script Files -->
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script>
+        async function loadReminders() {
+          const token = localStorage.getItem("token");
+          const response = await fetch(`/reminder/api/reminder-list`, {
+              headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${token}`
+              }
+          });
+          const data = await response.json();
+          const { reminders } = data;
+
+          if (reminders && reminders.length > 0) {
+              document.getElementById("remindersList").innerHTML = reminders.map(r => `
+                  <div class="reminder-card">
+                      <div class="reminder-info">
+                          <p><strong>Email:</strong> ${r.email}</p>
+                          <p><strong>Thời gian nhắc nhở:</strong> ${new Date(r.reminderTime).toLocaleString()}</p>
+                          <p><strong>Nội dung nhắc nhở:</strong> <span style="white-space: pre-line;">${r.additionalInfo}</span></p>
+                          <p><strong>Tần suất:</strong> ${r.frequency}</p>
+                      </div>
+                      <button onclick="editReminder('${r._id}')" class="btn btn-edit-reminder">Sửa</button>
+                      <button onclick="deleteReminder('${r._id}')" class="btn btn-delete-reminder">Xóa</button>
+                  </div>
+              `).join("");
+          } else {
+              document.getElementById("remindersList").innerHTML = "<p>Không có nhắc nhở nào</p>";
+          }
+      }
+
+      document.getElementById("addReminderForm").addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const token = localStorage.getItem("token");
+            const reminder = {
+                email: document.getElementById("addEmail").value,
+                reminderTime: document.getElementById("addReminderTime").value,
+                frequency: document.getElementById("addFrequency").value,
+                additionalInfo: document.getElementById("addAdditionalInfo").value
+            };
+
+            const response = await fetch("/reminder/api/reminder", {
+                method: "POST",
+                headers: { 
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify(reminder),
+            });
+
+            if (response.ok) {
+                alert("Thêm nhắc nhở thành công!");
+                document.getElementById("addReminderForm").reset();
+                loadReminders();
+                const addModal = bootstrap.Modal.getInstance(document.getElementById("addReminderModal"));
+                addModal.hide();
+            } else {
+                alert("Thêm nhắc nhở thất bại!");
+            }
+        });
+
+        async function editReminder(id) {
+            const token = localStorage.getItem("token");
+            const response = await fetch(`/reminder/api/reminder/${id}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            const reminder = await response.json();
+            document.getElementById("editEmail").value = reminder.email;
+            document.getElementById("editReminderTime").value = reminder.reminderTime;
+            document.getElementById("editFrequency").value = reminder.frequency;
+            document.getElementById("editAdditionalInfo").value = reminder.additionalInfo || ""; // Thêm trường additionalInfo
+            document.getElementById("editReminderId").value = id;
+            const editModal = new bootstrap.Modal(document.getElementById("editReminderModal"));
+            editModal.show();
+        }
+
+        document.getElementById("editReminderForm").addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const token = localStorage.getItem("token");
+          const reminderId = document.getElementById("editReminderId").value;
+          const updatedReminder = {
+              email: document.getElementById("editEmail").value,
+              reminderTime: document.getElementById("editReminderTime").value,
+              frequency: document.getElementById("editFrequency").value,
+              additionalInfo: document.getElementById("editAdditionalInfo").value
+          };
+          const response = await fetch(`/reminder/api/reminder/${reminderId}`, {
+              method: "PUT",
+              headers: { 
+                  "Authorization": `Bearer ${token}`,
+                  "Content-Type": "application/json"
+              },
+              body: JSON.stringify(updatedReminder)
+          });
+
+          if (response.ok) {
+              alert("Cập nhật nhắc nhở thành công!");
+              loadReminders();
+              const editModal = bootstrap.Modal.getInstance(document.getElementById("editReminderModal"));
+              editModal.hide();
+          } else {
+              alert("Cập nhật nhắc nhở thất bại!");
+          }
+      });
+
+        async function deleteReminder(id) {
+            if (confirm('Are you sure you want to delete this reminder?')) {
+                const token = localStorage.getItem("token");
+                const response = await fetch(`/reminder/api/reminder/${id}`, { 
+                    method: "DELETE",
+                    headers: {
+                        "Authorization": `Bearer ${token}`,
+                        "Content-Type": "application/json" 
+                    }
+                });
+
+                if (response.ok) {
+                    alert("Xóa nhắc nhở thành công!");
+                    loadReminders();
+                } else {
+                    alert("Xóa nhắc nhở thất bại!");
+                }
+            }
+        }
+
+        loadReminders();
+    </script>
+</body>
+</html>

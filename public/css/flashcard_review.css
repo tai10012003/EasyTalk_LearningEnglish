@@ -1,0 +1,112 @@
+.flashcard-container {
+    margin: 130px auto 50px auto;
+    max-width: 1000px;
+    padding: 50px;
+    border: 1px solid #e1e1e1;
+}
+.flashcard-container .my-4 {
+    margin-top: 0 !important;
+    text-align: center;
+}
+
+.flashcard {
+    width: 600px;
+    height: 300px;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+    cursor: pointer;
+}
+
+.flashcard.is-flipped .flashcard-inner {
+    transform: rotateY(180deg);
+}
+
+.flashcard-inner {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+}
+
+.flashcard-front,
+.flashcard-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.flashcard-front {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.flashcard-back {
+    transform: rotateY(180deg);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-flip {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+}
+
+.flashcard-back img {
+    width: 150px;
+    height: auto;
+    border-radius: 10px;
+}
+
+.word {
+    font-size: 2.3em;
+}
+
+.pronunciation {
+    font-style: italic;
+}
+
+.custom-btn {
+    background-color: #2eb635;
+    color: white;
+    border-radius: 20px;
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    width: 150px;
+    /* Chiều rộng cố định */
+    height: 50px;
+    /* Chiều cao cố định */
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.custom-btn:hover {
+    background-color: #176b19;
+    color: white;
+    transform: scale(1.05);
+}
+
+.custom-btn:focus {
+    outline: none;
+    box-shadow: 0 0 10px rgba(55, 121, 47, 0.982);
+}
+
+.mx-2 {
+    margin-left: 10px;
+    margin-right: 10px;
+}

@@ -1,0 +1,104 @@
+<!--::header part start::-->
+<header class="main_menu home_menu">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-12">
+                <nav class="navbar navbar-expand-lg navbar-light">
+                    <a class="navbar-brand" href="/"> <img src="/static/images/logo.png" alt="logo" width="110px"> </a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse"
+                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+
+                    <div class="collapse navbar-collapse main-menu-item justify-content-end"
+                        id="navbarSupportedContent">
+                        <ul class="navbar-nav align-items-center">
+                            <li class="nav-item active">
+                                <a class="nav-link" href="/">TRANG CHỦ</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/about">VỀ CHÚNG TÔI</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/journey">HÀNH TRÌNH</a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    BÀI HỌC
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="/story">CÂU CHUYỆN</a>
+                                    <a class="dropdown-item" href="/grammar">NGỮ PHÁP</a>
+                                    <a class="dropdown-item" href="/flashcards">TỪ VỰNG FLASHCARD</a>
+                                    <a class="dropdown-item" href="/pronunciation">PHÁT ÂM</a>
+                                </div>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    LUYỆN TẬP
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                    <a class="dropdown-item" href="/grammar-exercise">NGỮ PHÁP</a>
+                                    <a class="dropdown-item" href="/vocabulary-exercise">TỪ VỰNG</a>
+                                    <a class="dropdown-item" href="/pronunciation-exercise">PHÁT ÂM</a>
+                                    <a class="dropdown-item" href="/dictionary">TRA CỨU TỪ ĐIỂN</a>
+                                    <a class="dropdown-item" href="/chat">TRÒ CHUYỆN VỚI AI</a>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/blog">BÀI VIẾT</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="/contact">LIÊN HỆ</a>
+                            </li>
+                           <!-- LOGIN/Username Button -->
+                            <li class="nav-item dropdown">
+                                <a class="btn_1" href="/login" id="loginBtn" role="button">
+                                    LOGIN
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="loginBtn" id="userMenu" style="display: none; margin: 20px;">
+                                    <a class="dropdown-item" href="/profile">THÔNG TIN CÁ NHÂN</a>
+                                    <a class="dropdown-item" href="/reminder">NHẮC NHỞ HỌC TẬP</a>
+                                    <a class="dropdown-item" href="/change-password">ĐỔI MẬT KHẨU</a>
+                                    <a class="dropdown-item" href="/setting">CÀI ĐẶT</a>
+                                    <a class="dropdown-item" href="#" onclick="handleLogout()">ĐĂNG XUẤT</a>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+    </div>
+</header>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const token = localStorage.getItem("token");
+        const loginBtn = document.getElementById("loginBtn");
+        const userMenu = document.getElementById("userMenu");
+
+        if (token) {
+            // Decode JWT to get username (assuming it's stored in the payload)
+            const payload = JSON.parse(atob(token.split('.')[1]));
+            const username = payload.username || "User";
+
+            // Update button text to username and enable dropdown
+            loginBtn.textContent = username;
+            loginBtn.href = "#";
+            userMenu.style.display = "block";
+        } else {
+            // If not logged in, set button to redirect to login
+            loginBtn.textContent = "ĐĂNG NHẬP";
+            loginBtn.href = "/login";
+            userMenu.style.display = "none";
+        }
+    });
+
+    function handleLogout() {
+        if (confirm("Bạn có muốn đăng xuất tài khoản không?")) {
+                localStorage.removeItem("token"); // Xóa token khỏi storage
+                window.location.href = "/login"; // Chuyển hướng đến trang đăng nhập nếu chọn OK
+        } 
+    }
+</script>

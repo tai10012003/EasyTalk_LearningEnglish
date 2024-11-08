@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Từ Vựng Flashcard</title>
+  <script src="/static/js/authentication.js"></script>
+  <link rel="icon" href="/static/images/favicon.png">
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+  <!-- Animate CSS -->
+  <link rel="stylesheet" href="/static/css/animate.css">
+  <!-- Owl Carousel CSS -->
+  <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+  <!-- Themify Icons -->
+  <link rel="stylesheet" href="/static/css/themify-icons.css">
+  <!-- Flaticon CSS -->
+  <link rel="stylesheet" href="/static/css/flaticon.css">
+  <!-- Font Awesome CSS -->
+  <link rel="stylesheet" href="/static/css/magnific-popup.css">
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="/static/css/slick.css">
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+  
+  <link rel="stylesheet" type="text/css" href="/static/css/flashcard.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+</head>
+
+<body>
+  <%- include('../partials/menu.ejs') %>
+  <div class="container flashcard-container">
+    <h1 class="my-4">TỪ VỰNG FLASHCARD</h1>
+    <p class="bg-success text-white p-2" style="margin: 10px 0;">
+      Chú ý: Bạn có thể tạo flashcards dựa trên nội dung học của mình, bao gồm cả những nội dung đã lưu trước đây.
+      Tìm hiểu thêm cách tạo flashcards hiệu quả trong phần hướng dẫn."
+    </p>
+
+    <div class="row">
+      <div class="col-md-12">
+        <div class="row">
+          <div class="col-md-6">
+            <h3 class="my-4">Danh sách đã tạo</h3>
+          </div>
+          <div class="col-md-6 d-flex justify-content-end">
+            <button type="button" class="btn btn-primary my-4 create-new-fclist-btn" data-bs-toggle="modal"
+              data-bs-target="#createNewListModal">
+              Tạo mới
+            </button>
+          </div>
+        </div>
+
+        <!-- Nơi hiển thị danh sách flashcards sẽ được JavaScript chèn vào -->
+        <div id="flashcardListContainer" class="row">
+          <!-- Dữ liệu sẽ được chèn vào đây từ JavaScript -->
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Pagination">
+          <ul id="paginationControls" class="pagination justify-content-center">
+            <!-- Pagination sẽ được chèn vào đây từ JavaScript -->
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Modal để tạo danh sách flashcard mới -->
+    <div class="modal fade" id="createNewListModal" tabindex="-1" aria-labelledby="createNewListModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="createNewListModalLabel">Tạo danh sách flashcards mới</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true"><i class="bi bi-x-lg"></i></span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="newFlashcardListForm">
+              <div class="mb-3">
+                <label for="listName" class="form-label">Tên danh sách</label>
+                <input type="text" class="form-control" id="listName" placeholder="Nhập tên danh sách" required />
+              </div>
+              <div class="mb-3">
+                <label for="listDescription" class="form-label">Mô tả</label>
+                <textarea class="form-control" id="listDescription" rows="4" maxlength="500"
+                  placeholder="Mô tả danh sách (tối đa 500 ký tự)" required></textarea>
+                <small class="form-text text-muted">Tối đa 500 ký tự</small>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+            <button type="submit" class="btn btn-primary" form="newFlashcardListForm">Lưu</button>
+          </div>          
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <%- include('../partials/footer.ejs') %>
+  <script src="/static/js/jquery-1.12.1.min.js"></script>
+  <script src="/static/js/popper.min.js"></script>
+  <script src="/static/js/bootstrap.min.js"></script>
+  <script src="/static/js/jquery.magnific-popup.js"></script>
+  <script src="/static/js/swiper.min.js"></script>
+  <script src="/static/js/masonry.pkgd.js"></script>
+  <script src="/static/js/owl.carousel.min.js"></script>
+  <script src="/static/js/jquery.nice-select.min.js"></script>
+  <script src="/static/js/slick.min.js"></script>
+  <script src="/static/js/jquery.counterup.min.js"></script>
+  <script src="/static/js/waypoints.min.js"></script>
+  <script src="/static/js/custom.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Hàm gọi API để lấy danh sách Flashcard Lists và render ra giao diện
+    function fetchFlashcardLists(page = 1) {
+      fetch(`/flashcards/api/flashcard-list?page=${page}`)  // Đảm bảo đúng URL khớp với route API
+        .then((response) => response.json())
+        .then((data) => {
+          const flashcardLists = data.flashcardLists;
+          const totalPages = data.totalPages;
+          const currentPage = data.currentPage;
+
+          // Kiểm tra xem có dữ liệu flashcard list hay không
+          if (flashcardLists && flashcardLists.length > 0) {
+            // Render danh sách flashcard
+            renderFlashcardList(flashcardLists);
+            // Render pagination controls
+            renderPagination(currentPage, totalPages);
+          } else {
+            document.getElementById("flashcardListContainer").innerHTML = '<p>Chưa có danh sách flashcards nào.</p>';
+          }
+        })
+        .catch((error) => {
+          console.error("Error fetching flashcard lists:", error);
+        });
+    }
+
+    // Hàm render danh sách flashcards ra giao diện
+    function renderFlashcardList(flashcardLists) {
+      const container = document.getElementById("flashcardListContainer");
+      container.innerHTML = ''; // Xóa nội dung cũ
+
+      flashcardLists.forEach((flashcardlist) => {
+        const flashcardItem = `
+          <div class="col-6 col-md-3 my-2">
+            <div class="flashcard p-3 shadow-sm clickable-card" data-url="/flashcards/flashcardlist/${flashcardlist._id}">
+              <h5 class="flashcard-title">${flashcardlist.name}</h5>
+              <div class="flashcard-content">
+                <p><i class="far fa-clone"></i> ${flashcardlist.wordCount || 0} từ</p>
+              </div>
+              <div class="flashcard-review-status">
+                <p class="mb-1">Cần ôn tập: <span class="text-danger font-weight-bold">${flashcardlist.toReview || 0}</span></p>
+                <p>Đã nhớ: ${flashcardlist.remembered || 0}</p>
+              </div>
+              <div class="flashcard-review-status">
+                <p>Ngày tạo: ${new Date(flashcardlist.createdAt).toLocaleDateString()}</p>
+              </div>
+            </div>
+          </div>
+        `;
+        container.innerHTML += flashcardItem;
+      });
+
+      // Gắn sự kiện click cho các flashcard
+      addFlashcardClickEvent();
+    }
+
+    // Hàm render pagination controls ra giao diện
+    function renderPagination(currentPage, totalPages) {
+      const paginationControls = document.getElementById("paginationControls");
+      paginationControls.innerHTML = ''; // Xóa nội dung cũ
+
+      if (totalPages > 1) {
+        // Previous button
+        paginationControls.innerHTML += `
+          <li class="page-item ${currentPage == 1 ? 'disabled' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="fetchFlashcardLists(${currentPage - 1})">&laquo;</a>
+          </li>
+        `;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+          paginationControls.innerHTML += `
+            <li class="page-item ${currentPage == i ? 'active' : ''}">
+              <a class="page-link" href="javascript:void(0)" onclick="fetchFlashcardLists(${i})">${i}</a>
+            </li>
+          `;
+        }
+
+        // Next button
+        paginationControls.innerHTML += `
+          <li class="page-item ${currentPage == totalPages ? 'disabled' : ''}">
+            <a class="page-link" href="javascript:void(0)" onclick="fetchFlashcardLists(${currentPage + 1})">&raquo;</a>
+          </li>
+        `;
+      }
+    }
+
+    // Hàm gắn sự kiện click cho các flashcard
+    function addFlashcardClickEvent() {
+      document.querySelectorAll(".clickable-card").forEach((card) => {
+        card.addEventListener("click", function () {
+          const url = this.getAttribute("data-url"); // Lấy URL từ thuộc tính data-url
+          window.location.href = url; // Chuyển hướng đến trang mới
+        });
+      });
+    }
+
+    // Gọi hàm fetchFlashcardLists khi trang load
+    document.addEventListener("DOMContentLoaded", function () {
+      fetchFlashcardLists(); // Mặc định lấy trang đầu tiên
+    });
+
+    window.onpageshow = function(event) {
+      if (event.persisted) {
+        window.location.reload(); // Tự động reload trang khi người dùng quay lại
+      }
+    };
+
+    // Lấy form từ DOM và lắng nghe sự kiện submit
+    document.getElementById("newFlashcardListForm").addEventListener("submit", function (event) {
+      event.preventDefault(); // Ngăn không cho form tự submit lại trang
+
+      // Lấy dữ liệu từ form
+      const name = document.getElementById("listName").value;
+      const description = document.getElementById("listDescription").value;
+
+      /// Gửi yêu cầu POST đến server với dữ liệu JSON
+      fetch("/flashcards/create", {  // Đường dẫn khớp với route đã định nghĩa trong controller
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: name,              // Dữ liệu lấy từ form
+          description: description, // Dữ liệu lấy từ form
+        }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error('Lỗi khi gửi yêu cầu tạo flashcard list');
+          }
+          return response.json();  // Chuyển đổi phản hồi thành JSON
+        })
+        .then((data) => {
+          if (data.success) {
+            alert("Tạo danh sách flashcard thành công!");
+
+            // Đóng modal sau khi thêm thành công
+            const modal = bootstrap.Modal.getInstance(document.getElementById("createNewListModal"));
+            modal.hide();
+
+            // Reset form
+            document.getElementById("newFlashcardListForm").reset();
+
+            // Reload lại danh sách flashcard để hiển thị danh sách mới tạo
+            fetchFlashcardLists();  // Hàm này sẽ gọi lại API để cập nhật danh sách flashcard
+          } else {
+            alert("Có lỗi xảy ra: " + data.message);
+          }
+        })
+        .catch((error) => {
+          console.error("Error:", error);
+          alert("Có lỗi xảy ra khi gửi yêu cầu: " + error.message);
+        });
+
+    });
+</script>  
+</body>
+
+</html>

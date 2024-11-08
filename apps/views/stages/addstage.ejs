@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Stage</title>
+    <script src="/static/js/checkadmin.js"></script>
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/road.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+    <style>
+        .form-control {
+            padding: 10px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container stage-container">
+                        <h1 class="text-center stage-title">Add New Stage</h1>
+                        <form id="stage-form">
+                            <div class="form-group">
+                                <label for="stage-title">Title:</label>
+                                <input type="text" class="form-control" id="stage-title" name="title" required>
+                            </div>
+
+                            <!-- Select Gates Dropdown -->
+                            <div class="form-group">
+                                <label for="gate-select">Select Gate:</label>
+                                <select class="form-control" id="gate-select" name="gateId" required>
+                                    <option value="">Select a gate</option>
+                                    <% gates.forEach(gate => { %>
+                                        <option value="<%= gate._id %>"><%= gate.title %></option>
+                                    <% }) %>
+                                </select>
+                            </div>
+                        
+                            <div id="dynamic-questions" class="mt-3"></div>
+                        
+                            <div class="form-group">
+                                <label for="question-type">Question Type:</label>
+                                <select class="form-control" id="question-type" name="type" required>
+                                    <option value="">Select type</option>
+                                    <option value="multiple-choice">Multiple Choice</option>
+                                    <option value="fill-in-the-blank">Fill in the Blank</option>
+                                    <option value="translation">Translation</option>
+                                </select>
+                            </div>
+                        
+                            <button type="button" class="btn btn-secondary" id="add-question">Add Question</button>
+                            <button type="submit" class="btn btn-primary btn-submit-stage mt-3">Add Stage</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            let questionCount = 0;
+
+            $('#add-question').click(function() {
+                const questionType = $('#question-type').val();
+                questionCount++;
+                let questionHtml = '';
+
+                let questionTypeField = `<input type="hidden" name="questions[${questionCount}][type]" value="${questionType}">`;
+
+                if (questionType === 'multiple-choice') {
+                    questionHtml = `
+                        <div class="question-group">
+                            <h5>Question ${questionCount} (Multiple Choice)</h5>
+                            ${questionTypeField}
+                            <div class="form-group">
+                                <label for="question-${questionCount}">Question:</label>
+                                <input type="text" class="form-control" id="question-${questionCount}" name="questions[${questionCount}][question]" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Options:</label>
+                                <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 1" required>
+                                <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 2" required>
+                                <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 3" required>
+                                <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 4" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="correct-answer-${questionCount}">Correct Answer:</label>
+                                <input type="text" class="form-control" id="correct-answer-${questionCount}" name="questions[${questionCount}][correctAnswer]" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="explanation-${questionCount}">Explanation:</label>
+                                <textarea class="form-control" id="explanation-${questionCount}" name="questions[${questionCount}][explanation]" required></textarea>
+                            </div>
+                        </div>
+                    `;
+                } else if (questionType === 'fill-in-the-blank') {
+                    questionHtml = `
+                        <div class="question-group">
+                            <h5>Question ${questionCount} (Fill in the Blank)</h5>
+                            ${questionTypeField}
+                            <div class="form-group">
+                                <label for="fill-question-${questionCount}">Question:</label>
+                                <input type="text" class="form-control" id="fill-question-${questionCount}" name="questions[${questionCount}][question]" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fill-answer-${questionCount}">Correct Answer:</label>
+                                <input type="text" class="form-control" id="fill-answer-${questionCount}" name="questions[${questionCount}][correctAnswer]" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="fill-explanation-${questionCount}">Explanation:</label>
+                                <textarea class="form-control" id="fill-explanation-${questionCount}" name="questions[${questionCount}][explanation]" required></textarea>
+                            </div>
+                        </div>
+                    `;
+                } else if (questionType === 'translation') {
+                    questionHtml = `
+                        <div class="question-group">
+                            <h5>Question ${questionCount} (Translation)</h5>
+                            ${questionTypeField}
+                            <div class="form-group">
+                                <label for="translate-question-${questionCount}">Question:</label>
+                                <input type="text" class="form-control" id="translate-question-${questionCount}" name="questions[${questionCount}][question]" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="translate-answer-${questionCount}">Correct Answer:</label>
+                                <input type="text" class="form-control" id="translate-answer-${questionCount}" name="questions[${questionCount}][correctAnswer]" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="translate-explanation-${questionCount}">Explanation:</label>
+                                <textarea class="form-control" id="translate-explanation-${questionCount}" name="questions[${questionCount}][explanation]" required></textarea>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                $('#dynamic-questions').append(questionHtml);
+            });
+
+            $('#stage-form').submit(async function(event) {
+                event.preventDefault();
+                
+                const title = $('#stage-title').val();
+                const gateId = $('#gate-select').val();
+                const questions = [];
+                $('.question-group').each(function(index) {
+                    const question = $(this).find(`[name="questions[${index + 1}][question]"]`).val();
+                    const correctAnswer = $(this).find(`[name="questions[${index + 1}][correctAnswer]"]`).val();
+                    const type = $(this).find(`[name="questions[${index + 1}][type]"]`).val();
+                    const explanation = $(this).find(`[name="questions[${index + 1}][explanation]"]`).val();
+                    const options = [];
+                    $(this).find(`[name^="questions[${index + 1}][options]"]`).each(function() {
+                        options.push($(this).val());
+                    });
+
+                    questions.push({
+                        question,
+                        correctAnswer,
+                        type,
+                        explanation,
+                        options
+                    });
+                });
+
+                const data = { title, questions, gateId };
+
+                try {
+                    const response = await fetch('/admin/stage/add', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    });
+
+                    const result = await response.json();
+                    if (result.success) {
+                        alert("Stage added successfully!");
+                        window.location.href = '/admin/stage';
+                    } else {
+                        alert("Error: " + result.message);
+                    }
+                } catch (error) {
+                    console.error("Error adding stage:", error);
+                    alert("An error occurred while adding the stage.");
+                }
+            });
+        });
+    </script>
+
+    <!-- Additional Scripts -->
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+</body>
+</html>

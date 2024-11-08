@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Pronunciation</title>
+    <script src="/static/js/checkadmin.js"></script>
+    <!-- Fonts and icons -->
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <%- include('../admin/partials/menu.ejs') %>
+
+        <!-- Content -->
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container grammar-container">
+                        <h1 class="text-center grammar-title">Add New Pronunciation Lesson</h1>
+                        
+                        <!-- Form để thêm mới bài ngữ pháp -->
+                        <form id="addPronunciationForm" enctype="multipart/form-data">
+                            <!-- Title -->
+                            <div class="form-group">
+                                <label for="grammar-title">Title:</label>
+                                <input type="text" class="form-control" id="grammar-title" name="title" required>
+                            </div>
+
+                            <!-- Description -->
+                            <div class="form-group">
+                                <label for="grammar-description">Description:</label>
+                                <textarea class="form-control" id="grammar-description" name="description" required></textarea>
+                            </div>
+
+                            <!-- Content (Textarea dài với đường dẫn hình ảnh, video) -->
+                            <div class="form-group">
+                                <label for="grammar-content">Content:</label>
+                                <textarea class="form-control" id="grammar-content" name="content" rows="10" required placeholder="Enter content with links to images or videos, e.g. /static/images/example.png or /static/videos/example.mp4"></textarea>
+                            </div>
+
+                            <!-- Grammar Image -->
+                            <div class="form-group">
+                                <label for="image">Pronunciation Image:</label>
+                                <input type="file" id="image" name="image" accept="image/*" required>
+                            </div>
+
+                            <!-- Submit Button -->
+                            <button type="button" class="btn btn-primary btn-submit-grammar" onclick="addPronunciation()">Add Pronunciation Lesson</button>
+                        </form>
+                    </div>
+                </div>
+            </div>    
+        </div>
+    </div>
+
+    <!-- JS Files -->
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+
+    <script>
+        // Hàm để thêm mới bài ngữ pháp
+        function addPronunciation() {
+            const formData = new FormData(document.getElementById("addPronunciationForm"));
+
+            // Gọi AJAX để gửi dữ liệu tới API
+            $.ajax({
+                url: '/admin/pronunciation/api/add', // API xử lý thêm mới bài ngữ pháp
+                method: 'POST',
+                data: formData,
+                processData: false,  // Không xử lý dữ liệu, giữ nguyên dữ liệu dạng FormData
+                contentType: false,  // Không thiết lập header content-type, để mặc định là multipart/form-data
+                success: function () {
+                    alert("Pronunciation lesson added successfully");
+                    window.location.href = "/admin/pronunciation"; // Chuyển hướng về trang danh sách sau khi thêm thành công
+                },
+                error: function (error) {
+                    console.error("Error adding pronunciation:", error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="icon" href="/static/images/favicon.png">
+    <title>Xác Thực Mã</title>
+    <style>
+        .auth-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+        .auth-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 30px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+        .auth-title {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        .auth-input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .auth-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        .auth-btn:hover {
+            background-color: #218838;
+        }
+        .auth-message {
+            color: red;
+            line-height: 1.5;
+            margin: 20px 0;
+        }
+        .resend-btn {
+            display: block;
+            margin-top: 10px;
+            color: #007bff;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+        .resend-btn.disabled {
+            color: #ccc;
+            pointer-events: none;
+        }
+        .timer {
+            font-size: 14px;
+            line-height: 1.5;
+            margin: 20px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-container">
+            <h1 class="auth-title">Xác Thực Mã</h1>
+            <p id="timer" class="timer"></p>
+            <form id="verifyCodeForm">
+                <div class="auth-input-group">
+                    <label for="code">Nhập mã xác thực: </label>
+                    <input type="text" class="auth-input" id="code" maxlength="5" placeholder="Nhập mã xác thực lấy từ email của bạn" required>
+                </div>
+                <button type="submit" class="auth-btn">Xác thực</button>
+            </form>
+            <p id="message" class="auth-message"></p>
+            <span id="resendCode" class="resend-btn disabled">Gửi lại mã xác thực</span>
+        </div>
+    </div>
+    <script>
+        let countdown;
+        let resendTimeout;
+
+        const startCountdown = (duration) => {
+            clearInterval(countdown);
+            const timerElement = document.getElementById('timer');
+            let timeLeft = duration;
+            countdown = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerElement.textContent = `Thời gian còn lại để nhập mã: ${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    timerElement.textContent = "Mã xác thực của bạn đã hết hạn. Vui lòng yêu cầu một mã xác thực mới.";
+                    setMessage("Mã xác thực của bạn đã hết hạn. Vui lòng yêu cầu một mã xác thực mới.");
+                    document.getElementById('code').disabled = true;
+                }
+                timeLeft--;
+            }, 1000);
+        };
+
+        const setMessage = (text, color = 'red') => {
+            const messageElement = document.getElementById('message');
+            messageElement.textContent = text;
+            messageElement.style.color = color;
+        };
+
+        const enableResendButton = () => {
+            const resendButton = document.getElementById('resendCode');
+            resendButton.classList.remove('disabled');
+            resendButton.textContent = 'Gửi lại mã xác thực';
+        };
+
+        const disableResendButton = () => {
+            const resendButton = document.getElementById('resendCode');
+            resendButton.classList.add('disabled');
+            resendButton.textContent = 'Vui lòng đợi 1 phút để cho phép gửi lại mã';
+        };
+
+        document.getElementById('verifyCodeForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const code = document.getElementById('code').value;
+            const email = new URLSearchParams(window.location.search).get('email');
+
+            try {
+                const response = await fetch('/verify-code', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, code }),
+                });
+
+                if (response.ok) {
+                    setMessage("Mã xác thực của bạn chính xác !!", 'green');
+                    setTimeout(() => {
+                        window.location.href = `/reset-password?email=${email}`;
+                    }, 1000);
+                } else {
+                    const setMessage = (text, color = 'red') => {
+                    const messageElement = document.getElementById('message');
+                    messageElement.textContent = text;
+                    messageElement.style.color = color;
+
+                    // Tự động xóa thông báo sau 5 giây
+                    setTimeout(() => {
+                        messageElement.textContent = '';
+                    }, 3000);
+                };
+                setMessage("Mã xác thực của bạn không hợp lệ !!"); 
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                setMessage("An error occurred. Please try again.");
+            }
+        });
+
+        document.getElementById('resendCode').addEventListener('click', async () => {
+            disableResendButton();
+            clearTimeout(resendTimeout);
+
+            try {
+                const email = new URLSearchParams(window.location.search).get('email');
+                const response = await fetch('/forgot-password', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email }),
+                });
+
+                if (response.ok) {
+                    setMessage("Một mã xác thực mới đã được gửi đến email của bạn.", 'green');
+                    document.getElementById('code').disabled = false;
+                    startCountdown(60);
+                } else {
+                    setMessage("Lỗi gửi lại mã. Vui lòng thử lại lần nữa.");
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                setMessage("An error occurred. Please try again.");
+            }
+
+            resendTimeout = setTimeout(enableResendButton, 60000);
+        });
+        startCountdown(60);
+        disableResendButton();
+        resendTimeout = setTimeout(enableResendButton, 60000);
+    </script>
+</body>
+</html>
