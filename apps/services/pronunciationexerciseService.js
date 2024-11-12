@@ -11,20 +11,19 @@ class PronunciationexerciseService {
     constructor() {
         this.client = this.databaseConnection.getMongoClient();
         this.pronunciationExercisesDatabase = this.client.db(config.mongodb.database);
-        this.pronunciationExercisesCollection = this.pronunciationExercisesDatabase.collection("pronunciationexercises"); // Tên bảng bài tập phát âm
+        this.pronunciationExercisesCollection = this.pronunciationExercisesDatabase.collection("pronunciationexercises");
     }
 
-    // Lấy danh sách bài tập phát âm với phân trang
     async getPronunciationexerciseList(page = 1, limit = 2) {
         try {
-            const skip = (page - 1) * limit; // Tính số lượng bài tập cần bỏ qua
+            const skip = (page - 1) * limit;
             const cursor = await this.pronunciationExercisesCollection
                 .find({})
                 .skip(skip)
-                .limit(limit); // Thêm phân trang bằng cách dùng skip và limit
+                .limit(limit);
 
-            const pronunciationexercises = await cursor.toArray(); // Chuyển cursor thành mảng
-            const totalExercises = await this.pronunciationExercisesCollection.countDocuments(); // Đếm tổng số bài tập
+            const pronunciationexercises = await cursor.toArray();
+            const totalExercises = await this.pronunciationExercisesCollection.countDocuments();
 
             return { pronunciationexercises, totalExercises };
         } catch (error) {
@@ -32,20 +31,15 @@ class PronunciationexerciseService {
         }
     }
 
-
-    // Lấy một bài tập phát âm theo ID
     async getPronunciationexerciseById(id) {
         return await this.pronunciationExercisesCollection.findOne({ _id: new ObjectId(id) });
     }
 
-    // Thêm bài tập phát âm mới
     async insertPronunciationexercise(exerciseData) {
         const newExercise = {
             title: exerciseData.title,
             questions: []
         };
-
-        // Duyệt qua từng câu hỏi và thêm vào bài tập
         if (exerciseData.questions && Array.isArray(exerciseData.questions)) {
             exerciseData.questions.forEach(question => {
                 newExercise.questions.push({
@@ -53,18 +47,15 @@ class PronunciationexerciseService {
                     type: question.type,
                     correctAnswer: question.correctAnswer,
                     explanation: question.explanation || "",
-                    options: question.options || [] // Chỉ cần thiết khi loại là 'multiple-choice'
+                    options: question.options || []
                 });
             });
         }
-
-        // Lưu bài tập mới vào cơ sở dữ liệu
         return await this.pronunciationExercisesCollection.insertOne(newExercise);
     }
 
-    // Cập nhật bài tập phát âm
     async updatePronunciationexercise(id, updateData) {
-        const objectId = new ObjectId(id); // Chuyển đổi id sang ObjectId
+        const objectId = new ObjectId(id);
 
         const formattedQuestions = updateData.questions.map((question) => {
             return {
@@ -86,7 +77,6 @@ class PronunciationexerciseService {
         return result.modifiedCount > 0;
     }
 
-    // Xóa bài tập phát âm
     async deletePronunciationexercise(id) {
         return await this.pronunciationExercisesCollection.deleteOne({ _id: new ObjectId(id) });
     }

@@ -101,19 +101,19 @@
 
       function shuffleFlashcardList(array) {
         for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1)); // Chọn phần tử ngẫu nhiên
-          [array[i], array[j]] = [array[j], array[i]]; // Hoán đổi vị trí
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
         }
         return array;
       }
 
       function removeCurrentFlashcard() {
         if (flashcards.length > 0) {
-          flashcards.splice(currentCardIndex, 1); // Xóa phần tử hiện tại khỏi danh sách
+          flashcards.splice(currentCardIndex, 1);
           if (currentCardIndex >= flashcards.length) {
-            currentCardIndex = flashcards.length - 1; // Cập nhật chỉ số khi phần tử cuối cùng bị xóa
+            currentCardIndex = flashcards.length - 1;
           }
-          displayCard(currentCardIndex); // Hiển thị flashcard tiếp theo
+          displayCard(currentCardIndex); 
         }
       }
 
@@ -167,7 +167,6 @@
         </div>
       `;
 
-        // Đảm bảo thẻ mới không bị lật khi hiển thị
         flashcardElement.classList.remove("is-flipped");
       }
 
@@ -185,7 +184,6 @@
         }
       }
 
-      // Hiển thị flashcard đầu tiên khi tải trang
       window.onload = () => {
         displayCard(currentCardIndex);
       };
@@ -210,17 +208,17 @@
         }
       }
     </script>
-            <script src="/static/js/jquery-1.12.1.min.js"></script>
-            <script src="/static/js/popper.min.js"></script>
-            <script src="/static/js/bootstrap.min.js"></script>
-            <script src="/static/js/jquery.magnific-popup.js"></script>
-            <script src="/static/js/swiper.min.js"></script>
-            <script src="/static/js/masonry.pkgd.js"></script>
-            <script src="/static/js/owl.carousel.min.js"></script>
-            <script src="/static/js/jquery.nice-select.min.js"></script>
-            <script src="/static/js/slick.min.js"></script>
-            <script src="/static/js/jquery.counterup.min.js"></script>
-            <script src="/static/js/waypoints.min.js"></script>
-            <script src="/static/js/custom.js"></script>
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
   </body>
 </html>

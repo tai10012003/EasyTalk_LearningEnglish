@@ -18,18 +18,14 @@ router.get("/stage/api/stage/detail/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const stageId = req.params.id;
-        // Lấy thông tin UserProgress của người dùng
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             userProgress = await userProgressService.createUserProgress(userId);
         }
-
-        // Lấy thông tin chặng
         const stage = await stageService.getStageById(stageId);
         if (!stage) {
             return res.status(404).json({ error: "Chặng không tồn tại." });
         }
-
         res.json({ stage, userProgress });
     } catch (err) {
         res.status(500).json({ error: "Đã xảy ra lỗi khi tải chi tiết chặng." });
@@ -45,17 +41,11 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
         if (!currentStage) {
             return res.status(404).json({ error: "Không tìm thấy chặng." });
         }
-
-        // Lấy `gateId` từ `currentStage`
         const gateId = currentStage.gate;
-
-        // Truy vấn để lấy dữ liệu của cổng dựa trên `gateId`
         const gate = await gateService.getGateById(gateId);
         if (!gate) {
             return res.status(404).json({ error: "Không thể tìm thấy cổng cho chặng hiện tại." });
         }
-
-        // Lấy `journeyId` từ cổng
         const currentJourneyId = gate.journey;
 
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
@@ -67,8 +57,6 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
         if (!userProgress.unlockedStages.some(stage => stage.toString() === stageId)) {
             userProgress.unlockedStages.push(new ObjectId(stageId));
         }
-
-        // Kiểm tra và mở khóa chặng tiếp theo trong cùng `gate` nếu có
         const allStagesInGate = await stageService.getStagesInGate(currentStage.gate);
         const currentStageIndex = allStagesInGate.findIndex(stage => stage._id.toString() === stageId);
 
@@ -85,8 +73,6 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
                 const nextGate = allGatesInJourney[currentGateIndex + 1];
                 if (!userProgress.unlockedGates.some(gate => gate.toString() === nextGate._id.toString())) {
                     userProgress.unlockedGates.push(nextGate._id);
-
-                    // Mở khóa chặng đầu tiên của `gate` tiếp theo
                     const firstStageOfNextGate = await stageService.getStagesInGate(nextGate._id);
                     if (firstStageOfNextGate.length > 0 && !userProgress.unlockedStages.some(stage => stage.toString() === firstStageOfNextGate[0]._id.toString())) {
                         userProgress.unlockedStages.push(firstStageOfNextGate[0]._id);
@@ -94,8 +80,6 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
                 }
             }
         }
-
-        // Cập nhật điểm kinh nghiệm và lưu UserProgress
         userProgress.experiencePoints += 10;
         await userProgressService.updateUserProgress(userProgress);
 

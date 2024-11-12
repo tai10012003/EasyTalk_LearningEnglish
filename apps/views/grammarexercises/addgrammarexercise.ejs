@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Grammar Exercise</title>
+    <title>Thêm Bài Luyện Tập Ngữ Pháp</title>
+    <link rel="icon" href="/static/images/favicon.png">
     <script src="/static/js/checkadmin.js"></script>
     <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
         <link rel="stylesheet" type="text/css" href="/static/css/main.css">
@@ -31,43 +32,40 @@
     <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
     <style>
         .form-control {
-            padding: 10px; /* Đảm bảo khoảng cách giữa nội dung và viền */
-            line-height: 1.5; /* Đảm bảo dòng chữ được căn đều */
+            padding: 10px;
+            line-height: 1.5;
         }
 
     </style>
 </head>
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <%- include('../admin/partials/menu.ejs') %>
-
-        <!-- Content -->
         <div class="main-panel">
             <div class="content">
                 <div class="page-inner">
                     <div class="container grammar-container">
-                        <h1 class="text-center grammar-title">Add New Grammar Exercise</h1>
+                        <h1 class="text-center grammar-title">THÊM BÀI LUYỆN TẬP NGỮ PHÁP MỚI</h1>
                         <form id="grammar-exercise-form">
                             <div class="form-group">
-                                <label for="exercise-title">Title:</label>
+                                <label for="exercise-title">Tiêu đề:</label>
                                 <input type="text" class="form-control" id="exercise-title" name="title" required>
                             </div>
                         
                             <div id="dynamic-questions" class="mt-3"></div>
                         
                             <div class="form-group">
-                                <label for="exercise-type">Exercise Type:</label>
+                                <label for="exercise-type">Loại bài tập:</label>
                                 <select class="form-control" id="exercise-type" name="type" required>
-                                    <option value="">Select type</option>
-                                    <option value="multiple-choice">Multiple Choice</option>
-                                    <option value="fill-in-the-blank">Fill in the Blank</option>
-                                    <option value="translation">Translation</option>
+                                    <option value="">Chọn loại</option>
+                                    <option value="multiple-choice">Trắc nghiệm</option>
+                                    <option value="fill-in-the-blank">Điền vào chỗ trống</option>
+                                    <option value="translation">Dịch nghĩa</option>
                                 </select>
                             </div>
                         
-                            <button type="button" class="btn btn-secondary" id="add-question">Add Question</button>
-                            <button type="submit" class="btn btn-primary btn-submit-exercise mt-3">Add Grammar Exercise</button>
+                            <button type="button" class="btn btn-secondary" id="add-question">Thêm câu hỏi</button>
+                            <button type="submit" class="btn btn-primary btn-submit-exercise mt-3">Lưu</button>
                         </form>
                     </div>
                 </div>
@@ -87,32 +85,30 @@
             const exerciseType = $('#exercise-type').val();
             questionCount++;
             let questionHtml = '';
-
-            // Đặt loại câu hỏi cho mỗi câu hỏi được thêm vào
             let questionTypeField = `<input type="hidden" name="questions[${questionCount}][type]" value="${exerciseType}">`;
 
             if (exerciseType === 'multiple-choice') {
                 questionHtml = `
                     <div class="question-group">
-                        <h5>Question ${questionCount} (Multiple Choice)</h5>
+                        <h5>Câu hỏi ${questionCount} (Trắc nghiệm)</h5>
                         ${questionTypeField}
                         <div class="form-group">
-                            <label for="question-${questionCount}">Question:</label>
+                            <label for="question-${questionCount}">Câu hỏi:</label>
                             <input type="text" class="form-control" id="question-${questionCount}" name="questions[${questionCount}][question]" required>
                         </div>
                         <div class="form-group">
-                            <label>Options:</label>
-                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 1" required>
-                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 2" required>
-                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 3" required>
-                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Option 4" required>
+                            <label>Lựa chọn: </label>
+                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Lựa chọn 1" required>
+                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Lựa chọn 2" required>
+                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Lựa chọn 3" required>
+                            <input type="text" class="form-control" name="questions[${questionCount}][options][]" placeholder="Lựa chọn 4" required>
                         </div>
                         <div class="form-group">
-                            <label for="correct-answer-${questionCount}">Correct Answer:</label>
+                            <label for="correct-answer-${questionCount}">Đáp án chính xác:</label>
                             <input type="text" class="form-control" id="correct-answer-${questionCount}" name="questions[${questionCount}][correctAnswer]" required>
                         </div>
                         <div class="form-group">
-                            <label for="explanation-${questionCount}">Explanation:</label>
+                            <label for="explanation-${questionCount}">Giải thích:</label>
                             <textarea class="form-control" id="explanation-${questionCount}" name="questions[${questionCount}][explanation]" required></textarea>
                         </div>
                     </div>
@@ -120,18 +116,18 @@
             } else if (exerciseType === 'fill-in-the-blank') {
                 questionHtml = `
                     <div class="question-group">
-                        <h5>Question ${questionCount} (Fill in the Blank)</h5>
+                        <h5>Câu hỏi ${questionCount} (Điền vào lỗ trống)</h5>
                         ${questionTypeField}
                         <div class="form-group">
-                            <label for="fill-question-${questionCount}">Question:</label>
+                            <label for="fill-question-${questionCount}">Câu hỏi:</label>
                             <input type="text" class="form-control" id="fill-question-${questionCount}" name="questions[${questionCount}][question]" required>
                         </div>
                         <div class="form-group">
-                            <label for="fill-answer-${questionCount}">Correct Answer:</label>
+                            <label for="fill-answer-${questionCount}">Đáp án chính xác:</label>
                             <input type="text" class="form-control" id="fill-answer-${questionCount}" name="questions[${questionCount}][correctAnswer]" required>
                         </div>
                         <div class="form-group">
-                            <label for="fill-explanation-${questionCount}">Explanation:</label>
+                            <label for="fill-explanation-${questionCount}">Giải thích:</label>
                             <textarea class="form-control" id="fill-explanation-${questionCount}" name="questions[${questionCount}][explanation]" required></textarea>
                         </div>
                     </div>
@@ -139,33 +135,29 @@
             } else if (exerciseType === 'translation') {
                 questionHtml = `
                     <div class="question-group">
-                        <h5>Question ${questionCount} (Translation)</h5>
+                        <h5>Câu hỏi ${questionCount} (Dịch nghĩa)</h5>
                         ${questionTypeField}
                         <div class="form-group">
-                            <label for="translate-question-${questionCount}">Question:</label>
+                            <label for="translate-question-${questionCount}">Câu hỏi:</label>
                             <input type="text" class="form-control" id="translate-question-${questionCount}" name="questions[${questionCount}][question]" required>
                         </div>
                         <div class="form-group">
-                            <label for="translate-answer-${questionCount}">Correct Answer:</label>
+                            <label for="translate-answer-${questionCount}">Đáp án chính xác:</label>
                             <input type="text" class="form-control" id="translate-answer-${questionCount}" name="questions[${questionCount}][correctAnswer]" required>
                         </div>
                         <div class="form-group">
-                            <label for="translate-explanation-${questionCount}">Explanation:</label>
+                            <label for="translate-explanation-${questionCount}">Giải thích:</label>
                             <textarea class="form-control" id="translate-explanation-${questionCount}" name="questions[${questionCount}][explanation]" required></textarea>
                         </div>
                     </div>
                 `;
             }
-
-            // Append the question form to the dynamic questions area
             $('#dynamic-questions').append(questionHtml);
         });
 
         });
         document.getElementById("grammar-exercise-form").addEventListener("submit", async function (event) {
-        event.preventDefault(); // Ngăn form không submit theo cách thông thường
-        
-        // Lấy dữ liệu từ form
+        event.preventDefault();
         const title = document.getElementById("exercise-title").value;
         const questions = [];
         const questionGroups = document.querySelectorAll('.question-group');
@@ -206,7 +198,7 @@
 
             const result = await response.json();
             if (result.success) {
-                alert("Grammar exercise added successfully!");
+                alert("Bài luyện tập ngữ pháp đã được thêm thành công !");
                 window.location.href = '/admin/grammar-exercise';
             } else {
                 alert("Error: " + result.message);

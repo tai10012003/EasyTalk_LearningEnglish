@@ -1,19 +1,16 @@
 var express = require("express");
-var router = express.Router(); // Khởi tạo router
+var router = express.Router();
 
-// Route hiển thị giao diện ChatGPT
 router.get("/", function(req, res) {
-    res.render("chat"); // Render file "chat.ejs" từ thư mục views
+    res.render("chat");
 });
 
-// Cấu hình OpenAI API
-const OpenAI = require("openai"); // Đúng cú pháp cho OpenAI 4.x
+const OpenAI = require("openai");
 
 const openai = new OpenAI({
-    apiKey: process.env.OPENAI_API_KEY, // API Key từ file .env
+    apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Route API để gửi câu hỏi tới ChatGPT
 router.post('/api/chat', async (req, res) => {
     const { message } = req.body;
 
@@ -22,7 +19,7 @@ router.post('/api/chat', async (req, res) => {
     }
     try {
         const response = await openai.chat.completions.create({
-            model: "gpt-3.5-turbo", // Hoặc gpt-4 nếu có quyền truy cập
+            model: "gpt-3.5-turbo",
             messages: [{ role: "user", content: message }],
         });
 
@@ -34,4 +31,4 @@ router.post('/api/chat', async (req, res) => {
     }
 });
 
-module.exports = router; // Xuất router để sử dụng trong app.js
+module.exports = router;

@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update Pronunciation</title>
+    <title>Cập Nhật Bài Học Phát Âm</title>
+    <link rel="icon" href="/static/images/favicon.png">
     <script src="/static/js/checkadmin.js"></script>
-    <!-- Fonts and icons -->
     <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <script>
@@ -34,52 +34,37 @@
 
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <%- include('../admin/partials/menu.ejs') %>
-
-        <!-- Content -->
         <div class="main-panel">
             <div class="content">
                 <div class="page-inner">
                     <div class="container grammar-update-container">
-                        <h1 class="text-center grammar-update-title">Update Pronunciation Lesson</h1>
-                
-                        <!-- Grammar Update Form -->
+                        <h1 class="text-center grammar-update-title">CẬP NHẬT BÀI HỌC PHÁT ÂM</h1>
                         <form id="editPronunciationForm" enctype="multipart/form-data">
                             <input type="hidden" name="pronunciationId" value="<%= pronunciation._id %>">
-                            
-                            <!-- Title Input -->
                             <div class="form-group">
-                                <label for="title">Title:</label>
+                                <label for="title">Tiêu đề:</label>
                                 <input type="text" id="title" name="title" value="<%= pronunciation.title %>" class="form-control" required>
                             </div>
-                
-                            <!-- Description Textarea -->
                             <div class="form-group">
-                                <label for="description">Description:</label>
+                                <label for="description">Mô tả:</label>
                                 <textarea id="description" name="description" class="form-control" required><%= pronunciation.description %></textarea>
                             </div>
-                
-                            <!-- Content Textarea -->
                             <div class="form-group">
-                                <label for="content">Content (Text with Image/Video Links):</label>
+                                <label for="content">Nội dung:</label>
                                 <textarea id="content" name="content" class="form-control" rows="10" required><%= pronunciation.content %></textarea>
                             </div>
-                            
-                            <!-- Current Image and Upload New Image -->
                             <div class="form-group">
-                                <label for="createdAt">Created at: </label>
+                                <label for="createdAt">Ngày tạo: </label>
                                 <p style="color: #333; font-weight: bold;"><%= new Date(pronunciation.createdAt).toLocaleString() %></p>
                             </div>
                             <div class="form-group">
-                                <label for="image">Current Image:</label><br>
-                                <img src="data:image/png;base64,<%= pronunciation.images ? pronunciation.images.toString('base64') : '' %>" alt="<%= pronunciation.title %>" style="max-width: 200px; max-height: 200px;"><br><br> <!-- Hiển thị ảnh hiện tại -->
-                                <label for="image">Upload New Image:</label>
-                                <input type="file" id="image" name="image" accept="image/*"> <!-- Thêm trường tải lên ảnh mới -->
+                                <label for="image">Hình ảnh hiện tại:</label><br>
+                                <img src="data:image/png;base64,<%= pronunciation.images ? pronunciation.images.toString('base64') : '' %>" alt="<%= pronunciation.title %>" style="max-width: 200px; max-height: 200px;"><br><br>
+                                <label for="image">Tải hình ảnh mới:</label>
+                                <input type="file" id="image" name="image" accept="image/*">
                             </div>
-                            
-                            <!-- Submit Button -->
-                            <button type="button" class="btn btn-primary btn-submit-grammar" onclick="updatePronunciation()">Cập nhật</button>
+                            <button type="button" class="btn btn-primary btn-submit-grammar" onclick="updatePronunciation()">Lưu</button>
                         </form>
                     </div>
                 </div>
@@ -94,10 +79,7 @@
     <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
     <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
     <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
-
-    <!-- Script to update grammar -->
     <script>
-        // Update an existing grammar lesson
         function updatePronunciation() {
             const pronunciationId = $("#editPronunciationForm input[name='pronunciationId']").val();
             const formData = new FormData(document.getElementById("editPronunciationForm"));
@@ -108,7 +90,7 @@
                 processData: false,
                 contentType: false,
                 success: function () {
-                    alert("Pronunciation updated successfully");
+                    alert("Bài học phát âm đã được cập nhật thành công !");
                     window.location.href = "/admin/pronunciation";
                 },
                 error: function (error) {

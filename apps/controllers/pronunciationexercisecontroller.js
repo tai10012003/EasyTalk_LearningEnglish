@@ -28,7 +28,7 @@ router.get("/api/pronunciation-exercises", async (req, res) => {
           totalPages,
         });
     } catch (error) {
-        console.error("Error fetching pronunciation exercises:", error); // Ghi lỗi vào console
+        console.error("Error fetching pronunciation exercises:", error);
         res.status(500).json({ success: false, message: "Error fetching pronunciation exercises", error: error.message });
     }
 });

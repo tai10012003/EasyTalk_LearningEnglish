@@ -1,15 +1,12 @@
 var express = require("express");
 const { ObjectId } = require("mongodb");
 var router = express.Router();
-var Pronunciation = require("./../../models/pronunciation");
 var PronunciationService = require("./../../services/pronunciationService");
 const multer = require("multer");
 
-// Set up Multer storage
-const storage = multer.memoryStorage(); // Store file in memory as a Buffer
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Route để hiển thị trang chủ
 router.get("/", function (req, res) {
     res.render("pronunciations/pronunciation"); 
 });
@@ -28,10 +25,8 @@ router.get("/api/pronunciation-list", async function (req, res) {
   const pronunciationService = new PronunciationService();
   const page = parseInt(req.query.page) || 1;
   const limit = 3;
-
   const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit);
   const totalPages = Math.ceil(totalPronunciations / limit);
-
   res.json({
     pronunciations,
     currentPage: page,
@@ -39,70 +34,57 @@ router.get("/api/pronunciation-list", async function (req, res) {
   });
 });
 
-
 router.post("/api/add", upload.single("image"), async function (req, res) {
     const pronunciationService = new PronunciationService();
-
     try {
         const pronunciation = {
             title: req.body.title,
             description: req.body.description,
             content: req.body.content,
-            images: req.file ? req.file.buffer : null  // Lưu hình ảnh dưới dạng buffer nếu có
+            images: req.file ? req.file.buffer : null
         };
 
         const result = await pronunciationService.insertPronunciation(pronunciation);
-        res.status(201).json({ message: "Pronunciation added successfully", result });
+        res.status(201).json({ message: "Bài học phát âm đã được thêm thành công !", result });
     } catch (error) {
         res.status(500).json({ message: "Error adding Pronunciation", error });
     }
 });
 
-// API để cập nhật thông tin bài ngữ pháp
 router.put("/api/update/:id", upload.single("image"), async function (req, res) {
-    const pronunciationService = new PronunciationService();  // Đảm bảo import đúng service
+    const pronunciationService = new PronunciationService();
     try {
-      // Tạo đối tượng grammar từ request body
       const pronunciation = {
         _id: new ObjectId(req.params.id),
         title: req.body.title,
         description: req.body.description,
         content: req.body.content,
       };
-
-      // Nếu có file ảnh được upload thì thêm vào đối tượng grammar
       if (req.file) {
-        pronunciation.images = req.file.buffer;  // Lưu ảnh dưới dạng buffer
+        pronunciation.images = req.file.buffer;
       } else {
-        // Nếu không có ảnh mới, lấy ảnh hiện tại từ database
         const existingPronunciation = await pronunciationService.getPronunciation(req.params.id);
         if (!existingPronunciation) {
-          return res.status(404).json({ message: "Pronunciation not found" });
+          return res.status(404).json({ message: "Bài học phát âm không tìm thấy." });
         }
-        pronunciation.images = existingPronunciation.images;  // Giữ ảnh hiện tại nếu không có ảnh mới
+        pronunciation.images = existingPronunciation.images;
       }
-
-      // Gọi service để cập nhật bài ngữ pháp
       const result = await pronunciationService.updatePronunciation(pronunciation);
-      res.json({ message: "Pronunciation updated successfully", result });
+      res.json({ message: "Bài học phát âm đã được cập nhật thành công !", result });
     } catch (error) {
       res.status(500).json({ message: "Error updating pronunciation", error });
     }
   }
 );
 
-
-
-// API để xóa bài ngữ pháp
 router.delete("/api/pronunciation/:id", async function (req, res) {
     const pronunciationService = new PronunciationService();
     const result = await pronunciationService.deletePronunciation(req.params.id);
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Pronunciation not found" });
+      return res.status(404).json({ message: "Bài học phát âm không tìm thấy." });
     }
   
-    res.json({ message: "Pronunciation deleted successfully" });
-  });
+    res.json({ message: "Bài học phát âm đã xóa thành công !" });
+});
   
-
 module.exports = router;

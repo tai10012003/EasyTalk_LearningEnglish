@@ -26,6 +26,7 @@ router.use("/chat", require(__dirname + "/chatcontroller"));
 router.use("/reminder", require(__dirname + "/remindercontroller"));
 router.use("/dictionary", require(__dirname + "/dictionarycontroller"));
 router.use("/contact", require(__dirname + "/contactcontroller"));
+
 router.use("/admin", require(__dirname + "/admin/homeAdmincontroller"));
 router.use("/admin/grammar", require(__dirname + "/admin/grammarAdmincontroller"));
 router.use("/admin/journey", require(__dirname + "/admin/journeyAdmincontroller"));

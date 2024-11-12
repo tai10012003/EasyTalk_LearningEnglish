@@ -57,11 +57,10 @@ router.get("/api", verifyToken, async (req, res) => {
         const completedItems = totalCompletedGates + totalCompletedStages;
         const overallProgressPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
-        // Lấy dữ liệu bảng xếp hạng
         const leaderboard = await userProgressService.getLeaderboard(10);
 
         res.json({
-            journeys,  // Gửi tất cả journeys mà không lọc
+            journeys,
             userProgress,
             totalStages,
             totalGates,
@@ -76,8 +75,6 @@ router.get("/api", verifyToken, async (req, res) => {
     }
 });
 
-
-
 router.get('/detail/:id', (req, res) => {
     res.render('gates/gate-list');
 });
@@ -86,8 +83,6 @@ router.get("/api/:id", verifyToken, async (req, res) => {
     try {
         const journeyId = req.params.id;
         const userId = req.user.id;
-        
-        // Fetch journey details
         const journey = await journeyService.getJourneyWithDetails(journeyId);
 
         if (!journey) {
@@ -100,14 +95,12 @@ router.get("/api/:id", verifyToken, async (req, res) => {
         } else {
             userProgress = await userProgressService.unlockJourneyInitial(userProgress, journey);
         }
-
         const unlockedGates = userProgress.unlockedGates || [];
         const unlockedStages = userProgress.unlockedStages || [];
         const completedGates = unlockedGates.length;
         const completedStages = unlockedStages.length;
 
         const leaderboard = await userProgressService.getLeaderboard(10);
-
         res.json({
             journey,
             userProgress,

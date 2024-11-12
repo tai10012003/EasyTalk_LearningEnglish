@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bài Học Phát Âm</title>
     <link rel="icon" href="/static/images/favicon.png">
+    <link rel="icon" href="/static/images/favicon.png">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="/static/css/bootstrap.min.css">
@@ -27,52 +28,52 @@
     
     <style>
         .grammars-container {
-            margin: 140px auto 50px auto; /* Trung tâm trên trang */
+            margin: 140px auto 50px auto;
         }
         h2 {
-            color: #333; /* Màu chữ tiêu đề */
-            margin-bottom: 30px; /* Khoảng cách dưới tiêu đề */
+            color: #333;
+            margin-bottom: 30px;
             text-align: center;
             font-weight: bold;
         }
         .grammar-card {
-            margin-bottom: 20px; /* Khoảng cách giữa các bài học */
-            border: 1px solid #e0e0e0; /* Viền xung quanh */
-            border-radius: 8px; /* Bo góc cho thẻ */
-            padding: 10px; /* Padding bên trong thẻ */
-            background-color: #fff; /* Màu nền trắng cho thẻ */
-            transition: box-shadow 0.3s; /* Hiệu ứng chuyển đổi khi hover */
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+            transition: box-shadow 0.3s;
         }
         .grammar-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Đổ bóng khi hover */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
         .grammars-title h4{
-            font-weight: bold; /* Chữ đậm cho tiêu đề */
-            font-size: 20px; /* Kích thước chữ lớn hơn */
+            font-weight: bold;
+            font-size: 20px;
         }
         .grammar-description p {
             color: #333;
         }
         .grammar-image {
-            border-radius: 8px; /* Bo góc cho hình ảnh */
+            border-radius: 8px;
         }
         .detail-link {
             font-size: 17px;
-            display: inline-block; /* Hiển thị dưới dạng khối */
-            margin-top: 10px; /* Khoảng cách trên liên kết */
-            color: #006fe6; /* Màu sắc liên kết */
-            text-decoration: none; /* Bỏ gạch chân */
-            font-weight: bold; /* Chữ đậm cho liên kết */
-            transition: color 0.3s; /* Hiệu ứng chuyển đổi màu sắc */
+            display: inline-block;
+            margin-top: 10px;
+            color: #006fe6;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
             text-decoration: underline;
         }
         .detail-link:hover {
-            color:red; /* Màu khi hover */
+            color:red;
             text-decoration: underline;
         }
         .blog_right_sidebar {
             position: sticky;
-            top: 100px; /* Khoảng cách từ đỉnh của sidebar tới đỉnh trình duyệt */
+            top: 100px;
             max-height: calc(100vh - 100px);
             overflow: auto;
         }
@@ -84,7 +85,7 @@
         <div class="row mt-3">
             <div class="col-lg-8 mb-5 mb-lg-0">
                 <div class="blog_left_sidebar" id="pronunciation-list">
-                    <!-- Nội dung sẽ được AJAX đổ vào đây -->
+
                 </div>
             </div>
             <div class="col-lg-4">
@@ -153,12 +154,10 @@
     <script src="/static/js/jquery.counterup.min.js"></script>
     <script src="/static/js/waypoints.min.js"></script>
     <script src="/static/js/custom.js"></script>
-
-    <!-- Fetch pronunciation data from API and display it -->
     <script>
         function fetchPronunciations() {
             $.ajax({
-                url: '/admin/pronunciation/api/pronunciation-list', // Đường dẫn API
+                url: '/admin/pronunciation/api/pronunciation-list',
                 method: 'GET',
                 success: function (data) {
                     const { pronunciations } = data;
@@ -202,8 +201,6 @@
                 pronunciationList.append('<p>No Pronunciation Lessons Found</p>');
             }
         }
-
-        // Gọi hàm khi trang được tải
         $(document).ready(function () {
             fetchPronunciations();
         });

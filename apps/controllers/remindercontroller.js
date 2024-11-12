@@ -1,14 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const reminderService = require("../services/reminderService");
-const verifyToken = require("../util/verifyToken");
+const verifyToken = require("./../util/VerifyToken");
 
-// Route để render giao diện danh sách reminders
 router.get("/", (req, res) => {
     res.render("reminders/reminder");
 });
 
-// API GET để lấy danh sách reminders cho người dùng hiện tại
 router.get("/api/reminder-list", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -19,7 +17,7 @@ router.get("/api/reminder-list", verifyToken, async (req, res) => {
         res.status(500).json({ message: "Có lỗi xảy ra khi lấy danh sách nhắc nhở", error: error.message });
     }
 });
-// API GET to fetch a single reminder by ID
+
 router.get("/api/reminder/:id", verifyToken, async (req, res) => {
     try {
         const reminder = await reminderService.getReminderById(req.params.id);
@@ -33,38 +31,35 @@ router.get("/api/reminder/:id", verifyToken, async (req, res) => {
     }
 });
 
-// API POST để thêm reminder cho người dùng hiện tại
 router.post("/api/reminder", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const { email, reminderTime, frequency,additionalInfo } = req.body;
         const reminderId = await reminderService.createReminder(userId, email, reminderTime, frequency,additionalInfo);
-        res.status(201).json({ message: "Reminder created successfully", reminderId });
+        res.status(201).json({ message: "Nhắc nhở học tập đã được thêm thành công !", reminderId });
     } catch (error) {
         console.error("Error in creating reminder:", error);
         res.status(500).json({ message: "Có lỗi xảy ra khi tạo nhắc nhở", error: error.message });
     }
 });
 
-// API PUT để cập nhật reminder
 router.put("/api/reminder/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const updatedFields = req.body;
         await reminderService.updateReminder(id, updatedFields);
-        res.status(200).json({ message: "Reminder updated successfully" });
+        res.status(200).json({ message: "Nhắc nhở học tập đã được cập nhật thành công !" });
     } catch (error) {
         console.error("Error in updating reminder:", error);
         res.status(500).json({ message: "Có lỗi xảy ra khi cập nhật nhắc nhở", error: error.message });
     }
 });
 
-// API DELETE để xóa reminder
 router.delete("/api/reminder/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         await reminderService.deleteReminder(id);
-        res.status(200).json({ message: "Reminder deleted successfully" });
+        res.status(200).json({ message: "Nhắc nhở học tập đã xóa thành công !" });
     } catch (error) {
         console.error("Error in deleting reminder:", error);
         res.status(500).json({ message: "Có lỗi xảy ra khi xóa nhắc nhở", error: error.message });

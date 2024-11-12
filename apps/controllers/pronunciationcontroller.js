@@ -2,12 +2,10 @@ const express = require("express");
 const router = express.Router();
 const PronunciationService = require("../services/pronunciationService");
 
-// API để lấy danh sách bài phát âm (với phân trang)
 router.get("/api/pronunciation-list", async function (req, res) {
     const pronunciationService = new PronunciationService();
     const page = parseInt(req.query.page) || 1;
-    const limit = 3; // Số lượng bài phát âm trên mỗi trang
-  
+    const limit = 3;  
     try {
         const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit);
         const totalPages = Math.ceil(totalPronunciations / limit);
@@ -22,17 +20,14 @@ router.get("/api/pronunciation-list", async function (req, res) {
     }
 });
   
-// Hiển thị trang chính (sẽ gọi API thông qua AJAX)
 router.get('/', (req, res) => {
     res.render('pronunciations/pronunciation-list');
 });
 
-// Hiển thị trang chi tiết bài học phát âm
 router.get('/detail/:id', (req, res) => {
     res.render('pronunciations/pronunciation-detail');
 });
 
-// API để lấy thông tin một bài phát âm theo ID
 router.get("/api/:id", async function (req, res) {
     const pronunciationService = new PronunciationService();
     try {

@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update User</title>
+    <title>Cập Nhật Người Dùng</title>
     <script src="/static/js/checkadmin.js"></script>
-    <!-- Fonts and icons -->
+    <link rel="icon" href="/static/images/favicon.png">
     <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <script>
@@ -35,18 +35,16 @@
 
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <%- include('../admin/partials/menu.ejs') %>
-        <!-- Content -->
         <div class="main-panel">
             <div class="content">
                 <div class="page-inner">
                     <div class="user-container">
-                        <h1 class="user-title">Update User</h1>
+                        <h1 class="user-title">CẬP NHẬT NGƯỜI DÙNG</h1>
 
                         <form id="updateUserForm" class="form-user">
                             <div class="user-form-group">
-                                <label for="username">Username:</label>
+                                <label for="username">Tên:</label>
                                 <input type="text" id="username" name="username" value="<%= user.username %>" class="user-form-control" required>
                             </div>
                         
@@ -57,7 +55,7 @@
                         
                             <!-- Role Dropdown -->
                             <div class="user-form-group">
-                                <label for="role">Role:</label>
+                                <label for="role">Vai trò:</label>
                                 <div class="custom-dropdown">
                                     <div class="dropdown-btn" id="dropdown-btn-role"><%= user.role %></div>
                                     <ul class="dropdown-content" id="dropdown-content-role">
@@ -70,7 +68,7 @@
                         
                             <!-- Active Dropdown -->
                             <div class="user-form-group">
-                                <label for="active">Active:</label>
+                                <label for="active">Hoạt động:</label>
                                 <div class="custom-dropdown">
                                     <div class="dropdown-btn" id="dropdown-btn-active"><%= user.active%></div>
                                     <ul class="dropdown-content" id="dropdown-content-active">
@@ -81,50 +79,41 @@
                                 </div>
                             </div>
                         
-                            <button type="submit" class="btn-submit-user">Update User</button>
+                            <button type="submit" class="btn-submit-user">Lưu</button>
                         </form>                        
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- JavaScript logic for the form -->
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const updateUserForm = document.getElementById("updateUserForm");
-
-            // Bắt sự kiện submit form
             updateUserForm.addEventListener("submit", function (event) {
-                event.preventDefault(); // Ngăn chặn form submit truyền thống
-
-                // Lấy dữ liệu từ form
+                event.preventDefault();
                 const username = document.getElementById("username").value;
                 const email = document.getElementById("email").value;
                 const role = document.getElementById("role").value;
                 const active = document.getElementById("active").value;
-
-                // Tạo dữ liệu để gửi
                 const updatedUser = {
                     username: username,
                     email: email,
                     role: role,
-                    active: active === 'active' // Chuyển 'active' thành boolean
+                    active: active === 'active'
                 };
 
-                // Gửi yêu cầu PUT đến API, chú ý đến URL có user._id
                 fetch(`/admin/users/api/update/<%= user._id %>`, {
-                    method: "PUT", // Sử dụng PUT cho cập nhật
+                    method: "PUT",
                     headers: {
-                        "Content-Type": "application/json", // Đảm bảo định dạng JSON
+                        "Content-Type": "application/json",
                     },
-                    body: JSON.stringify(updatedUser), // Chuyển đổi dữ liệu thành JSON
+                    body: JSON.stringify(updatedUser),
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('User updated successfully!');
-                        window.location.href = '/admin/users'; // Chuyển hướng sau khi cập nhật thành công
+                        alert('Người dùng đã được cập nhật thành công !');
+                        window.location.href = '/admin/users';
                     } else {
                         alert('Error updating user: ' + data.message);
                     }
@@ -134,8 +123,6 @@
                     alert('Error updating user.');
                 });
             });
-
-            // Logic cho các dropdown (giống như trong ví dụ trước)
             const dropdownRoleBtn = document.getElementById("dropdown-btn-role");
             const dropdownRoleContent = document.getElementById("dropdown-content-role");
             const roleInput = document.getElementById("role");
@@ -144,7 +131,6 @@
             const dropdownActiveContent = document.getElementById("dropdown-content-active");
             const activeInput = document.getElementById("active");
 
-            // Dropdown cho Role
             dropdownRoleBtn.addEventListener("click", function () {
                 dropdownRoleContent.style.display = dropdownRoleContent.style.display === "block" ? "none" : "block";
             });
@@ -164,13 +150,19 @@
             dropdownActiveContent.addEventListener("click", function (e) {
                 if (e.target.tagName === "LI") {
                     dropdownActiveBtn.textContent = e.target.textContent;
-                    activeInput.value = e.target.getAttribute("data-value"); // Cập nhật giá trị vào input ẩn
+                    activeInput.value = e.target.getAttribute("data-value");
                     dropdownActiveContent.style.display = "none";
                 }
             });
         });
 
     </script>
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
 </body>
 
 </html>

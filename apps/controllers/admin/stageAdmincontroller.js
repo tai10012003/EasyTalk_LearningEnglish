@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const StageService = require("../../services/stageService"); // Sử dụng StageService
+const StageService = require("../../services/stageService");
 const GateService = require("../../services/gateService");
 const { ObjectId } = require("mongodb");
-const stageService = new StageService(); // Khởi tạo StageService
+const stageService = new StageService();
 const gateService = new GateService();
 
-// Render trang danh sách Stage với danh sách Gates
 router.get("/", async (req, res) => {
     try {
         const gateData = await gateService.getGateList();
@@ -18,7 +17,6 @@ router.get("/", async (req, res) => {
     }
 });
 
-// API để lấy danh sách stage với phân trang
 router.get("/api/stages", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -39,52 +37,44 @@ router.get("/api/stages", async (req, res) => {
     }
 });
 
-// Route để hiển thị trang thêm Stage mới
 router.get("/add", async (req, res) => {
     try {
         const gateData = await gateService.getGateList();
         const gates = gateData.gates;
-        res.render("stages/addstage", { gates }); // Render trang thêm stage mới với danh sách gates
+        res.render("stages/addstage", { gates });
     } catch (error) {
         console.error("Error loading gates:", error);
         res.status(500).send("Failed to load gates for stage creation.");
     }
 });
 
-// API để thêm một Stage mới và cập nhật Gate liên kết
 router.post("/add", async (req, res) => {
     const { title, questions, gateId } = req.body;
 
     if (!title || !gateId) {
-        return res.status(400).json({ error: "Title and Gate ID are required" });
+        return res.status(400).json({ error: "Tiêu đề và ID cổng là bắt buộc." });
     }
 
     if (!Array.isArray(questions) || questions.length === 0) {
-        return res.status(400).json({ success: false, message: "Questions are invalid." });
+        return res.status(400).json({ success: false, message: "Câu hỏi không hợp lệ." });
     }
 
     try {
-        // Thêm `stage` mới với liên kết `gateId`
         const newStage = await stageService.insertStage({
             title,
             questions,
-            gate: new ObjectId(gateId),  // Liên kết với gate
+            gate: new ObjectId(gateId),
             createdAt: new Date(),
         });
-
-        // Thêm `stageId` vào `stages` của `gate`
         await gateService.addStageToGate(gateId, newStage.insertedId);
 
-        res.json({ success: true, message: "Stage added successfully!", stage: newStage });
+        res.json({ success: true, message: "Chặng đã được thêm thành công !", stage: newStage });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "Error adding stage", error: err.message });
     }
 });
 
-
-
-// Route để hiển thị trang cập nhật một Stage
 router.get("/update/:id", async (req, res) => {
     try {
         const stage = await stageService.getStageById(req.params.id);
@@ -96,53 +86,48 @@ router.get("/update/:id", async (req, res) => {
     }
 });
 
-// API để cập nhật một Stage và xử lý thay đổi Gate liên kết
 router.post("/update/:id", async (req, res) => {
     const stageId = req.params.id;
     const { title, questions, gateId: newGateId } = req.body;
 
     if (!title || title.trim() === "") {
-        return res.status(400).json({ success: false, message: "Title cannot be empty." });
+        return res.status(400).json({ success: false, message: "Tiêu đề không để trống." });
     }
 
     if (!Array.isArray(questions) || questions.length === 0) {
-        return res.status(400).json({ success: false, message: "Questions are invalid." });
+        return res.status(400).json({ success: false, message: "Câu hỏi không hợp lệ." });
     }
 
     try {
         const currentStage = await stageService.getStageById(stageId);
         if (!currentStage) {
-            return res.status(404).json({ error: "Stage not found." });
+            return res.status(404).json({ error: "Chặng không tìm thấy." });
         }
         
         const oldGateId = currentStage.gate ? currentStage.gate.toString() : null;
         await stageService.updateStage(stageId, { title, questions, gate: new ObjectId(newGateId) });
-
-        // Nếu `gateId` thay đổi, cập nhật `stages` trong `gate` tương ứng
         if (oldGateId && oldGateId !== newGateId) {
             await gateService.removeStageFromGate(oldGateId, stageId);
             await gateService.addStageToGate(newGateId, stageId);
         }
-        
-        res.json({ success: true, message: "Stage updated successfully!" });
+        res.json({ success: true, message: "Chặng đã được cập nhật thành công !" });
     } catch (err) {
         return res.status(500).json({ success: false, message: "Error updating stage", error: err.message });
     }
 });
 
-// API để xóa một Stage và cập nhật Gate liên kết
 router.delete("/delete/:id", async (req, res) => {
     const stageId = req.params.id;
     try {
         const currentStage = await stageService.getStageById(stageId);
         if (!currentStage) {
-            return res.status(404).json({ error: "Stage not found." });
+            return res.status(404).json({ error: "Chặng không tìm thấy." });
         }
 
         await stageService.deleteStage(stageId);
         await gateService.removeStageFromGate(currentStage.gate, stageId);
 
-        res.json({ success: true, message: "Stage deleted successfully!" });
+        res.json({ success: true, message: "Chặng đã xóa thành công !" });
     } catch (err) {
         res.status(500).json({ success: false, message: "Error deleting stage", error: err.message });
     }

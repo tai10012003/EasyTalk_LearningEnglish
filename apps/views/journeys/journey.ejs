@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Journey List</title>
-    <!-- Fonts and icons -->
+    <title>Danh Sách Hành Trình</title>
+    <link rel="icon" href="/static/images/favicon.png">
     <script src="/static/js/checkadmin.js"></script>
     <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/road.css">
@@ -31,9 +31,7 @@
     <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
     <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
     <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
-    <!-- CSS cho modal -->
     <style>
-        /* Modal container */
         .modal {
             display: none;
             position: fixed;
@@ -46,8 +44,6 @@
             justify-content: center;
             align-items: center;
         }
-
-        /* Modal content */
         .modal-content {
             background-color: white;
             padding: 20px;
@@ -58,7 +54,7 @@
         .modal-content h3 {
             text-align: center;
         }
-        /* Close button */
+
         .close {
             color: #aaa;
             float: right;
@@ -73,8 +69,6 @@
             text-decoration: none;
             cursor: pointer;
         }
-
-        /* Form styling */
         .form-group {
             margin-bottom: 15px;
         }
@@ -111,8 +105,6 @@
                 <div class="page-inner">
                     <div class="container journey-container">
                         <h1 class="text-center journey-title">DANH SÁCH HÀNH TRÌNH</h1>
-                
-                        <!-- Nút để mở modal thêm mới -->
                         <div class="text-right mb-3">
                             <button class="btn btn-primary" id="openModal">+ Thêm hành trình mới</button>
                         </div>
@@ -160,14 +152,12 @@
                                 </tr>
                             </thead>
                             <tbody id="journeyList">
-                                <!-- Content will be dynamically loaded here -->
+
                             </tbody>                                                        
                         </table>
-
-                        <!-- Pagination Controls -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center" id="pagination-controls">
-                                <!-- Pagination links will be dynamically added here -->
+
                             </ul>
                         </nav>
                     </div>
@@ -186,8 +176,6 @@
     <script>
         let currentPage = 1;
         const pageLimit = 10;
-
-        // Hàm để lấy danh sách journeys qua API và hiển thị vào bảng
         function fetchJourneys(page = 1) {
             $.ajax({
                 url: `/admin/journey/api/journey-list?page=${page}&limit=${pageLimit}`,
@@ -221,8 +209,6 @@
 
                     });
                     renderPagination(currentPage, totalPages);
-
-                    // Gắn sự kiện click cho nút sửa và xóa sau khi dữ liệu được tải
                     bindEditDeleteEvents();
                 },
                 error: function (error) {
@@ -231,7 +217,6 @@
             });
         }
 
-        // Render pagination controls
         function renderPagination(currentPage, totalPages) {
             const paginationControls = $("#pagination-controls");
             paginationControls.empty();
@@ -246,12 +231,10 @@
             }
         }
 
-        // Modal thêm Journey
         $("#openModal").on("click", () => $("#journeyModal").css("display", "flex"));
         $("#closeModal").on("click", () => $("#journeyModal").css("display", "none"));
         $("#closeEditModal").on("click", () => $("#editJourneyModal").css("display", "none"));
 
-        // Xử lý thêm Journey khi submit form
         $("#journeyForm").on("submit", function (e) {
             e.preventDefault();
             const title = $("#journeyTitle").val();
@@ -260,7 +243,7 @@
                     alert(data.message);
                     $("#journeyModal").css("display", "none");
                     $("#journeyForm")[0].reset();
-                    fetchJourneys(currentPage);  // Cập nhật danh sách sau khi thêm
+                    fetchJourneys(currentPage);
                 }).fail(function (error) {
                     console.error("Error adding journey:", error);
                     alert("Failed to add journey");
@@ -270,7 +253,6 @@
             }
         });
 
-        // Hiển thị modal sửa và xử lý cập nhật Journey
         function bindEditDeleteEvents() {
             $(".btn-edit").on("click", function () {
                 const journeyId = $(this).data("id");
@@ -294,7 +276,7 @@
                         success: function (data) {
                             alert(data.message);
                             $("#editJourneyModal").css("display", "none");
-                            fetchJourneys(currentPage); // Làm mới danh sách sau khi cập nhật
+                            fetchJourneys(currentPage);
                         },
                         error: function (error) {
                             console.error("Error updating journey:", error);
@@ -306,8 +288,6 @@
                 }
             });
 
-
-            // Xóa Journey
             $(".btn-delete").on("click", function () {
                 const journeyId = $(this).data("id");
                 if (confirm("Bạn có chắc muốn xóa hành trình này?")) {
@@ -327,7 +307,6 @@
             });
         }
 
-        // Tải danh sách Journey khi trang được load
         $(document).ready(function () {
             fetchJourneys(currentPage);
         });

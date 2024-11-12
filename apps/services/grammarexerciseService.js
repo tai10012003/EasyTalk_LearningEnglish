@@ -3,7 +3,7 @@ var config = require("./../config/setting.json");
 
 class GrammarexerciseService {
     databaseConnection = require('./../database/database');
-    grammarexercises = require('./../models/grammarexercise'); // Import model đã tạo
+    grammarexercises = require('./../models/grammarexercise');
     client;
     grammarExercisesCollection;  
     grammarExercisesDatabase;
@@ -11,38 +11,33 @@ class GrammarexerciseService {
     constructor() {
         this.client = this.databaseConnection.getMongoClient();
         this.grammarExercisesDatabase = this.client.db(config.mongodb.database);
-        this.grammarExercisesCollection = this.grammarExercisesDatabase.collection("grammarexercises"); // Tên bảng grammar exercises
+        this.grammarExercisesCollection = this.grammarExercisesDatabase.collection("grammarexercises");
     }
 
     async getGrammarexerciseList(page = 1, limit = 2) {
         try {
-            const skip = (page - 1) * limit; // Tính số lượng bài tập cần bỏ qua cho phân trang
+            const skip = (page - 1) * limit;
             const cursor = await this.grammarExercisesCollection.find({}).skip(skip).limit(limit);
-            const grammarexercises = await cursor.toArray(); // Chuyển cursor thành mảng
-            const totalExercises = await this.grammarExercisesCollection.countDocuments(); // Đếm tổng số bài tập
+            const grammarexercises = await cursor.toArray();
+            const totalExercises = await this.grammarExercisesCollection.countDocuments(); 
     
-            return { grammarexercises, totalExercises }; // Trả về dữ liệu
+            return { grammarexercises, totalExercises };
         } catch (error) {
-            console.error("Error in getGrammarexerciseList:", error); // Ghi lỗi vào console
+            console.error("Error in getGrammarexerciseList:", error);
             throw new Error("Error fetching grammar exercises");
         }
     }
     
-
-
-    // Lấy một bài tập ngữ pháp theo ID
     async getGrammarexerciseById(id) {
         return await this.grammarExercisesCollection.findOne({ _id: new ObjectId(id) });
     }
 
-    // Thêm bài tập ngữ pháp mới
     async insertGrammarexercise(exerciseData) {
         const newExercise = {
             title: exerciseData.title,
             questions: []
         };
 
-        // Duyệt qua từng câu hỏi và thêm vào bài tập
         if (exerciseData.questions && Array.isArray(exerciseData.questions)) {
             exerciseData.questions.forEach(question => {
                 newExercise.questions.push({
@@ -54,13 +49,11 @@ class GrammarexerciseService {
                 });
             });
         }
-
-        // Lưu bài tập mới vào cơ sở dữ liệu
         return await this.grammarExercisesCollection.insertOne(newExercise);
     }
 
     async updateGrammarexercise(id, updateData) {
-        const objectId = new ObjectId(id); // Chuyển đổi id sang ObjectId
+        const objectId = new ObjectId(id);
 
         const formattedQuestions = updateData.questions.map((question) => {
             return {
@@ -82,7 +75,6 @@ class GrammarexerciseService {
         return result.modifiedCount > 0;
     }
 
-    // Xóa bài tập ngữ pháp
     async deleteGrammarexercise(id) {
         return await this.grammarExercisesCollection.deleteOne({ _id: new ObjectId(id) });
     }

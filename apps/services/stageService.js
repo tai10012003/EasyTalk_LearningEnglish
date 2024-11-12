@@ -13,20 +13,19 @@ class StageService {
         this.stagesCollection = this.stagesDatabase.collection("stages");
     }
 
-    // StageService.js
     async getStageList(page = 1, limit = 10) {
         const skip = (page - 1) * limit;
 
         const stages = await this.stagesCollection.aggregate([
             {
                 $lookup: {
-                    from: "gates",            // Tên của collection chứa Gates
-                    localField: "gate",      // Trường trong Stage liên kết với Gates
-                    foreignField: "_id",      // Trường _id trong Gates để liên kết
-                    as: "gateInfo"            // Tên mảng kết quả sau khi lookup
+                    from: "gates",
+                    localField: "gate",
+                    foreignField: "_id",
+                    as: "gateInfo"
                 }
             },
-            { $unwind: { path: "$gateInfo", preserveNullAndEmptyArrays: true } },  // Chuyển mảng gateInfo thành đối tượng đơn lẻ
+            { $unwind: { path: "$gateInfo", preserveNullAndEmptyArrays: true } },
             { $skip: skip },
             { $limit: limit }
         ]).toArray();
@@ -35,7 +34,6 @@ class StageService {
         return { stages, totalStages };
     }
 
-    // Lấy một stage theo ID
     async getStageById(id) {
         return await this.stagesCollection.findOne({ _id: new ObjectId(id) });
     }
@@ -45,7 +43,7 @@ class StageService {
     async insertStage(stageData) {
         const newStage = {
             title: stageData.title,
-            gate: new ObjectId(stageData.gate),  // Liên kết với `gate`
+            gate: new ObjectId(stageData.gate),
             questions: stageData.questions || [],
             createdAt: new Date()
         };
@@ -67,7 +65,6 @@ class StageService {
         );
     }
 
-    // Xóa một stage
     async deleteStage(id) {
         return await this.stagesCollection.deleteOne({ _id: new ObjectId(id) });
     }

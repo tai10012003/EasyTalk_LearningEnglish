@@ -119,8 +119,7 @@
             width: 200px;
             height: auto;
         }
-
-        /* Phần bên phải - thời gian và danh sách câu hỏi */
+        
         .sidebar {
             margin: 130px auto 50px auto;
             padding: 25px;
@@ -192,7 +191,7 @@
                 <div class="exercises-container">
                     <div id="exerciseCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
                         <div class="carousel-inner" id="carousel-inner">
-                            <!-- Các câu hỏi sẽ được thêm ở đây thông qua JavaScript -->
+
                         </div>
                     </div>
                 </div>
@@ -205,7 +204,7 @@
                     <button id="submitQuizBtn" class="btn btn-primary submit-btn mb-4">Nộp bài</button>
                     <h5 id="questionListTitle">Danh sách câu hỏi:</h5>
                     <div class="question-list mt-3" id="question-list">
-                        <!-- Danh sách số câu hỏi sẽ được thêm vào qua AJAX -->
+
                     </div>
                     <div id="completed-info" style="display: none; text-align: center;">
                         <h4>Thời gian đã làm: <span id="completedTime"></span></h4>
@@ -218,22 +217,20 @@
     <%- include('../partials/footer.ejs') %>
     <script>
         $(document).ready(function() {
-            let timeRemaining = 20 * 60; // 20 minutes
-            let correctAnswers = 0; // Đếm số câu trả lời đúng
+            let timeRemaining = 20 * 60;
+            let correctAnswers = 0;
             let totalQuestions = $('.carousel-item').length;
-            let timer; // Biến lưu trữ timer để có thể dừng khi cần
-            // Bắt đầu đếm ngược thời gian khi trang tải
+            let timer; 
             const carouselInner = $('#carousel-inner');
             const questionList = $('#question-list');
-            const exerciseId = window.location.pathname.split('/').pop(); // Lấy ID bài tập từ URL
+            const exerciseId = window.location.pathname.split('/').pop();
 
-            // Gọi API để lấy chi tiết bài tập
             $.ajax({
-                url: `/grammar-exercise/api/${exerciseId}`, // Đường dẫn API của bạn
+                url: `/grammar-exercise/api/${exerciseId}`,
                 method: 'GET',
                 success: function(data) {
                     if (data && data.questions && data.questions.length > 0) {
-                        totalQuestions = data.questions.length; // Cập nhật tổng số câu hỏi
+                        totalQuestions = data.questions.length;
                         data.questions.forEach((question, index) => {
                             let questionHtml = '';
 
@@ -333,11 +330,11 @@
                     if (timeRemaining < 0) {
                         clearInterval(timer);
                         alert("Hết giờ làm bài!");
-                        $('#submitQuizBtn').click(); // Tự động nộp bài khi hết giờ
+                        $('#submitQuizBtn').click();
                     }
                 }, 1000);
             }
-            // Phát âm
+            
             $(document).on('click', '.speak-button', function () {
                 const textToSpeak = $(this).data('text');
                 speakText(textToSpeak);
@@ -353,13 +350,11 @@
                 }
             }
 
-            // Sự kiện chuyển slide câu hỏi khi nhấn vào số câu hỏi
             $(document).on('click', '.question-number', function () {
                 const index = $(this).data('index');
                 $('#exerciseCarousel').carousel(index);
             });
 
-            // Sự kiện chọn đáp án và kiểm tra kết quả
             $(document).on('click', '.submit-answer', function () {
                 const index = $(this).data('index');
                 const questionCard = $(this).closest('.question-card');
@@ -385,7 +380,6 @@
                     }
                 }
 
-                // Kiểm tra kết quả câu trả lời
                 if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
                     const answerElement = $(`textarea[name="answer"]`, `#question-form-${index}`);
                     answerElement.removeClass('correct-answer incorrect-answer');
@@ -413,20 +407,18 @@
                     }
                 }
 
-                // Khóa form sau khi đã trả lời
                 $(`#question-form-${index} input, #question-form-${index} textarea`).prop('disabled', true).addClass('disabled');
                 $(this).prop('disabled', true).addClass('disabled');
             });
 
-            // Xử lý sự kiện nộp bài
+
             $('#submitQuizBtn').click(function() {
                 if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
                     clearInterval(timer);
                     submitQuiz();
                 }
             });
-    
-            // Hàm nộp bài và chuyển qua màn hình kết quả
+
             function submitQuiz() {
                 const timeTaken = 20 * 60 - timeRemaining;
                 const minutesTaken = Math.floor(timeTaken / 60);
@@ -440,7 +432,7 @@
 
             function showResultScreen() {
                 let percentageCorrect = 0;
-                const incorrectAnswers = totalQuestions - correctAnswers; // Số câu trả lời sai
+                const incorrectAnswers = totalQuestions - correctAnswers;
                 if (totalQuestions > 0) {
                     percentageCorrect = (correctAnswers / totalQuestions) * 100;
                 }
@@ -470,7 +462,6 @@
                 $('.exercises-container').html(resultHtml);
             }
 
-            // Xử lý sự kiện khi chuyển slide
             $('#exerciseCarousel').on('slid.bs.carousel', function () {
                 const currentIndex = $('#exerciseCarousel .carousel-item.active').index();
                 $('#current-question').text(currentIndex + 1);
@@ -479,7 +470,6 @@
                 $('.next-slide').prop('disabled', currentIndex === $('.carousel-item').length - 1);
             });
 
-            // Chuyển slide khi nhấn "Next" hoặc "Previous"
             $(document).on('click', '.next-slide', function () {
                 $('#exerciseCarousel').carousel('next');
             });

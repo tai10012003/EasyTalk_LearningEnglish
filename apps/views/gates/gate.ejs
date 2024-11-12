@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gate List</title>
+    <title>Danh Sách Cổng</title>
+    <link rel="icon" href="/static/images/favicon.png">
     <script src="/static/js/checkadmin.js"></script>
-    <!-- Fonts and icons -->
     <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/road.css">
     <script>
@@ -32,7 +32,6 @@
     <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
     <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
     <style>
-        /* Modal container */
         .modal {
             display: none;
             position: fixed;
@@ -46,7 +45,6 @@
             align-items: center;
         }
 
-        /* Modal content */
         .modal-content {
             background-color: white;
             padding: 20px;
@@ -107,81 +105,76 @@
             <div class="content">
                 <div class="page-inner">
                     <div class="container gate-container">
-                        <h1 class="text-center gate-title">GATE LIST</h1>
+                        <h1 class="text-center gate-title">DANH SÁCH CỔNG</h1>
 
-                        <!-- Add New Gate Button -->
                         <div class="text-right mb-3">
-                            <button class="btn btn-primary" id="openGateModal">+ Add New Gate</button>
+                            <button class="btn btn-primary" id="openGateModal">+ Thêm cổng mới</button>
                         </div>
 
-                        <!-- Add Gate Modal -->
                         <div id="gateModal" class="modal">
                             <div class="modal-content">
                                 <span class="close" id="closeGateModal">&times;</span>
-                                <h3>Add New Gate</h3>
+                                <h3>Thêm cổng mới</h3>
                                 <form id="gateForm">
                                     <div class="form-group">
-                                        <label for="gateName">Gate Title:</label>
+                                        <label for="gateName">Tiêu đề cổng:</label>
                                         <input type="text" id="gateName" class="form-control" placeholder="Enter gate title" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="journeySelect">Select Journey:</label>
+                                        <label for="journeySelect">Chọn hành trình:</label>
                                         <select id="journeySelect" class="form-control" required>
                                             <% journeys.forEach(journey => { %>
                                                 <option value="<%= journey._id %>"><%= journey.title %></option>
                                             <% }) %>
                                         </select>
                                     </div>
-                                    <button type="submit" class="btn-submit">Add</button>
+                                    <button type="submit" class="btn-submit">Thêm</button>
                                 </form>
                             </div>
                         </div>
 
-                        <!-- Edit Gate Modal -->
                         <div id="editGateModal" class="modal">
                             <div class="modal-content">
                                 <span class="close" id="closeEditGateModal">&times;</span>
-                                <h3>Edit Gate</h3>
+                                <h3>Cập nhật cổng</h3>
                                 <form id="editGateForm">
                                     <input type="hidden" id="editGateId">
                                     <div class="form-group">
-                                        <label for="editGateName">Gate Title:</label>
+                                        <label for="editGateName">Tiêu đề cổng:</label>
                                         <input type="text" id="editGateName" class="form-control" required>
                                     </div>
                                     <div class="form-group">
-                                        <label for="editJourneySelect">Select Journey:</label>
+                                        <label for="editJourneySelect">Chọn hành trình:</label>
                                         <select id="editJourneySelect" class="form-control" required>
                                             <% journeys.forEach(journey => { %>
                                                 <option value="<%= journey._id %>"><%= journey.title %></option>
                                             <% }) %>
                                         </select>
                                     </div>
-                                    <button type="submit" class="btn-submit">Save</button>
+                                    <button type="submit" class="btn-submit">Lưu</button>
                                 </form>
                             </div>
                         </div>
 
-                        <!-- Gate List Table -->
                         <table class="table table-bordered gate-table">
                             <thead class="thead-light">
                                 <tr>
                                     <th>#</th>
-                                    <th>Gate Title</th>
-                                    <th>Journey</th>
-                                    <th>Stages</th>
-                                    <th>Created At</th>
-                                    <th>Actions</th>
+                                    <th>Tiêu đề cổng</th>
+                                    <th>Hành trình</th>
+                                    <th>Số lượng chặng</th>
+                                    <th>Ngày tạo</th>
+                                    <th>Hành động</th>
                                 </tr>
                             </thead>
                             <tbody id="gateList">
-                                <!-- Dynamic content from API will load here -->
+
                             </tbody>
                         </table>
 
-                        <!-- Pagination Controls -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center" id="pagination-controls">
-                                <!-- Dynamic pagination controls will load here -->
+
                             </ul>
                         </nav>
                     </div>
@@ -193,6 +186,9 @@
     <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="/static/admin/assets/js/core/popper.min.js"></script>
     <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
 
     <script>
         let currentPage = 1;
@@ -218,18 +214,18 @@
                                 <tr>
                                     <td>${(page - 1) * pageLimit + index + 1}</td>
                                     <td>${gate.title}</td>
-                                    <td>${gate.journeyInfo ? gate.journeyInfo.title : "No Journey"}</td>
+                                    <td>${gate.journeyInfo ? gate.journeyInfo.title : "Không có hành trình"}</td>
                                     <td>${gate.stages.length || 0} Stages</td> <!-- Sử dụng journey.gateCount -->
                                     <td>${createdAt}</td>
                                     <td>
-                                        <button class="btn btn-warning btn-edit" data-id="${gate._id}" data-title="${gate.title}" data-journey="${gate.journeyInfo ? gate.journeyInfo._id : ""}">Edit</button>
-                                        <button class="btn btn-danger btn-delete" data-id="${gate._id}">Delete</button>
+                                        <button class="btn btn-warning btn-edit" data-id="${gate._id}" data-title="${gate.title}" data-journey="${gate.journeyInfo ? gate.journeyInfo._id : ""}">Sửa</button>
+                                        <button class="btn btn-danger btn-delete" data-id="${gate._id}">Xóa</button>
                                     </td>
                                 </tr>
                             `);
                         });
                     } else {
-                        gateList.append(`<tr><td colspan="6" class="text-center">No gates found</td></tr>`);
+                        gateList.append(`<tr><td colspan="6" class="text-center">Không có cổng nào trong danh sách !</td></tr>`);
                     }
     
                     renderPagination(currentPage, totalPages);
@@ -241,8 +237,7 @@
                 }
             });
         }
-    
-        // Render pagination controls
+
         function renderPagination(currentPage, totalPages) {
             const paginationControls = $("#pagination-controls");
             paginationControls.empty();
@@ -257,12 +252,10 @@
             }
         }
     
-        // Open and close modals
         $("#openGateModal").on("click", () => $("#gateModal").css("display", "flex"));
         $("#closeGateModal").on("click", () => $("#gateModal").css("display", "none"));
         $("#closeEditGateModal").on("click", () => $("#editGateModal").css("display", "none"));
     
-        // Handle adding gate
         $("#gateForm").on("submit", function (e) {
             e.preventDefault();
             const title = $("#gateName").val();
@@ -277,7 +270,6 @@
             });
         });
     
-        // Edit and delete event handlers
         function bindEditDeleteEvents() {
             $(".btn-edit").on("click", function () {
                 const gateId = $(this).data("id");
@@ -314,7 +306,7 @@
     
             $(".btn-delete").on("click", function () {
                 const gateId = $(this).data("id");
-                if (confirm("Are you sure you want to delete this gate?")) {
+                if (confirm("Bạn có muốn xóa cổng này ra khỏi danh sách ?")) {
                     $.ajax({
                         url: `/admin/gate/delete/${gateId}`,
                         method: 'POST',
@@ -329,8 +321,6 @@
                 }
             });
         }
-    
-        // Initial fetch on page load
         $(document).ready(function () {
             fetchGates(currentPage);
         });

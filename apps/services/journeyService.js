@@ -12,10 +12,9 @@ class JourneyService {
     constructor() {
         this.client = this.databaseConnection.getMongoClient();
         this.journeysDatabase = this.client.db(config.mongodb.database);
-        this.journeysCollection = this.journeysDatabase.collection("journeys"); // Đảm bảo tên giống trong database
+        this.journeysCollection = this.journeysDatabase.collection("journeys");
     }
 
-    // Lấy danh sách các hành trình
     async getJourneyList(page = 1, limit = 10) {
         const skip = (page - 1) * limit;
 
@@ -28,31 +27,31 @@ class JourneyService {
         const totalJourneys = await this.journeysCollection.countDocuments();
 
         return {
-            journeys,       // Danh sách hành trình cho trang hiện tại
-            totalJourneys,  // Tổng số hành trình
+            journeys,
+            totalJourneys,
         };
     }
     async getAllJourneysWithDetails() {
         return await this.journeysCollection.aggregate([
             {
                 $lookup: {
-                    from: 'gates',               // Tên collection chứa các cổng
-                    localField: '_id',           // Liên kết bằng _id của hành trình
-                    foreignField: 'journey',     // `journey` là trường trong collection gates tham chiếu đến _id của hành trình
+                    from: 'gates',
+                    localField: '_id',
+                    foreignField: 'journey',
                     as: 'gates'
                 }
             },
             {
                 $unwind: {
                     path: "$gates",
-                    preserveNullAndEmptyArrays: true // Để giữ lại các hành trình không có cổng
+                    preserveNullAndEmptyArrays: true
                 }
             },
             {
                 $lookup: {
-                    from: 'stages',              // Tên collection chứa các chặng
-                    localField: 'gates._id',     // Liên kết bằng _id của gate
-                    foreignField: 'gate',        // `gate` là trường trong collection stages tham chiếu đến _id của cổng
+                    from: 'stages',
+                    localField: 'gates._id',
+                    foreignField: 'gate',
                     as: 'gates.stages'
                 }
             },
@@ -61,7 +60,7 @@ class JourneyService {
                     _id: "$_id",
                     title: { $first: "$title" },
                     createdAt: { $first: "$createdAt" },
-                    gates: { $push: "$gates" }   // Gom tất cả các cổng và chặng lại thành một mảng
+                    gates: { $push: "$gates" }
                 }
             }
         ]).toArray();
@@ -103,19 +102,17 @@ class JourneyService {
             throw error;
         }
     }        
-    // Lấy một Journey theo ID
+
     async getJourney(id) {
         return await this.journeysCollection.findOne({ _id: new ObjectId(id) });
     }
 
-    // Thêm mới một Journey
     async insertJourney(journey) {
         journey.createdAt = new Date();
-        journey.gates = [];  // Thêm mảng `gates` trống khi khởi tạo
+        journey.gates = [];
         return await this.journeysCollection.insertOne(journey);
     }
 
-    // Thêm Gate ID vào Journey
     async addGateToJourney(journeyId, gateId) {
         return await this.journeysCollection.updateOne(
             { _id: new ObjectId(journeyId) },
@@ -123,7 +120,6 @@ class JourneyService {
         );
     }
 
-    // Xóa Gate ID khỏi Journey
     async removeGateFromJourney(journeyId, gateId) {
         return await this.journeysCollection.updateOne(
             { _id: new ObjectId(journeyId) },
@@ -131,7 +127,6 @@ class JourneyService {
         );
     }
 
-    // Cập nhật Journey
     async updateJourney(journey) {
         const { _id, ...updateData } = journey;
         return await this.journeysCollection.updateOne(
@@ -140,13 +135,9 @@ class JourneyService {
         );
     }
 
-    // Xóa một Journey theo ID
     async deleteJourney(id) {
         return await this.journeysCollection.deleteOne({ _id: new ObjectId(id) });
     }
-
-
-
 }
 
 module.exports = JourneyService;

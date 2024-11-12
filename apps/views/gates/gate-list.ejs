@@ -17,14 +17,10 @@
         body {
             background-image: #fff !important;
         }
-
-        /* General container styling */
         .journey-container {
             margin: 110px auto 50px auto;
             padding: 20px;
         }
-
-        /* Journey title */
         .journey-title {
             font-size: 25px;
             font-weight: 700;
@@ -34,8 +30,6 @@
             margin-bottom: 50px;
             position: relative;
         }
-
-        /* Card styling for gates */
         .gate-card {
             width: 50%;
             background: #fff;
@@ -48,8 +42,6 @@
             position: relative;
             overflow: hidden;
         }
-
-        /* Gradient effect for gates */
         .gate-card:before {
             content: '';
             position: absolute;
@@ -60,15 +52,12 @@
             z-index: -1;
             opacity: 0.1;
         }
-
-        /* Hover effect for gate cards */
         .gate-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
             border-color: #39517c;
         }
 
-        /* Gate title */
         .gate-title {
             font-size: 25px;
             font-weight: 700;
@@ -76,29 +65,23 @@
             text-align: center;
         }
 
-        /* Stage list container */
         .stage-list-container {
             text-align: center;
         }
 
-        /* Stage card styling */
         .stage-card {
-            width: 30%; /* Adjust width similar to gate */
+            width: 30%;
             background: #fff;
             border-radius: 8px;
             padding: 20px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            margin: 30px auto 10px auto; /* Center the stage cards */
+            margin: 30px auto 10px auto;
             border-left: 5px solid #519be4;
             transition: background-color 0.3s ease;
         }
-
-        /* Stage hover effect */
         .stage-card:hover {
             border: 1px solid #044efc;
         }
-
-        /* Stage title */
         .stage-title {
             font-size: 20px;
             font-weight: 600;
@@ -121,11 +104,11 @@
 
         .btn-primary:hover {
             background: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Shadow on hover */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             border: 1px solid #d87a99;
             color: #333;
         }
-        /* Decorative lines */
+
         .journey-title::after, .journey-title::before {
             content: '';
             display: block;
@@ -136,17 +119,16 @@
         }
         .achievement-panel,
         .leaderboard-panel {
-            position: -webkit-sticky; /* For Safari */
+            position: -webkit-sticky;
             position: sticky;
-            top: 95px; /* The distance from the top of the viewport when it becomes sticky */
+            top: 95px;
         }
-        /* Styling for left panel - Achievement */
         .achievement-panel {
             background-color: #fff;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            border-left: 2px solid sandybrown; /* Chỉ áp dụng cho border trái */
-            border-right: 2px solid sandybrown; /* Chỉ áp dụng cho border phải */
+            border-left: 2px solid sandybrown;
+            border-right: 2px solid sandybrown;
         }
 
         .achievement-panel h4 {
@@ -217,15 +199,14 @@
         .btn-upgrade:hover {
             background-color: #044efc;
         }
-        /* Styling for right panel - Leaderboard */
         .leaderboard-panel {
-            height: calc(100vh - 50px); /* Adjust height based on the viewport */
-            overflow-y: auto; /* Enable scrolling within the panel if the content is taller */
+            height: calc(100vh - 50px);
+            overflow-y: auto; 
             background-color: #fff;
             padding: 10px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border-left: 2px solid rgb(238, 190, 0); /* Chỉ áp dụng cho border trái */
-            border-right: 2px solid rgb(238, 190, 0); /* Chỉ áp dụng cho border phải */
+            border-left: 2px solid rgb(238, 190, 0);
+            border-right: 2px solid rgb(238, 190, 0);
         }
 
         .leaderboard-panel h4 {
@@ -256,12 +237,12 @@
             color: #000000;
         }
         .unlocked {
-            border-color: #4caf50; /* Màu xanh lá để biểu thị đã mở khóa */
+            border-color: #4caf50;
             background-color: #e0ffe0;
         }
 
         .locked {
-            border-color: #f44336; /* Màu đỏ để biểu thị bị khóa */
+            border-color: #f44336;
             background-color: #fcfcfc;
             opacity: 0.6;
         }
@@ -272,7 +253,6 @@
     <%- include('../partials/menu.ejs') %>
     <div class="container journey-container">
         <div class="row">
-            <!-- Achievement Panel -->
             <div class="col-md-3">
                 <div class="achievement-panel">
                     <h4>Thành tích của bạn</h4>
@@ -297,7 +277,6 @@
                 </div>
             </div>
 
-            <!-- Journey Details Panel -->
             <div class="col-md-6">
                 <h2 class="journey-title" id="journey-title">Hành trình: Đang tải...</h2>
                 <div class="row justify-content-center">
@@ -307,7 +286,6 @@
                 </div>
             </div>
 
-            <!-- Leaderboard Panel -->
             <div class="col-md-3">
                 <div class="leaderboard-panel">
                     <h4>Bảng xếp hạng</h4>
@@ -339,8 +317,6 @@
     <script src="/static/js/jquery.counterup.min.js"></script>
     <script src="/static/js/waypoints.min.js"></script>
     <script src="/static/js/custom.js"></script>
-
-    <!-- Custom Script for Loading Data from API -->
     <script>
         document.addEventListener("DOMContentLoaded", async function() {
             const journeyId = window.location.pathname.split("/").pop();
@@ -365,17 +341,12 @@
         });
 
         function renderJourneyDetails(data) {
-            // Cập nhật tiêu đề hành trình
             document.getElementById("journey-title").textContent = `Hành trình: ${data.journey.title}`;
-
-            // Cập nhật thành tích
             document.getElementById("achievement-list").innerHTML = `
                 <li>Điểm KN: ${data.userProgress.experiencePoints}</li>
                 <li>Cổng đã hoàn thành: ${data.completedGates}</li>
                 <li>Chặng đã hoàn thành: ${data.completedStages}</li>
             `;
-
-            // Render Gates và Stages
             const journeyContainer = document.getElementById("journey-container");
             journeyContainer.innerHTML = "";
 
@@ -414,7 +385,6 @@
                 }
             });
 
-            // Render Leaderboard
             const leaderboardTable = document.getElementById("leaderboard-table");
             leaderboardTable.innerHTML = "";
 

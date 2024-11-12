@@ -200,18 +200,15 @@
 
     <div class="container">
         <div class="row">
-            <!-- Vùng hiển thị bài tập phát âm -->
             <div class="col-md-8">
                 <div class="container exercises-container">
                     <div id="exerciseCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
                         <div class="carousel-inner" id="carousel-inner">
-                            <!-- Nội dung câu hỏi sẽ được thêm vào qua AJAX -->
+
                         </div>
                     </div>
                 </div>
             </div>
-
-            <!-- Sidebar: Thời gian và danh sách câu hỏi -->
             <div class="col-md-4">
                 <div class="sidebar">
                     <div class="time-remaining text-center">
@@ -220,7 +217,7 @@
                     <button id="submitQuizBtn" class="btn btn-primary submit-btn mb-4">Nộp bài</button>
                     <h5 id="questionListTitle">Danh sách câu hỏi:</h5>
                     <div class="question-list mt-3" id="question-list">
-                        <!-- Danh sách số câu hỏi sẽ được thêm vào qua AJAX -->
+
                     </div>
                     <div id="completed-info" style="display: none; text-align: center;">
                         <h4>Thời gian đã làm: <span id="completedTime"></span></h4>
@@ -233,17 +230,15 @@
     <%- include('../partials/footer.ejs') %>
     <script>
         $(document).ready(function() {
-            let timeRemaining = 20 * 60; // 20 minutes
-            let correctAnswers = 0; // Đếm số câu trả lời đúng
+            let timeRemaining = 20 * 60;
+            let correctAnswers = 0;
             let totalQuestions = $('.carousel-item').length;
             let timer;
             let mediaRecorder;
             let audioChunks = [];
             const carouselInner = $('#exerciseCarousel .carousel-inner');
             const questionList = $('#question-list');
-            const exerciseId = window.location.pathname.split('/').pop(); // Lấy ID của bài tập từ URL
-    
-            // AJAX gọi API để lấy chi tiết bài tập phát âm
+            const exerciseId = window.location.pathname.split('/').pop();
             $.ajax({
                 url: `/pronunciation-exercise/api/${exerciseId}`,
                 method: 'GET',
@@ -265,7 +260,7 @@
                                             </div>
                                             <form  id="question-form-${index}" class="mt-4">
                                                 ${question.options
-                                                .filter(option => option.trim() !== '')  // Lọc những đáp án không rỗng
+                                                .filter(option => option.trim() !== '')
                                                 .map((option, optIndex) => `
                                                     <div class="form-check">
                                                         <input class="option-input" type="radio" name="answer-${index}" value="${option}" id="option-${optIndex}-${index}">
@@ -301,11 +296,9 @@
                             `;
                             carouselInner.append(questionHtml);
     
-                            // Thêm các nút câu hỏi vào danh sách câu hỏi
                             questionList.append(`<button class="question-number btn btn-light" id="question-btn-${index}" data-index="${index}">${index + 1}</button>`);
                         });
     
-                        // Sự kiện cho nút điều hướng
                         $('.next-slide').on('click', function() {
                             $('#exerciseCarousel').carousel('next');
                         });
@@ -313,8 +306,6 @@
                         $('.prev-slide').on('click', function() {
                             $('#exerciseCarousel').carousel('prev');
                         });
-    
-                        // Sự kiện cho các nút chọn câu hỏi
                         $('.question-number').on('click', function() {
                             const index = $(this).data('index');
                             $('#exerciseCarousel').carousel(index);
@@ -327,8 +318,6 @@
                     console.error('Error fetching pronunciation exercise:', error);
                 }
             });
-    
-            // Bắt đầu đếm ngược thời gian
             function startTimer() {
                 timer = setInterval(() => {
                     let minutes = Math.floor(timeRemaining / 60);
@@ -343,8 +332,6 @@
                     }
                 }, 1000);
             }
-    
-            // Sự kiện bấm vào nút phát âm
             $(document).on('click', '.speak-button', function() {
                 const textToSpeak = $(this).data('text');
                 speakText(textToSpeak);
@@ -353,14 +340,12 @@
             function speakText(text) {
                 if ('speechSynthesis' in window) {
                     const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'en-US'; // Bạn có thể thay đổi ngôn ngữ nếu cần
+                    utterance.lang = 'en-US';
                     window.speechSynthesis.speak(utterance);
                 } else {
                     alert('Trình duyệt của bạn không hỗ trợ Speech Synthesis.');
                 }
             }
-    
-            // Sự kiện khi người dùng chọn câu trả lời và kiểm tra đáp án
             $(document).on('click', '.submit-answer', function() {
                 const index = $(this).data('index');
                 const questionCard = $(this).closest('.question-card');
@@ -389,44 +374,39 @@
                     correctAnswers++; // Cộng số câu trả lời đúng
                 }
     
-                // Khóa câu hỏi sau khi người dùng đã trả lời
                 $(`#question-form-${index} input`).prop('disabled', true).addClass('disabled');
                 $(this).prop('disabled', true).addClass('disabled');
             });
-            // Bắt sự kiện khi người dùng bấm nút ghi âm
             $(document).on('click', '.record-btn', function() {
                 const index = $(this).data('index');
                 const status = $(`#recording-status-${index}`);
                 const userAudio = $(`#user-audio-${index}`);
                 const recordButton = $(this);
-
-                // Nếu người dùng đang ghi âm thì dừng ghi âm
                 if (recordButton.text() === 'Dừng ghi âm') {
                     if (mediaRecorder) {
-                        mediaRecorder.stop();  // Dừng ghi âm
-                        recordButton.text('Bắt đầu ghi âm');  // Đặt lại nút thành "Bắt đầu ghi âm"
-                        status.hide();  // Ẩn thông báo "Đang ghi âm"
+                        mediaRecorder.stop();
+                        recordButton.text('Bắt đầu ghi âm');
+                        status.hide();
                     }
                 } else {
-                    // Nếu trình duyệt hỗ trợ ghi âm, bắt đầu ghi âm
                     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
                         navigator.mediaDevices.getUserMedia({ audio: true })
                             .then(stream => {
                                 mediaRecorder = new MediaRecorder(stream);
                                 audioChunks = [];
                                 mediaRecorder.start();
-                                status.show().text('Đang ghi âm...');  // Hiển thị thông báo ghi âm
-                                recordButton.text('Dừng ghi âm');  // Đổi nút thành "Dừng ghi âm"
+                                status.show().text('Đang ghi âm...');
+                                recordButton.text('Dừng ghi âm');
 
                                 mediaRecorder.ondataavailable = (event) => {
-                                    audioChunks.push(event.data);  // Lưu các đoạn âm thanh vào mảng
+                                    audioChunks.push(event.data);
                                 };
 
                                 mediaRecorder.onstop = () => {
                                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                                     const audioUrl = URL.createObjectURL(audioBlob);
-                                    userAudio.attr('src', audioUrl);  // Hiển thị URL của đoạn âm thanh
-                                    userAudio.show();  // Hiển thị bản ghi âm
+                                    userAudio.attr('src', audioUrl);
+                                    userAudio.show();
                                 };
                             })
                             .catch(error => {
@@ -438,15 +418,12 @@
                     }
                 }
             });
-            // Xử lý sự kiện nộp bài
             $('#submitQuizBtn').click(function() {
                 if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
                     clearInterval(timer);
                     submitQuiz();
                 }
             });
-    
-            // Hàm nộp bài và chuyển qua màn hình kết quả
             function submitQuiz() {
                 const timeTaken = 20 * 60 - timeRemaining;
                 const minutesTaken = Math.floor(timeTaken / 60);
@@ -460,7 +437,7 @@
     
             function showResultScreen() {
                 let percentageCorrect = 0;
-                const incorrectAnswers = totalQuestions - correctAnswers; // Số câu trả lời sai
+                const incorrectAnswers = totalQuestions - correctAnswers;
                 if (totalQuestions > 0) {
                     percentageCorrect = (correctAnswers / totalQuestions) * 100;
                 }
@@ -491,7 +468,7 @@
             }
 
     
-            startTimer(); // Khởi động bộ đếm thời gian
+            startTimer();
         });
     </script>      
     <script src="/static/js/jquery-1.12.1.min.js"></script>

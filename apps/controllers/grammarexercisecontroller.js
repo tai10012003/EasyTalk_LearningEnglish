@@ -3,12 +3,9 @@ const router = express.Router();
 const GrammarexerciseService = require("./../services/grammarexerciseService");
 const grammarExerciseService = new GrammarexerciseService();
 
-// Hiển thị danh sách bài tập ngữ pháp
 router.get("/", async (req, res) => {
     try {
-        // Gọi phương thức từ service để lấy danh sách bài tập ngữ pháp
         const { grammarexercises } = await grammarExerciseService.getGrammarexerciseList();
-        // Render giao diện danh sách với dữ liệu bài tập ngữ pháp
         res.render("grammarexercises/grammarexercise-list", { exercises: grammarexercises });
     } catch (err) {
         res.status(500).send("Error retrieving grammar exercises: " + err.message);
@@ -16,17 +13,10 @@ router.get("/", async (req, res) => {
 });
 router.get("/api/grammar-exercises", async (req, res) => {
     try {
-        // Lấy các tham số phân trang từ query string
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
-    
-        // Gọi service để lấy danh sách bài tập ngữ pháp với phân trang
         const { grammarexercises, totalExercises } = await grammarExerciseService.getGrammarexerciseList(page, limit);
-    
-        // Tính tổng số trang
         const totalPages = Math.ceil(totalExercises / limit);
-    
-        // Trả về kết quả dưới dạng JSON
         res.json({
           success: true,
           data: grammarexercises,
@@ -34,7 +24,7 @@ router.get("/api/grammar-exercises", async (req, res) => {
           totalPages,
         });
     } catch (error) {
-        console.error("Error fetching grammar exercises:", error); // Ghi lỗi vào console
+        console.error("Error fetching grammar exercises:", error);
         res.status(500).json({ success: false, message: "Error fetching grammar exercises", error: error.message });
     }
 });

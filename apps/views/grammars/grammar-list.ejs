@@ -26,52 +26,52 @@
     
     <style>
         .grammars-container {
-            margin: 140px auto 50px auto; /* Trung tâm trên trang */
+            margin: 140px auto 50px auto;
         }
         h2 {
-            color: #333; /* Màu chữ tiêu đề */
-            margin-bottom: 30px; /* Khoảng cách dưới tiêu đề */
+            color: #333;
+            margin-bottom: 30px;
             text-align: center;
             font-weight: bold;
         }
         .grammar-card {
-            margin-bottom: 20px; /* Khoảng cách giữa các bài học */
-            border: 1px solid #e0e0e0; /* Viền xung quanh */
-            border-radius: 8px; /* Bo góc cho thẻ */
-            padding: 10px; /* Padding bên trong thẻ */
-            background-color: #fff; /* Màu nền trắng cho thẻ */
-            transition: box-shadow 0.3s; /* Hiệu ứng chuyển đổi khi hover */
+            margin-bottom: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #fff;
+            transition: box-shadow 0.3s;
         }
         .grammar-card:hover {
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* Đổ bóng khi hover */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
         }
         .grammars-title h4 {
-            font-weight: bold; /* Chữ đậm cho tiêu đề */
-            font-size: 20px; /* Kích thước chữ lớn hơn */
+            font-weight: bold;
+            font-size: 20px;
         }
         .grammar-description p {
             color: #333;
         }
         .grammar-image {
-            border-radius: 8px; /* Bo góc cho hình ảnh */
+            border-radius: 8px;
         }
         .detail-link {
             font-size: 17px;
-            display: inline-block; /* Hiển thị dưới dạng khối */
-            margin-top: 10px; /* Khoảng cách trên liên kết */
-            color: #006fe6; /* Màu sắc liên kết */
-            text-decoration: none; /* Bỏ gạch chân */
-            font-weight: bold; /* Chữ đậm cho liên kết */
-            transition: color 0.3s; /* Hiệu ứng chuyển đổi màu sắc */
+            display: inline-block;
+            margin-top: 10px;
+            color: #006fe6;
+            text-decoration: none;
+            font-weight: bold; 
+            transition: color 0.3s;
             text-decoration: underline;
         }
         .detail-link:hover {
-            color: red; /* Màu khi hover */
+            color: red;
             text-decoration: underline;
         }
         .blog_right_sidebar {
             position: sticky;
-            top: 100px; /* Khoảng cách từ đỉnh của sidebar tới đỉnh trình duyệt */
+            top: 100px;
             max-height: calc(100vh - 100px);
             overflow: auto;
         }
@@ -89,7 +89,7 @@
                     <div class="col-lg-12">
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center" id="pagination-controls">
-                                <!-- Phân trang sẽ được AJAX điền vào -->
+
                             </ul>
                         </nav>
                     </div>
@@ -162,7 +162,6 @@
     <script src="/static/js/waypoints.min.js"></script>
     <script src="/static/js/custom.js"></script>
     <script>
-        // Fetch the list of grammar lessons and render them
         function fetchGrammars(page = 1) {
             $.ajax({
                 url: `/admin/grammar/api/grammar-list?page=${page}`,
@@ -178,10 +177,9 @@
             });
         }
     
-        // Render grammar list into the EJS template
         function renderGrammarList(grammars) {
-            const grammarList = $("#grammar-list");  // Ensure this ID exists in your HTML
-            grammarList.empty();  // Clear previous data
+            const grammarList = $("#grammar-list"); 
+            grammarList.empty();
             if (grammars.length > 0) {
                 grammars.forEach((grammar) => {
                     const grammarCard = `
@@ -190,7 +188,7 @@
                                 <div class="col-md-4">
                                     ${grammar.images
                                         ? `<img src="data:image/jpeg;base64,${grammar.images.toString('base64')}" alt="${grammar.title}" style="width: 300px;">`
-                                        : 'No Image Available'}
+                                        : 'Không có hình ảnh'}
                                 </div>
                                 <div class="col-md-8 card-body">
                                     <div class="grammars-title">
@@ -210,8 +208,6 @@
                 grammarList.append('<p>No Grammar Lessons Available</p>');
             }
         }
-    
-        // Render pagination controls
         function renderPagination(currentPage, totalPages) {
             const paginationControls = $("#pagination-controls");
             paginationControls.empty();
@@ -237,10 +233,9 @@
                 `);
             }
         }
-    
-        // Fetch grammars when the page is loaded
+
         $(document).ready(function () {
-            fetchGrammars();  // Call API when the page loads
+            fetchGrammars();
         });
     </script>
 </html>

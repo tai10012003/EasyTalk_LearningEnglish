@@ -3,11 +3,9 @@ var router = express.Router();
 const FlashcardsService = require("./../services/flashcardService");
 const flashcardsService = new FlashcardsService();
 
-
 router.get("/", async (req, res) => {
     res.render("flashcards/flashcards");
 });
-
 
 router.get("/api/flashcard-list", async (req, res) => {
   const perPage = 12;
@@ -17,12 +15,10 @@ router.get("/api/flashcard-list", async (req, res) => {
     const { flashcardLists, totalFlashcardLists } = await flashcardsService.getFlashcardList(page, perPage);
 
     const totalPages = Math.ceil(totalFlashcardLists / perPage);
-
-    // Trả về JSON
     res.json({
-      flashcardLists,  // Danh sách flashcard lists
-      totalPages,      // Tổng số trang
-      currentPage: page // Trang hiện tại
+      flashcardLists,
+      totalPages,
+      currentPage: page
     });
   } catch (err) {
     res.status(500).json({ message: "Có lỗi xảy ra", error: err.message });
@@ -33,8 +29,6 @@ router.post("/create", async (req, res) => {
   try {
     const { name, description } = req.body;
     const newFlashcardList = await flashcardsService.insertFlashcardList({ name, description });
-
-    // Phản hồi thành công với JSON
     res.status(201).json({ success: true, flashcardList: newFlashcardList });
   } catch (err) {
     res.status(500).json({ success: false, message: "Lỗi khi tạo FlashcardList", error: err.message });
@@ -50,17 +44,14 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
-// Route để cập nhật một list từ
 router.put("/flashcardlist/:id", async (req, res) => {
   try {
-    const { name, description } = req.body; // Lấy dữ liệu từ client gửi lên
+    const { name, description } = req.body;
     const updatedFlashcardList = await flashcardsService.updateFlashcardList(req.params.id, { name, description });
 
     if (!updatedFlashcardList) {
       return res.status(404).json({ success: false, message: "Không tìm thấy danh sách" });
     }
-
-    // Phản hồi thành công
     res.status(200).json({ success: true, flashcardList: updatedFlashcardList });
   } catch (err) {
     res.status(500).json({
@@ -78,7 +69,6 @@ router.get("/flashcardlist/:id", async (req, res) => {
     if (!flashcardList) {
       return res.status(404).send("Không tìm thấy danh sách flashcards.");
     }
-
     res.render("flashcards/flashcard_list_detail", {
       flashcardList: flashcardList,
       flashcards: flashcards,
@@ -88,7 +78,6 @@ router.get("/flashcardlist/:id", async (req, res) => {
   }
 });
 
-// Thêm flashcard mới
 router.post("/flashcardlist/:id", async (req, res) => {
   try {
     const flashcardData = req.body;
@@ -103,7 +92,6 @@ router.post("/flashcardlist/:id", async (req, res) => {
   }
 });
 
-// Xóa flashcard
 router.delete("/delete-flashcard/:id", async (req, res) => {
   try {
     await flashcardsService.deleteFlashcard(req.params.id);
@@ -113,7 +101,6 @@ router.delete("/delete-flashcard/:id", async (req, res) => {
   }
 });
 
-// Cập nhật flashcard
 router.put("/update-flashcard/:id", async (req, res) => {
   try {
     const updatedFlashcard = await flashcardsService.updateFlashcard(req.params.id, req.body);
@@ -132,7 +119,6 @@ router.put("/update-flashcard/:id", async (req, res) => {
   }
 });
 
-// Lấy flashcards cho review
 router.get("/flashcardlist/:listId/review", async (req, res) => {
   try {
     const { flashcards, flashcardList } = await flashcardsService.getFlashcardListById(req.params.listId);

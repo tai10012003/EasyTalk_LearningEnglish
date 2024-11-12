@@ -59,14 +59,10 @@ class UserProgressService {
         const firstGate = journey.gates && journey.gates.length > 0 ? journey.gates[0]._id : null;
         const firstStage = journey.gates[0]?.stages && journey.gates[0].stages.length > 0 ? journey.gates[0].stages[0]._id : null;
         let isUpdated = false;
-
-        // Check if the first gate of this journey is unlocked
         if (firstGate && !userProgress.unlockedGates.includes(firstGate)) {
             userProgress.unlockedGates.push(firstGate);
             isUpdated = true;
         }
-
-        // Check if the first stage of this journey is unlocked
         if (firstStage && !userProgress.unlockedStages.includes(firstStage)) {
             userProgress.unlockedStages.push(firstStage);
             isUpdated = true;
@@ -89,7 +85,6 @@ class UserProgressService {
         );
     }
 
-    // Xóa tiến trình của người dùng
     async deleteUserProgress(userId) {
         try {
             const result = await this.userprogressCollection.deleteOne({ user: new ObjectId(userId) });

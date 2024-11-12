@@ -17,8 +17,6 @@ class UsersService {
 
     async getUserList(page = 1, limit = 3) {
         const skip = (page - 1) * limit; 
-
-
         const cursor = await this.usersCollection
             .find({}, {})
             .skip(skip)
@@ -36,9 +34,11 @@ class UsersService {
     async getUser(id) {
         return await this.usersCollection.findOne({ _id: new ObjectId(id) });
     }
+
     async getUserByEmail(email) {
         return await this.usersCollection.findOne({ email });
     }
+
     async updatePassword(userId, hashedNewPassword) {
         try {
           await this.usersCollection.updateOne(
@@ -49,7 +49,8 @@ class UsersService {
           console.error("Error updating password:", error);
           throw new Error("Failed to update password.");
         }
-    }      
+    } 
+         
     async insertUser(user) {
         user.createdAt = new Date(); 
         return await this.usersCollection.insertOne(user);

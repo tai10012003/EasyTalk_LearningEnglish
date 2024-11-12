@@ -6,7 +6,6 @@ const databaseConnection = require('./../database/database');
 
 class ReminderService {
     constructor() {
-        // Initialize the MongoDB client and connect to the database
         this.client = databaseConnection.getMongoClient();
         this.reminderDatabase = this.client.db(config.mongodb.database);
         this.reminderCollection = this.reminderDatabase.collection("reminders");
@@ -86,8 +85,6 @@ class ReminderService {
 
     async scheduleEmail(reminder) {
         const reminderDate = new Date(reminder.reminderTime);
-        
-        // Create cron schedule based on the reminder date
         const cronExpression = `${reminderDate.getMinutes()} ${reminderDate.getHours()} ${reminderDate.getDate()} ${reminderDate.getMonth() + 1} *`;
         
         cron.schedule(cronExpression, () => {
@@ -99,7 +96,7 @@ class ReminderService {
             );
         }, {
             scheduled: true,
-            timezone: "Asia/Ho_Chi_Minh" // Adjust to your timezone
+            timezone: "Asia/Ho_Chi_Minh"
         });
     }
 

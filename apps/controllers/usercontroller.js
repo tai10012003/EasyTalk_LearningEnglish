@@ -9,23 +9,21 @@ const verifyToken = require("./../util/VerifyToken")
 const config = require("../config/setting.json");
 const userService = new UserService();
 let verificationCodes = {};
-//trang dang ki
+
 router.get("/register", (req, res) => {
-  res.render("users/signup"); // Assuming the signup.ejs is inside the 'views/users/' folder
+  res.render("users/signup");
 });
 
 router.get("/login", (req, res) => {
   res.render("users/login");
 });
 
-// Đăng ký người dùng mới
 router.post("/register", async (req, res) => {
   const { username, email, password, confirmPassword, role = "user" } = req.body;
 
   if (password !== confirmPassword) {
       return res.status(400).json({ message: "Passwords do not match." });
   }
-
   try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = { username, email, password: hashedPassword, role, active: true };
@@ -60,7 +58,6 @@ router.get('/auth/google', (req, res) => {
   res.redirect(getGoogleAuthURL());
 });
 
-// Route callback từ Google OAuth
 router.get('/auth/google/callback', async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send('Lỗi: Không nhận được mã xác thực');
@@ -68,11 +65,8 @@ router.get('/auth/google/callback', async (req, res) => {
   try {
     const googleUser = await getGoogleUser(code);
     const { email, name } = googleUser;
-
-    // Kiểm tra nếu email đã tồn tại
     let user = await userService.getUserByEmail(email);
     if (!user) {
-      // Nếu chưa có, tạo người dùng mới với mật khẩu giả
       const hashedPassword = await bcrypt.hash('google_auth_password', 10);
       user = await userService.insertUser({
           username: name,
@@ -82,7 +76,6 @@ router.get('/auth/google/callback', async (req, res) => {
           active: true
       });
     }
-    // Tạo token JWT
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, config.jwt.secret, { expiresIn: '1h' });
     res.status(200).json({ token, message: 'Đăng nhập thành công!' });
   } catch (error) {
@@ -90,6 +83,7 @@ router.get('/auth/google/callback', async (req, res) => {
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
   }
 });
+
 router.get("/change-password", (req, res) => {
   res.render("users/changepassword");
 });
@@ -118,9 +112,11 @@ router.post("/change-password", verifyToken, async (req, res) => {
     res.status(500).json({ message: "An error occurred. Please try again." });
   }
 });
+
 router.get("/forgot-password", (req, res) => {
   res.render("users/forgotpassword");
 });
+
 router.post('/forgot-password', async (req, res) => {
   const { email } = req.body;
   const user = await userService.getUserByEmail(email);
@@ -130,8 +126,6 @@ router.post('/forgot-password', async (req, res) => {
 
   const verificationCode = Math.floor(10000 + Math.random() * 90000);
   verificationCodes[email] = verificationCode;
-
-  // Gửi email với mã xác thực
   const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: { user: config.email.user, pass: config.email.pass }
@@ -149,8 +143,6 @@ router.post('/forgot-password', async (req, res) => {
       <p>Trân trọng,</p>
       <p>Nhóm hỗ trợ EasyTalk</p>`
     };
-
-
   transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
           return res.status(500).json({ message: 'Failed to send email' });
@@ -167,7 +159,7 @@ router.post('/verify-code', (req, res) => {
   const { email, code } = req.body;
 
   if (verificationCodes[email] && verificationCodes[email] == code) {
-      delete verificationCodes[email]; // Xoá mã sau khi xác thực
+      delete verificationCodes[email];
       res.json({ message: 'Code verified' });
   } else {
       res.status(400).json({ message: 'Invalid verification code' });
@@ -195,7 +187,6 @@ router.get("/profile", (req, res) => {
   res.render("users/profile", { user: req.user });
 });
 
-// Route cập nhật thông tin cá nhân
 router.post("/profile/update", async (req, res) => {
   const { username, email } = req.body;
   const userId = req.user.id;
@@ -209,6 +200,5 @@ router.post("/profile/update", async (req, res) => {
       res.status(500).json({ message: "Error updating profile", error });
   }
 });
-
 
 module.exports = router;

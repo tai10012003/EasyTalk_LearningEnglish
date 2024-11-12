@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>User List</title>
+    <title>Danh Sách Người Dùng</title>
     <script src="/static/js/checkadmin.js"></script>
-    <!-- Fonts and icons -->
+    <link rel="icon" href="/static/images/favicon.png">
     <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
     <link rel="stylesheet" type="text/css" href="/static/css/main.css">
     <script>
@@ -35,17 +35,14 @@
 
 <body>
     <div class="wrapper">
-        <!-- Sidebar -->
         <%- include('../admin/partials/menu.ejs') %>
-
-        <!-- Content -->
         <div class="main-panel">
             <div class="content">
                 <div class="page-inner">
                     <div class="container user-container" id="user-list">
-                        <h1 class="text-center user-title">USER LIST</h1>
+                        <h1 class="text-center user-title">DANH SÁCH NGƯỜI DÙNG</h1>
                         <div class="text-right mb-3">
-                            <a href="/admin/users/add" class="btn btn-primary">+ Add New User</a>
+                            <a href="/admin/users/add" class="btn btn-primary">+ Thêm người dùng</a>
                         </div>
 
                         <div class="table-responsive">
@@ -53,33 +50,30 @@
                                 <thead class="thead-light">
                                     <tr>
                                         <th>#</th>
-                                        <th>Name</th>
+                                        <th>Tên</th>
                                         <th>Email</th>
-                                        <th>Role</th>
-                                        <th>Active</th>
-                                        <th>Actions</th>
+                                        <th>Vai trò</th>
+                                        <th>Hoạt động</th>
+                                        <th>Hành động</th>
                                     </tr>
                                 </thead>
                                 <tbody id="userTableBody">
-                                    <!-- Nội dung người dùng sẽ được thêm vào đây -->
+
                                 </tbody>
                             </table>
                         </div>
 
-                        <!-- Phân trang -->
                         <nav aria-label="Page navigation">
                             <ul class="pagination justify-content-center" id="pagination">
-                                <!-- Pagination items will be added here -->
+
                             </ul>
                         </nav>
                     </div>
                 </div>
             </div>
         </div>  
-        <!-- End Content -->
     </div>
 
-    <!-- JS Files -->
     <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
     <script src="/static/admin/assets/js/core/popper.min.js"></script>
     <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
@@ -88,7 +82,6 @@
     <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
     
     <script>
-        // Hàm lấy danh sách người dùng từ API và hiển thị
         function fetchUserList(page = 1) {
             fetch(`/admin/users/api/user-list?page=${page}`)
                 .then(response => response.json())
@@ -96,31 +89,25 @@
                     if (data.success) {
                         const userTableBody = document.getElementById('userTableBody');
                         const pagination = document.getElementById('pagination');
-
-                        // Xóa các hàng hiện tại
                         userTableBody.innerHTML = '';
                         pagination.innerHTML = '';
-
-                        // Thêm người dùng vào bảng
                         data.data.forEach((user, index) => {
-                            const isActive = user.active ? 'active' : 'locked'; // Kiểm tra trạng thái active
+                            const isActive = user.active ? 'active' : 'locked';
                             const row = `
                                 <tr>
                                     <td>${(page - 1) * 3 + index + 1}</td>
                                     <td>${user.username}</td>   
                                     <td>${user.email}</td>
                                     <td>${user.role}</td>
-                                    <td>${isActive}</td> <!-- Hiển thị trạng thái active hoặc locked -->
+                                    <td>${isActive}</td>
                                     <td>
-                                        <a href="/admin/users/update/${user._id}" class="btn btn-warning btn-sm">Update</a>
-                                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">Delete</button>
+                                        <a href="/admin/users/update/${user._id}" class="btn btn-warning btn-sm">Sửa</a>
+                                        <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">Xóa</button>
                                     </td>
                                 </tr>
                             `;
                             userTableBody.innerHTML += row;
                         });
-
-                        // Thêm pagination
                         for (let i = 1; i <= data.totalPages; i++) {
                             const activeClass = page === i ? 'active' : '';
                             pagination.innerHTML += `
@@ -138,17 +125,16 @@
                 });
         }
 
-        // Hàm xóa người dùng bằng API
         function deleteUser(userId) {
-            if (confirm('Are you sure you want to delete this User?')) {
+            if (confirm('Bạn có muốn xóa người dùng này ra khỏi danh sách?')) {
                 fetch(`/admin/users/api/delete/${userId}`, {
                     method: 'DELETE',
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        alert('User deleted successfully');
-                        fetchUserList(); // Reload lại danh sách sau khi xóa
+                        alert('Người dùng đã được xóa thành công !');
+                        fetchUserList();
                     } else {
                         alert('Error deleting user: ' + data.message);
                     }
@@ -158,8 +144,6 @@
                 });
             }
         }
-
-        // Khi trang được load, gọi API để lấy danh sách người dùng
         document.addEventListener('DOMContentLoaded', () => {
             fetchUserList();
         });

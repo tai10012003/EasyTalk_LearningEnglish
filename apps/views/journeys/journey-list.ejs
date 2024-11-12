@@ -35,38 +35,30 @@
             margin: 110px auto 50px auto;
             padding: 20px;
         }
-
-         /* Card styling with vibrant colors */
          .journey-card {
-            width: 70%; /* Adjust width */
-            margin: 0 auto 30px auto; /* Center and space between cards */
+            width: 70%;
+            margin: 0 auto 30px auto;
             padding: 10px;
-            background-color: #fff; /* Light background for contrast */
+            background-color: #fff;
             border-radius: 12px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); /* Deeper shadow for 3D effect */
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
             border: 2px solid #d87a99;
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
         }
-
-        /* Hover effect to make the card more interactive */
         .journey-card:hover {
-            transform: translateY(-8px); /* Elevate the card */
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3); /* Increase shadow for hover */
-            border-color:   #69f0ae; /* Change border on hover */
+            transform: translateY(-8px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
+            border-color:   #69f0ae;
         }
-
-        /* Card title with custom font and vibrant color */
         .card-title {
             font-size: 22px;
             font-weight: 700;
-            color: #333; /* Dark color for readability */
+            color: #333;
             text-align: center;
             font-family: 'Poppins', sans-serif;
         }
-
-        /* Button styles with gradient and hover effects */
         .btn-primary {
             display: block;
             width: 50%;
@@ -83,23 +75,20 @@
 
         .btn-primary:hover {
             background: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Shadow on hover */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             border: 1px solid #d87a99;
             color: #333;
         }
 
-        /* Media query for responsiveness */
         @media (max-width: 768px) {
             .journey-card {
-                width: 90%; /* Adjust width for smaller screens */
+                width: 90%;
             }
         }
         .progress-container {
             width: 100%;
             margin-top: 10px;
         }
-
-        /* Label hiển thị phần trăm hoàn thành */
         .progress-label {
             font-size: 0.9rem;
             font-weight: bold;
@@ -107,8 +96,6 @@
             margin-bottom: 5px;
             color: #333;
         }
-
-        /* Thanh progress */
         .progress {
             height: 20px;
             background-color: #e9ecef;
@@ -116,8 +103,6 @@
             overflow: hidden;
             position: relative;
         }
-
-        /* Thanh progress-bar hiển thị mức độ hoàn thành */
         .progress-bar {
             background-image: linear-gradient(45deg, #69f0ae, #448aff);
             transition: width 0.4s ease;
@@ -127,18 +112,17 @@
         }
         .achievement-panel,
         .leaderboard-panel {
-            position: -webkit-sticky; /* For Safari */
+            position: -webkit-sticky;
             position: sticky;
-            top: 95px; /* Khoảng cách từ trên đầu khi bắt đầu dính */
-            z-index: 100; /* Đảm bảo nó nằm trên các thành phần khác */
+            top: 95px;
+            z-index: 100;
         }
-        /* Styling for left panel - Achievement */
         .achievement-panel {
             background-color: #fff;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            border-left: 2px solid sandybrown; /* Chỉ áp dụng cho border trái */
-            border-right: 2px solid sandybrown; /* Chỉ áp dụng cho border phải */
+            border-left: 2px solid sandybrown;
+            border-right: 2px solid sandybrown;
         }
 
         .achievement-panel h4 {
@@ -209,15 +193,14 @@
         .btn-upgrade:hover {
             background-color: #044efc;
         }
-        /* Styling for right panel - Leaderboard */
         .leaderboard-panel {
-            height: calc(100vh - 50px); /* Adjust height based on the viewport */
-            overflow-y: auto; /* Enable scrolling within the panel if the content is taller */
+            height: calc(100vh - 50px);
+            overflow-y: auto;
             background-color: #fff;
             padding: 10px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border-left: 2px solid rgb(238, 190, 0); /* Chỉ áp dụng cho border trái */
-            border-right: 2px solid rgb(238, 190, 0); /* Chỉ áp dụng cho border phải */
+            border-left: 2px solid rgb(238, 190, 0); 
+            border-right: 2px solid rgb(238, 190, 0);
         }
 
         .leaderboard-panel h4 {
@@ -256,12 +239,11 @@
 
     <div class="container journey-container">
         <div class="row">
-            <!-- Left Panel: Achievement -->
             <div class="col-md-3">
                 <div class="achievement-panel">
                     <h4>Thành tích của bạn</h4>
                     <ul id="achievement-list" class="achievement-list">
-                        <!-- Nội dung sẽ được render động -->
+
                     </ul>
                     <hr>
                     <h4>Nhiệm vụ hàng ngày</h4>
@@ -279,15 +261,13 @@
                 </div>
             </div>
 
-            <!-- Center Panel: Journey List -->
             <div class="col-md-6">
                 <h2 class="text-center mt-5 mb-5">HÀNH TRÌNH HỌC TẬP CỦA BẠN</h2>
                 <div id="journey-list" class="row justify-content-center">
-                    <!-- Danh sách hành trình sẽ được render động -->
+                
                 </div>
             </div>
 
-            <!-- Right Panel: Leaderboard -->
             <div class="col-md-3">
                 <div class="leaderboard-panel">
                     <h4>Bảng xếp hạng</h4>
@@ -299,7 +279,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Bảng xếp hạng sẽ được render động -->
+
                         </tbody>
                     </table>
                 </div>
@@ -308,8 +288,6 @@
     </div>
 
     <%- include('../partials/footer.ejs') %>
-
-    <!-- Script để gọi API và hiển thị dữ liệu -->
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
             try {
@@ -317,7 +295,7 @@
                 const response = await fetch('/journey/api', {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${token}`, // Thêm token vào Authorization header
+                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -328,7 +306,7 @@
 
                 const data = await response.json(); 
                 const journeyList = document.getElementById('journey-list');
-                journeyList.innerHTML = ""; // Clear any previous content
+                journeyList.innerHTML = "";
                 data.journeys.forEach(journey => {
                     const journeyCard = document.createElement('div');
                     journeyCard.classList.add('col-md-12', 'mb-4');
@@ -351,8 +329,6 @@
                     `;
                     journeyList.appendChild(journeyCard);
                 });
-
-                // Hiển thị Thành tích của người dùng
                 const achievementList = document.getElementById('achievement-list');
                 achievementList.innerHTML = `
                     <li>Điểm KN: ${data.userProgress.experiencePoints}</li>
@@ -360,9 +336,8 @@
                     <li>Chặng đã hoàn thành: ${data.completedStages}</li>
                 `;
 
-                // Hiển thị bảng xếp hạng
                 const leaderboardTable = document.getElementById('leaderboard-table').querySelector('tbody');
-                leaderboardTable.innerHTML = ""; // Clear any previous content
+                leaderboardTable.innerHTML = "";
                 data.leaderboard.forEach(entry => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
