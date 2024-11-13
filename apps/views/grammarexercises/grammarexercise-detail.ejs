@@ -92,6 +92,9 @@
         .btn {
             width: 100%;
         }
+        .result-screen h2 {
+            margin: 10px 0 20px 0;
+        }
         .result-content {
             text-align: center;
         }
@@ -169,7 +172,8 @@
             margin-bottom: 20px;
         }
         .history-item h5 {
-            font-size: 18px;
+            font-size: 16px;
+            line-height: 1.6;
             font-weight: bold;
         }
         .history-item p {
@@ -179,6 +183,9 @@
         .speak-button {
             border: 1px solid #9ba0a6;
             background-color: #ffffff;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.485);
         }
 
     </style>
@@ -206,12 +213,31 @@
                     <div class="question-list mt-3" id="question-list">
 
                     </div>
+                    
                     <div id="completed-info" style="display: none; text-align: center;">
                         <h4>Thời gian đã làm: <span id="completedTime"></span></h4>
-                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn">Xem lịch sử</button>
+                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn" data-toggle="modal" data-target="#historyModal">Xem lịch sử</button>
                     </div>
                 </div>
-            </div>        
+            </div>   
+            <div class="modal" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="historyModalLabel">LỊCH SỬ LÀM BÀI LUYỆN TẬP NGỮ PHÁP</h3>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="historyContent"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>     
         </div>
     </div>
     <%- include('../partials/footer.ejs') %>
@@ -219,6 +245,7 @@
         $(document).ready(function() {
             let timeRemaining = 20 * 60;
             let correctAnswers = 0;
+            const questionResults = [];
             let totalQuestions = $('.carousel-item').length;
             let timer; 
             const carouselInner = $('#carousel-inner');
@@ -232,6 +259,13 @@
                     if (data && data.questions && data.questions.length > 0) {
                         totalQuestions = data.questions.length;
                         data.questions.forEach((question, index) => {
+                            questionResults.push({
+                                question: question.question,
+                                userAnswer: "Chưa trả lời",
+                                correctAnswer: question.correctAnswer,
+                                isCorrect: false,
+                                explanation: question.explanation
+                            });
                             let questionHtml = '';
 
                             if (question.type === 'multiple-choice') {
@@ -359,58 +393,61 @@
                 const index = $(this).data('index');
                 const questionCard = $(this).closest('.question-card');
                 const questionType = questionCard.data('type');
-                const correctAnswer = questionCard.data('correct-answer');
+                const correctAnswer = questionCard.data('correct-answer').trim().toLowerCase();
                 const explanation = questionCard.data('explanation');
-
-                let answer = '';
+                const questionText = questionCard.find('.question-title').text();
+                let userAnswer = '';
+                let isCorrect = false;
 
                 if (questionType === 'multiple-choice') {
                     const selectedOption = $(`input[name="answer"]:checked`, `#question-form-${index}`);
                     if (selectedOption.length > 0) {
-                        answer = selectedOption.val();
+                        userAnswer = selectedOption.val();
                     } else {
                         alert("Vui lòng chọn một đáp án.");
                         return;
                     }
                 } else if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
-                    answer = $(`textarea[name="answer"]`, `#question-form-${index}`).val().trim();
-                    if (answer === '') {
+                    userAnswer = $(`textarea[name="answer"]`, `#question-form-${index}`).val().trim().toLowerCase();
+                    if (userAnswer === '') {
                         alert("Vui lòng nhập câu trả lời.");
                         return;
                     }
                 }
 
+                isCorrect = userAnswer === correctAnswer;
+                if (isCorrect) {
+                    questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
+                    $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
+                    correctAnswers++;
+                } else {
+                    questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}. <br> Giải thích: ${explanation}`).show();
+                    $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
+                }
+
+                questionResults[index].userAnswer = userAnswer || "Không trả lời";
+                questionResults[index].isCorrect = isCorrect;
+
                 if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
                     const answerElement = $(`textarea[name="answer"]`, `#question-form-${index}`);
                     answerElement.removeClass('correct-answer incorrect-answer');
-                    if (answer === correctAnswer) {
+                    if (isCorrect) {
                         answerElement.addClass('correct-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
-                        correctAnswers++;
                     } else {
                         answerElement.addClass('incorrect-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}. <br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
                     }
                 } else if (questionType === 'multiple-choice') {
-                    if (answer === correctAnswer) {
+                    if (isCorrect) {
                         $(`input[name="answer"]:checked + .form-check-label`, `#question-form-${index}`).addClass('correct-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
-                        correctAnswers++;
                     } else {
                         $(`input[name="answer"]:checked + .form-check-label`, `#question-form-${index}`).addClass('incorrect-answer');
                         $(`input[name="answer"][value="${correctAnswer}"] + .form-check-label`, `#question-form-${index}`).addClass('correct-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}.<br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
                     }
                 }
 
                 $(`#question-form-${index} input, #question-form-${index} textarea`).prop('disabled', true).addClass('disabled');
                 $(this).prop('disabled', true).addClass('disabled');
             });
-
 
             $('#submitQuizBtn').click(function() {
                 if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
@@ -441,7 +478,7 @@
 
                 const resultHtml = `
                     <div class="result-screen text-center">
-                        <h2 class="text-center">Kết quả bài Luyện tập</h2>
+                        <h2 class="text-center">KẾT QUẢ BÀI LUYỆN TẬP NGỮ PHÁP</h2>
                         <div class="row">
                             <div class="col-md-6 result-content">
                                 <p>Tổng số câu: <span class="result-number">${totalQuestions}</span></p>
@@ -461,6 +498,30 @@
                 `;
                 $('.exercises-container').html(resultHtml);
             }
+            $('#viewHistoryBtn').click(function() {
+                const historyContent = $('#historyContent');
+                historyContent.empty();
+
+                if (questionResults.length === 0) {
+                    historyContent.html('<p>Không có dữ liệu lịch sử.</p>');
+                    return;
+                }
+
+                questionResults.forEach((result, index) => {
+                    const resultHtml = `
+                        <div class="history-item">
+                            <h5>Câu ${index + 1}: ${result.question}</h5>
+                            <p><strong>Đáp án của bạn:</strong> ${result.userAnswer}</p>
+                            <p><strong>Đáp án đúng:</strong> ${result.correctAnswer}</p>
+                            <p><strong>Kết quả:</strong> ${result.isCorrect ? '<span style="color: green;">Đúng</span>' : '<span style="color: red;">Sai</span>'}</p>
+                            <p><strong>Giải thích:</strong> ${result.explanation}</p>
+                            <hr>
+                        </div>
+                    `;
+                    historyContent.append(resultHtml);
+                });
+            });
+
 
             $('#exerciseCarousel').on('slid.bs.carousel', function () {
                 const currentIndex = $('#exerciseCarousel .carousel-item.active').index();
@@ -477,7 +538,7 @@
             $(document).on('click', '.prev-slide', function () {
                 $('#exerciseCarousel').carousel('prev');
             });
-            startTimer(); // Khởi động bộ đếm thời gian
+            startTimer();
         });
     </script>
     

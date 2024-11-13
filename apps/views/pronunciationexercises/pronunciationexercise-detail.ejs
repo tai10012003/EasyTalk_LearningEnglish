@@ -122,6 +122,9 @@
         .result-content {
             text-align: center;
         }
+        .result-screen h2 {
+            margin: 10px 0 20px 0;
+        }
         .result-content p{
             margin: 20px 0;
             color: black;
@@ -193,6 +196,65 @@
             padding: 30px;
             font-size: 25px;
         }
+        .history-item {
+            margin-bottom: 20px;
+        }
+        .history-item h5 {
+            font-size: 16px;
+            line-height: 1.6;
+            font-weight: bold;
+        }
+        .history-item p {
+            font-size: 16px;
+            margin: 5px 0;
+        }
+        .speak-button {
+            border: 1px solid #9ba0a6;
+            background-color: #ffffff;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.485);
+        }
+
+        .accuracy-display {
+            text-align: center;
+        }
+
+        .accuracy-display.green {
+            color: green;
+        }
+
+        .accuracy-display.orange {
+            color: orange;
+        }
+
+        .accuracy-display.red {
+            color: red;
+        }
+
+        .analysis-message {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 10px;
+            text-align: center;
+        }
+
+
+        .detailed-analysis {
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .correct-word {
+            color: green;
+            font-weight: bold;
+        }
+
+        .incorrect-word {
+            color: red;
+            font-weight: bold;
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
@@ -221,7 +283,7 @@
                     </div>
                     <div id="completed-info" style="display: none; text-align: center;">
                         <h4>Thời gian đã làm: <span id="completedTime"></span></h4>
-                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn">Xem lịch sử</button>
+                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn" data-toggle="modal" data-target="#historyModal">Xem lịch sử</button>
                     </div>
                 </div>
             </div>
@@ -250,6 +312,7 @@
                                 <div class="carousel-item ${index === 0 ? 'active' : ''}">
                                     <div class="question-card p-3" data-correct-answer="${question.correctAnswer}" data-explanation="${question.explanation}" data-type="${question.type}">
                                         ${question.type === 'multiple-choice' ? `
+                                            <!-- Nội dung câu hỏi lựa chọn -->
                                             <h4>Nghe và chọn đáp án phát âm đúng:</h4>
                                             <h5 style="margin-top: 20px; line-height: 1.8;" id="ques-${index}">
                                                 Question ${index + 1}:
@@ -258,7 +321,7 @@
                                             <div class="d-flex justify-content-center align-items-center mt-3">
                                                 <button id="speak-choice" class="speak-button btn-sm btn-outline" data-text="${question.question}">🔊</button>
                                             </div>
-                                            <form  id="question-form-${index}" class="mt-4">
+                                            <form id="question-form-${index}" class="mt-4">
                                                 ${question.options
                                                 .filter(option => option.trim() !== '')
                                                 .map((option, optIndex) => `
@@ -273,18 +336,24 @@
                                                 <button type="button" class="btn btn-success submit-answer mt-4" data-index="${index}">Kiểm tra</button>
                                             </form>
                                         ` : `
+                                            <!-- Nội dung câu hỏi phát âm lại -->
                                             <h4>Phát âm lại sao cho đúng:</h4>
                                             <h5 style="margin-top: 20px; line-height: 1.8" id="ques-${index}">
                                                 <button class="speak-button btn-sm btn-outline mr-2" data-text="${question.question}">🔊</button>
-                                                Question ${index + 1}:  ${question.question}
+                                                Question ${index + 1}:  <span class="question-text">${question.question}</span>
                                             </h5>
-                                            <div class="mt-4">
-                                                <button type="button" class="btn record-btn" id="record-answer-${index}" data-index="${index}">Bắt đầu ghi âm</button>
-                                                <p id="recording-status-${index}" style="display: none; color: red;">Đang ghi âm...</p>
-                                                <audio id="user-audio-${index}" controls style="display: none;"></audio>
+                                            <div class="mt-4" style="text-align: center;">
+                                                <button type="button" class="btn record-btn" id="record-answer-${index}" data-index="${index}" style="width: 30%; display: inline-block; margin-top: 10px">
+                                                    Ghi âm
+                                                </button>
+                                                <p id="recording-status-${index}" style="display: none; color: green; font-weight: bold;"></p>
+                                                <div id="analysisResult-${index}" style="display: none; margin-top: 30px">
+                                                    <audio id="user-audio-${index}" controls style="display: none; margin-bottom: 25px;"></audio>
+                                                    <div id="accuracyDisplay-${index}" class="accuracy-display" style="font-size: 48px; font-weight: bold; margin: 20px 0;"></div>
+                                                    <div class="detailed-analysis" id="detailedAnalysis-${index}"></div>
+                                                </div>
                                             </div>
                                             <div class="explanation mt-4" style="display: none;"></div>
-                                            <button type="button" class="btn btn-success submit-answer mt-4" data-index-${index}">Kiểm tra</button>
                                         `}
                                     </div>
                                     <!-- Navigation buttons -->
@@ -371,21 +440,23 @@
                 }
     
                 if (isCorrect) {
-                    correctAnswers++; // Cộng số câu trả lời đúng
+                    correctAnswers++;
                 }
     
                 $(`#question-form-${index} input`).prop('disabled', true).addClass('disabled');
                 $(this).prop('disabled', true).addClass('disabled');
             });
-            $(document).on('click', '.record-btn', function() {
+            
+            $(document).on('click', '.record-btn', function () {
                 const index = $(this).data('index');
                 const status = $(`#recording-status-${index}`);
-                const userAudio = $(`#user-audio-${index}`);
                 const recordButton = $(this);
+                const audioElement = $(`#user-audio-${index}`);
+
                 if (recordButton.text() === 'Dừng ghi âm') {
                     if (mediaRecorder) {
                         mediaRecorder.stop();
-                        recordButton.text('Bắt đầu ghi âm');
+                        recordButton.text('Ghi âm');
                         status.hide();
                     }
                 } else {
@@ -404,20 +475,23 @@
 
                                 mediaRecorder.onstop = () => {
                                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                                    const audioUrl = URL.createObjectURL(audioBlob);
-                                    userAudio.attr('src', audioUrl);
-                                    userAudio.show();
+                                    const audioURL = URL.createObjectURL(audioBlob);
+                                    audioElement.attr('src', audioURL);
+                                    audioElement.show();
+                                    uploadAudio(audioBlob, index);
                                 };
                             })
                             .catch(error => {
                                 console.error('Lỗi khi truy cập microphone', error);
-                                alert('Lỗi không thể truy cập vào microphone. Vui lòng kiểm tra quyền truy cập microphone.');
+                                alert('Không thể truy cập vào microphone. Vui lòng kiểm tra quyền truy cập microphone.');
                             });
                     } else {
                         alert('Trình duyệt của bạn không hỗ trợ ghi âm.');
                     }
                 }
             });
+
+
             $('#submitQuizBtn').click(function() {
                 if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
                     clearInterval(timer);
@@ -446,7 +520,7 @@
 
                 const resultHtml = `
                     <div class="result-screen text-center">
-                        <h2 class="text-center">Kết quả bài Luyện tập</h2>
+                        <h2 class="text-center">KẾT QUẢ BÀI LUYỆN TẬP PHÁT ÂM</h2>
                         <div class="row">
                             <div class="col-md-6 result-content">
                                 <p>Tổng số câu: <span class="result-number">${totalQuestions}</span></p>
@@ -470,7 +544,87 @@
     
             startTimer();
         });
-    </script>      
+
+        function uploadAudio(audioBlob, index) {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            const exerciseId = window.location.pathname.split('/').pop();
+
+            $.ajax({
+                url: `/pronunciation-exercise/analyze/${exerciseId}/${index}`,
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    displayAnalysisResult(response, index);
+                },
+                error: function(error) {
+                    console.error('Lỗi khi tải lên và phân tích âm thanh:', error);
+                    alert('Đã xảy ra lỗi khi phân tích giọng nói.');
+                }
+            });
+        }
+
+        function displayAnalysisResult(response, index) {
+            if (response.success) {
+                const transcriptionWords = response.transcription.replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(' ');
+                const correctAnswerWords = $(`#ques-${index} .question-text`).text().replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(' ');
+
+                let matchCount = 0;
+                const totalCount = correctAnswerWords.length;
+                let detailedAnalysisHTML = "<p><strong>Chi tiết phát âm: </strong> ";
+
+                correctAnswerWords.forEach((correctWord, i) => {
+                    const transWord = transcriptionWords[i] || "";
+
+                    if (correctWord === transWord) {
+                        detailedAnalysisHTML += `<span class="correct-word">${correctWord} </span>`;
+                        matchCount++;
+                    } else if (transcriptionWords.includes(correctWord)) {
+                        detailedAnalysisHTML += `<span class="correct-word">${correctWord} </span>`;
+                        matchCount++;
+                    } else {
+                        detailedAnalysisHTML += `<span class="incorrect-word">${correctWord} </span>`;
+                    }
+                });
+
+                detailedAnalysisHTML += "</p>";
+                
+                const accuracy = ((matchCount / totalCount) * 100).toFixed(2);
+                
+                let accuracyColorClass = "";
+                let message = "";
+                if (accuracy < 50) {
+                    accuracyColorClass = "red";
+                    message = "Cần học lại phát âm.";
+                } else if (accuracy >= 50 && accuracy < 75) {
+                    accuracyColorClass = "orange";
+                    message = "Phát âm khá, cần cải thiện thêm.";
+                } else {
+                    accuracyColorClass = "green";
+                    message = "Phát âm tốt, giữ vững phong độ!";
+                }
+
+                $(`#accuracyDisplay-${index}`).text(`${accuracy}%`).removeClass('green orange red').addClass(accuracyColorClass);
+                
+                $(`#detailedAnalysis-${index}`).html(`
+                    <p class="analysis-message" style="color:${accuracyColorClass};">${message}</p>
+                    <p style="margin-top: 15px;"><strong>Kết quả phân tích:</strong> "${response.transcription}"</p>
+                    ${detailedAnalysisHTML}
+                `);
+
+                const analysisResultElement = document.getElementById(`analysisResult-${index}`);
+                if (analysisResultElement) {
+                    analysisResultElement.style.display = "block";
+                } else {
+                    console.error(`Element with id 'analysisResult-${index}' not found.`);
+                }
+            } else {
+                alert(response.message || "Lỗi khi phân tích giọng nói");
+            }
+        }
+    </script>  
     <script src="/static/js/jquery-1.12.1.min.js"></script>
     <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>

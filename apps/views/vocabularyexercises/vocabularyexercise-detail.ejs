@@ -92,6 +92,9 @@
         .btn {
             width: 100%;
         }
+        .result-screen h2 {
+            margin: 10px 0 20px 0;
+        }
         .result-content {
             text-align: center;
         }
@@ -168,12 +171,20 @@
             margin-bottom: 20px;
         }
         .history-item h5 {
-            font-size: 18px;
+            font-size: 16px;
+            line-height: 1.6;
             font-weight: bold;
         }
         .history-item p {
             font-size: 16px;
             margin: 5px 0;
+        }
+        .speak-button {
+            border: 1px solid #9ba0a6;
+            background-color: #ffffff;
+        }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.485);
         }
         .speak-button {
             border: 1px solid #9ba0a6;
@@ -203,36 +214,61 @@
                     <button id="submitQuizBtn" class="btn btn-primary submit-btn mb-4">Nộp bài</button>
                     <h5 id="questionListTitle">Danh sách câu hỏi:</h5>
                     <div class="question-list mt-3" id="question-list">
-                        <!-- Danh sách số câu hỏi sẽ được thêm vào qua AJAX -->
+
                     </div>
                     <div id="completed-info" style="display: none; text-align: center;">
                         <h4>Thời gian đã làm: <span id="completedTime"></span></h4>
-                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn">Xem lịch sử</button>
+                        <button class="btn btn-secondary mt-3" id="viewHistoryBtn" data-toggle="modal" data-target="#historyModal">Xem lịch sử</button>
                     </div>
                 </div>
-            </div>        
+            </div>  
+            <div class="modal" id="historyModal" tabindex="-1" role="dialog" aria-labelledby="historyModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="modal-title" id="historyModalLabel">LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG</h3>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div id="historyContent"></div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            </div>      
         </div>
     </div>
     <%- include('../partials/footer.ejs') %>
     <script>
         $(document).ready(function() {
-            let timeRemaining = 20 * 60; // 20 minutes
-            let correctAnswers = 0; // Đếm số câu trả lời đúng
+            let timeRemaining = 20 * 60;
+            let correctAnswers = 0;
+            const questionResults = [];
             let totalQuestions = $('.carousel-item').length;
-            let timer; // Biến lưu trữ timer để có thể dừng khi cần
-            // Bắt đầu đếm ngược thời gian khi trang tải
+            let timer;
+
             const carouselInner = $('#carousel-inner');
             const questionList = $('#question-list');
-            const exerciseId = window.location.pathname.split('/').pop(); // Lấy ID bài tập từ URL
+            const exerciseId = window.location.pathname.split('/').pop();
 
-            // Gọi API để lấy chi tiết bài tập
             $.ajax({
-                url: `/vocabulary-exercise/api/${exerciseId}`, // Đường dẫn API của bạn
+                url: `/vocabulary-exercise/api/${exerciseId}`,
                 method: 'GET',
                 success: function(data) {
                     if (data && data.questions && data.questions.length > 0) {
-                        totalQuestions = data.questions.length; // Cập nhật tổng số câu hỏi
+                        totalQuestions = data.questions.length;
                         data.questions.forEach((question, index) => {
+                            questionResults.push({
+                                question: question.question,
+                                userAnswer: "Chưa trả lời",
+                                correctAnswer: question.correctAnswer,
+                                isCorrect: false,
+                                explanation: question.explanation
+                            });
                             let questionHtml = '';
 
                             if (question.type === 'multiple-choice') {
@@ -331,7 +367,7 @@
                     if (timeRemaining < 0) {
                         clearInterval(timer);
                         alert("Hết giờ làm bài!");
-                        $('#submitQuizBtn').click(); // Tự động nộp bài khi hết giờ
+                        $('#submitQuizBtn').click();
                     }
                 }, 1000);
             }
@@ -351,72 +387,71 @@
                 }
             }
 
-            // Sự kiện chuyển slide câu hỏi khi nhấn vào số câu hỏi
             $(document).on('click', '.question-number', function () {
                 const index = $(this).data('index');
                 $('#exerciseCarousel').carousel(index);
             });
 
-            // Sự kiện chọn đáp án và kiểm tra kết quả
             $(document).on('click', '.submit-answer', function () {
                 const index = $(this).data('index');
                 const questionCard = $(this).closest('.question-card');
                 const questionType = questionCard.data('type');
-                const correctAnswer = questionCard.data('correct-answer');
+                const correctAnswer = questionCard.data('correct-answer').trim().toLowerCase();
                 const explanation = questionCard.data('explanation');
-
-                let answer = '';
+                const questionText = questionCard.find('.question-title').text();
+                let userAnswer = '';
+                let isCorrect = false;
 
                 if (questionType === 'multiple-choice') {
                     const selectedOption = $(`input[name="answer"]:checked`, `#question-form-${index}`);
                     if (selectedOption.length > 0) {
-                        answer = selectedOption.val();
+                        userAnswer = selectedOption.val();
                     } else {
                         alert("Vui lòng chọn một đáp án.");
                         return;
                     }
                 } else if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
-                    answer = $(`textarea[name="answer"]`, `#question-form-${index}`).val().trim();
-                    if (answer === '') {
+                    userAnswer = $(`textarea[name="answer"]`, `#question-form-${index}`).val().trim().toLowerCase();
+                    if (userAnswer === '') {
                         alert("Vui lòng nhập câu trả lời.");
                         return;
                     }
                 }
 
-                // Kiểm tra kết quả câu trả lời
+                isCorrect = userAnswer === correctAnswer;
+                if (isCorrect) {
+                    questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
+                    $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
+                    correctAnswers++;
+                } else {
+                    questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}. <br> Giải thích: ${explanation}`).show();
+                    $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
+                }
+
+                questionResults[index].userAnswer = userAnswer || "Không trả lời";
+                questionResults[index].isCorrect = isCorrect;
+
                 if (questionType === 'fill-in-the-blank' || questionType === 'translation') {
                     const answerElement = $(`textarea[name="answer"]`, `#question-form-${index}`);
                     answerElement.removeClass('correct-answer incorrect-answer');
-                    if (answer === correctAnswer) {
+                    if (isCorrect) {
                         answerElement.addClass('correct-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
-                        correctAnswers++;
                     } else {
                         answerElement.addClass('incorrect-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}. <br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
                     }
                 } else if (questionType === 'multiple-choice') {
-                    if (answer === correctAnswer) {
+                    if (isCorrect) {
                         $(`input[name="answer"]:checked + .form-check-label`, `#question-form-${index}`).addClass('correct-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời đúng.<br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#28a745').css('color', 'white');
-                        correctAnswers++;
                     } else {
                         $(`input[name="answer"]:checked + .form-check-label`, `#question-form-${index}`).addClass('incorrect-answer');
                         $(`input[name="answer"][value="${correctAnswer}"] + .form-check-label`, `#question-form-${index}`).addClass('correct-answer');
-                        questionCard.find('.explanation').html(`Bạn đã trả lời sai. Đáp án đúng là: ${correctAnswer}.<br> Giải thích: ${explanation}`).show();
-                        $(`#question-btn-${index}`).css('background-color', '#dc3545').css('color', 'white');
                     }
                 }
 
-                // Khóa form sau khi đã trả lời
                 $(`#question-form-${index} input, #question-form-${index} textarea`).prop('disabled', true).addClass('disabled');
                 $(this).prop('disabled', true).addClass('disabled');
             });
 
-            // Xử lý sự kiện nộp bài
             $('#submitQuizBtn').click(function() {
                 if (confirm('Bạn có chắc chắn muốn nộp bài?')) {
                     clearInterval(timer);
@@ -424,7 +459,6 @@
                 }
             });
     
-            // Hàm nộp bài và chuyển qua màn hình kết quả
             function submitQuiz() {
                 const timeTaken = 20 * 60 - timeRemaining;
                 const minutesTaken = Math.floor(timeTaken / 60);
@@ -438,7 +472,7 @@
 
             function showResultScreen() {
                 let percentageCorrect = 0;
-                const incorrectAnswers = totalQuestions - correctAnswers; // Số câu trả lời sai
+                const incorrectAnswers = totalQuestions - correctAnswers;
                 if (totalQuestions > 0) {
                     percentageCorrect = (correctAnswers / totalQuestions) * 100;
                 }
@@ -447,7 +481,7 @@
 
                 const resultHtml = `
                     <div class="result-screen text-center">
-                        <h2 class="text-center">Kết quả bài Luyện tập</h2>
+                        <h2 class="text-center">KẾT QUẢ BÀI LUYỆN TẬP TỪ VỰNG</h2>
                         <div class="row">
                             <div class="col-md-6 result-content">
                                 <p>Tổng số câu: <span class="result-number">${totalQuestions}</span></p>
@@ -468,7 +502,31 @@
                 $('.exercises-container').html(resultHtml);
             }
 
-            // Xử lý sự kiện khi chuyển slide
+            $('#viewHistoryBtn').click(function() {
+                const historyContent = $('#historyContent');
+                historyContent.empty();
+
+                if (questionResults.length === 0) {
+                    historyContent.html('<p>Không có dữ liệu lịch sử.</p>');
+                    return;
+                }
+
+                // Tạo danh sách các câu hỏi và kết quả
+                questionResults.forEach((result, index) => {
+                    const resultHtml = `
+                        <div class="history-item">
+                            <h5>Câu ${index + 1}: ${result.question}</h5>
+                            <p><strong>Đáp án của bạn:</strong> ${result.userAnswer}</p>
+                            <p><strong>Đáp án đúng:</strong> ${result.correctAnswer}</p>
+                            <p><strong>Kết quả:</strong> ${result.isCorrect ? '<span style="color: green;">Đúng</span>' : '<span style="color: red;">Sai</span>'}</p>
+                            <p><strong>Giải thích:</strong> ${result.explanation}</p>
+                            <hr>
+                        </div>
+                    `;
+                    historyContent.append(resultHtml);
+                });
+            });
+
             $('#exerciseCarousel').on('slid.bs.carousel', function () {
                 const currentIndex = $('#exerciseCarousel .carousel-item.active').index();
                 $('#current-question').text(currentIndex + 1);
@@ -477,7 +535,6 @@
                 $('.next-slide').prop('disabled', currentIndex === $('.carousel-item').length - 1);
             });
 
-            // Chuyển slide khi nhấn "Next" hoặc "Previous"
             $(document).on('click', '.next-slide', function () {
                 $('#exerciseCarousel').carousel('next');
             });
@@ -485,7 +542,7 @@
             $(document).on('click', '.prev-slide', function () {
                 $('#exerciseCarousel').carousel('prev');
             });
-            startTimer(); // Khởi động bộ đếm thời gian
+            startTimer();
         });
     </script>
     

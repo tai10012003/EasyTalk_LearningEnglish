@@ -66,10 +66,10 @@
                                             <div class="form-group">
                                                 <label>Câu hỏi:</label>
                                                 <% question.options.forEach((option, optIndex) => { %>
-                                                    <input type="text" class="form-control" name="questions[<%= index %>][options][]" value="<%= option %>" placeholder="Lựa chọn <%= optIndex + 1 %>" required>
+                                                    <input type="text" class="form-control" name="questions[<%= index %>][options][]" value="<%= option %>" placeholder="Lựa chọn <%= optIndex + 1 %>">
                                                 <% }) %>
                                                 <% for (let i = question.options.length; i < 4; i++) { %>
-                                                    <input type="text" class="form-control" name="questions[<%= index %>][options][]" placeholder="Lựa chọn <%= i + 1 %>" required>
+                                                    <input type="text" class="form-control" name="questions[<%= index %>][options][]" placeholder="Lựa chọn <%= i + 1 %>">
                                                 <% } %>
                                             </div>
                                         <% } else if (question.type === 'pronunciation') { %>
@@ -125,8 +125,8 @@
                         <label>Câu hỏi:</label>
                         <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Lựa chọn 1" required>
                         <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Lựa chọn 2" required>
-                        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Lựa chọn 3" required>
-                        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Lựa chọn 4" required>
+                        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Lựa chọn 3">
+                        <input type="text" class="form-control" name="questions[${index}][options][]" placeholder="Lựa chọn 4">
                     </div>
                     ` : type === 'pronunciation' ? `
                     <div class="form-group">

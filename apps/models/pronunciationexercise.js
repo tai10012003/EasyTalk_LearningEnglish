@@ -1,16 +1,16 @@
 class PronunciationQuestion {
     question;
-    type; // 'multiple-choice', 'fill-in-the-blank', 'translation'
+    type;
     correctAnswer;
-    options = []; // Chỉ khi loại là multiple-choice mới có options
+    options = [];
     explanation;
 }
 
 class PronunciationExercise {
     _id;
     title;
-    createdAt = new Date(); // Tự động gán ngày tạo
-    questions = []; // Mảng các câu hỏi
+    createdAt = new Date();
+    questions = [];
 
 
     addQuestion(question, type, correctAnswer, explanation, options = []) {
