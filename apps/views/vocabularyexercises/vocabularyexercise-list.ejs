@@ -93,17 +93,122 @@
             background-color: #007bff;
             border-color: #007bff;
         }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.485);
+        }
+        .modal-content {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: none;
+            padding: 20px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .modal-header .close {
+            color: #333;
+            font-size: 1.4rem;
+            opacity: 0.8;
+        }
+
+        .modal-header .close:hover {
+            opacity: 1;
+            color: #ff6666;
+        }
+
+        .modal-body {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .modal-body p {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .modal-body ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .modal-body ul li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body ul li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            top: 3px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .modal-footer {
+            border-top: none;
+            justify-content: center;
+            padding-top: 0;
+        }
     </style>
 </head>
 <body>
     <%- include('../partials/menu.ejs') %>
     <div class="container exercises-container">
-        <h2 class="text-center">Luyện Tập Từ Vựng</h2>
+        <h2 class="text-center">
+            LUYỆN TẬP TỪ VỰNG
+            <i class="fas fa-question-circle help-icon" data-toggle="modal" data-target="#helpModal"></i>
+        </h2>
         <div id="exercises-list" class="row"></div>
 
         <nav aria-label="Page navigation">
             <ul class="pagination" id="pagination-controls"></ul>
         </nav>
+    </div>
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guideModalLabel">Hướng Dẫn Bài Luyện Tập Từ Vựng</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Chọn bài tập từ vựng mà bạn muốn luyện tập từ danh sách.</p>
+                    <p>Mỗi bài tập sẽ có các câu hỏi từ vựng bao gồm các dạng câu hỏi như: trắc nghiệm, điền từ vào lỗ trống và dịch nghĩa.</p>
+                    <p><strong>Dạng câu hỏi:</strong></p>
+                    <ul>
+                        <li><strong>Trắc Nghiệm:</strong> Chọn đáp án đúng nhất trong các lựa chọn được đưa ra.</li>
+                        <li><strong>Điền Từ Vào Chỗ Trống:</strong> Điền từ thích hợp vào ô trống để hoàn thành câu.</li>
+                        <li><strong>Dịch Nghĩa:</strong> Dịch câu từ Tiếng Việt sang Tiếng Anh hoặc ngược lại.</li>
+                    </ul>
+                    <p><strong>Lưu ý:</strong></p>
+                    <ul>
+                        <li>Nhấn <strong>Kiểm tra</strong> sau khi trả lời mỗi câu hỏi để xem đáp án và giải thích.</li>
+                        <li>Mỗi bộ đề có số lượng câu hỏi khác nhau, hãy cố gắng hoàn thành hết các câu hỏi.</li>
+                        <li>Thời gian làm bài là 20 phút. Hãy cố gắng hoàn thành đúng giờ nhé.</li>
+                        <li>Nhấn <strong>Nộp bài</strong> bài thì hệ thống sẽ hiển thị kết quả bài luyện tập gồm có: số câu hỏi, số câu đúng, số câu sai, tỷ lệ chính xác (%). Nhấn <strong>Xem lịch sử</strong> để thấy những câu mình đã làm, để biết mình đúng hoặc sai chỗ nào.</li>
+                    </ul>
+                    <p>Chúc bạn luyện tập tốt và cải thiện từ vựng của mình!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
     </div>
     <%- include('../partials/footer.ejs') %>
     <script src="/static/js/jquery-1.12.1.min.js"></script>

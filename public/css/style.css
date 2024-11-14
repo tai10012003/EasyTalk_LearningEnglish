@@ -6944,7 +6944,7 @@ h1, h2, h3, h4, h5, h6 {
 /* line 2, E:/172 Etrain Education/172_Etrain_Education_html/sass/_footer.scss */
 .footer-area {
   background-color: #f7f7f7;
-  padding: 50px 0px 20px;
+  padding: 35px 0px 10px;
 }
 
 @media (max-width: 991px) {
@@ -7212,8 +7212,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* line 195, E:/172 Etrain Education/172_Etrain_Education_html/sass/_footer.scss */
 .footer-area .copyright_part_text {
-  padding-top: 26px;
-  margin-top: 50px;
+  padding-top: 10px;
+  margin-top: 20px;
   border-top: 1px solid #dedede;
 }
 

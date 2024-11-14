@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const UserService = require("../services/userService");
+const UserProgressService = require("../services/userprogressService")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
@@ -8,6 +9,7 @@ const { getGoogleAuthURL, getGoogleUser } = require('./../util/googleAuth');
 const verifyToken = require("./../util/VerifyToken")
 const config = require("../config/setting.json");
 const userService = new UserService();
+const userProgressService = new UserProgressService();
 let verificationCodes = {};
 
 router.get("/register", (req, res) => {
@@ -187,17 +189,44 @@ router.get("/profile", (req, res) => {
   res.render("users/profile", { user: req.user });
 });
 
-router.post("/profile/update", async (req, res) => {
+router.get("/profile/data", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const user = await userService.getUser(userId);
+    if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng !" });
+    const userProgress = await userProgressService.getUserProgressByUserId(userId);
+    if (!userProgress) {
+      return res.status(404).json({ message: "User progress not found" });
+    }
+
+    res.json({
+      success: true,
+      user,
+      achievements: {
+        unlockedGates: userProgress.unlockedGates.length,
+        unlockedStages: userProgress.unlockedStages.length,
+        experiencePoints: userProgress.experiencePoints,
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching profile data:", error);
+    res.status(500).json({ message: "Error fetching profile data", error });
+  }
+});
+
+
+router.post("/profile/update", verifyToken, async (req, res) => {
   const { username, email } = req.body;
   const userId = req.user.id;
 
   try {
-      const updatedUser = await userService.updateUser({ _id: userId, username, email });
-      if (!updatedUser) return res.status(404).json({ message: "User not found" });
+    const updatedUser = await userService.updateUser({ _id: userId, username, email });
+    if (!updatedUser) return res.status(404).json({ message: "Không tìm thấy người dùng !" });
 
-      res.json({ message: "Profile updated successfully", user: updatedUser });
+    res.json({ success: true, message: "Thông tin của bạn đã được cập nhật thành công !", user: updatedUser });
   } catch (error) {
-      res.status(500).json({ message: "Error updating profile", error });
+    console.error("Error updating profile:", error);
+    res.status(500).json({ message: "Error updating profile", error });
   }
 });
 

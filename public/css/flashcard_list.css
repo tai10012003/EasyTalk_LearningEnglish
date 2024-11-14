@@ -1,8 +1,10 @@
 .flashcard-container {
-    margin: 130px auto 50px auto;
+    margin: 110px auto 50px auto;
     max-width: 1000px;
-    padding: 20px 50px 50px 50px;
-    border: 1px solid #e1e1e1;
+    padding: 5px 50px 50px 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
+    border-radius: 10px;
+    background-color: #fff;
 }
 .flashcard-list-action-btn {
     font-size: 13px;
@@ -14,7 +16,8 @@
     padding: 20px;
     border-radius: 10px;
     margin-bottom: 15px;
-    background-color: #f8f9fa;
+    background-color: #fefcfc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
     position: relative;
 }
 
@@ -60,4 +63,19 @@
 
 .pronunciation {
     font-style: italic;
+}
+.btn-primary {
+    background-color: #333;
+    border-color: #333;
+    font-size: 13px;
+}
+
+.btn-primary:hover {
+    background-color: #fff;
+    border-color: #333;
+    color: #333;
+}
+
+.content p {
+    margin-bottom: 20px;
 }

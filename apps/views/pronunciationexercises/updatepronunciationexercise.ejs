@@ -64,7 +64,7 @@
 
                                         <% if (question.type === 'multiple-choice') { %>
                                             <div class="form-group">
-                                                <label>Câu hỏi:</label>
+                                                <label>Lựa chọn:</label>
                                                 <% question.options.forEach((option, optIndex) => { %>
                                                     <input type="text" class="form-control" name="questions[<%= index %>][options][]" value="<%= option %>" placeholder="Lựa chọn <%= optIndex + 1 %>">
                                                 <% }) %>
@@ -73,10 +73,6 @@
                                                 <% } %>
                                             </div>
                                         <% } else if (question.type === 'pronunciation') { %>
-                                            <div class="form-group">
-                                                <label for="audio-url-<%= index %>">Audio URL:</label>
-                                                <input type="text" class="form-control" id="audio-url-<%= index %>" name="questions[<%= index %>][audioUrl]" value="<%= question.audioUrl %>">
-                                            </div>
                                         <% } %>
 
                                         <div class="form-group">

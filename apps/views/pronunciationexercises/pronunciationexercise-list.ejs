@@ -28,14 +28,12 @@
     <link rel="stylesheet" href="/static/css/main.css">
 
     <style>
-        /* Container tổng thể cho danh sách bài tập */
         .exercises-container {
             margin: 140px auto 50px auto;
             max-width: 1000px;
             min-width: 300px;
         }
 
-        /* Tiêu đề chính của trang */
         h2 {
             color: #333;
             margin-bottom: 30px;
@@ -43,7 +41,6 @@
             font-weight: bold;
         }
 
-        /* Định dạng từng thẻ bài tập */
         .exercise-card {
             margin-top: 15px;
             background-color: #fff;
@@ -55,18 +52,15 @@
             transition: all 0.3s ease-in-out;
         }
 
-        /* Hiệu ứng khi hover vào thẻ bài tập */
         .exercise-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
 
-        /* Căn chỉnh nội dung trong thẻ bài tập */
         .exercise-card .row {
             align-items: center;
         }
 
-        /* Phần thông tin bài tập */
         .exercise-info {
             padding-left: 20px;
         }
@@ -122,16 +116,120 @@
             background-color: #007bff;
             border-color: #007bff;
         }
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.485);
+        }
+        .modal-content {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            border: none;
+            padding: 20px;
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .modal-header .close {
+            color: #333;
+            font-size: 1.4rem;
+            opacity: 0.8;
+        }
+
+        .modal-header .close:hover {
+            opacity: 1;
+            color: #ff6666;
+        }
+
+        .modal-body {
+            color: #555;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .modal-body p {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .modal-body ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        .modal-body ul li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 8px;
+        }
+
+        .modal-body ul li::before {
+            content: "✔";
+            position: absolute;
+            left: 0;
+            top: 3px;
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .modal-footer {
+            border-top: none;
+            justify-content: center;
+            padding-top: 0;
+        }
     </style>
 </head>
 <body>
     <%- include('../partials/menu.ejs') %>
     <div class="container exercises-container">
-        <h2 class="text-center">Luyện Tập Phát Âm</h2>
+        <h2 class="text-center">
+            LUYỆN TẬP PHÁT ÂM
+            <i class="fas fa-question-circle help-icon" data-toggle="modal" data-target="#helpModal"></i>
+        </h2>
         <div id="exercises-list" class="row"></div>
         <nav aria-label="Page navigation">
             <ul class="pagination" id="pagination-controls"></ul>
         </nav>
+    </div>
+    <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="guideModalLabel">Hướng Dẫn Bài Luyện Tập Phát Âm</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Chọn bài luyện tập phát âm mà bạn muốn luyện tập từ danh sách.</p>
+                    <p>Mỗi bài luyện tập sẽ có các câu hỏi phát âm với hai dạng câu hỏi chính: chọn đáp án đúng và phát âm.</p>
+                    <p><strong>Dạng câu hỏi:</strong></p>
+                    <ul>
+                        <li><strong>Trắc nghiệm:</strong> Nghe một câu và chọn đáp án đúng nhất từ các lựa chọn đưa ra.</li>
+                        <li><strong>Phát Âm:</strong> Người dùng sẽ nghe một câu hoặc cụm từ, sau đó phát âm lại. Hệ thống sẽ ghi lại giọng nói, phân tích và hiển thị độ chính xác theo tỷ lệ phần trăm (%).</li>
+                    </ul>
+                    <p><strong>Lưu ý:</strong></p>
+                    <ul>
+                        <li>Nhấn <strong>Kiểm tra</strong> sau khi hoàn thành mỗi câu hỏi để xem kết quả và giải thích.</li>
+                        <li>Khi thực hiện câu hỏi <strong>phát âm</strong>, hệ thống sẽ ghi lại giọng nói của bạn, phân tích và chỉ ra các từ phát âm đúng và sai. Độ chính xác sẽ được hiển thị dưới dạng phần trăm.</li>
+                        <li>Thời gian làm bài là 20 phút. Hãy cố gắng hoàn thành đúng giờ nhé.</li>
+                        <li>Sau khi nhấn <strong>Nộp bài</strong>, hệ thống sẽ hiển thị kết quả luyện tập, bao gồm: tổng số câu hỏi, số câu trả lời đúng, tỷ lệ chính xác (%) và phân tích chi tiết về các từ bạn đã phát âm đúng hoặc sai. Nhấn <strong>Xem lịch sử</strong> để xem lại các câu hỏi đã làm và đánh giá độ chính xác của từng câu.</li>
+                    </ul>
+                    <p>Chúc bạn luyện tập tốt và cải thiện kỹ năng phát âm của mình!</p>
+                </div>                
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Đóng</button>
+                </div>
+            </div>
+        </div>
     </div>
     <%- include('../partials/footer.ejs') %>
     <script src="/static/js/jquery-1.12.1.min.js"></script>

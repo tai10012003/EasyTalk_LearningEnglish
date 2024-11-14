@@ -1,8 +1,10 @@
 .flashcard-container {
-    margin: 130px auto 50px auto;
+    margin: 120px auto 50px auto;
     max-width: 1000px;
-    padding: 50px;
-    border: 1px solid #e1e1e1;
+    padding: 25px 50px 50px 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
+    border-radius: 10px;
+    background-color: #fff;
 }
 .flashcard-container .my-4 {
     margin-top: 0 !important;
@@ -43,6 +45,7 @@
 }
 
 .flashcard-front {
+    font-size: 16px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -53,8 +56,12 @@
     transform: rotateY(180deg);
     padding: 20px;
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+}
+.flashcard-back p {
+    font-size: 17px;
+    margin: 10px;
 }
 
 .btn-flip {
@@ -78,16 +85,15 @@
 }
 
 .custom-btn {
-    background-color: #2eb635;
+    background-color: #2a732d;
     color: white;
+    margin-top: 15px;
     border-radius: 20px;
     padding: 10px;
     font-size: 16px;
     border: none;
-    width: 150px;
-    /* Chiều rộng cố định */
+    width: 220px;
     height: 50px;
-    /* Chiều cao cố định */
     transition: background-color 0.3s ease, transform 0.3s ease;
     display: flex;
     align-items: center;

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Luyện tập Từ Vựng Flashcard</title>
+    <title>Luyện Tập Từ Vựng Flashcard</title>
     <link rel="icon" href="/static/images/favicon.png">
 
         <!-- Bootstrap CSS -->
@@ -43,15 +43,14 @@
         <div class="content">
           <div class="row align-items-center">
             <div class="col-md-12">
-              <h2 class="my-4">Luyện tập: <%= flashcardList.name %></h2>
+              <h2 class="my-4" style="text-transform: uppercase;">Luyện tập: <%= flashcardList.name %></h2>
             </div>
             <div class="col-md-12">
-              <button
-                class="btn btn-outline-danger btn-lg btn-block mb-4 w-100"
-                onclick="exitReviewing()"
-              >
-                <i class="bi bi-calendar-x"></i> Dừng học list từ này
-              </button>
+              <div class="d-flex justify-content-center">
+                <button class="btn btn-outline-danger btn-lg btn-block mt-3 mb-3" style="width: 70%;" onclick="exitReviewing()">
+                  <i class="bi bi-calendar-x"></i> Dừng học danh sách từ này
+                </button>
+              </div>              
             </div>
           </div>
         </div>
@@ -66,30 +65,21 @@
             onclick="flipCard()"
           ></div>
         </div>
-  
-        <!-- Navigation Buttons -->
         <div class="d-flex justify-content-center mt-4">
           <div class="row">
-            <div class="col-md-4">
-              <button class="btn custom-btn mx-2" onclick="prevCard()">
-                Prev
+            <div class="col-md-6">
+              <button class="btn custom-btn mx-2" onclick="removeCurrentFlashcard()">
+                Loại từ ra khỏi danh sách
               </button>
             </div>
-            <div class="col-md-4">
-              <button
-                class="btn custom-btn mx-2"
-                onclick="removeCurrentFlashcard()"
-              >
-                Loại từ này khỏi list
-              </button>
-            </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
               <button class="btn custom-btn mx-2" onclick="nextCard()">
-                Next
+                Tiếp theo
               </button>
             </div>
           </div>
         </div>
+
       </div>
     </div>
     <%- include('../partials/footer.ejs') %>
@@ -109,12 +99,16 @@
 
       function removeCurrentFlashcard() {
         if (flashcards.length > 0) {
-          flashcards.splice(currentCardIndex, 1);
-          if (currentCardIndex >= flashcards.length) {
-            currentCardIndex = flashcards.length - 1;
+              const isConfirmed = confirm("Bạn có muốn loại từ này khỏi luyện tập ?");
+              
+              if (isConfirmed) {
+                  flashcards.splice(currentCardIndex, 1);
+                  if (currentCardIndex >= flashcards.length) {
+                      currentCardIndex = flashcards.length - 1;
+                  }
+                  displayCard(currentCardIndex);
+              }
           }
-          displayCard(currentCardIndex); 
-        }
       }
 
       const shuffleFlashcards = shuffleFlashcardList(flashcards);
@@ -138,9 +132,7 @@
               <button class="btn btn-light btn-sm mx-2" onclick="playPronou(event)">
                 <i class="bi bi-volume-up"></i>
               </button>
-              <em class="pronunciation">(${flashcard.pos || "N/A"}) ${
-          flashcard.pronunciation || ""
-        }</em>
+              <em class="pronunciation">(${flashcard.pos || "N/A"}) ${flashcard.pronunciation || ""}</em>
             </div>
             <i class="bi bi-arrow-repeat btn-flip"></i>
           </div>
@@ -150,14 +142,7 @@
             <div>
               <p><strong>Định nghĩa:</strong> ${flashcard.meaning}</p>
               <p><strong>Ví dụ:</strong>
-                <ul>${
-                  flashcard.exampleSentence
-                    ? flashcard.exampleSentence
-                        .split(".")
-                        .map((example) => `<li>${example}</li>`)
-                        .join("")
-                    : ""
-                }</ul>
+                ${flashcard.exampleSentence}
               </p>
             </div>
             
@@ -171,11 +156,12 @@
       }
 
       function nextCard() {
-        if (currentCardIndex < flashcards.length - 1) {
-          currentCardIndex++;
-          displayCard(currentCardIndex);
+        if (flashcards.length > 0) {
+          const randomIndex = Math.floor(Math.random() * flashcards.length);
+          displayCard(randomIndex);
         }
       }
+
 
       function prevCard() {
         if (currentCardIndex > 0) {
