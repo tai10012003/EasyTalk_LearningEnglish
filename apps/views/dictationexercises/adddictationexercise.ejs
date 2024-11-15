@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Bài Nghe Chép Chính Tả</title>
+    <link rel="icon" href="/static/images/favicon.png">
+    <script src="/static/js/checkadmin.js"></script>
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <%- include('../admin/partials/menu.ejs') %>
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container dictation-container">
+                        <h1 class="text-center dictation-title">THÊM BÀI NGHE CHÉP CHÍNH TẢ MỚI</h1>
+                        <form id="addDictationForm">
+                            <div class="form-group">
+                                <label for="dictation-title">Tiêu đề:</label>
+                                <input type="text" class="form-control" id="dictation-title" name="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="dictation-content">Nội dung:</label>
+                                <textarea class="form-control" id="dictation-content" name="content" rows="10" required placeholder="Nhập nội dung nghe chép chính tả"></textarea>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-submit-dictation" onclick="addDictation()">Thêm</button>
+                        </form>                        
+                    </div>
+                </div>
+            </div>    
+        </div>
+    </div>
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+
+    <script>
+        function addDictation() {
+            const title = document.getElementById("dictation-title").value;
+            const content = document.getElementById("dictation-content").value;
+
+            $.ajax({
+                url: '/admin/dictation-exercise/api/add',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ title, content }),
+                success: function () {
+                    alert("Bài nghe chép chính tả đã được thêm thành công!");
+                    window.location.href = "/admin/dictation-exercise";
+                },
+                error: function (error) {
+                    console.error("Error adding dictation:", error);
+                    alert("Lỗi khi thêm bài nghe chép chính tả");
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cập Nhật Bài Nghe Chép Chính Tả</title>
+    <link rel="icon" href="/static/images/favicon.png">
+    <script src="/static/js/checkadmin.js"></script>
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+
+<body>
+    <div class="wrapper">
+        <%- include('../admin/partials/menu.ejs') %>
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container dictation-update-container">
+                        <h1 class="text-center dictation-update-title">CẬP NHẬT BÀI NGHE CHÉP CHÍNH TẢ</h1>
+                        <form id="editDictationForm" enctype="multipart/form-data">
+                            <input type="hidden" name="dictationId" value="<%= dictation._id %>">
+                            <div class="form-group">
+                                <label for="title">Tiêu đề:</label>
+                                <input type="text" id="title" name="title" value="<%= dictation.title %>" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="content">Nội dung:</label>
+                                <textarea id="content" name="content" class="form-control" rows="10" required><%= dictation.content %></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="createdAt">Ngày tạo: </label>
+                                <p style="color: #333; font-weight: bold;"><%= new Date(dictation.createdAt).toLocaleString() %></p>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-submit-dictation" onclick="updateDictation()">Lưu</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- JS Files -->
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+    
+    <script>
+        function updateDictation() {
+            const dictationId = $("#editDictationForm input[name='dictationId']").val();
+            const title = $("#title").val();
+            const content = $("#content").val();
+
+            $.ajax({
+                url: `/admin/dictation-exercise/api/update/${dictationId}`,
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify({ title, content }),
+                success: function () {
+                    alert("Bài nghe chép chính tả đã được cập nhật thành công!");
+                    window.location.href = "/admin/dictation-exercise";
+                },
+                error: function (error) {
+                    console.error("Error updating dictation:", error);
+                    alert("Đã xảy ra lỗi khi cập nhật bài nghe chép chính tả.");
+                }
+            });
+        }
+
+    </script>
+</body>
+</html>

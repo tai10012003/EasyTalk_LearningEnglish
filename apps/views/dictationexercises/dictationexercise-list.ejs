@@ -223,42 +223,41 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>  
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-        fetchDictationExercises(1); // Khởi tạo dữ liệu với trang đầu tiên
-    });
+            fetchDictationExercises(1);
+        });
 
-    function fetchDictationExercises(page = 1) {
-        fetch(`/dictation-exercise/api/dictation-exercises?page=${page}&limit=2`)
-            .then(response => response.json())
-            .then(data => {
-                const exercisesList = document.getElementById("exercises-list");
-                const paginationControls = document.getElementById("pagination-controls");
-                exercisesList.innerHTML = '';
-                paginationControls.innerHTML = '';
+        function fetchDictationExercises(page = 1) {
+            fetch(`/dictation-exercise/api/dictation-exercises?page=${page}&limit=6`)
+                .then(response => response.json())
+                .then(data => {
+                    const exercisesList = document.getElementById("exercises-list");
+                    const paginationControls = document.getElementById("pagination-controls");
+                    exercisesList.innerHTML = '';
+                    paginationControls.innerHTML = '';
 
-                if (data.success && data.data && data.data.length > 0) {
-                    data.data.forEach((exercise) => {
-                        const exerciseCard = `
-                            <div class="col-md-4">
-                                <div class="exercise-card">
-                                    <h4>${exercise.title}</h4>
-                                    <p>${exercise.content.split('.').length} câu</p>
-                                    <a href="/dictation-exercise/detail/${exercise._id}" class="detail-link">Luyện tập</a>
+                    if (data.success && data.dictationExercises && data.dictationExercises.length > 0) {
+                        data.dictationExercises.forEach((exercise) => {
+                            const exerciseCard = `
+                                <div class="col-md-4">
+                                    <div class="exercise-card">
+                                        <h4>${exercise.title}</h4>
+                                        <p>${exercise.content.split('.').length} câu</p>
+                                        <a href="/dictation-exercise/detail/${exercise._id}" class="detail-link">Luyện tập</a>
+                                    </div>
                                 </div>
-                            </div>
-                        `;
-                        exercisesList.innerHTML += exerciseCard;
-                    });
-                    renderPagination(data.currentPage, data.totalPages);
-                } else {
-                    exercisesList.innerHTML = '<p class="text-center">Không có bài luyện nghe chép chính tả nào.</p>';
-                }
-            })
-            .catch(error => console.error('Error fetching dictation exercises:', error));
-    }
+                            `;
+                            exercisesList.innerHTML += exerciseCard;
+                        });
+                        renderPagination(data.currentPage, data.totalPages);
+                    } else {
+                        exercisesList.innerHTML = '<p class="text-center">Không có bài luyện nghe chép chính tả nào.</p>';
+                    }
+                })
+                .catch(error => console.error('Error fetching dictation exercises:', error));
+        }
 
-    function renderPagination(currentPage, totalPages) {
+        function renderPagination(currentPage, totalPages) {
             const paginationControls = document.getElementById("pagination-controls");
-
             if (currentPage > 1) {
                 paginationControls.innerHTML += `
                     <li class="page-item">
@@ -283,8 +282,6 @@
                 `;
             }
         }
-
-
     </script>
 </body>
 </html>

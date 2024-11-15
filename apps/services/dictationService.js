@@ -15,37 +15,37 @@ class DictationService {
         this.dictationCollection = this.dictationDatabase.collection("dictationexercises");
     }
 
-    async getDictationList(page = 1, limit = 2) {
+    async getDictationList(page = 1, limit = 6) {
         const skip = (page - 1) * limit;
         const cursor = await this.dictationCollection
             .find({})
             .skip(skip)
             .limit(limit);
-    
+
         const dictationExercises = await cursor.toArray();
         const totalDictationExercises = await this.dictationCollection.countDocuments();
         return {
             dictationExercises,
             totalDictationExercises,
         };
-    }    
+    }
 
     async getDictation(id) {
         return await this.dictationCollection.findOne({ _id: new ObjectId(id) });
     }
 
-    async insertDictation(dictation) {
-        dictation.createdAt = new Date();
-        return await this.dictationCollection.insertOne(dictation);
+    async insertDictation(dictationexercises) {
+        dictationexercises.createdAt = new Date();
+        return await this.dictationCollection.insertOne(dictationexercises);
     }
 
-    async updateDictation(dictation) {
-        const { _id, ...updateFields } = dictation;
+    async updateDictation(dictationexercises) {
+        const { _id, ...updateFields } = dictationexercises;
         return await this.dictationCollection.updateOne(
             { _id: new ObjectId(_id) },
             { $set: updateFields }
         );
-    }
+    }    
 
     async deleteDictation(id) {
         return await this.dictationCollection.deleteOne({ "_id": new ObjectId(id) });

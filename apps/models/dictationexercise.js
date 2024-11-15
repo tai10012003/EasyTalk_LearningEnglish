@@ -1,11 +1,9 @@
-class dictationexercise {
+class dictationexercises {
     _id;
     title;
     content;
-    createdAt = new Date();
+    createdAt;
     constructor() {
         
     }
 }
-
-module.exports = dictationexercise;

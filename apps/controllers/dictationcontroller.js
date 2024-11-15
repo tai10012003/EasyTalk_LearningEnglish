@@ -1,30 +1,31 @@
 const express = require("express");
 const router = express.Router();
 const DictationService = require("../services/dictationService");
-const dictationExerciseService = new DictationService()
-// Endpoint để trả về danh sách bài tập dictation cho giao diện trang chính với phân trang
+const dictationExerciseService = new DictationService();
+
 router.get("/api/dictation-exercises", async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 6;
+    
     try {
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 2;
-        
-        const { dictationExercises, totalExercises } = await dictationExerciseService.getDictationList(page, limit);
-        
-        const totalPages = Math.ceil(totalExercises / limit);
-        
+        const { dictationExercises, totalDictationExercises } = await dictationExerciseService.getDictationList(page, limit);
+        const totalPages = Math.ceil(totalDictationExercises / limit);
+
         res.json({
             success: true,
-            data: dictationExercises,
+            dictationExercises,
             currentPage: page,
-            totalPages: totalPages
+            totalPages,
         });
     } catch (error) {
         console.error("Error fetching dictation exercises:", error);
-        res.status(500).json({ success: false, message: "Error fetching dictation exercises", error: error.message });
+        res.status(500).json({
+            success: false,
+            message: "Error fetching dictation exercises",
+        });
     }
 });
 
-// Endpoint để trả về giao diện hiển thị danh sách
 router.get("/", (req, res) => {
     res.render("dictationexercises/dictationexercise-list");
 });
@@ -47,6 +48,5 @@ router.get("/api/:id", async (req, res) => {
         res.status(500).json({ success: false, message: "Error fetching dictation exercise details", error: error.message });
     }
 });
-
 
 module.exports = router;

@@ -10,22 +10,16 @@ var app = express();
 
 require('dotenv').config();
 
-  // Cấu hình LocalStrategy để xác thực bằng email
 passport.use(new LocalStrategy({ usernameField: 'email' }, async (email, password, done) => {
    try {
-     // Tìm kiếm người dùng theo email
      const user = await User.findOne({ email });
      if (!user) {
        return done(null, false, { message: "Incorrect email." });
      }
- 
-     // So sánh mật khẩu với mật khẩu đã băm
      const isMatch = await bcrypt.compare(password, user.password);
      if (!isMatch) {
        return done(null, false, { message: "Incorrect password." });
      }
- 
-     // Nếu xác thực thành công
      return done(null, user);
    } catch (err) {
      return done(err);
@@ -55,13 +49,11 @@ passport.serializeUser(function(user, done) {
    }
  });
  
-
-// Middleware để xử lý dữ liệu từ form
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 app.use((req, res, next) => {
-   res.locals.user = req.user; // Truyền user vào tất cả các file EJS
+   res.locals.user = req.user;
    next();
  });
 
@@ -73,7 +65,7 @@ app.use((req, res, next) => {
   res.locals.errorMessages = req.flash('error');
   next();
 });
-// Routes
+
 var controller = require(__dirname  + "/apps/controllers");
 app.use(controller);
 
@@ -128,6 +120,12 @@ app.use("/admin/vocabulary-exercise", vocabularyexerciseAdminController);
 var vocabularyexerciseController = require(__dirname + "/apps/controllers/vocabularyexercisecontroller");
 app.use(vocabularyexerciseController);
 
+var dictationexerciseAdminController = require(__dirname + "/apps/controllers/admin/dictationAdmincontroller");
+app.use("/admin/dictation-exercise", dictationexerciseAdminController);
+
+var dictationexerciseController = require(__dirname + "/apps/controllers/dictationcontroller");
+app.use(dictationexerciseController);
+
 var userAdminController = require(__dirname + "/apps/controllers/admin/userAdmincontroller");
 app.use("/admin/users", userAdminController);
 
@@ -137,14 +135,11 @@ app.use(userController);
 var chatController = require(__dirname + "/apps/controllers/chatcontroller");
 app.use(chatController);
 
-// Views
 app.set("views", __dirname + "/apps/views");
 app.set("view engine", "ejs");
 
-// Static files
 app.use("/static", express.static(__dirname + "/public"));
 
-// Khởi chạy server
 var server = app.listen(3000, function(){
   console.log("Server is running on port 3000");
 });

@@ -33,6 +33,7 @@ router.use("/admin/grammar", require(__dirname + "/admin/grammarAdmincontroller"
 router.use("/admin/journey", require(__dirname + "/admin/journeyAdmincontroller"));
 router.use("/admin/gate",require(__dirname + "/admin/gateAdmincontroller"));
 router.use("/admin/stage", require(__dirname + "/admin/stageAdmincontroller"));
+router.use("/admin/dictation-exercise", require(__dirname + "/admin/dictationAdmincontroller"));
 router.use("/admin/grammar-exercise", require(__dirname + "/admin/grammarexerciseAdmincontroller"));
 router.use("/admin/pronunciation",require(__dirname + "/admin/pronunciationAdmincontroller"));
 router.use("/admin/pronunciation-exercise",require(__dirname + "/admin/pronunciationexerciseAdmincontroller"));
