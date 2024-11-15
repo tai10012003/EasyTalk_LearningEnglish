@@ -24,6 +24,7 @@ router.use("/profile/update", require(__dirname + "/usercontroller"));
 router.use("/flashcards",require(__dirname + "/flashcardcontroller"));
 router.use("/chat", require(__dirname + "/chatcontroller"));
 router.use("/reminder", require(__dirname + "/remindercontroller"));
+router.use("/dictation-exercise", require(__dirname + "/dictationcontroller"))
 router.use("/dictionary", require(__dirname + "/dictionarycontroller"));
 router.use("/contact", require(__dirname + "/contactcontroller"));
 

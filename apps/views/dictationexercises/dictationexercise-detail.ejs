@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Nghe Chép Chính Tả</title>
+    <script src="/static/js/authentication.js"></script>
+    <link rel="icon" href="/static/images/favicon.png">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="/static/css/animate.css">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <!-- Themify Icons -->
+    <link rel="stylesheet" href="/static/css/themify-icons.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="/static/css/flaticon.css">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="/static/css/slick.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    
+    <link rel="stylesheet" type="text/css" href="/static/css/flashcard.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <style>
+        .dictation-container {
+            margin: 120px auto 20px auto;
+            max-width: 1000px;
+            padding: 30px 50px 50px 50px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
+            border-radius: 10px;
+            background-color: #fff;
+        }
+        #dictation-title {
+            color: #2c3e50;
+            font-weight: bold;
+            border-bottom: 3px solid #2980b9;
+            padding-bottom: 10px;
+            font-size: 25px;
+            margin-bottom: 20px;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        #currentSentenceDisplay {
+            margin: 15px 0;
+            font-size: 18px;
+            color: #333;
+        }
+        textarea {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: none;
+        }
+        .button-group button {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #28a745;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+        .button-group button:hover {
+            background-color: #218838;
+        }
+
+        .centered-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .centered-buttons #retryButton {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #be2929;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+        .centered-buttons #retryButton:hover {
+            background-color: #911f1f;
+        }
+
+        .centered-buttons #backButton, .button-group #skipButton {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #777777;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+        .centered-buttons #backButton:hover, .button-group #skipButton:hover {
+            background-color: #4e4c4c;
+        }
+
+        #result {
+            margin: 15px 0;
+            font-size: 18px;
+        }
+
+        .full-script-container {
+            width: 80%;
+            max-width: 1000px;
+            margin: 30px auto 50px auto;
+            padding: 30px 50px 50px 50px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
+            border-radius: 10px;
+            background-color: #fff;
+        }
+
+        .full-script-container h3 {
+            font-size: 25px;
+            color: #333;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .full-script-container button {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #be2929;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        .full-script-container button:hover {
+            background-color: #911f1f;
+        }
+
+        #fullScriptText {
+            font-size: 16px;
+            line-height: 1.8;
+            color: #333;
+            padding: 10px;
+            background-color: #fdfdfd;
+            border-radius: 5px;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+            white-space: pre-line;
+        }
+
+        #playFullScriptButton {
+            margin: 10px 5px;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #555;
+            color: #fff;
+            transition: background-color 0.3s ease;
+        }
+
+        #playFullScriptButton i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        #playFullScriptButton:hover {
+            background-color: #333;
+        }
+        .completion-message {
+            font-size: 22px;
+            font-weight: bold;
+            color: green;
+            margin: 40px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <%- include('../partials/menu.ejs') %>
+
+    <div class="dictation-container">
+        <h2 id="dictation-title"></h2>
+        <div class="button-group">
+            <button id="audio" onclick="playSentence()">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <label for="speedControl" id="speed" style="font-weight: bold; font-size: 17px; margin: 0 10px;">Tốc độ âm thanh:</label>
+            <input type="range" id="speedControl" min="0.5" max="2" step="0.1" value="1" oninput="updateSpeedDisplay()">
+            <span id="speedDisplay">1x</span>
+
+            <textarea id="userInput" placeholder="Nhập lại nội dung bạn nghe được..." rows="3" oninput="onUserInput()"></textarea>
+            <div id="currentSentenceDisplay" style="display: none;"></div>
+            <div id="result"></div>
+
+            <button id="checkButton" onclick="checkDictation()">Kiểm tra</button>
+            <button id="skipButton" onclick="skipSentence()">Bỏ qua</button>
+            <button id="nextButton" onclick="showNextSentence()" style="display: none;">Tiếp theo</button>
+        </div>
+        <div class="centered-buttons">
+            <button id="retryButton" onclick="retryExercise()" style="display: none;">Làm lại</button>
+            <button id="backButton" onclick="goBackToList()" style="display: none;">Quay lại</button>
+        </div>
+    </div>
+    <div class="full-script-container">
+        <h3>ĐẦY ĐỦ AUDIO VÀ SCRIPT</h3>
+        <div>
+            <button onclick="playFullScript()" id="playFullScriptButton">
+                <i class="fas fa-volume-up"></i>
+            </button>
+            <label for="fullScriptSpeedControl" style="font-weight: bold; font-size: 17px; margin: 0 10px;">Tốc độ âm thanh:</label>
+            <input type="range" id="fullScriptSpeedControl" min="0.5" max="2" step="0.1" value="1" oninput="updateFullScriptSpeedDisplay()">
+            <span id="fullScriptSpeedDisplay">1x</span>
+        </div>
+        <button onclick="toggleScriptVisibility()" id="toggleScriptButton" style="margin-bottom: 10px;">
+            Hiện script
+        </button>
+        <div id="fullScriptText" style="display: none;">
+
+        </div>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentSentenceIndex = 0;
+        let playSpeed = 1;
+        const dictationId = window.location.pathname.split('/').pop();
+        function removePunctuation(text) {
+            return text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s{2,}/g, " ");
+        }
+
+        function formatFullScript(script) {
+            return script
+                .split('. ')
+                .map(sentence => sentence.trim() + '.')
+                .join('<br>');
+        }
+
+        $.ajax({
+            url: `/dictation-exercise/api/${dictationId}`,
+            method: 'GET',
+            success: function (data) {
+                if (data.success) {
+                    const dictation = data.data;
+                    $('#dictation-title').text(dictation.title);
+                    fullScript = dictation.content;
+                    document.getElementById("fullScriptText").innerHTML = formatFullScript(fullScript);
+                    window.sentences = dictation.content.split('. ').map(sentence => sentence.trim() + '.');
+                    showSentence();
+                    playSentence(3);
+                } else {
+                    $('#dictation-title').text("Error loading content");
+                }
+            },
+            error: function (error) {
+                console.error("Error fetching dictation content:", error);
+                $('#dictation-title').text("Error loading content");
+            }
+        });
+
+        function updateSpeedDisplay() {
+            playSpeed = document.getElementById("speedControl").value;
+            document.getElementById("speedDisplay").innerText = playSpeed + "x";
+        }
+
+        function playSentence(repeats = 1) {
+            speechSynthesis.cancel();
+            const sentence = sentences[currentSentenceIndex];
+            let count = 0;
+
+            function speak() {
+                const utterance = new SpeechSynthesisUtterance(sentence);
+                utterance.lang = "en-US";
+                utterance.rate = playSpeed;
+                speechSynthesis.speak(utterance);
+                count++;
+                if (count < repeats) {
+                    utterance.onend = speak;
+                }
+            }
+            speak();
+        }
+
+        function toggleScriptVisibility() {
+            const scriptText = document.getElementById("fullScriptText");
+            const toggleButton = document.getElementById("toggleScriptButton");
+
+            if (scriptText.style.display === "none") {
+                scriptText.style.display = "block";
+                toggleButton.innerText = "Ẩn script";
+            } else {
+                scriptText.style.display = "none";
+                toggleButton.innerText = "Hiện script";
+            }
+        }
+        let fullScriptPlaySpeed = 1;
+    
+        function updateFullScriptSpeedDisplay() {
+            fullScriptPlaySpeed = document.getElementById("fullScriptSpeedControl").value;
+            document.getElementById("fullScriptSpeedDisplay").innerText = fullScriptPlaySpeed + "x";
+        }
+
+        function playFullScript() {
+            const utterance = new SpeechSynthesisUtterance(fullScript);
+            utterance.lang = "en-US";
+            utterance.rate = fullScriptPlaySpeed;
+            speechSynthesis.speak(utterance);
+        }
+
+        function stopAudio() {
+            speechSynthesis.cancel();
+        }
+
+        function checkDictation() {
+            const userInput = removePunctuation(document.getElementById("userInput").value.trim().toLowerCase());
+            const correctSentence = removePunctuation(sentences[currentSentenceIndex].toLowerCase().trim());
+            const correctWords = correctSentence.split(" ");
+            const userWords = userInput.split(" ");            
+            let matchIndex = 0;
+            let correctSoFar = "";
+
+            while (matchIndex < userWords.length && matchIndex < correctWords.length) {
+                if (userWords[matchIndex].toLowerCase() === correctWords[matchIndex].toLowerCase()) {
+                    correctSoFar += correctWords[matchIndex] + " ";
+                } else {
+                    break;
+                }
+                matchIndex++;
+            }
+
+            if (matchIndex < correctWords.length) {
+                correctSoFar += correctWords[matchIndex] + " ";
+            }
+            let maskedSentence = correctSoFar;
+            for (let i = matchIndex + 1; i < correctWords.length; i++) {
+                maskedSentence += "*** ";
+            }
+
+            document.getElementById("currentSentenceDisplay").innerHTML = maskedSentence.trim();
+
+            if (userInput.toLowerCase() === correctSentence.toLowerCase().trim()) {
+                document.getElementById("result").innerHTML = `<p style="color: green;">Câu chính xác: ${correctSoFar.trim()}</p>  `;
+                document.getElementById("nextButton").style.display = "inline-block";
+                document.getElementById("checkButton").style.display = "none";
+                document.getElementById("skipButton").style.display = "none";
+            } else {
+                document.getElementById("result").innerHTML = `<p style="color: black;">Đáp án hiện tại: ${correctSoFar.trim()}</p>`;
+                document.getElementById("checkButton").style.display = "inline-block";
+            }
+        }
+
+        function skipSentence() {
+            const correctSentence = sentences[currentSentenceIndex];
+            document.getElementById("userInput").value = correctSentence;
+            document.getElementById("result").innerHTML = `<p style="color: green;">Câu chính xác: ${correctSentence}</p>`;
+
+            document.getElementById("checkButton").style.display = "none";
+            document.getElementById("skipButton").style.display = "none";
+            document.getElementById("nextButton").style.display = "inline-block";
+        }
+
+        document.getElementById("userInput").addEventListener("input", () => {
+            document.getElementById("checkButton").style.display = "inline-block";
+            document.getElementById("result").innerHTML = "";
+            document.getElementById("currentSentenceDisplay").innerHTML = "";
+            document.getElementById("nextButton").style.display = "none";
+        });
+
+        function showSentence() {
+            document.getElementById("currentSentenceDisplay").innerText = sentences[currentSentenceIndex];
+            document.getElementById("checkButton").style.display = "inline-block";
+            document.getElementById("skipButton").style.display = "inline-block";
+            document.getElementById("nextButton").style.display = "none";
+        }
+
+        document.getElementById("userInput").addEventListener("keydown", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                if (document.getElementById("nextButton").style.display === "inline-block") {
+                    showNextSentence();
+                } else {
+                    checkDictation();
+                }
+            } else if (event.ctrlKey && event.key === "Control") {
+                playSentence();
+            }
+        });
+
+        function showNextSentence() {
+            speechSynthesis.cancel();
+            currentSentenceIndex++;
+            if (currentSentenceIndex < sentences.length) {
+                document.getElementById("userInput").value = "";
+                document.getElementById("result").innerHTML = "";
+                document.getElementById("currentSentenceDisplay").innerHTML = "";
+                showSentence();
+                playSentence(3);
+            } else {
+                document.getElementById("result").innerHTML = "<p class='completion-message'>Bạn đã hoàn thành bài luyện nghe chép chính tả !</p>";
+                document.getElementById("userInput").style.display = "none";
+                document.getElementById("checkButton").style.display = "none";
+                document.getElementById("skipButton").style.display = "none";
+                document.getElementById("nextButton").style.display = "none";
+                document.getElementById("audio").style.display = "none";
+                document.getElementById("speedControl").style.display = "none";
+                document.getElementById("speedDisplay").style.display = "none";
+                document.getElementById("speed").style.display = "none";
+                document.getElementById("backButton").style.display = "inline-block";
+                document.getElementById("retryButton").style.display = "inline-block";
+            }
+        }
+
+        function retryExercise() {
+            location.reload();
+        }
+
+        function goBackToList() {
+            window.location.href = "/dictation-exercise";
+        }
+    </script>
+</body>
+</html>
