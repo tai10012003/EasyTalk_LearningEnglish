@@ -17,25 +17,24 @@ class FlashcardsService {
         this.flashcardListsCollection = this.flashcardsDatabase.collection("flashcardlists");
     }
 
-    async getFlashcardList(page = 1, limit = 12) {
+    async getFlashcardList(page = 1, limit = 2) {
         const skip = (page - 1) * limit;
-        const cursor = await this.flashcardListsCollection
-            .find({}, {})
+        const cursor = await this.flashcardListsCollection.find({})
             .skip(skip)
             .limit(limit);
-
+    
         const flashcardLists = await cursor.toArray();
         const totalFlashcardLists = await this.flashcardListsCollection.countDocuments();
-
+    
         for (let list of flashcardLists) {
             list.wordCount = await this.flashcardsCollection.countDocuments({ flashcardList: list._id.toString() });
         }
-
+    
         return {
             flashcardLists,
             totalFlashcardLists,
         };
-    }
+    }    
 
     async getFlashcardListById(id) {
         const flashcardList = await this.flashcardListsCollection.findOne({ _id: new ObjectId(id) });

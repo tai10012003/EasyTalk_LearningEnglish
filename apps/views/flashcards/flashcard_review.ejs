@@ -5,37 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Luyện Tập Từ Vựng Flashcard</title>
     <link rel="icon" href="/static/images/favicon.png">
-
-        <!-- Bootstrap CSS -->
-        <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-        <!-- Animate CSS -->
-        <link rel="stylesheet" href="/static/css/animate.css">
-        <!-- Owl Carousel CSS -->
-        <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
-        <!-- Themify Icons -->
-        <link rel="stylesheet" href="/static/css/themify-icons.css">
-        <!-- Flaticon CSS -->
-        <link rel="stylesheet" href="/static/css/flaticon.css">
-        <!-- Font Awesome CSS -->
-        <link rel="stylesheet" href="/static/css/magnific-popup.css">
-        <!-- Swiper CSS -->
-        <link rel="stylesheet" href="/static/css/slick.css">
-
-        <!-- Custom Styles -->
-        <link rel="stylesheet" href="/static/css/style.css">
-        <link rel="stylesheet" href="/static/css/main.css">
-        
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="/static/css/flashcard_review.css"
-    />
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"
-      rel="stylesheet"
-    />
+    <link rel="stylesheet" href="/static/css/bootstrap.min.css">
+    <!-- Animate CSS -->
+    <link rel="stylesheet" href="/static/css/animate.css">
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="/static/css/owl.carousel.min.css">
+    <!-- Themify Icons -->
+    <link rel="stylesheet" href="/static/css/themify-icons.css">
+    <!-- Flaticon CSS -->
+    <link rel="stylesheet" href="/static/css/flaticon.css">
+    <!-- Font Awesome CSS -->
+    <link rel="stylesheet" href="/static/css/magnific-popup.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="/static/css/slick.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/main.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/flashcard_review.css"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet"/>
   </head>
-
   <body>
     <%- include('../partials/menu.ejs') %>
     <div class="container flashcard-container">
@@ -55,21 +42,14 @@
           </div>
         </div>
   
-        <!-- Flashcard Section -->
-        <div
-          class="custom-container mt-4 d-flex justify-content-center align-items-center"
-        >
-          <div
-            id="flashcard-wrapper"
-            class="flashcard"
-            onclick="flipCard()"
-          ></div>
+        <div class="custom-container mt-4 d-flex justify-content-center align-items-center">
+          <div id="flashcard-wrapper" class="flashcard" onclick="flipCard()"></div>
         </div>
         <div class="d-flex justify-content-center mt-4">
           <div class="row">
             <div class="col-md-6">
               <button class="btn custom-btn mx-2" onclick="removeCurrentFlashcard()">
-                Loại từ ra khỏi danh sách
+                Loại từ ra khỏi luyện tập
               </button>
             </div>
             <div class="col-md-6">
@@ -79,15 +59,24 @@
             </div>
           </div>
         </div>
-
       </div>
     </div>
     <%- include('../partials/footer.ejs') %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
       const flashcards = JSON.parse(`<%- JSON.stringify(flashcards) %>`);
-
       let currentCardIndex = 0;
+
+      function speakWord(word) {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(word);
+          utterance.lang = 'en-US';
+          utterance.rate = 1;
+          speechSynthesis.speak(utterance);
+        } else {
+          alert('Trình duyệt của bạn không hỗ trợ phát âm bằng Web Speech API.');
+        }
+      }
 
       function shuffleFlashcardList(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -97,76 +86,88 @@
         return array;
       }
 
-      function removeCurrentFlashcard() {
-        if (flashcards.length > 0) {
-              const isConfirmed = confirm("Bạn có muốn loại từ này khỏi luyện tập ?");
-              
-              if (isConfirmed) {
-                  flashcards.splice(currentCardIndex, 1);
-                  if (currentCardIndex >= flashcards.length) {
-                      currentCardIndex = flashcards.length - 1;
-                  }
-                  displayCard(currentCardIndex);
-              }
-          }
-      }
-
       const shuffleFlashcards = shuffleFlashcardList(flashcards);
+
       function displayCard(index) {
         const flashcard = shuffleFlashcards[index];
         const flashcardElement = document.getElementById("flashcard-wrapper");
-        console.log(shuffleFlashcards);
 
-        const imageHTML = flashcard.image
-          ? `<img src="${flashcard.image}" alt="Image">`
-          : "";
+        let backContent;
+        if (flashcard.image) {
+          backContent = `
+            <div class="flashcard-back">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <p><strong>Định nghĩa:</strong> ${flashcard.meaning}</p>
+                  <p><strong>Ví dụ:</strong> ${flashcard.exampleSentence}</p>
+                </div>
+                <div class="col-md-6 text-center">
+                  <img src="data:image/jpeg;base64,${flashcard.image}" alt="${flashcard.word}" style="width: 150px; height: auto; border-radius: 5px;">
+                </div>
+              </div>
+              <i class="bi bi-arrow-repeat btn-flip"></i>
+            </div>
+          `;
+        } else {
+          backContent = `
+            <div class="flashcard-back">
+              <div>
+                <p><strong>Định nghĩa:</strong> ${flashcard.meaning}</p>
+                <p><strong>Ví dụ:</strong> ${flashcard.exampleSentence}</p>
+              </div>
+              <i class="bi bi-arrow-repeat btn-flip"></i>
+            </div>
+          `;
+        }
 
         flashcardElement.innerHTML = `
-        <div class="flashcard-inner">
-          <!-- Front of the flashcard -->
-          <div class="flashcard-front">
-            <div class="word">
-              <strong>${flashcard.word}</strong>
+          <div class="flashcard-inner">
+            <!-- Front of the flashcard -->
+            <div class="flashcard-front">
+              <div class="word">
+                <strong>${flashcard.word}</strong>
+              </div>
+              <div class="d-flex justify-content-center align-items-center mt-2"> 
+                <button class="btn btn-light btn-sm mx-2" onclick="playPronou(event, '${flashcard.word}')">
+                  <i class="bi bi-volume-up" style="font-size: 17px"></i>
+                </button>
+                <em class="pronunciation">(${flashcard.pos || "N/A"}) ${flashcard.pronunciation || ""}</em>
+              </div>
+              <i class="bi bi-arrow-repeat btn-flip"></i>
             </div>
-            <div class="d-flex justify-content-center align-items-center">
-              <button class="btn btn-light btn-sm mx-2" onclick="playPronou(event)">
-                <i class="bi bi-volume-up"></i>
-              </button>
-              <em class="pronunciation">(${flashcard.pos || "N/A"}) ${flashcard.pronunciation || ""}</em>
-            </div>
-            <i class="bi bi-arrow-repeat btn-flip"></i>
+            ${backContent}
           </div>
-
-          <!-- Back of the flashcard -->
-          <div class="flashcard-back">
-            <div>
-              <p><strong>Định nghĩa:</strong> ${flashcard.meaning}</p>
-              <p><strong>Ví dụ:</strong>
-                ${flashcard.exampleSentence}
-              </p>
-            </div>
-            
-             ${imageHTML}
-            <i class="bi bi-arrow-repeat btn-flip"></i>
-          </div>
-        </div>
-      `;
+        `;
 
         flashcardElement.classList.remove("is-flipped");
+        speakWord(flashcard.word);
+      }
+
+      function removeCurrentFlashcard() {
+        if (flashcards.length > 0) {
+          const isConfirmed = confirm("Bạn có muốn loại từ này khỏi luyện tập?");
+          if (isConfirmed) {
+            flashcards.splice(currentCardIndex, 1);
+            if (currentCardIndex >= flashcards.length) {
+              currentCardIndex = 0;
+            }
+            if (flashcards.length === 0) {
+              alert("Không còn từ nào để luyện tập.");
+              document.getElementById("flashcard-wrapper").innerHTML =
+                "<p>Không còn từ nào trong danh sách luyện tập.</p>";
+              return;
+            }
+            displayCard(currentCardIndex);
+          }
+        }
       }
 
       function nextCard() {
         if (flashcards.length > 0) {
-          const randomIndex = Math.floor(Math.random() * flashcards.length);
-          displayCard(randomIndex);
-        }
-      }
-
-
-      function prevCard() {
-        if (currentCardIndex > 0) {
-          currentCardIndex--;
+          currentCardIndex = Math.floor(Math.random() * flashcards.length);
           displayCard(currentCardIndex);
+        } else {
+          alert("Không còn từ nào trong danh sách luyện tập.");
         }
       }
 
@@ -174,9 +175,9 @@
         displayCard(currentCardIndex);
       };
 
-      function playPronou(event) {
+      function playPronou(event, word) {
         event.stopPropagation();
-        console.log("Playing UK pronunciation");
+        speakWord(word);
       }
 
       function flipCard() {

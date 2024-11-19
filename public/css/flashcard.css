@@ -160,3 +160,11 @@
     background-color: #5a6268;
     transform: scale(1.05);
 }
+.pagination {
+    justify-content: center;
+    margin-top: 20px;
+}
+.pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+}

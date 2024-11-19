@@ -12,17 +12,27 @@
 }
 
 .flashcard-item {
-    border: 1px solid #ddd;
-    padding: 20px;
-    border-radius: 10px;
     margin-bottom: 15px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    width: 80%; 
     background-color: #fefcfc;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
-    position: relative;
+    display: flex;
+    align-items: center;
+    margin: 15px auto;
 }
 
-.flashcard-item h5 {
+.flashcard-item .flashcard-image img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+
+.flashcard-item h5 {    
     font-weight: bold;
+    margin-bottom: 10px;
 }
 
 .flashcard-item .definition,
@@ -30,8 +40,8 @@
     margin-bottom: 10px;
 }
 
-.flashcard-item .actions {
-    text-align: right;
+.flashcard-item .audio-icons {
+    margin-left: 10px;
 }
 
 .delete-icon {
@@ -40,10 +50,6 @@
     position: absolute;
     bottom: 10px;
     right: 10px;
-}
-
-.audio-icons {
-    margin-left: 10px;
 }
 
 .update-flashcard-btn {
@@ -79,3 +85,24 @@
 .content p {
     margin-bottom: 20px;
 }
+
+.pagination-container {
+    margin: 20px 0;
+  }
+  
+  .pagination .page-item.active .page-link {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: white;
+  }
+  
+  .pagination .page-item .page-link {
+    color: #007bff;
+    text-decoration: none;
+  }
+  
+  .pagination .page-item.disabled .page-link {
+    color: #6c757d;
+    pointer-events: none;
+  }
+  

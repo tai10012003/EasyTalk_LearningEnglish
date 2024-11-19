@@ -6,7 +6,6 @@ class flashcards {
   pronunciation;
   exampleSentence;
   image;
-  audio;
   flashcardList;
   createdAt
   constructor() {

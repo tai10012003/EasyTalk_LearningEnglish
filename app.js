@@ -4,7 +4,7 @@ const passport = require('passport');
 const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 const bcrypt = require('bcrypt');
-const flash = require('connect-flash'); // Flash messages
+const flash = require('connect-flash');
 const User = require("./apps/models/user"); 
 var app = express();
 
@@ -49,8 +49,8 @@ passport.serializeUser(function(user, done) {
    }
  });
  
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '50mb' })); 
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 
 app.use((req, res, next) => {
    res.locals.user = req.user;

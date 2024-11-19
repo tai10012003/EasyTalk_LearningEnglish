@@ -267,25 +267,8 @@
             </div>
         </div>
     </section>
-    <!--::blog_part end::-->
 
     <%- include('partials/footer.ejs') %>
-    <% if (successMessages && successMessages.length > 0) { %>
-        <script>
-          var successMessage = "<%= successMessages[0] %>";
-          alert(successMessage);
-        </script>
-      <% } %>
-      
-      <% if (errorMessages && errorMessages.length > 0) { %>
-        <script>
-          var errorMessage = "<%= errorMessages[0] %>";
-          alert(errorMessage);
-        </script>
-      <% } %>
-      
-    <!-- jquery plugins here-->
-    <!-- jquery -->
     <script src="/static/js/jquery-1.12.1.min.js"></script>
     <!-- popper js -->
     <script src="/static/js/popper.min.js"></script>
