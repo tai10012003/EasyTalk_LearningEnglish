@@ -43,7 +43,7 @@
         </div>
   
         <div class="custom-container mt-4 d-flex justify-content-center align-items-center">
-          <div id="flashcard-wrapper" class="flashcard" onclick="flipCard()"></div>
+          <div id="flashcard-wrapper" class="flashcard"></div>
         </div>
         <div class="d-flex justify-content-center mt-4">
           <div class="row">
@@ -64,45 +64,25 @@
     <%- include('../partials/footer.ejs') %>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-      const flashcards = JSON.parse(`<%- JSON.stringify(flashcards) %>`);
+      const flashcards = JSON.parse('<%- JSON.stringify(flashcards) %>');
       let currentCardIndex = 0;
 
-      function speakWord(word) {
-        if ('speechSynthesis' in window) {
-          const utterance = new SpeechSynthesisUtterance(word);
-          utterance.lang = 'en-US';
-          utterance.rate = 1;
-          speechSynthesis.speak(utterance);
-        } else {
-          alert('Trình duyệt của bạn không hỗ trợ phát âm bằng Web Speech API.');
-        }
+      function randomExerciseType() {
+        return Math.floor(Math.random() * 3) + 1;
       }
 
-      function shuffleFlashcardList(array) {
-        for (let i = array.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-      }
-
-      const shuffleFlashcards = shuffleFlashcardList(flashcards);
-
-      function displayCard(index) {
-        const flashcard = shuffleFlashcards[index];
-        const flashcardElement = document.getElementById("flashcard-wrapper");
-
+      function showFlipCard(flashcard) {
         let backContent;
         if (flashcard.image) {
           backContent = `
             <div class="flashcard-back">
               <div class="row align-items-center">
-                <div class="col-md-6">
+                <div class="col-md-8">
                   <p><strong>Định nghĩa:</strong> ${flashcard.meaning}</p>
                   <p><strong>Ví dụ:</strong> ${flashcard.exampleSentence}</p>
                 </div>
-                <div class="col-md-6 text-center">
-                  <img src="data:image/jpeg;base64,${flashcard.image}" alt="${flashcard.word}" style="width: 150px; height: auto; border-radius: 5px;">
+                <div class="col-md-4 text-center">
+                  <img src="data:image/jpeg;base64,${flashcard.image}" alt="${flashcard.word}" style="width: 200px; height: auto; border-radius: 5px; padding: 10px;">
                 </div>
               </div>
               <i class="bi bi-arrow-repeat btn-flip"></i>
@@ -119,10 +99,9 @@
             </div>
           `;
         }
-
-        flashcardElement.innerHTML = `
+        const wrapper = document.getElementById("flashcard-wrapper");
+        wrapper.innerHTML = `
           <div class="flashcard-inner">
-            <!-- Front of the flashcard -->
             <div class="flashcard-front">
               <div class="word">
                 <strong>${flashcard.word}</strong>
@@ -138,14 +117,91 @@
             ${backContent}
           </div>
         `;
-
-        flashcardElement.classList.remove("is-flipped");
+        wrapper.classList.remove("is-flipped");
+        wrapper.onclick = flipCard;
         speakWord(flashcard.word);
+      }
+
+      function speakWord(word) {
+        if ('speechSynthesis' in window) {
+          const utterance = new SpeechSynthesisUtterance(word);
+          utterance.lang = 'en-US';
+          utterance.rate = 1;
+          speechSynthesis.speak(utterance);
+        } else {
+          alert('Trình duyệt của bạn không hỗ trợ phát âm bằng Web Speech API.');
+        }
+      }
+
+      function flipCard() {
+        const card = document.getElementById("flashcard-wrapper");
+        card.classList.toggle("is-flipped");
+      }
+
+      function showMultipleChoice(card) {
+        const wrapper = document.getElementById("flashcard-wrapper");
+        const choices = shuffleFlashcardList([...flashcards])
+          .filter((fc) => fc.word !== card.word)
+          .slice(0, 3)
+          .concat(card)
+          .sort(() => Math.random() - 0.5);
+    
+        const question = card.exampleSentence.replace(card.word, "______");
+        wrapper.innerHTML = `
+          <p><strong>Chọn đáp án đúng: </strong> ${question}</p>
+          <div id="choices" class="d-flex flex-wrap">
+            ${choices
+              .map(
+                (choice, index) => `
+              <button class="btn btn-outline-secondary m-2" onclick="checkAnswer(this, '${choice.word}', '${card.word}')">
+                ${index + 1}. ${choice.word}
+              </button>
+            `
+              )
+              .join("")}
+          </div>
+        `;
+        wrapper.onclick = null;
+      }
+      function showFillInTheBlank(card) {
+        const wrapper = document.getElementById("flashcard-wrapper");
+    
+        const question = card.exampleSentence.replace(card.word, "______");
+        wrapper.innerHTML = `
+          <p><strong>Điền từ vào lỗ trống: </strong> ${question}</p>
+          <input type="text" id="user-answer" class="form-control my-2" placeholder="Điền từ vào chỗ trống" />
+          <button class="btn mt-2" id="check" onclick="checkFillAnswer('${card.word}')">Kiểm tra</button>
+        `;
+        wrapper.onclick = null;
+      }
+    
+      function checkAnswer(button, selected, correct) {
+        if (selected === correct) {
+          button.classList.add("btn-success");
+        } else {
+          button.classList.add("btn-danger");
+        }
+        document.querySelectorAll("#choices button").forEach((btn) => {
+          btn.disabled = true;
+          if (btn.innerText.includes(correct)) btn.classList.add("btn-success");
+        });
+      }
+
+      function checkFillAnswer(correct) {
+        const userAnswer = document.getElementById("user-answer").value.trim();
+        const inputField = document.getElementById("user-answer");
+        if (userAnswer.toLowerCase() === correct.toLowerCase()) {
+          inputField.classList.add("is-valid");
+          inputField.classList.remove("is-invalid");
+        } else {
+          inputField.classList.add("is-invalid");
+          inputField.classList.remove("is-valid");
+        }
       }
 
       function removeCurrentFlashcard() {
         if (flashcards.length > 0) {
-          const isConfirmed = confirm("Bạn có muốn loại từ này khỏi luyện tập?");
+          const isConfirmed = confirm("Bạn có muốn loại từ này khỏi luyện tập ?");
           if (isConfirmed) {
             flashcards.splice(currentCardIndex, 1);
             if (currentCardIndex >= flashcards.length) {
@@ -162,39 +218,46 @@
         }
       }
 
-      function nextCard() {
-        if (flashcards.length > 0) {
-          currentCardIndex = Math.floor(Math.random() * flashcards.length);
-          displayCard(currentCardIndex);
-        } else {
-          alert("Không còn từ nào trong danh sách luyện tập.");
-        }
-      }
-
-      window.onload = () => {
-        displayCard(currentCardIndex);
-      };
-
       function playPronou(event, word) {
         event.stopPropagation();
         speakWord(word);
       }
 
-      function flipCard() {
-        const card = document.getElementById("flashcard-wrapper");
-        card.classList.toggle("is-flipped");
-      }
+      function nextCard() {
+        currentCardIndex = Math.floor(Math.random() * flashcards.length);
+        const card = flashcards[currentCardIndex];
+    
+        const exerciseType = randomExerciseType();
+        const wrapper = document.getElementById("flashcard-wrapper");
 
+        wrapper.className = "flashcard";
+        wrapper.onclick = null;
+    
+        switch (exerciseType) {
+          case 1:
+            showFlipCard(card);
+            break;
+          case 2:
+            showMultipleChoice(card);
+            break;
+          case 3:
+            showFillInTheBlank(card);
+            break;
+        }
+      }
+    
+      function shuffleFlashcardList(array) {
+        return array.sort(() => Math.random() - 0.5);
+      }
+    
       function exitReviewing() {
-        const userConfirmed = window.confirm(
-          "Bạn có chắc chắn muốn dừng học và thoát khỏi danh sách từ này?"
-        );
-        if (userConfirmed) {
-          window.history.replaceState(null, null, window.location.href);
+        if (confirm("Bạn có chắc muốn dừng luyện tập?")) {
           window.location.href = "/flashcards";
         }
       }
-    </script>
+    
+      window.onload = () => nextCard();
+    </script>      
     <script src="/static/js/jquery-1.12.1.min.js"></script>
     <script src="/static/js/popper.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>

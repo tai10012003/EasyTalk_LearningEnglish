@@ -40,7 +40,6 @@
     backface-visibility: hidden;
     background-color: white;
     border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 30px;
 }
 
@@ -117,3 +116,72 @@
     margin-left: 10px;
     margin-right: 10px;
 }
+
+#flashcard-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #c3c3c3;
+    border-radius: 10px;
+    padding: 0 10px;
+}
+
+#flashcard-wrapper #user-answer {
+    margin: 30px 0 !important;
+    padding: 22px;
+    font-size: 16px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    width: 50%;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}  
+
+#flashcard-wrapper #choices {
+    margin: 30px 0;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+  
+#flashcard-wrapper #choices .btn {
+    min-width: 100px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 8px;
+    background-color: #fff;
+    color: #333;
+}
+  
+#flashcard-wrapper #choices .btn:hover {
+    transform: scale(1.05);
+}
+
+#check {
+    background-color: #000000;
+    color: #fff;
+    padding: 10px 20px;
+}
+#check:hover {
+    background-color: #fff;
+    border: 1px solid #333;
+    color: #333;
+    transition: 0.3s ease;
+
+}
+
+.btn-success {
+    background-color: #088808 !important;
+    color: #ffffff !important;
+    border: none;
+  }
+  
+  .btn-danger {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
+    border: none;
+  }
+  
