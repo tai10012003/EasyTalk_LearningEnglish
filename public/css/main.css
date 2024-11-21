@@ -9,7 +9,8 @@ body {
 .user-container,
 .vocabulary-container,
 .vocabulary-update-container,
-.dictation-container {
+.dictation-container,
+.story-container {
     margin: 60px auto;
     max-width: 1000px;
     padding: 50px;
@@ -22,7 +23,8 @@ body {
 .user-title,
 .vocabulary-title,
 .vocabulary-update-title,
-.dictation-title {
+.dictation-title,
+.story-title {
     text-align: center;
     color: #333;
     margin-bottom: 10px;
@@ -34,7 +36,8 @@ body {
 .pronunciation-table,
 .user-table,
 .vocabulary-table,
-.dictation-table {
+.dictation-table,
+.story-table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
@@ -44,7 +47,8 @@ body {
 .pronunciation-header,
 .user-header,
 .vocabulary-header,
-.dictation-header {
+.dictation-header,
+.story-header {
     color: #495057;
     background-color: #e9ecef;
     border-color: #dee2e6;
@@ -57,7 +61,8 @@ body {
 .pronunciation-row,
 .user-row,
 .vocabulary-row,
-.dictation-row {
+.dictation-row,
+.story-row {
     border-bottom: 1px solid #ddd;
 }
 
@@ -65,7 +70,8 @@ body {
 .pronunciation-cell,
 .user-cell,
 .vocabulary-cell,
-.dictation-cell {
+.dictation-cell,
+.story-cell {
     text-align: center;
     padding: 12px;
 }
@@ -89,7 +95,11 @@ body {
 .btn-dictation-add,
 .btn-dictation-update,
 .btn-dictation-delete,
-.btn-submit-dictation {
+.btn-submit-dictation,
+.btn-story-add,
+.btn-story-update,
+.btn-story-delete,
+.btn-submit-story {
     background-color: #000000;
     color: white;
     border: none;
@@ -120,7 +130,11 @@ body {
 .btn-dictation-add:hover,
 .btn-dictation-update:hover,
 .btn-dictation-delete:hover,
-.btn-submit-dictation:hover {
+.btn-submit-dictation:hover,
+.btn-story-add:hover,
+.btn-story-update:hover,
+.btn-story-delete:hover,
+.btn-submit-story:hover {
     background-color: #ffffff;
     color: #333;
     border: 1px solid black;
@@ -132,7 +146,8 @@ body {
 .form-pronunciation,
 .form-user,
 .form-vocabulary,
-.form-dictation {
+.form-dictation,
+.form-story {
     margin-top: 30px;
 }
 
@@ -193,7 +208,8 @@ body {
     .user-container,
     .vocabulary-container,
     .vocabulary-update-container,
-    .dictation-container {
+    .dictation-container,
+    .story-container {
         padding: 20px;
     }
 
@@ -216,7 +232,11 @@ body {
     .btn-dictation-add,
     .btn-dictation-update,
     .btn-dictation-delete,
-    .btn-submit-dictation {
+    .btn-submit-dictation,
+    .btn-story-add,
+    .btn-story-update,
+    .btn-story-delete,
+    .btn-submit-story {
         width: 100%;
         padding: 10px 15px;
     }

@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giao Tiếp Với AI</title>
+    <link rel="icon" href="/static/images/favicon.png">
+    <script src="/static/js/authentication.js"></script>
+    <link rel="icon" href="/static/images/favicon2.png">
+    <link rel="icon" href="/static/images/favicon2.png">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
+    <!-- animate CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/animate.css">
+    <!-- owl carousel CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/owl.carousel.min.css">
+    <!-- themify CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/themify-icons.css">
+    <!-- flaticon CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/flaticon.css">
+    <!-- font awesome CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/magnific-popup.css">
+    <link rel="stylesheet" type="text/css" href="/static/css/font-awesome.min.css">
+    <!-- swiper CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/slick.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <!-- Custom CSS -->
+    <style>
+        .assistant-container {
+            margin: 130px auto 50px auto;
+            max-width: 800px;
+            min-width: 300px;
+            padding: 25px;
+            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .assistant-container .assistant-avatar {
+            width: 140px;
+            height: 140px;
+            margin: 50px auto;
+            border-radius: 50%;
+            background: #f4f4f9;
+            border: 4px solid #007bff;
+            overflow: hidden;
+            animation: idle 2s infinite;
+        }
+
+        .assistant-container .assistant-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+
+        .listening .assistant-avatar {
+            animation: listening 1.2s infinite;
+        }
+
+        .thinking .assistant-avatar {
+            animation: thinking 1.5s infinite;
+        }
+
+        @keyframes idle {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes listening {
+            0%, 100% {
+                box-shadow: 0 0 15px rgba(0, 123, 255, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(0, 123, 255, 0.8);
+            }
+        }
+
+        @keyframes thinking {
+            0% {
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 25px rgba(255, 165, 0, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 10px rgba(255, 165, 0, 0.6);
+            }
+        }
+
+        .assistant-container h3 {
+            font-size: 25px;
+            font-weight: 700;
+            color: #333;
+            text-align: center;
+            margin: 0 auto 30px auto;
+        }
+
+        .assistant-container .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .assistant-container button {
+            background-color: #59841c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+            outline: none;
+        }
+
+        .assistant-container button:hover {
+            background-color: #47740a;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .assistant-container button.disabled {
+            background-color: #cccccc;
+            pointer-events: none;
+        }
+
+        .assistant-container button i {
+            margin-right: 8px;
+        }
+
+        .assistant-container .recording-indicator {
+            font-size: 16px;
+            text-align: center;
+            margin-top: 15px;
+            color: #ff3b3b;
+            font-weight: bold;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <%- include('partials/menu.ejs') %>
+    <div class="assistant-container">
+        <h3>Giao Tiếp Với AI - Thực Hành Tiếng Anh</h3>
+        <div class="assistant-avatar">
+            <img src="/static/images/AI.png" alt="AI Assistant">
+        </div>
+        <div class="button-group">
+            <button id="startButton">
+                <i class="fas fa-microphone"></i> Ghi âm
+            </button>
+            <button id="stopButton" class="disabled">
+                <i class="fas fa-stop"></i> Dừng
+            </button>
+        </div>
+        <p id="recordingIndicator" class="recording-indicator">Đang ghi âm...</p>
+    </div>
+    <%- include('partials/footer.ejs') %>
+    <script>
+        const startButton = document.getElementById("startButton");
+        const stopButton = document.getElementById("stopButton");
+        const recordingIndicator = document.getElementById("recordingIndicator");
+        const assistantContainer = document.querySelector(".assistant-container");
+
+        let recognition;
+
+        startButton.addEventListener("click", () => {
+            startButton.classList.add("disabled");
+            stopButton.classList.remove("disabled");
+            recordingIndicator.style.display = "block";
+            assistantContainer.classList.add("listening");
+            startSpeechToText();
+        });
+
+        stopButton.addEventListener("click", () => {
+            stopRecording();
+        });
+
+        function startSpeechToText() {
+            recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+            recognition.lang = "en-US";
+            recognition.interimResults = false;
+
+            recognition.onresult = async (event) => {
+                const userMessage = event.results[0][0].transcript;
+                assistantContainer.classList.remove("listening");
+                assistantContainer.classList.add("thinking");
+                const aiResponse = await sendToGPT(userMessage);
+                assistantContainer.classList.remove("thinking");
+                startTextToSpeech(aiResponse);
+                resetButtons();
+            };
+
+            recognition.onerror = () => {
+                startTextToSpeech("Xin lỗi, tôi không thể nghe được. Vui lòng thử lại.");
+                resetButtons();
+            };
+
+            recognition.start();
+        }
+
+        function stopRecording() {
+            if (recognition) {
+                recognition.stop();
+                resetButtons();
+            }
+        }
+
+        function resetButtons() {
+            startButton.classList.remove("disabled");
+            stopButton.classList.add("disabled");
+            recordingIndicator.style.display = "none";
+            assistantContainer.classList.remove("listening", "thinking");
+        }
+
+        async function sendToGPT(message) {
+            try {
+                const response = await fetch("/api/communicate", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ message }),
+                });
+                const data = await response.json();
+                return data.response;
+            } catch (error) {
+                console.error("Error sending message to GPT:", error);
+                return "Xin lỗi, tôi không thể trả lời ngay bây giờ.";
+            }
+        }
+
+        function startTextToSpeech(message) {
+            const utterance = new SpeechSynthesisUtterance(message);
+            utterance.lang = "en-US";
+            utterance.rate = 1;
+            speechSynthesis.speak(utterance);
+        }
+    </script>
+    <script src="/static/js/jquery-1.12.1.min.js"></script>
+    <script src="/static/js/popper.min.js"></script>
+    <script src="/static/js/bootstrap.min.js"></script>
+    <script src="/static/js/jquery.magnific-popup.js"></script>
+    <script src="/static/js/swiper.min.js"></script>
+    <script src="/static/js/masonry.pkgd.js"></script>
+    <script src="/static/js/owl.carousel.min.js"></script>
+    <script src="/static/js/jquery.nice-select.min.js"></script>
+    <script src="/static/js/slick.min.js"></script>
+    <script src="/static/js/jquery.counterup.min.js"></script>
+    <script src="/static/js/waypoints.min.js"></script>
+    <script src="/static/js/custom.js"></script>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Thêm Câu Chuyện</title>
+    <link rel="icon" href="/static/images/favicon.png">
+    <script src="/static/js/checkadmin.js"></script>
+    <script src="/static/admin/assets/js/plugin/webfont/webfont.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
+    <script>
+        WebFont.load({
+            google: { families: ["Public Sans:300,400,500,600,700"] },
+            custom: {
+                families: [
+                    "Font Awesome 5 Solid",
+                    "Font Awesome 5 Regular",
+                    "Font Awesome 5 Brands",
+                    "simple-line-icons",
+                ],
+                urls: ["/static/admin/assets/css/fonts.min.css"],
+            },
+            active: function () {
+                sessionStorage.fonts = true;
+            },
+        });
+    </script>
+
+    <!-- CSS Files -->
+    <link rel="stylesheet" href="/static/admin/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/plugins.min.css" />
+    <link rel="stylesheet" href="/static/admin/assets/css/kaiadmin.min.css" />
+</head>
+<body>
+    <div class="wrapper">
+        <%- include('../admin/partials/menu.ejs') %>
+        <div class="main-panel">
+            <div class="content">
+                <div class="page-inner">
+                    <div class="container story-container">
+                        <h1 class="text-center story-title">THÊM CÂU CHUYỆN MỚI</h1>
+                        <form id="addStoryForm" enctype="multipart/form-data">
+                            <div class="form-group">
+                                <label for="story-title">Tiêu đề:</label>
+                                <input type="text" class="form-control" id="story-title" name="title" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="story-description">Mô tả:</label>
+                                <textarea class="form-control" id="story-description" name="description" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="story-content">Nội dung:</label>
+                                <textarea class="form-control" id="story-content" name="content" rows="10" required></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="image">Hình ảnh:</label>
+                                <input type="file" id="image" name="image" accept="image/*" required>
+                            </div>
+                            <button type="button" class="btn btn-primary btn-submit-story" onclick="addStory()">Thêm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>    
+        </div>
+    </div>
+    <script src="/static/admin/assets/js/core/jquery-3.7.1.min.js"></script>
+    <script src="/static/admin/assets/js/core/popper.min.js"></script>
+    <script src="/static/admin/assets/js/core/bootstrap.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/jquery-scrollbar/jquery.scrollbar.min.js"></script>
+    <script src="/static/admin/assets/js/plugin/datatables/datatables.min.js"></script>
+    <script src="/static/admin/assets/js/kaiadmin.min.js"></script>
+
+    <script>
+        function addStory() {
+            const formData = new FormData(document.getElementById("addStoryForm"));
+            $.ajax({
+                url: '/admin/story/api/add',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function () {
+                    alert("Câu chuyện đã được thêm thành công !");
+                    window.location.href = "/admin/story";
+                },
+                error: function (error) {
+                    console.error("Error adding story:", error);
+                }
+            });
+        }
+    </script>
+</body>
+</html>

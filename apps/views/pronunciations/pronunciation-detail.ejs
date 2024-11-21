@@ -17,12 +17,12 @@
     <style>
         body {
             font-family: 'Roboto', sans-serif;
-            background-color: #fcfcfc; /* Thay đổi màu nền cho mềm mại hơn */
+            background-color: #fcfcfc;
         }
         h2 {
             color: #2c3e50;
             font-weight: bold;
-            border-bottom: 3px solid #2980b9; /* Thêm đường viền dưới cho tiêu đề */
+            border-bottom: 3px solid #2980b9;
             padding-bottom: 10px;
             font-size: 28px;
         }
@@ -37,11 +37,11 @@
             font-size: 23px;
         }
         .example-item {
-            background-color: #ecf0f1; /* Thay đổi màu nền cho phần ví dụ */
+            background-color: #ecf0f1;
             border-radius: 10px;
             padding: 15px;
             margin-bottom: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Thêm bóng đổ */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
             transition: transform 0.2s;
         }
         .btn-primary {
@@ -70,13 +70,13 @@
             max-width: 100%;
             height: auto;
             margin-bottom: 15px;
-            border-radius: 5px; /* Bo góc cho hình ảnh */
+            border-radius: 5px;
         }
         .content-item iframe {
             width: 100%;
             height: 400px;
             margin-bottom: 15px;
-            border-radius: 5px; /* Bo góc cho iframe */
+            border-radius: 5px;
         }
         table {
             width: 100%;
@@ -173,38 +173,38 @@
             color: #1f78c1;
             text-decoration: underline;
         }
-        /* Comment Section */
+
         .comment-section {
             margin-top: 20px;
-            background-color: #f7f9fc;  /* Màu nền nhạt hơn, tạo cảm giác sạch sẽ */
+            background-color: #f7f9fc;
             padding: 20px;
             border-radius: 10px;
-            border: 1px solid #e0e7ff;  /* Đường viền màu xanh nhạt */
+            border: 1px solid #e0e7ff;
         }
 
         .comment-box textarea {
             border-radius: 5px;
-            border: 1px solid #d1d5db;  /* Màu viền nhạt */
+            border: 1px solid #d1d5db;
             background-color: #ffffff;
             padding: 10px;
             font-size: 14px;
-            transition: border-color 0.3s ease; /* Hiệu ứng khi hover */
+            transition: border-color 0.3s ease;
         }
 
         .comment-box textarea:focus {
-            border-color: #6366f1;  /* Viền xanh khi người dùng tương tác */
+            border-color: #6366f1;
             outline: none;
         }
 
         .comment-box button {
-            background-color: #6366f1; /* Màu nút xanh tím nhạt */
+            background-color: #6366f1;
             border-color: #6366f1;
             color: white;
             transition: background-color 0.3s ease;
         }
 
         .comment-box button:hover {
-            background-color: #4f46e5; /* Đổi màu khi hover */
+            background-color: #4f46e5;
         }
 
         .comment-list {
@@ -215,28 +215,26 @@
             background-color: #ffffff;
             padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Hiệu ứng đổ bóng nhẹ */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
             margin-bottom: 15px;
-            border-left: 4px solid #6366f1; /* Đường viền trái màu xanh tím */
+            border-left: 4px solid #6366f1;
         }
 
         .comment-item strong {
-            color: #1f2937; /* Màu chữ đậm hơn */
+            color: #1f2937;
             font-size: 16px;
         }
 
         .comment-item small {
-            color: #6b7280; /* Màu chữ nhẹ nhàng hơn */
+            color: #6b7280;
             font-size: 12px;
         }
 
         .comment-item p {
             margin-bottom: 5px;
             font-size: 14px;
-            color: #374151; /* Màu chữ tối hơn để dễ đọc */
+            color: #374151;
         }
-
-
     </style>    
 </head>
 <body>
@@ -250,7 +248,6 @@
                         <p style="color: #333; font-weight: bold;">Ngày đăng: <span id="createdAt"></span></p>
                         <p id="pronunciation-description" class="lead mb-4"></p>
                 
-                        <!-- Content Section -->
                         <section class="my-4">
                             <div class="content-item mb-4" id="pronunciation-content">
                                 
@@ -437,7 +434,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
     <script>
-        // Fetch grammar details
         const pronunciationId = window.location.pathname.split('/').pop();
         $.ajax({
             url: `/pronunciation/api/${pronunciationId}`,

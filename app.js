@@ -90,6 +90,12 @@ app.use("/admin/stage",  stageAdminController);
 var stageController = require(__dirname + "/apps/controllers/stagecontroller"); 
 app.use(stageController);
 
+var storyAdminController = require(__dirname + "/apps/controllers/admin/storyAdmincontroller");
+app.use("/admin/story", storyAdminController);
+
+var storyController = require(__dirname + "/apps/controllers/storycontroller");
+app.use(storyController);
+
 var grammarAdminController = require(__dirname + "/apps/controllers/admin/grammarAdmincontroller");
 app.use("/admin/grammar", grammarAdminController);
 
@@ -134,6 +140,9 @@ app.use(userController);
 
 var chatController = require(__dirname + "/apps/controllers/chatcontroller");
 app.use(chatController);
+
+var communicatetController = require(__dirname + "/apps/controllers/communicatecontroller");
+app.use(communicatetController);
 
 app.set("views", __dirname + "/apps/views");
 app.set("view engine", "ejs");

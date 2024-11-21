@@ -1,61 +1,41 @@
 const express = require("express");
 const router = express.Router();
-const Story = require("../models/story");
+const StoryService = require("./../services/storyService");
 
-// Route để hiển thị trang chính với danh sách các câu chuyện
-router.get("/", (req, res) => {
-  Story.find()
-    .then((stories) => {
-      res.render("/stories/story_list", { stories }); // Render trang EJS và truyền dữ liệu stories
-    })
-    .catch((err) => res.status(500).send(err));
+router.get("/api/story-list", async function (req, res) {
+    const storyService = new StoryService();
+    const page = parseInt(req.query.page) || 1;
+    const limit = 2;
+    const { stories, totalStory } = await storyService.getStoryList(page, limit);
+    const totalPages = Math.ceil(totalStory / limit);
+    res.json({
+      stories,
+      currentPage: page,
+      totalPages,
+    });
+});
+  
+router.get('/', (req, res) => {
+    res.render('stories/story-list');
 });
 
-// Route để tạo mới một câu chuyện
-// router.post("/", (req, res) => {
-//   const { title, content, audio, genre, vietnameseScript } = req.body;
+router.get('/detail/:id', (req, res) => {
+  res.render('stories/story-detail');
+});
 
-//   const newStory = new Story({
-//     title,
-//     content,
-//     audio,
-//     genre,
-//     vietnameseScript,
-//   });
+router.get("/api/:id", async function (req, res) {
+  const storyService = new StoryService();
+  try {
+    const story = await storyService.getStory(req.params.id);
 
-//   newStory
-//     .save()
-//     .then(() => {
-//       res.redirect("admin/stories"); // Sau khi tạo thành công, chuyển về trang danh sách
-//     })
-//     .catch((err) => res.status(500).send(err));
-// });
+    if (!story) {
+      return res.status(404).json({ message: "story not found" });
+    }
 
-// Route để xóa một câu chuyện
-// router.delete("/:id", (req, res) => {
-//   Story.findByIdAndDelete(req.params.id)
-//     .then(() => {
-//       res.redirect("admin/stories"); // Sau khi xóa, quay lại trang danh sách
-//     })
-//     .catch((err) => res.status(500).send(err));
-// });
-
-// Route để lấy dữ liệu của một câu chuyện để chỉnh sửa (bạn có thể thêm phần sửa tại đây)
-// router.get("/edit/:id", (req, res) => {
-//   Story.findById(req.params.id)
-//     .then((story) => {
-//       res.render("admin/story_edit", { story }); // Render trang chỉnh sửa
-//     })
-//     .catch((err) => res.status(500).send(err));
-// });
-
-// Route để cập nhật một câu chuyện (cần thêm phần chỉnh sửa .ejs để xử lý)
-// router.put("/:id", (req, res) => {
-//   Story.findByIdAndUpdate(req.params.id, req.body, { new: true })
-//     .then(() => {
-//       res.redirect("/stories"); // Sau khi cập nhật, chuyển về trang danh sách
-//     })
-//     .catch((err) => res.status(500).send(err));
-// });
+    res.json(story);
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching story details", error: err });
+  }
+});
 
 module.exports = router;
