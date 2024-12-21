@@ -281,7 +281,7 @@
       });
 
         async function deleteReminder(id) {
-            if (confirm('Are you sure you want to delete this reminder?')) {
+            if (confirm('Bạn có muốn xóa cái nhắc nhở này không ?')) {
                 const token = localStorage.getItem("token");
                 const response = await fetch(`/reminder/api/reminder/${id}`, { 
                     method: "DELETE",

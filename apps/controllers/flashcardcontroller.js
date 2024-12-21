@@ -14,7 +14,7 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/api/flashcard-list", async (req, res) => {
-  const limit = parseInt(req.query.limit) || 2;
+  const limit = parseInt(req.query.limit) || 5;
   const page = parseInt(req.query.page) || 1;
 
   try {

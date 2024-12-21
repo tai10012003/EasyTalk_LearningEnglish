@@ -14,7 +14,7 @@ class PronunciationexerciseService {
         this.pronunciationExercisesCollection = this.pronunciationExercisesDatabase.collection("pronunciationexercises");
     }
 
-    async getPronunciationexerciseList(page = 1, limit = 2) {
+    async getPronunciationexerciseList(page = 1, limit = 5) {
         try {
             const skip = (page - 1) * limit;
             const cursor = await this.pronunciationExercisesCollection

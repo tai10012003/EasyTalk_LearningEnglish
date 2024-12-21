@@ -15,7 +15,7 @@ class GrammarsService {
         this.grammarsCollection = this.grammarsDatabase.collection("grammars");
     }
 
-    async getGrammarList(page = 1, limit = 2) {
+    async getGrammarList(page = 1, limit = 5) {
         const skip = (page - 1) * limit;
         const cursor = await this.grammarsCollection
             .find({}, {})

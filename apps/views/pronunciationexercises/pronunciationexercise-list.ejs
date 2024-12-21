@@ -251,7 +251,7 @@
             fetchPronunciationExercises(1);
         });
         function fetchPronunciationExercises(page = 1) {
-            fetch(`/pronunciation-exercise/api/pronunciation-exercises?page=${page}&limit=2`)
+            fetch(`/pronunciation-exercise/api/pronunciation-exercises?page=${page}&limit=5`)
                 .then(response => response.json())
                 .then(data => {
                     const exercisesList = document.getElementById("exercises-list");

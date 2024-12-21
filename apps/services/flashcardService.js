@@ -17,7 +17,7 @@ class FlashcardsService {
         this.flashcardListsCollection = this.flashcardsDatabase.collection("flashcardlists");
     }
 
-    async getFlashcardList(page = 1, limit = 2) {
+    async getFlashcardList(page = 1, limit = 5) {
         const skip = (page - 1) * limit;
         const cursor = await this.flashcardListsCollection.find({})
             .skip(skip)

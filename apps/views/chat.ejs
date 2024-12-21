@@ -175,6 +175,7 @@
             const messageInput = document.getElementById('messageInput');
             const chatBox = document.getElementById('chatBox');
 
+            let isSending = false;
             function appendMessage(sender, message, type) {
                 const messageElement = document.createElement('div');
                 messageElement.classList.add('chat-message', type);
@@ -189,19 +190,26 @@
                 messageElement.appendChild(messageContent);
 
                 chatBox.appendChild(messageElement);
-                chatBox.scrollTop = chatBox.scrollHeight; // Tự động cuộn xuống cuối
+                chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
             }
 
-            // Gửi yêu cầu đến API ChatGPT
             async function sendMessage() {
-                const userMessage = messageInput.value;
+                const userMessage = messageInput.value.trim();
 
                 if (!userMessage) {
-                    alert("Please enter a message");
+                    alert("Vui lòng nhập nội dung tin nhắn.");
                     return;
                 }
 
-                appendMessage('You', userMessage, 'user-message'); // Hiển thị tin nhắn người dùng
+                if (isSending) {
+                    alert("Đang gửi tin nhắn, vui lòng đợi...");
+                    return;
+                }
+
+                isSending = true;
+                sendBtn.disabled = true;
+
+                appendMessage('You', userMessage, 'user-message');
 
                 try {
                     const response = await fetch('/api/chat', {
@@ -214,28 +222,29 @@
 
                     const data = await response.json();
                     if (response.ok) {
-                        appendMessage('Chat AI', data.response, 'bot-message'); // Hiển thị phản hồi từ ChatGPT
+                        appendMessage('Chat AI', data.response, 'bot-message');
                     } else {
-                        appendMessage('Error', data.error || 'Có gì đó không ổn', 'bot-message');
+                        appendMessage('Chat AI', data.error || 'Có gì đó không ổn.', 'bot-message');
                     }
                 } catch (error) {
-                    appendMessage('Error', 'Không gửi được tin nhắn', 'bot-message');
+                    appendMessage('Chat AI', 'Không thể gửi tin nhắn. Vui lòng thử lại.', 'bot-message');
+                    console.error("Error:", error);
+                } finally {
+                    messageInput.value = '';
+                    isSending = false;
+                    sendBtn.disabled = false;
                 }
-
-                // Xóa nội dung trong input sau khi gửi
-                messageInput.value = '';
             }
 
-            // Gửi tin nhắn khi nhấn nút gửi
             sendBtn.addEventListener('click', sendMessage);
 
-            // Gửi tin nhắn khi nhấn phím Enter
             messageInput.addEventListener('keypress', function (event) {
                 if (event.key === 'Enter') {
                     sendMessage();
                 }
             });
         });
+
     </script>
     <script src="/static/js/jquery-1.12.1.min.js"></script>
     <script src="/static/js/popper.min.js"></script>

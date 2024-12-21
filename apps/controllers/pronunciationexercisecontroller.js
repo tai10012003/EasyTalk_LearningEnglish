@@ -21,7 +21,7 @@ router.get("/", async (req, res) => {
 router.get("/api/pronunciation-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 2;
+        const limit = parseInt(req.query.limit) || 5;
         const { pronunciationexercises, totalExercises } = await pronunciationExerciseService.getPronunciationexerciseList(page, limit);
     
         const totalPages = Math.ceil(totalExercises / limit);
