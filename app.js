@@ -149,6 +149,8 @@ app.set("view engine", "ejs");
 
 app.use("/static", express.static(__dirname + "/public"));
 
-var server = app.listen(3000, function(){
-  console.log("Server is running on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
 });
