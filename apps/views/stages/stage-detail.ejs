@@ -316,7 +316,7 @@
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="answer" value="${option}" id="option-${option}-${index}">
                             <label class="form-check-label" for="option-${option}-${index}">${option}</label>
-                        </div>`).join('');
+                        </div>`).join('').toLowerCase();
                 } else {
                     return `<textarea class="form-control question-input" name="answer" rows="4" placeholder="Nhập câu trả lời của bạn"></textarea>`;
                 }
