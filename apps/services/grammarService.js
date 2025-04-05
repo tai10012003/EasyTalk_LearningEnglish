@@ -35,16 +35,26 @@ class GrammarsService {
     }
 
     async insertGrammar(grammar) {
+        const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 10MB
+        if (grammar.images && grammar.images.length > MAX_IMAGE_SIZE) {
+            throw new Error("Ảnh quá lớn. Vui lòng chọn ảnh có kích thước nhỏ hơn 5MB.");
+        }
+    
         grammar.createdAt = new Date();
         return await this.grammarsCollection.insertOne(grammar);
     }
-
+    
     async updateGrammar(grammar) {
+        const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 10MB
+        if (grammar.images && grammar.images.length > MAX_IMAGE_SIZE) {
+            throw new Error("Ảnh quá lớn. Vui lòng chọn ảnh có kích thước nhỏ hơn 5MB.");
+        }
+    
         return await this.grammarsCollection.updateOne(
             { _id: new ObjectId(grammar._id) },
             { $set: grammar }
         );
-    }
+    }    
 
     async deleteGrammar(id) {
         return await this.grammarsCollection.deleteOne({ "_id": new ObjectId(id) });

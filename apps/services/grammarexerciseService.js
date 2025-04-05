@@ -56,14 +56,19 @@ class GrammarexerciseService {
         const objectId = new ObjectId(id);
 
         const formattedQuestions = updateData.questions.map((question) => {
+            if (question.type == null) {
+                throw new Error("Không để trống type question.");
+            }
             return {
                 question: question.question,
-                type: question.type,
+                type: question.type ,
                 correctAnswer: question.correctAnswer,
                 explanation: question.explanation || "",
                 options: question.options || [],
             };
         });
+
+
 
         const update = {
             title: updateData.title.trim(),
