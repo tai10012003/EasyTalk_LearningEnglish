@@ -25,237 +25,7 @@
     <link rel="stylesheet" href="/static/css/slick.css">    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <!-- Custom Styles -->
-    <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="/static/css/main.css">
-    <style>
-        .exercises-container {
-            margin: 130px auto 50px auto;
-            max-width: 800px;
-            min-width: 300px;
-            padding: 25px;
-            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            background-color: #fff;
-        }
-        .form-check {
-            padding-left: 0;
-        }
-        .option-label {
-            display: block;
-            padding: 10px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            background-color: #fff;
-        }
-
-        .option-label:hover {
-            background-color: #f8f9fa;
-        }
-
-        .option-input {
-            display: none;
-        }
-
-        .option-input:checked + .option-label {
-            background-color: #e9ecef;
-            font-weight: bold;
-        }
-
-        .btn {
-            width: 100%;
-        }
-
-        .time-remaining {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .submit-btn {
-            background-color: #28a745;
-            color: white;
-            padding: 10px;
-            border-radius: 4px;
-            width: 100%;
-        }
-
-        .record-btn {
-            background-color: #17a2b8;
-            color: white;
-        }
-
-        .correct-answer {
-            background-color: #aceebb !important;
-        }
-
-        .incorrect-answer {
-            background-color: #eab3b8 !important;
-        }
-
-        .speaker-icon {
-            cursor: pointer;
-            margin-left: 10px;
-            font-size: 20px;
-            color: #007bff;
-        }
-
-        .explanation {
-            border: 1px solid cadetblue;
-            line-height: 1.8;
-            padding: 10px;
-            font-size: 15px;
-            font-weight: bold;
-        }
-        .correct-answer {
-            background-color: #aceebb !important;
-            font-weight: bold !important;
-        }
-        .incorrect-answer {
-            background-color: #eab3b8 !important;
-            font-weight: bold !important;
-        }
-        .btn {
-            width: 100%;
-        }
-        .result-content {
-            text-align: center;
-        }
-        .result-screen h2 {
-            margin: 10px 0 20px 0;
-        }
-        .result-content p{
-            margin: 20px 0;
-            color: black;
-            font-size: 16px;
-        }
-        .result-number {
-            font-weight: bold;
-            color: black;
-            font-size: 16px;
-        }
-        .result-percentage {
-            font-size: 16px;
-            color: #17a2b8;
-        }
-        .result-icon {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-        }
-
-        .result-icon img {
-            width: 200px;
-            height: auto;
-        }
-
-        /* Phần bên phải - thời gian và danh sách câu hỏi */
-        .sidebar {
-            margin: 130px auto 50px auto;
-            padding: 25px;
-            box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            background-color: #fff;
-        }
-
-        .time-remaining {
-            font-size: 22px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        .question-list {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-        }
-
-        .question-list button {
-            background-color: #fff;
-            color: #333;
-            border: 1px solid black;
-            padding: 5px;
-            font-size: 13px;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        .question-list button.active {
-            background-color: #6c757d;
-        }
-
-        .question-list button:hover {
-            background-color: #0057b3;
-            color: white;
-        }
-        .speak-button {
-            border: 1px solid #9ba0a6;
-            background-color: #ffffff;
-        }
-        #speak-choice {
-            padding: 30px;
-            font-size: 25px;
-        }
-        .history-item {
-            margin-bottom: 20px;
-        }
-        .history-item h5 {
-            font-size: 16px;
-            line-height: 1.6;
-            font-weight: bold;
-        }
-        .history-item p {
-            font-size: 16px;
-            margin: 5px 0;
-        }
-        .speak-button {
-            border: 1px solid #9ba0a6;
-            background-color: #ffffff;
-        }
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.485);
-        }
-
-        .accuracy-display {
-            text-align: center;
-        }
-
-        .accuracy-display.green {
-            color: green;
-        }
-
-        .accuracy-display.orange {
-            color: orange;
-        }
-
-        .accuracy-display.red {
-            color: red;
-        }
-
-        .analysis-message {
-            font-size: 18px;
-            font-weight: bold;
-            margin-top: 10px;
-            text-align: center;
-        }
-
-
-        .detailed-analysis {
-            margin-top: 20px;
-            text-align: left;
-        }
-
-        .correct-word {
-            color: green;
-            font-weight: bold;
-        }
-
-        .incorrect-word {
-            color: red;
-            font-weight: bold;
-            text-decoration: underline;
-        }
-    </style>
 </head>
 <body>
     <%- include('../partials/menu.ejs') %>
@@ -263,7 +33,7 @@
     <div class="container">
         <div class="row">
             <div class="col-md-8">
-                <div class="container exercises-container">
+                <div class="container exercises-detail-container">
                     <div id="exerciseCarousel" class="carousel slide" data-ride="carousel" data-interval="false">
                         <div class="carousel-inner" id="carousel-inner">
 
@@ -272,11 +42,11 @@
                 </div>
             </div>
             <div class="col-md-4">
-                <div class="sidebar">
+                <div class="sidebar-exercise">
                     <div class="time-remaining text-center">
                         <span id="timeLabel">Thời gian còn lại:</span> <span id="time">20:00</span>
                     </div>
-                    <button id="submitQuizBtn" class="btn btn-primary submit-btn mb-4">Nộp bài</button>
+                    <button id="submitQuizBtn" class="btn btn-success submit-btn mb-4">Nộp bài</button>
                     <h5 id="questionListTitle">Danh sách câu hỏi:</h5>
                     <div class="question-list mt-3" id="question-list">
 
@@ -313,8 +83,8 @@
                                     <div class="question-card p-3" data-correct-answer="${question.correctAnswer}" data-explanation="${question.explanation}" data-type="${question.type}">
                                         ${question.type === 'multiple-choice' ? `
                                             <!-- Nội dung câu hỏi lựa chọn -->
-                                            <h4>Nghe và chọn đáp án phát âm đúng:</h4>
-                                            <h5 style="margin-top: 20px; line-height: 1.8;" id="ques-${index}">
+                                            <h4 class="question-title">Nghe và chọn đáp án phát âm đúng: </h4>
+                                            <h5 class="ques-id" id="ques-${index}">
                                                 Question ${index + 1}:
                                                 <span class="question-text" style="display: none;">${question.question}</span>
                                             </h5>
@@ -335,15 +105,20 @@
                                                 <div class="explanation mt-4" style="display: none;"></div>
                                                 <button type="button" class="btn btn-success submit-answer mt-4" data-index="${index}">Kiểm tra</button>
                                             </form>
+                                            <hr>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <button class="btn btn-secondary prev-slide" type="button" data-slide="prev" ${index === 0 ? 'disabled' : ''}>Quay lại</button>
+                                                <button class="btn btn-secondary next-slide ml-5" type="button" data-slide="next" ${index === data.questions.length - 1 ? 'disabled' : ''}>Tiếp theo</button>
+                                            </div>
                                         ` : `
                                             <!-- Nội dung câu hỏi phát âm lại -->
-                                            <h4>Phát âm lại sao cho đúng:</h4>
-                                            <h5 style="margin-top: 20px; line-height: 1.8" id="ques-${index}">
+                                            <h4 class="question-title">Phát âm lại sao cho đúng:</h4>
+                                            <h5 class="ques-id" id="ques-${index}">
                                                 <button class="speak-button btn-sm btn-outline mr-2" data-text="${question.question}">🔊</button>
                                                 Question ${index + 1}:  <span class="question-text">${question.question}</span>
                                             </h5>
                                             <div class="mt-4" style="text-align: center;">
-                                                <button type="button" class="btn record-btn" id="record-answer-${index}" data-index="${index}" style="width: 30%; display: inline-block; margin-top: 10px">
+                                                <button type="button" class="btn record-btn" id="record-answer-${index}" data-index="${index}">
                                                     Ghi âm
                                                 </button>
                                                 <p id="recording-status-${index}" style="display: none; color: green; font-weight: bold;"></p>
@@ -354,12 +129,12 @@
                                                 </div>
                                             </div>
                                             <div class="explanation mt-4" style="display: none;"></div>
+                                            <hr>
+                                            <div class="d-flex justify-content-between mt-3">
+                                                <button class="btn btn-secondary prev-slide" type="button" data-slide="prev" ${index === 0 ? 'disabled' : ''}>Quay lại</button>
+                                                <button class="btn btn-secondary next-slide ml-5" type="button" data-slide="next" ${index === data.questions.length - 1 ? 'disabled' : ''}>Tiếp theo</button>
+                                            </div>
                                         `}
-                                    </div>
-                                    <!-- Navigation buttons -->
-                                    <div class="d-flex justify-content-between mt-3">
-                                        <button class="btn btn-secondary prev-slide" type="button" ${index === 0 ? 'disabled' : ''}>Quay lại</button>
-                                        <button class="btn btn-secondary next-slide ml-5" type="button" ${index === data.questions.length - 1 ? 'disabled' : ''}>Tiếp theo</button>
                                     </div>
                                 </div>
                             `;
@@ -532,13 +307,13 @@
                                 <img src="${iconSrc}" alt="Icon kết quả">
                             </div>
                         </div>
-                        <div class="d-flex flex-column align-items-center mt-3">
+                        <div class="d-flex flex-column align-items-center mt-5">
                             <button class="btn btn-danger" style="width: 200px; margin-bottom: 10px;" onclick="location.reload()">Làm lại</button>
                             <button class="btn btn-secondary" style="width: 200px;" onclick="location.href='/pronunciation-exercise'">Thoát</button>
                         </div>
                     </div>
                 `;
-                $('.exercises-container').html(resultHtml);
+                $('.exercises-detail-container').html(resultHtml);
             }
 
     

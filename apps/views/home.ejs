@@ -20,255 +20,297 @@
     <!-- swiper CSS -->
     <link rel="stylesheet" type="text/css" href="/static/css/slick.css">
     <!-- style CSS -->
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <link rel="stylesheet" type="text/css" href="/static/css/main.css">
 </head>
 
 <body>
     <%- include('partials/menu.ejs') %>
-    <!-- banner part start-->
-    <section class="banner_part">
+    <!-- Hero Section -->
+    <section class="hero-section">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col-lg-6 col-xl-6">
-                    <div class="banner_text">
-                        <div class="banner_text_iner">
-                            <h5>Khám phá thế giới tiếng Anh cùng chúng tôi</h5>
-                            <h1>Cải thiện kỹ năng tiếng Anh của bạn</h1>
-                            <p>Cho dù bạn là người mới bắt đầu hay muốn cải thiện kỹ năng của mình, 
-                                hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày.</p>
-                                <a href="/journey" class="btn_1">BẮT ĐẦU NÀO !!</a>
+                <div class="col-lg-6">
+                    <div class="hero-content">
+                        <span class="hero-tag">Website học tiếng Anh hiệu quả</span>
+                        <h1>Học Tiếng Anh Dễ Dàng <br><span class="highlight">Cùng EasyTalk</span></h1>
+                        <p>Phương pháp học đa dạng kết hợp với công nghệ hiện đại giúp việc học trở nên thú vị và hiệu quả hơn.</p>
+                        <div class="hero-btns">
+                            <a href="/study-path" class="btn-primary">Bắt Đầu Học</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-image">
+                        <img src="/images/hero-learning.png" alt="EasyTalk Learning" class="main-img">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Main Features -->
+    <section id="main-features" class="main-features">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Bài Học Đa Dạng</h2>
+                <p>Học tập toàn diện với nhiều kỹ năng khác nhau</p>
+            </div>
+            
+            <div class="row feature-cards">
+                <!-- Stories -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="card-icon">
+                            <i class="fas fa-book-reader"></i>
+                        </div>
+                        <h3>Câu Chuyện</h3>
+                        <p>Học qua các câu chuyện thú vị, tăng vốn từ và ngữ pháp tự nhiên</p>
+                        <a href="/stories" class="card-link">Xem Các Câu Chuyện</a>
+                    </div>
+                </div>
+    
+                <!-- Grammar -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="card-icon">
+                            <i class="fas fa-pencil-alt"></i>
+                        </div>
+                        <h3>Ngữ Pháp</h3>
+                        <p>Học ngữ pháp có hệ thống từ cơ bản đến nâng cao</p>
+                        <a href="/grammar" class="card-link">Học Ngữ Pháp</a>
+                    </div>
+                </div>
+    
+                <!-- Vocabulary -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="card-icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                        <h3>Từ Vựng</h3>
+                        <p>Học từ vựng qua flashcard và các bài tập tương tác</p>
+                        <a href="/vocabulary" class="card-link">Học Từ Vựng</a>
+                    </div>
+                </div>
+    
+                <!-- Pronunciation -->
+                <div class="col-md-6 col-lg-3">
+                    <div class="feature-card">
+                        <div class="card-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <h3>Phát Âm</h3>
+                        <p>Luyện phát âm chuẩn với công nghệ nhận diện giọng nói</p>
+                        <a href="/pronunciation" class="card-link">Luyện Phát Âm</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Practice Section -->
+    <section class="practice-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Bài Luyện Tập Phong Phú</h2>
+                <p>Đa dạng bài tập giúp củng cố kiến thức</p>
+            </div>
+    
+            <div class="row practice-items">
+                <div class="col-md-6 col-lg-3">
+                    <div class="practice-item">
+                        <span class="practice-tag">Ngữ Pháp</span>
+                        <div class="practice-icon">
+                            <i class="fas fa-pencil-alt"></i>
+                        </div>
+                        <h3>Bài Tập Ngữ Pháp</h3>
+                        <p>Luyện tập ngữ pháp qua các dạng bài tập đa dạng</p>
+                        <a href="/grammar-exercises" class="btn-practice">Làm Bài Tập</a>
+                    </div>
+                </div>
+    
+                <div class="col-md-6 col-lg-3">
+                    <div class="practice-item">
+                        <span class="practice-tag">Từ Vựng</span>
+                        <div class="practice-icon">
+                            <i class="fas fa-book-open"></i>
+                        </div>
+                        <h3>Bài Tập Từ Vựng</h3>
+                        <p>Củng cố từ vựng qua các game và bài tập tương tác</p>
+                        <a href="/vocabulary-exercises" class="btn-practice">Làm Bài Tập</a>
+                    </div>
+                </div>
+    
+                <div class="col-md-6 col-lg-3">
+                    <div class="practice-item">
+                        <span class="practice-tag">Phát Âm</span>
+                        <div class="practice-icon">
+                            <i class="fas fa-microphone"></i>
+                        </div>
+                        <h3>Bài Tập Phát Âm</h3>
+                        <p>Luyện phát âm với công nghệ nhận diện giọng nói</p>
+                        <a href="/pronunciation-exercises" class="btn-practice">Làm Bài Tập</a>
+                    </div>
+                </div>
+    
+                <div class="col-md-6 col-lg-3">
+                    <div class="practice-item">
+                        <span class="practice-tag">Nghe - Viết</span>
+                        <div class="practice-icon">
+                            <i class="fas fa-headphones"></i>
+                        </div>
+                        <h3>Chép Chính Tả</h3>
+                        <p>Luyện nghe và viết qua các bài chép chính tả</p>
+                        <a href="/dictation" class="btn-practice">Làm Bài Tập</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Learning Path Section -->
+    <section class="learning-path-section">
+        <div class="container">
+            <div class="section-header text-center">
+                <h2>Hành Trình Học Tập</h2>
+                <p>Theo dõi và đạt được mục tiêu của bạn</p>
+            </div>
+
+            <div class="learning-path-wrapper">
+                <div class="path-timeline">
+                    <div class="path-item" data-aos="fade-up" data-aos-delay="100">
+                        <div class="path-icon">
+                            <i class="fas fa-flag-checkered"></i>
+                        </div>
+                        <div class="path-content">
+                            <h4>Kiểm Tra Trình Độ</h4>
+                            <p>Làm bài test đầu vào để xác định trình độ và nhận lộ trình học phù hợp</p>
+                            <a href="/level-test" class="path-link">Làm Bài Test <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="path-item" data-aos="fade-up" data-aos-delay="200">  
+                        <div class="path-icon">
+                            <i class="fas fa-book-reader"></i>
+                        </div>
+                        <div class="path-content">
+                            <h4>Học Tập Căn Bản</h4>
+                            <p>Xây dựng nền tảng vững chắc với các bài học được thiết kế theo trình độ</p>
+                            <a href="/basic-lessons" class="path-link">Xem Bài Học <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="path-item" data-aos="fade-up" data-aos-delay="300">
+                        <div class="path-icon">
+                            <i class="fas fa-tasks"></i>
+                        </div>
+                        <div class="path-content">
+                            <h4>Luyện Tập & Thực Hành</h4>
+                            <p>Củng cố kiến thức qua hệ thống bài tập đa dạng và tương tác</p>
+                            <a href="/practice" class="path-link">Làm Bài Tập <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+
+                    <div class="path-item" data-aos="fade-up" data-aos-delay="400">
+                        <div class="path-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="path-content">
+                            <h4>Đánh Giá & Cải Thiện</h4>
+                            <p>Kiểm tra định kỳ và nhận đánh giá chi tiết về tiến độ học tập</p>
+                            <a href="/assessment" class="path-link">Xem Đánh Giá <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-    <!-- banner part start-->
-
-        <!-- learning part start-->
-    <section class="learning_part">
+    
+    <!-- Study Tools -->
+    <section class="study-tools">
         <div class="container">
-            <div class="row align-items-sm-center align-items-lg-stretch">
-                <div class="col-md-7 col-lg-7">
-                    <div class="learning_img">
-                        <img src="/static/images/learningenglish.png" alt="Learning English Online">
+            <div class="section-header text-center">
+                <h2>Công Cụ Hỗ Trợ & AI</h2>
+                <p>Các công cụ & AI giúp việc học hiệu quả hơn</p>
+            </div>
+    
+            <div class="row tools-list">
+                <div class="col-md-6 col-lg-3">
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                        <h4>Từ Điển Thông Minh</h4>
+                        <p>Tra cứu từ vựng và phát âm chuẩn với nhiều ví dụ thực tế</p>
+                        <a href="/dictionary" class="tool-link">
+                            Tra Từ Điển
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
-                <div class="col-md-5 col-lg-5">
-                    <div class="learning_member_text" style="padding: 10px 20px;">
-                        <h5>Về chúng tôi</h5>
-                        <h2>Học tiếng Anh dễ dàng và thú vị</h2>
-                        <p>Tại EasyTalk, chúng tôi tin rằng việc học tiếng Anh phải thú vị và dễ tiếp cận với tất cả mọi người. Nền tảng của chúng tôi cung cấp các bài học tương tác, thử thách thú vị và nội dung được cá nhân hóa giúp bạn cải thiện kỹ năng của mình từng bước.</p>
-                        <ul>
-                            <li><span class="ti-pencil-alt"></span>Các bài học tương tác phù hợp với phong cách và tốc độ học tập của bạn</li>
-                            <li><span class="ti-ruler-pencil"></span>Các ví dụ và bài tập thực tế giúp xây dựng sự tự tin trong giao tiếp</li>
-                        </ul>
-                        <a href="/about" class="btn_1">HỌC HỎI THÊM</a>
+    
+                <div class="col-md-6 col-lg-3">
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <h4>Luyện Hội Thoại</h4>
+                        <p>Thực hành giao tiếp với các chủ đề phổ biến trong cuộc sống</p>
+                        <a href="/conversation" class="tool-link">
+                            Luyện Hội Thoại
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+    
+                <div class="col-md-6 col-lg-3">
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <h4>Luyện Viết</h4>
+                        <p>Cải thiện kỹ năng viết với hệ thống chấm điểm và góp ý chi tiết</p>
+                        <a href="/writing" class="tool-link">
+                            Luyện Viết
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+    
+                <div class="col-md-6 col-lg-3">
+                    <div class="tool-card">
+                        <div class="tool-icon">
+                            <i class="fas fa-question-circle"></i>
+                        </div>
+                        <h4>Trợ Giúp</h4>
+                        <p>Giải đáp thắc mắc và hỗ trợ học tập 24/7</p>
+                        <a href="/help" class="tool-link">
+                            Xem Trợ Giúp
+                            <i class="fas fa-arrow-right"></i>
+                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </section>
-
-    <!-- learning part end-->
-
-    <!-- feature_part start-->
-    <section class="feature_part">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-6 col-xl-3 align-self-center">
-                    <div class="single_feature_text " style="padding: 10px 20px;">
-                        <h3>Hành trình của bạn</h3>
-                        <p>Bắt đầu hành trình cá nhân hóa để thành thạo tiếng Anh, phù hợp với tiến trình và mục tiêu của bạn. Hãy tận dụng từng bước đi!</p>
-                        <a href="/journey" class="btn_1">BẮT ĐẦU NGAY</a>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="single_feature">
-                        <div class="single_feature_part">
-                            <span class="single_feature_icon"><i class="ti-layers"></i></span>
-                            <h4>Bài học cá nhân hóa</h4>
-                            <p>Hành trình của bạn được thiết kế riêng cho trình độ kỹ năng và tốc độ học tập của bạn, đảm bảo bạn đạt được mục tiêu một cách hiệu quả.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="single_feature">
-                        <div class="single_feature_part">
-                            <span class="single_feature_icon"><i class="ti-new-window"></i></span>
-                            <h4>Những thử thách hấp dẫn</h4>
-                            <p>Từ các câu đố đến các bài học tương tác, hành trình của bạn bao gồm những thử thách thú vị để đảm bảo bạn vừa học vừa tận hưởng quá trình này.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-xl-3">
-                    <div class="single_feature">
-                        <div class="single_feature_part single_feature_part_2">
-                            <span class="single_service_icon style_icon"><i class="ti-light-bulb"></i></span>
-                            <h4>Theo dõi tiến trình của bạn</h4>
-                            <p>Với mỗi bài học hoàn thành, bạn tiến gần hơn một bước đến sự trôi chảy. Hành trình giúp bạn duy trì động lực và tập trung vào mục tiêu của mình.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>    
-    <!-- upcoming_event part start-->
-
-    <!--::review_part start::-->
-    <section class="special_cource padding_top">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-xl-5">
-                    <div class="section_tittle text-center">
-                        <h2>Các Bài Học Phổ Biến</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-6 col-lg-4">
-                    <div class="single_special_cource">
-                        <img src="/static/images/special_cource_1.png" class="special_img" alt="">
-                        <div class="special_cource_text">
-                            <a href="/grammar" class="btn_4">NGỮ PHÁP</a>
-                            <a href="/grammar"><h3>BÀI HỌC NGỮ PHÁP</h3></a>
-                            <p>Danh sách bài học ngữ pháp cung cấp các bài học rõ ràng, có cấu trúc để cải thiện kỹ năng ngữ pháp từ cơ bản đến nâng cao.</p>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="single_special_cource">
-                        <img src="/static/images/special_cource_2.png" class="special_img" alt="">
-                        <div class="special_cource_text">
-                            <a href="/flashcards" class="btn_4">TỪ VỰNG</a>
-                            <a href="/flashcards"> <h3>TỪ VỰNG FLASHCARD</h3></a>
-                            <p>Các bài học Flashcard giúp người học nắm vững vốn từ vựng thông qua các thẻ flashcard trực quan, tương tác để ghi nhớ hiệu quả.</p>
-                        </div>
-
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <div class="single_special_cource">
-                        <img src="/static/images/special_cource_3.png" class="special_img" alt="">
-                        <div class="special_cource_text">
-                            <a href="/pronunciation" class="btn_4">PHÁT ÂM</a>
-                            <a href="/pronunciation">  <h3>BÀI HỌC PHÁT ÂM</h3> </a> 
-                            <p>Danh sách bài học phát âm giúp cải thiện khả năng nói rõ ràng với hướng dẫn từng bước về âm thanh, trọng âm và ngữ điệu.</p>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!--::blog_part end::-->
-
-    <!-- learning part start-->
-    <section class="advance_feature learning_part">
-        <div class="container">
-            <div class="row align-items-sm-center align-items-xl-stretch">
-                <div class="col-md-7 col-lg-7">
-                    <div class="learning_member_text">
-                        <h5>LUYỆN TẬP & CẢI THIỆN</h5>
-                        <h2>Nâng cao kỹ năng của bạn với hệ thống học tập tương tác của chúng tôi</h2>
-                        <p>Cải thiện kỹ năng ngôn ngữ của bạn thông qua các buổi thực hành chuyên biệt về ngữ pháp, phát âm và từ vựng. Hệ thống của chúng tôi được thiết kế để tăng hiệu quả học tập của bạn mọi lúc, mọi nơi.</p>
-                        <div class="row">
-                            <div class="col-sm-4 col-md-12 col-lg-4">
-                                <a href="/grammar-exercise" class="learning_member_text_link">
-                                    <div class="learning_member_text_iner">
-                                        <span class="ti-book"></span>
-                                        <h4>Luyện Tập Ngữ Pháp</h4>
-                                        <p>Nắm vững các quy tắc ngữ pháp với các bài tập tương tác được thiết kế riêng theo trình độ của bạn, giúp bạn xây dựng nền tảng vững chắc.</p>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-sm-4 col-md-12 col-lg-4">
-                                <a href="/pronunciation-exercise" class="learning_member_text_link">
-                                    <div class="learning_member_text_iner">
-                                        <span class="ti-microphone"></span>
-                                        <h4>Luyện Tập Phát Âm</h4>
-                                        <p>Hoàn thiện cách phát âm của bạn thông qua các bài học có hướng dẫn, đảm bảo bạn nói tự nhiên và rõ ràng trong cuộc trò chuyện. </p>
-                                    </div>
-                                </a>
-                            </div>
-                            <div class="col-sm-4 col-md-12 col-lg-4">
-                                <a href="/vocabulary-exercise" class="learning_member_text_link">
-                                    <div class="learning_member_text_iner">
-                                        <span class="ti-light-bulb"></span>
-                                        <h4>Luyện Tập Từ Vựng</h4>
-                                        <p>Học từ mới hiệu quả bằng cách nghiên cứu từ vựng được nhóm theo chủ đề có liên quan, giúp bạn dễ nhớ và áp dụng chúng vào ngữ cảnh hơn.</p>
-                                    </div>
-                                </a>
-                            </div>                                                        
-                        </div>
-                    </div>
-                </div>                
-                <div class="col-lg-5 col-md-5">
-                    <div class="learning_img">
-                        <img src="/static/images/advanceenglish.png" alt="">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- learning part end-->
-
-    <!--::blog_part start::-->
-    <section class="blog_part section_padding">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-xl-5">
-                    <div class="section_tittle text-center">
-                        <h2>Bài Viết Chúng Tôi</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-sm-6 col-lg-4 col-xl-4">
-                    <div class="single-home-blog">
-                        <div class="card">
-                            <img src="/static/images/blog/single_blog_1.jpeg" class="card-img-top" alt="blog">
-                            <div class="card-body">
-                                <a href="/single-blog">
-                                    <h5 class="card-title">Giao lưu văn hóa anh ngữ</h5>
-                                </a>
-                                <p>Mà lời nói bóng tối của nó là sự sống cho cá trong đó tất cả cá cùng được gọi là</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4 col-xl-4">
-                    <div class="single-home-blog">
-                        <div class="card">
-                            <img src="/static/images/blog/single_blog_2.png" class="card-img-top" alt="blog">
-                            <div class="card-body">
-                                <a href="/single-blog-1">
-                                    <h5 class="card-title">Top 10 thí sinh lọt top cuộc thi tìm kiếm tài năng Anh-Việt</h5>
-                                </a>
-                                <p>Mà lời nói bóng tối của nó là sự sống cho cá trong đó tất cả cá cùng được gọi là</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-sm-6 col-lg-4 col-xl-4">
-                    <div class="single-home-blog">
-                        <div class="card">
-                            <img src="/static/images/blog/single_blog_3.webp" class="card-img-top" alt="blog">
-                            <div class="card-body">
-                                <a href="/single-blog-1">
-                                    <h5 class="card-title">Ngành Ngôn ngữ Anh – con đường của sự đam mê ngoại ngữ Anh</h5>
-                                </a>
-                                <p>Mà lời nói bóng tối của nó là sự sống cho cá trong đó tất cả cá cùng được gọi là</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    
+    <!-- Call to Action -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h2>Bắt Đầu Hành Trình Học Tiếng Anh</h2>
+            <p>Tham gia cùng cộng đồng học viên EasyTalk</p>
+            <div class="cta-buttons">
+                <a href="/register" class="cta-primary">Tham Gia Ngay</a>
+                <a href="/study-path" class="cta-secondary">Xem Lộ Trình</a>
             </div>
         </div>
     </section>
 
     <%- include('partials/footer.ejs') %>
+
+    <!-- Thêm scripts -->
     <script src="/static/js/jquery-1.12.1.min.js"></script>
     <!-- popper js -->
     <script src="/static/js/popper.min.js"></script>

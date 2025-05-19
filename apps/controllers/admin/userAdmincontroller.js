@@ -73,7 +73,7 @@ router.put('/api/update/:id', async (req, res) => {
           username,
           email,
           role,
-          active
+          active: true
       };
 
       const result = await userService.updateUser({ _id: req.params.id, ...updatedUser });

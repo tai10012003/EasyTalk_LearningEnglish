@@ -23,8 +23,7 @@
     <!-- Swiper CSS -->
     <link rel="stylesheet" href="/static/css/slick.css">    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-    <!-- Custom Styles -->
-    <link rel="stylesheet" href="/static/css/style.css">
+
     <link rel="stylesheet" href="/static/css/main.css">
 
     <style>
@@ -42,7 +41,7 @@
             background-color: #fff;
             border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-            border: 2px solid #d87a99;
+            border: 2px solid linear-gradient(45deg, #1126ad, #1e45e8);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
             position: relative;
             overflow: hidden;
@@ -53,7 +52,7 @@
             border-color:   #69f0ae;
         }
         .card-title {
-            font-size: 22px;
+            font-size: 28px;
             font-weight: 700;
             color: #333;
             text-align: center;
@@ -63,7 +62,6 @@
             display: block;
             width: 50%;
             padding: 8px;
-            background-image: linear-gradient(45deg, #f1447d, #3278f1);
             border: none;
             color: #fff;
             border-radius: 30px;
@@ -71,13 +69,6 @@
             margin-top: 30px;
             text-align: center;
             transition: background 0.3s ease, box-shadow 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            border: 1px solid #d87a99;
-            color: #333;
         }
 
         @media (max-width: 768px) {
@@ -121,14 +112,14 @@
             background-color: #fff;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
             padding: 20px;
-            border-left: 2px solid sandybrown;
-            border-right: 2px solid sandybrown;
+            border-left: 2px solid #1e45e8;
+            border-right: 2px solid #1e45e8;
         }
 
         .achievement-panel h4 {
             font-weight: 700;
             font-size: 20px;
-            color: #ed3535;
+            color: #1e45e8;;
             text-align: center;
             margin: 30px 0 25px 0;
             font-family: 'Poppins', sans-serif;
@@ -169,7 +160,7 @@
         .upgrade-section h4 {
             font-size: 20px;
             font-weight: 700;
-            color: #ed3535;
+            color: #1e45e8;
             text-align: center;
             margin: 30px 0 25px 0;
             font-family: 'Poppins', sans-serif;
@@ -182,7 +173,7 @@
         }
 
         .btn-upgrade {
-            background-color: #4487fa;
+            background-color: #1e45e8;;
             border: none;
             color: #fff;
             padding: 10px 20px;
@@ -199,14 +190,14 @@
             background-color: #fff;
             padding: 10px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-            border-left: 2px solid rgb(238, 190, 0); 
-            border-right: 2px solid rgb(238, 190, 0);
+            border-left: 2px solid #1e45e8;
+            border-right: 2px solid #1e45e8;
         }
 
         .leaderboard-panel h4 {
             font-size: 20px;
             font-weight: 700;
-            color: #ed3535;
+            color: #1e45e8;
             text-align: center;
             margin: 30px 0 25px 0;
             font-family: 'Poppins', sans-serif;
@@ -262,7 +253,7 @@
             </div>
 
             <div class="col-md-6">
-                <h2 class="text-center mt-5 mb-5">HÀNH TRÌNH HỌC TẬP CỦA BẠN</h2>
+                <h2 class="card-title mt-5 mb-5">HÀNH TRÌNH HỌC TẬP CỦA BẠN</h2>
                 <div id="journey-list" class="row justify-content-center">
                 
                 </div>

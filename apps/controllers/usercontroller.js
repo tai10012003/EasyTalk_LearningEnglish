@@ -24,13 +24,13 @@ router.post("/register", async (req, res) => {
   const { username, email, password, confirmPassword, role = "user" } = req.body;
 
   if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match." });
+      return res.status(400).json({ message: "Mật khẩu không khớp." });
   }
   try {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = { username, email, password: hashedPassword, role, active: true };
       await userService.insertUser(user);
-      res.status(201).json({ message: "User registered successfully" });
+      res.status(201).json({ message: "Người dùng đã được đăng ký thành công !!" });
   } catch (error) {
       res.status(500).json({ message: "Registration error", error });
   }
@@ -79,7 +79,7 @@ router.get('/auth/google/callback', async (req, res) => {
       });
     }
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, config.jwt.secret, { expiresIn: '1h' });
-    res.status(200).json({ token, message: 'Đăng nhập thành công!' });
+    res.status(200).json({ token, message: 'Đăng nhập thành công !' });
   } catch (error) {
     console.error('Google login error:', error);
     res.status(500).json({ message: 'Internal Server Error', error: error.message });
