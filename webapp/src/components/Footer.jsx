@@ -19,7 +19,7 @@ function Footer() {
           <div className="col-sm-6 col-md-4">
             <div className="single-footer-widget footer_1">
               <Link to="/">
-                <img src="/static/images/logo.png" alt="logo" width="150" />
+                <img src="/src/assets/images/logo.png" alt="logo" width="120" />
               </Link>
               <p>
                 Khi tham gia EasyTalk, người dùng sẽ có trải nghiệm giao tiếp liền mạch. Cho dù đang học hay đang thực hành, nền tảng này sẽ hướng dẫn người học dễ dàng qua từng giai đoạn, đảm bảo tiến trình suôn sẻ và cải thiện đáng kể.
@@ -40,7 +40,7 @@ function Footer() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                   />
-                  <button className="btn btn_1" type="submit">
+                  <button className="btn" type="submit">
                     <i className="ti-angle-right"></i>
                   </button>
                 </div>

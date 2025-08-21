@@ -20,6 +20,11 @@ function Banner() {
               </div>
             </div>
           </div>
+          <div className="col-lg-6 col-xl-6">
+            <div className="banner_image flex justify-center items-center h-full">
+              <img src="/src/assets/images/banner.png" alt="Banner Image" className="max-w-full max-h-64 rounded-lg object-contain"/>
+            </div>
+          </div>
         </div>
       </div>
     </section>

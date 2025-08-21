@@ -4,17 +4,24 @@ import { Link } from 'react-router-dom';
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('User');
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState({
+    lessons: false,
+    practice: false,
+    login: false,
+  });
 
   useEffect(() => {
-    // Simulate checking for authentication token
-    // Note: In Claude.ai artifacts, localStorage is not available
-    // This is a mock implementation for demonstration
-    const mockToken = false; // Set to true to simulate logged in state
-    
-    if (mockToken) {
-      setUsername('John Doe');
-      setIsLoggedIn(true);
-    }
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const handleLogout = () => {
@@ -26,150 +33,239 @@ function Menu() {
     }
   };
 
+  const toggleMenu = () => {
+    setMenuOpen(!menuOpen);
+  };
+
+  const toggleDropdown = (dropdown) => {
+    setDropdownOpen((prev) => ({
+      ...prev,
+      [dropdown]: !prev[dropdown],
+    }));
+  };
+
+  const handleLinkClick = () => {
+    setMenuOpen(false);
+    setDropdownOpen({ lessons: false, practice: false, login: false });
+  };
+
   return (
-    <header className="main_menu">
+    <header className={`main_menu ${scrolled ? "scrolled" : ""}`}>
       <div className="container">
         <div className="row">
           <div className="col-lg-12">
-            <nav className="navbar navbar-expand-lg navbar-light">
-              <Link className="navbar-brand" to="/">
+            <nav className="navbar">
+              <Link className="navbar-brand" to="/" onClick={handleLinkClick}>
                 <img src="/src/assets/images/logo.png" alt="logo" width="75" />
               </Link>
               <button
-                className="navbar-toggler"
+                className={`navbar-toggler ${menuOpen ? 'active' : ''}`}
                 type="button"
-                data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent"
-                aria-expanded="false"
+                onClick={toggleMenu}
                 aria-label="Toggle navigation"
               >
+                <span className="navbar-toggler-icon"></span>
+                <span className="navbar-toggler-icon"></span>
                 <span className="navbar-toggler-icon"></span>
               </button>
 
               <div
-                className="collapse navbar-collapse main-menu-item"
+                className={`main-menu-item ${menuOpen ? 'show' : ''}`}
                 id="navbarSupportedContent"
               >
                 <ul className="navbar-nav">
                   <li className="nav-item active">
-                    <Link className="nav-link" to="/">
+                    <Link className="nav-link" to="/" onClick={handleLinkClick}>
                       TRANG CHỦ
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/about">
+                    <Link className="nav-link" to="/about" onClick={handleLinkClick}>
                       VỀ CHÚNG TÔI
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/journey">
+                    <Link className="nav-link" to="/journey" onClick={handleLinkClick}>
                       HÀNH TRÌNH
                     </Link>
                   </li>
-                  <li className="nav-item dropdown">
+                  <li className={`nav-item dropdown ${dropdownOpen.lessons ? 'show' : ''}`}>
                     <a
                       className="nav-link dropdown-toggle"
                       href="#"
-                      id="navbarDropdownLessons"
+                      onClick={() => toggleDropdown('lessons')}
                       role="button"
-                      data-bs-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
+                      aria-expanded={dropdownOpen.lessons}
                     >
                       BÀI HỌC
                     </a>
-                    <div className="dropdown-menu" aria-labelledby="navbarDropdownLessons">
-                      <Link className="dropdown-item" to="/story">
+                    <div
+                      className={`dropdown-menu ${dropdownOpen.lessons ? 'show' : ''}`}
+                      aria-labelledby="navbarDropdownLessons"
+                    >
+                      <Link
+                        className="dropdown-item"
+                        to="/story"
+                        onClick={handleLinkClick}
+                      >
                         CÂU CHUYỆN
                       </Link>
-                      <Link className="dropdown-item" to="/grammar">
+                      <Link
+                        className="dropdown-item"
+                        to="/grammar"
+                        onClick={handleLinkClick}
+                      >
                         NGỮ PHÁP
                       </Link>
-                      <Link className="dropdown-item" to="/flashcards">
+                      <Link
+                        className="dropdown-item"
+                        to="/flashcards"
+                        onClick={handleLinkClick}
+                      >
                         TỪ VỰNG FLASHCARD
                       </Link>
-                      <Link className="dropdown-item" to="/pronunciation">
+                      <Link
+                        className="dropdown-item"
+                        to="/pronunciation"
+                        onClick={handleLinkClick}
+                      >
                         PHÁT ÂM
                       </Link>
                     </div>
                   </li>
-                  <li className="nav-item dropdown">
+                  <li className={`nav-item dropdown ${dropdownOpen.practice ? 'show' : ''}`}>
                     <a
                       className="nav-link dropdown-toggle"
                       href="#"
-                      id="navbarDropdownPractice"
+                      onClick={() => toggleDropdown('practice')}
                       role="button"
-                      data-bs-toggle="dropdown"
-                      aria-haspopup="true"
-                      aria-expanded="false"
+                      aria-expanded={dropdownOpen.practice}
                     >
                       LUYỆN TẬP
                     </a>
-                    <div className="dropdown-menu" aria-labelledby="navbarDropdownPractice">
-                      <Link className="dropdown-item" to="/grammar-exercise">
+                    <div
+                      className={`dropdown-menu ${dropdownOpen.practice ? 'show' : ''}`}
+                      aria-labelledby="navbarDropdownPractice"
+                    >
+                      <Link
+                        className="dropdown-item"
+                        to="/grammar-exercise"
+                        onClick={handleLinkClick}
+                      >
                         NGỮ PHÁP
                       </Link>
-                      <Link className="dropdown-item" to="/vocabulary-exercise">
+                      <Link
+                        className="dropdown-item"
+                        to="/vocabulary-exercise"
+                        onClick={handleLinkClick}
+                      >
                         TỪ VỰNG
                       </Link>
-                      <Link className="dropdown-item" to="/pronunciation-exercise">
+                      <Link
+                        className="dropdown-item"
+                        to="/pronunciation-exercise"
+                        onClick={handleLinkClick}
+                      >
                         PHÁT ÂM
                       </Link>
-                      <Link className="dropdown-item" to="/dictation-exercise">
+                      <Link
+                        className="dropdown-item"
+                        to="/dictation-exercise"
+                        onClick={handleLinkClick}
+                      >
                         NGHE CHÉP CHÍNH TẢ
                       </Link>
-                      <Link className="dropdown-item" to="/dictionary">
+                      <Link
+                        className="dropdown-item"
+                        to="/dictionary"
+                        onClick={handleLinkClick}
+                      >
                         TRA CỨU TỪ ĐIỂN
                       </Link>
-                      <Link className="dropdown-item" to="/chat">
+                      <Link
+                        className="dropdown-item"
+                        to="/chat"
+                        onClick={handleLinkClick}
+                      >
                         TRÒ CHUYỆN VỚI AI
                       </Link>
-                      <Link className="dropdown-item" to="/communicate">
+                      <Link
+                        className="dropdown-item"
+                        to="/communicate"
+                        onClick={handleLinkClick}
+                      >
                         GIAO TIẾP VỚI AI
                       </Link>
-                      <Link className="dropdown-item" to="/writing">
+                      <Link
+                        className="dropdown-item"
+                        to="/writing"
+                        onClick={handleLinkClick}
+                      >
                         LUYỆN VIẾT VỚI AI
                       </Link>
                     </div>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/blog">
+                    <Link className="nav-link" to="/blog" onClick={handleLinkClick}>
                       BÀI VIẾT
                     </Link>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/contact">
+                    <Link className="nav-link" to="/contact" onClick={handleLinkClick}>
                       LIÊN HỆ
                     </Link>
                   </li>
-                  <li className="nav-item dropdown">
+                  <li className={`nav-item dropdown ${dropdownOpen.login ? 'show' : ''}`}>
                     <a
                       className="btn_1"
                       href={isLoggedIn ? '#' : '/login'}
-                      id="loginBtn"
+                      onClick={() => isLoggedIn && toggleDropdown('login')}
                       role="button"
-                      data-bs-toggle={isLoggedIn ? 'dropdown' : ''}
-                      aria-haspopup="true"
-                      aria-expanded="false"
+                      aria-expanded={dropdownOpen.login}
                     >
                       {isLoggedIn ? username : 'ĐĂNG NHẬP'}
                     </a>
                     {isLoggedIn && (
-                      <div className="dropdown-menu" aria-labelledby="loginBtn">
-                        <Link className="dropdown-item" to="/profile">
+                      <div
+                        className={`dropdown-menu ${dropdownOpen.login ? 'show' : ''}`}
+                        aria-labelledby="loginBtn"
+                      >
+                        <Link
+                          className="dropdown-item"
+                          to="/profile"
+                          onClick={handleLinkClick}
+                        >
                           THÔNG TIN CÁ NHÂN
                         </Link>
-                        <Link className="dropdown-item" to="/reminder">
+                        <Link
+                          className="dropdown-item"
+                          to="/reminder"
+                          onClick={handleLinkClick}
+                        >
                           NHẮC NHỞ HỌC TẬP
                         </Link>
-                        <Link className="dropdown-item" to="/change-password">
+                        <Link
+                          className="dropdown-item"
+                          to="/change-password"
+                          onClick={handleLinkClick}
+                        >
                           ĐỔI MẬT KHẨU
                         </Link>
-                        <Link className="dropdown-item" to="/setting">
+                        <Link
+                          className="dropdown-item"
+                          to="/setting"
+                          onClick={handleLinkClick}
+                        >
                           CÀI ĐẶT
                         </Link>
-                        <a className="dropdown-item" href="#" onClick={handleLogout}>
+                        <a
+                          className="dropdown-item"
+                          href="#"
+                          onClick={() => {
+                            handleLogout();
+                            handleLinkClick();
+                          }}
+                        >
                           ĐĂNG XUẤT
                         </a>
                       </div>

@@ -15,13 +15,13 @@ function Home() {
           <div className="row">
             <div className="col-md-7 col-lg-7">
               <div className="learning_img">
-                <img src="/static/images/learningenglish.png" alt="Learning English Online" />
+                <img src="/src/assets/images/learningenglish.png" alt="Learning English Online" />
               </div>
             </div>
             <div className="col-md-5 col-lg-5">
               <div className="learning_member_text">
                 <h5>Về chúng tôi</h5>
-                <h3>Học tiếng Anh dễ dàng và thú vị</h3>
+                <h4>HỌC TIẾNG ANH DỄ DÀNG VÀ THÚ VỊ</h4>
                 <p>
                   Tại EasyTalk, chúng tôi tin rằng việc học tiếng Anh phải thú vị và dễ tiếp cận với tất cả mọi người. Nền tảng của chúng tôi cung cấp các bài học tương tác, thử thách thú vị và nội dung được cá nhân hóa giúp bạn cải thiện kỹ năng của mình từng bước.
                 </p>
@@ -43,60 +43,62 @@ function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="feature_part">
-        <div className="container">
-          <div className="row">
-            <div className="col-sm-6 col-xl-3">
-              <div className="single_feature_text">
-                <h3>Hành trình của bạn</h3>
-                <p>
-                  Bắt đầu hành trình cá nhân hóa để thành thạo tiếng Anh, phù hợp với tiến trình và mục tiêu của bạn. Hãy tận dụng từng bước đi!
+      <section className="feature_part py-12 bg-gray-100">
+      <div className="container mx-auto">
+        <div className="row flex flex-wrap justify-center gap-6">
+          <div className="col-sm-6 col-md-4 col-xl-3 flex justify-center">
+            <div className="single_feature_text text-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <h4 className="text-xl font-semibold mb-2">HÀNH TRÌNH CỦA BẠN</h4>
+              <p className="text-gray-600 mb-4">
+                Bắt đầu hành trình cá nhân hóa để thành thạo tiếng Anh, phù hợp với tiến trình và mục tiêu của bạn. Hãy tận dụng từng bước đi!
+              </p>
+              <a href="/journey" className="btn_1 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                BẮT ĐẦU NGAY
+              </a>
+            </div>
+          </div>
+          <div className="col-sm-6 col-md-4 col-xl-3 flex justify-center">
+            <div className="single_feature text-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <div className="single_feature_part">
+                <span className="single_feature_icon inline-block mb-3">
+                  <i className="ti-layers text-3xl text-blue-600"></i>
+                </span>
+                <h4 className="text-xl font-semibold mb-2">Bài học cá nhân hóa</h4>
+                <p className="text-gray-600 mb-4">
+                  Hành trình của bạn được thiết kế riêng cho trình độ kỹ năng và tốc độ học tập của bạn, đảm bảo bạn đạt được mục tiêu một cách hiệu quả.
                 </p>
-                <a href="/journey" className="btn_1">BẮT ĐẦU NGAY</a>
               </div>
             </div>
-            <div className="col-sm-6 col-xl-3">
-              <div className="single_feature">
-                <div className="single_feature_part">
-                  <span className="single_feature_icon">
-                    <i className="ti-layers"></i>
-                  </span>
-                  <h4>Bài học cá nhân hóa</h4>
-                  <p>
-                    Hành trình của bạn được thiết kế riêng cho trình độ kỹ năng và tốc độ học tập của bạn, đảm bảo bạn đạt được mục tiêu một cách hiệu quả.
-                  </p>
-                </div>
+          </div>
+          <div className="col-sm-6 col-md-4 col-xl-3 flex justify-center">
+            <div className="single_feature text-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <div className="single_feature_part">
+                <span className="single_feature_icon inline-block mb-3">
+                  <i className="ti-new-window text-3xl text-blue-600"></i>
+                </span>
+                <h4 className="text-xl font-semibold mb-2">Những thử thách hấp dẫn</h4>
+                <p className="text-gray-600 mb-4">
+                  Từ các câu đố đến các bài học tương tác, hành trình của bạn bao gồm những thử thách thú vị để đảm bảo bạn vừa học vừa tận hưởng quá trình này.
+                </p>
               </div>
             </div>
-            <div className="col-sm-6 col-xl-3">
-              <div className="single_feature">
-                <div className="single_feature_part">
-                  <span className="single_feature_icon">
-                    <i className="ti-new-window"></i>
-                  </span>
-                  <h4>Những thử thách hấp dẫn</h4>
-                  <p>
-                    Từ các câu đố đến các bài học tương tác, hành trình của bạn bao gồm những thử thách thú vị để đảm bảo bạn vừa học vừa tận hưởng quá trình này.
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="col-sm-6 col-xl-3">
-              <div className="single_feature">
-                <div className="single_feature_part single_feature_part_2">
-                  <span className="single_service_icon style_icon">
-                    <i className="ti-light-bulb"></i>
-                  </span>
-                  <h4>Theo dõi tiến trình của bạn</h4>
-                  <p>
-                    Với mỗi bài học hoàn thành, bạn tiến gần hơn một bước đến sự trôi chảy. Hành trình giúp bạn duy trì động lực và tập trung vào mục tiêu của mình.
-                  </p>
-                </div>
+          </div>
+          <div className="col-sm-6 col-md-4 col-xl-3 flex justify-center">
+            <div className="single_feature text-center p-4 bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow">
+              <div className="single_feature_part single_feature_part_2">
+                <span className="single_service_icon style_icon inline-block mb-3">
+                  <i className="ti-light-bulb text-3xl text-blue-600"></i>
+                </span>
+                <h4 className="text-xl font-semibold mb-2">Theo dõi tiến trình của bạn</h4>
+                <p className="text-gray-600 mb-4">
+                  Với mỗi bài học hoàn thành, bạn tiến gần hơn một bước đến sự trôi chảy. Hành trình giúp bạn duy trì động lực và tập trung vào mục tiêu của mình.
+                </p>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
       {/* Popular Courses Section */}
       <section className="special_cource">
@@ -107,7 +109,7 @@ function Home() {
           <div className="row">
             <div className="col-sm-6 col-lg-4">
               <div className="single_special_cource">
-                <img src="/static/images/special_cource_1.png" className="special_img" alt="Grammar Course" />
+                <img src="/src/assets/images/special_cource_1.png" className="special_img" alt="Grammar Course" />
                 <div className="special_cource_text">
                   <a href="/grammar" className="btn_4">NGỮ PHÁP</a>
                   <a href="/grammar">
@@ -121,7 +123,7 @@ function Home() {
             </div>
             <div className="col-sm-6 col-lg-4">
               <div className="single_special_cource">
-                <img src="/static/images/special_cource_2.png" className="special_img" alt="Vocabulary Course" />
+                <img src="/src/assets/images/special_cource_2.png" className="special_img" alt="Vocabulary Course" />
                 <div className="special_cource_text">
                   <a href="/flashcards" className="btn_4">TỪ VỰNG</a>
                   <a href="/flashcards">
@@ -135,7 +137,7 @@ function Home() {
             </div>
             <div className="col-sm-6 col-lg-4">
               <div className="single_special_cource">
-                <img src="/static/images/special_cource_3.png" className="special_img" alt="Pronunciation Course" />
+                <img src="/src/assets/images/special_cource_3.png" className="special_img" alt="Pronunciation Course" />
                 <div className="special_cource_text">
                   <a href="/pronunciation" className="btn_4">PHÁT ÂM</a>
                   <a href="/pronunciation">
@@ -165,7 +167,7 @@ function Home() {
                   Cải thiện kỹ năng ngôn ngữ của bạn thông qua các buổi thực hành chuyên biệt về ngữ pháp, phát âm và từ vựng. Hệ thống của chúng tôi được thiết kế để tăng hiệu quả học tập của bạn mọi lúc, mọi nơi.
                 </p>
                 <div className="row">
-                  <div className="col-sm-4 col-md-12 col-lg-4">
+                  <div className="col-sm-6 col-lg-4 col-xl-4">
                     <a href="/grammar-exercise" className="learning_member_text_link">
                       <div className="learning_member_text_iner">
                         <span className="ti-book"></span>
@@ -176,7 +178,7 @@ function Home() {
                       </div>
                     </a>
                   </div>
-                  <div className="col-sm-4 col-md-12 col-lg-4">
+                  <div className="col-sm-6 col-lg-4 col-xl-4">
                     <a href="/pronunciation-exercise" className="learning_member_text_link">
                       <div className="learning_member_text_iner">
                         <span className="ti-microphone"></span>
@@ -187,7 +189,7 @@ function Home() {
                       </div>
                     </a>
                   </div>
-                  <div className="col-sm-4 col-md-12 col-lg-4">
+                  <div className="col-sm-6 col-lg-4 col-xl-4">
                     <a href="/vocabulary-exercise" className="learning_member_text_link">
                       <div className="learning_member_text_iner">
                         <span className="ti-light-bulb"></span>
