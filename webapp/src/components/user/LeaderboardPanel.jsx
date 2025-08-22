@@ -2,7 +2,7 @@ import React from "react";
 
 function LeaderboardPanel({ leaderboard }) {
   return (
-    <div className="leaderboard-panel">
+    <section className="leaderboard-panel">
         <h4>Bảng xếp hạng</h4>
         <table className="leaderboard-table">
             <thead>
@@ -20,7 +20,7 @@ function LeaderboardPanel({ leaderboard }) {
                 ))}
             </tbody>
         </table>
-    </div>
+    </section>
   );
 }
 

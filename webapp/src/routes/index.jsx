@@ -1,6 +1,7 @@
 import Home from "../views/user/Home";
 import About from "../views/user/About";
 import Journey from "../views/user/Journey";
+import Gate from "../views/user/Gate";
 import NotFound from "../views/user/NotFound";
 
 const routes = [
@@ -15,6 +16,10 @@ const routes = [
   {
     path: "/journey",
     element: <Journey />,
+  },
+  {
+    path: "/gate",
+    element: <Gate />,
   },
   {
     path: "*",

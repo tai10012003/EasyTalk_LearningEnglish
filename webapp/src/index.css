@@ -914,18 +914,6 @@ p {
   flex-direction: column;
 }
 
-.card-title {
-  color: #2d3748;
-  font-weight: 700;
-  transition: color 0.3s ease;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-}
-
-.card-title:hover {
-  color: #667eea;
-}
-
 .card a {
   text-decoration: none;
 }
@@ -985,27 +973,35 @@ p {
 }
 
 /* ===============================================
-   JOURNEY STYLES
+   JOURNEY, GATE AND STAGE STYLES
    =============================================== */
 
-body {
-  background-color: #fff;
+.your_journey {
+  background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 50%, #f1f5f9 100%);
+  position: relative;
+  padding: 50px 0;
 }
 
-.journey-container {
-  margin: 110px auto 50px auto;
-  padding: 20px;
+.card-title {
+  color: #681fbb;
+  font-weight: 700;
+  transition: color 0.3s ease;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
 }
 
-/* Card cho hành trình */
+.card-title:hover {
+  color: #667eea;
+}
+
 .journey-card {
   width: 70%;
   margin: 0 auto 30px auto;
-  padding: 10px;
+  padding: 30px;
   background-color: #fff;
   border-radius: 12px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  border: 2px solid #d87a99;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   position: relative;
   overflow: hidden;
@@ -1017,45 +1013,93 @@ body {
   border-color: #69f0ae;
 }
 
-/* Title trong card */
-.card-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #333;
-  text-align: center;
-  font-family: 'Poppins', sans-serif;
-}
-
-/* Button chính */
-.btn-primary {
+.btn-journey {
   display: block;
   width: 50%;
+  margin: 30px auto 0;
   padding: 8px;
-  background-image: linear-gradient(45deg, #f1447d, #3278f1);
+  background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border: none;
   color: #fff;
   border-radius: 30px;
   font-weight: bold;
-  margin-top: 30px;
   text-align: center;
   transition: background 0.3s ease, box-shadow 0.3s ease;
 }
 
-.btn-primary:hover {
+.btn-journey:hover {
   background: white;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border: 1px solid #d87a99;
+  border: 1px solid #721fdf;
   color: #333;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .journey-card {
-    width: 90%;
-  }
+.gate-card {
+  max-width: 600px;
+  width: 70%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 20px;
+  border: 1px solid transparent;
+  margin: 0 auto 30px auto;
+  position: relative;
+  overflow: hidden;
 }
 
-/* Progress */
+.gate-card:before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  opacity: 0.08;
+}
+
+.gate-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+  border-color: #39517c;
+}
+
+.gate-title {
+  font-weight: 700;
+  color: #333;
+  text-align: center;
+  margin-bottom: 15px;
+}
+
+.stage-list-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stage-card {
+  width: 50%;
+  background: #fff;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  margin: 30px auto 10px auto;
+  border-left: 5px solid #519be4;
+  transition: background-color 0.3s ease;
+}
+
+.stage-card:hover {
+  transform: translateY(-4px);
+  border-color: #044efc;
+}
+
+.stage-title {
+  font-size: 18px;
+  font-weight: 600;
+  text-align: center;
+  color: #333;
+  margin-bottom: 8px;
+}
+
 .progress-container {
   width: 100%;
   margin-top: 10px;
@@ -1065,7 +1109,7 @@ body {
   font-size: 0.9rem;
   font-weight: bold;
   text-align: center;
-  margin-bottom: 5px;
+  margin-bottom: 15px;
   color: #333;
 }
 
@@ -1085,7 +1129,6 @@ body {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Panels */
 .achievement-panel,
 .leaderboard-panel {
   position: sticky;
@@ -1097,20 +1140,24 @@ body {
   background-color: #fff;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
   padding: 20px;
-  border-left: 2px solid sandybrown;
-  border-right: 2px solid sandybrown;
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
 }
 
 .achievement-panel h4 {
   font-weight: 700;
   font-size: 20px;
-  color: #ed3535;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   text-align: center;
   margin: 30px 0 25px 0;
   font-family: 'Poppins', sans-serif;
 }
 
-/* List achievements & tasks */
 .achievement-list,
 .daily-tasks {
   list-style-type: none;
@@ -1130,7 +1177,6 @@ body {
   border-radius: 8px;
 }
 
-/* Upgrade section */
 .upgrade-section {
   text-align: center;
   margin-top: 20px;
@@ -1139,7 +1185,11 @@ body {
 .upgrade-section h4 {
   font-size: 20px;
   font-weight: 700;
-  color: #ed3535;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   text-align: center;
   margin: 30px 0 25px 0;
   font-family: 'Poppins', sans-serif;
@@ -1152,7 +1202,7 @@ body {
 }
 
 .btn-upgrade {
-  background-color: #4487fa;
+  background-color: #8037d3;
   border: none;
   color: #fff;
   padding: 10px 20px;
@@ -1161,24 +1211,28 @@ body {
 }
 
 .btn-upgrade:hover {
-  background-color: #044efc;
+  background-color: #4f0b9c;
 }
 
-/* Leaderboard */
 .leaderboard-panel {
-  height: calc(100vh - 50px);
+  /* height: calc(100vh - 50px); */
   overflow-y: auto;
   background-color: #fff;
   padding: 10px;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-left: 2px solid rgb(238, 190, 0);
-  border-right: 2px solid rgb(238, 190, 0);
+  border-left: 2px solid;
+  border-right: 2px solid;
+  border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
 }
 
 .leaderboard-panel h4 {
   font-size: 20px;
   font-weight: 700;
-  color: #ed3535;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
   text-align: center;
   margin: 30px 0 25px 0;
   font-family: 'Poppins', sans-serif;
@@ -1446,6 +1500,21 @@ body {
   .card-img-top {
     height: 200px;
   }
+
+  .journey-card {
+    width: 90%;
+  }
+
+  .section_tittle h3 {
+    margin-top: 2rem;
+  }
+
+  .gate-card {
+    padding: 15px;
+  }
+  .stage-card {
+    padding: 12px;
+  }
 }
 
 /* New 1024px breakpoint for iPad optimization */
@@ -1501,6 +1570,12 @@ body {
 @media (max-width: 992px) {
   .container {
     max-width: 960px;
+  }
+
+  [class*="col-"] {
+    flex: 0 0 100%;
+    max-width: 100%;
+    margin-bottom: 15px;
   }
 
   .text-center-sm {

@@ -2,7 +2,7 @@ import React from "react";
 
 function AchievementPanel({ achievements, dailyTasks }) {
   return (
-    <div className="achievement-panel">
+    <section className="achievement-panel">
         <h4>Thành tích của bạn</h4>
         <ul className="achievement-list">
             <li>Điểm KN: {achievements.experiencePoints}</li>
@@ -24,7 +24,7 @@ function AchievementPanel({ achievements, dailyTasks }) {
             <p>Nâng cấp để có trải nghiệm tốt hơn và truy cập không giới hạn các tính năng.</p>
             <button className="btn btn-info btn-upgrade">Xem chi tiết</button>
         </div>
-    </div>
+    </section>
   );
 }
 
