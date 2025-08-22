@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink, Link } from 'react-router-dom';
 
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -68,26 +68,38 @@ function Menu() {
                 <span className="navbar-toggler-icon"></span>
                 <span className="navbar-toggler-icon"></span>
               </button>
-
               <div
                 className={`main-menu-item ${menuOpen ? 'show' : ''}`}
                 id="navbarSupportedContent"
               >
                 <ul className="navbar-nav">
-                  <li className="nav-item active">
-                    <Link className="nav-link" to="/" onClick={handleLinkClick}>
+                  <li className="nav-item">
+                    <NavLink
+                      className="nav-link"
+                      to="/"
+                      exact
+                      onClick={handleLinkClick}
+                    >
                       TRANG CHỦ
-                    </Link>
+                    </NavLink>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/about" onClick={handleLinkClick}>
+                    <NavLink
+                      className="nav-link"
+                      to="/about"
+                      onClick={handleLinkClick}
+                    >
                       VỀ CHÚNG TÔI
-                    </Link>
+                    </NavLink>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/journey" onClick={handleLinkClick}>
+                    <NavLink
+                      className="nav-link"
+                      to="/journey"
+                      onClick={handleLinkClick}
+                    >
                       HÀNH TRÌNH
-                    </Link>
+                    </NavLink>
                   </li>
                   <li className={`nav-item dropdown ${dropdownOpen.lessons ? 'show' : ''}`}>
                     <a
@@ -103,34 +115,34 @@ function Menu() {
                       className={`dropdown-menu ${dropdownOpen.lessons ? 'show' : ''}`}
                       aria-labelledby="navbarDropdownLessons"
                     >
-                      <Link
+                      <NavLink
                         className="dropdown-item"
                         to="/story"
                         onClick={handleLinkClick}
                       >
                         CÂU CHUYỆN
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/grammar"
                         onClick={handleLinkClick}
                       >
                         NGỮ PHÁP
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/flashcards"
                         onClick={handleLinkClick}
                       >
                         TỪ VỰNG FLASHCARD
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/pronunciation"
                         onClick={handleLinkClick}
                       >
                         PHÁT ÂM
-                      </Link>
+                      </NavLink>
                     </div>
                   </li>
                   <li className={`nav-item dropdown ${dropdownOpen.practice ? 'show' : ''}`}>
@@ -147,73 +159,81 @@ function Menu() {
                       className={`dropdown-menu ${dropdownOpen.practice ? 'show' : ''}`}
                       aria-labelledby="navbarDropdownPractice"
                     >
-                      <Link
+                      <NavLink
                         className="dropdown-item"
                         to="/grammar-exercise"
                         onClick={handleLinkClick}
                       >
                         NGỮ PHÁP
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/vocabulary-exercise"
                         onClick={handleLinkClick}
                       >
                         TỪ VỰNG
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/pronunciation-exercise"
                         onClick={handleLinkClick}
                       >
                         PHÁT ÂM
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/dictation-exercise"
                         onClick={handleLinkClick}
                       >
                         NGHE CHÉP CHÍNH TẢ
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/dictionary"
                         onClick={handleLinkClick}
                       >
                         TRA CỨU TỪ ĐIỂN
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/chat"
                         onClick={handleLinkClick}
                       >
                         TRÒ CHUYỆN VỚI AI
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/communicate"
                         onClick={handleLinkClick}
                       >
                         GIAO TIẾP VỚI AI
-                      </Link>
-                      <Link
+                      </NavLink>
+                      <NavLink
                         className="dropdown-item"
                         to="/writing"
                         onClick={handleLinkClick}
                       >
                         LUYỆN VIẾT VỚI AI
-                      </Link>
+                      </NavLink>
                     </div>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/blog" onClick={handleLinkClick}>
+                    <NavLink
+                      className="nav-link"
+                      to="/blog"
+                      onClick={handleLinkClick}
+                    >
                       BÀI VIẾT
-                    </Link>
+                    </NavLink>
                   </li>
                   <li className="nav-item">
-                    <Link className="nav-link" to="/contact" onClick={handleLinkClick}>
+                    <NavLink
+                      className="nav-link"
+                      to="/contact"
+                      onClick={handleLinkClick}
+                    >
                       LIÊN HỆ
-                    </Link>
+                    </NavLink>
                   </li>
                   <li className={`nav-item dropdown ${dropdownOpen.login ? 'show' : ''}`}>
                     <a
@@ -230,34 +250,34 @@ function Menu() {
                         className={`dropdown-menu ${dropdownOpen.login ? 'show' : ''}`}
                         aria-labelledby="loginBtn"
                       >
-                        <Link
+                        <NavLink
                           className="dropdown-item"
                           to="/profile"
                           onClick={handleLinkClick}
                         >
                           THÔNG TIN CÁ NHÂN
-                        </Link>
-                        <Link
+                        </NavLink>
+                        <NavLink
                           className="dropdown-item"
                           to="/reminder"
                           onClick={handleLinkClick}
                         >
                           NHẮC NHỞ HỌC TẬP
-                        </Link>
-                        <Link
+                        </NavLink>
+                        <NavLink
                           className="dropdown-item"
                           to="/change-password"
                           onClick={handleLinkClick}
                         >
                           ĐỔI MẬT KHẨU
-                        </Link>
-                        <Link
+                        </NavLink>
+                        <NavLink
                           className="dropdown-item"
                           to="/setting"
                           onClick={handleLinkClick}
                         >
                           CÀI ĐẶT
-                        </Link>
+                        </NavLink>
                         <a
                           className="dropdown-item"
                           href="#"
