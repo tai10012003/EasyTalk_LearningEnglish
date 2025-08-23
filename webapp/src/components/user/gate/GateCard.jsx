@@ -3,7 +3,7 @@ import StageCard from "../stage/StageCard";
 
 const GateCard = ({ gate }) => {
   return (
-    <div className="gate-card-wrapper">
+    <section className="gate-card-wrapper">
       <div className="gate-card unlocked">
         <h5 className="gate-title text-center">{gate.title}</h5>
         <p className="card-text text-center">
@@ -15,7 +15,7 @@ const GateCard = ({ gate }) => {
           <StageCard key={stage.id} stage={stage} />
         ))}
       </div>
-    </div>
+    </section>
   );
 };
 

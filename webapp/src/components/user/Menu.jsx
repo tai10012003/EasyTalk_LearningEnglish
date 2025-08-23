@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, Link } from 'react-router-dom';
+import { NavLink, Link, useLocation } from 'react-router-dom';
 
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -12,13 +12,27 @@ function Menu() {
     login: false,
   });
 
+  const location = useLocation();
+  const lessonRoutes = ['/story', '/grammar', '/flashcards', '/pronunciation'];
+  const practiceRoutes = [
+    '/grammar-exercise',
+    '/vocabulary-exercise',
+    '/pronunciation-exercise',
+    '/dictation-exercise',
+    '/dictionary',
+    '/chat',
+    '/communicate',
+    '/writing',
+  ];
+  const isLessonsActive = lessonRoutes.some((p) => location.pathname === p);
+  const isPracticeActive = practiceRoutes.some((p) => location.pathname === p);
+  const isMobile = window.innerWidth <= 991;
+  const showLessons = isMobile ? dropdownOpen.lessons : (dropdownOpen.lessons || isLessonsActive);
+  const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);
+
   useEffect(() => {
     const handleScroll = () => {
-      if (window.scrollY > 50) {
-        setScrolled(true);
-      } else {
-        setScrolled(false);
-      }
+      setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
@@ -28,8 +42,6 @@ function Menu() {
     if (window.confirm('Bạn có muốn đăng xuất tài khoản không?')) {
       setIsLoggedIn(false);
       setUsername('User');
-      // In a real app: localStorage.removeItem('token');
-      // window.location.href = '/login';
     }
   };
 
@@ -75,9 +87,9 @@ function Menu() {
                 <ul className="navbar-nav">
                   <li className="nav-item">
                     <NavLink
-                      className="nav-link"
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/"
-                      exact
+                      end
                       onClick={handleLinkClick}
                     >
                       TRANG CHỦ
@@ -85,7 +97,7 @@ function Menu() {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      className="nav-link"
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/about"
                       onClick={handleLinkClick}
                     >
@@ -94,50 +106,49 @@ function Menu() {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      className="nav-link"
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/journey"
                       onClick={handleLinkClick}
                     >
                       HÀNH TRÌNH
                     </NavLink>
                   </li>
-                  <li className={`nav-item dropdown ${dropdownOpen.lessons ? 'show' : ''}`}>
+                  <li className={`nav-item dropdown ${showLessons ? 'show' : ''}`}>
                     <a
-                      className="nav-link dropdown-toggle"
-                      href="#"
+                      className={`nav-link dropdown-toggle ${isLessonsActive ? 'active' : ''}`}
                       onClick={() => toggleDropdown('lessons')}
                       role="button"
-                      aria-expanded={dropdownOpen.lessons}
+                      aria-expanded={showLessons}
                     >
                       BÀI HỌC
                     </a>
                     <div
-                      className={`dropdown-menu ${dropdownOpen.lessons ? 'show' : ''}`}
+                      className={`dropdown-menu ${showLessons ? 'show' : ''}`}
                       aria-labelledby="navbarDropdownLessons"
                     >
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/story"
                         onClick={handleLinkClick}
                       >
                         CÂU CHUYỆN
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/grammar"
                         onClick={handleLinkClick}
                       >
                         NGỮ PHÁP
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/flashcards"
                         onClick={handleLinkClick}
                       >
                         TỪ VỰNG FLASHCARD
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/pronunciation"
                         onClick={handleLinkClick}
                       >
@@ -145,71 +156,70 @@ function Menu() {
                       </NavLink>
                     </div>
                   </li>
-                  <li className={`nav-item dropdown ${dropdownOpen.practice ? 'show' : ''}`}>
+                  <li className={`nav-item dropdown ${showPractice ? 'show' : ''}`}>
                     <a
-                      className="nav-link dropdown-toggle"
-                      href="#"
+                      className={`nav-link dropdown-toggle ${isPracticeActive ? 'active' : ''}`}
                       onClick={() => toggleDropdown('practice')}
                       role="button"
-                      aria-expanded={dropdownOpen.practice}
+                      aria-expanded={showPractice}
                     >
                       LUYỆN TẬP
                     </a>
                     <div
-                      className={`dropdown-menu ${dropdownOpen.practice ? 'show' : ''}`}
+                      className={`dropdown-menu ${showPractice ? 'show' : ''}`}
                       aria-labelledby="navbarDropdownPractice"
                     >
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/grammar-exercise"
                         onClick={handleLinkClick}
                       >
                         NGỮ PHÁP
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/vocabulary-exercise"
                         onClick={handleLinkClick}
                       >
                         TỪ VỰNG
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/pronunciation-exercise"
                         onClick={handleLinkClick}
                       >
                         PHÁT ÂM
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/dictation-exercise"
                         onClick={handleLinkClick}
                       >
                         NGHE CHÉP CHÍNH TẢ
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/dictionary"
                         onClick={handleLinkClick}
                       >
                         TRA CỨU TỪ ĐIỂN
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/chat"
                         onClick={handleLinkClick}
                       >
                         TRÒ CHUYỆN VỚI AI
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/communicate"
                         onClick={handleLinkClick}
                       >
                         GIAO TIẾP VỚI AI
                       </NavLink>
                       <NavLink
-                        className="dropdown-item"
+                        className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/writing"
                         onClick={handleLinkClick}
                       >
@@ -219,7 +229,7 @@ function Menu() {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      className="nav-link"
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/blog"
                       onClick={handleLinkClick}
                     >
@@ -228,7 +238,7 @@ function Menu() {
                   </li>
                   <li className="nav-item">
                     <NavLink
-                      className="nav-link"
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/contact"
                       onClick={handleLinkClick}
                     >
@@ -251,28 +261,28 @@ function Menu() {
                         aria-labelledby="loginBtn"
                       >
                         <NavLink
-                          className="dropdown-item"
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/profile"
                           onClick={handleLinkClick}
                         >
                           THÔNG TIN CÁ NHÂN
                         </NavLink>
                         <NavLink
-                          className="dropdown-item"
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/reminder"
                           onClick={handleLinkClick}
                         >
                           NHẮC NHỞ HỌC TẬP
                         </NavLink>
                         <NavLink
-                          className="dropdown-item"
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/change-password"
                           onClick={handleLinkClick}
                         >
                           ĐỔI MẬT KHẨU
                         </NavLink>
                         <NavLink
-                          className="dropdown-item"
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/setting"
                           onClick={handleLinkClick}
                         >

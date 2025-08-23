@@ -5,8 +5,17 @@ const LocalStrategy = require('passport-local').Strategy;
 const session = require('express-session');
 const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
+const cors = require("cors");
 const User = require("./apps/models/user"); 
 var app = express();
+
+// Cho phép tất cả domain (tạm thời)
+app.use(cors());
+
+// Nếu muốn chỉ cho React frontend gọi API thì dùng:
+app.use(cors({
+  origin: "http://localhost:5173"
+}));
 
 require('dotenv').config();
 
