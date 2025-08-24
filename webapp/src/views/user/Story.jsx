@@ -6,15 +6,30 @@ function Story() {
     const [stories, setStories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedCategory, setSelectedCategory] = useState("");
+    const [selectedLevel, setSelectedLevel] = useState("");
 
     useEffect(() => {
-        StoryService.fetchStories(currentPage).then((data) => {
-        setStories(data.stories);
-        setTotalPages(data.totalPages);
-        setCurrentPage(data.currentPage);
-        });
-    }, [currentPage]);
+        StoryService.resetAlertFlag();
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await StoryService.fetchStories(currentPage, 6, {
+                    category: selectedCategory,
+                    level: selectedLevel,
+                });
+                setStories(data.data || []);
+                setTotalPages(data.totalPages);
+            } catch (err) {
+                console.error(err);
+                setStories([]);
+            }
+            setIsLoading(false);
+        };
+        fetchData();
+    }, [currentPage, selectedCategory, selectedLevel]);
 
     const renderPagination = () => {
         const pages = [];
@@ -63,21 +78,64 @@ function Story() {
   return (
     <>
         <div className="story-container">
-            <div className="container">
-                <div className="section_tittle">
-                    <h3>
-                        DANH SÁCH CÁC CÂU CHUYỆN HAY{" "}
-                        <i
-                            className="fas fa-question-circle help-icon"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setIsModalOpen(true)}
-                        ></i>
-                    </h3>
+            <div className="hero-mini">
+                <h3 className="hero-title">DANH SÁCH CÁC CÂU CHUYỆN HAY
+                    <i
+                        className="fas fa-question-circle help-icon"
+                        style={{ cursor: "pointer" }}
+                        onClick={() => setIsModalOpen(true)}
+                    ></i></h3>
+                <div className="search-bar">
+                    <input type="text" className="search-input" placeholder="Tìm kiếm câu chuyện..." />
+                    <button className="search-button">Search</button>
                 </div>
-
-                <div className="story-list row">
-                    {stories.length > 0 ? (
-                        stories.map((story) => <StoryCard key={story._id} story={story} />)
+            </div>
+            <div className="container">
+                <div className="filter-bar d-flex justify-content-center my-3">
+                    <select
+                        className="form-select mx-2"
+                        value={selectedCategory}
+                        onChange={(e) => {
+                            setCurrentPage(1);
+                            setSelectedCategory(e.target.value);
+                        }}
+                    >
+                        <option value="">-- Chọn Category --</option>
+                        <option value="Daily Life">Daily Life</option>
+                        <option value="Travel">Travel</option>
+                        <option value="Adventure">Adventure</option>
+                        <option value="Motivation">Motivation</option>
+                    </select>
+                    <select
+                        className="form-select mx-2"
+                        value={selectedLevel}
+                        onChange={(e) => {
+                            setCurrentPage(1);
+                            setSelectedLevel(e.target.value);
+                        }}
+                    >
+                        <option value="">-- Chọn Level --</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                    </select>
+                </div>
+            </div>
+            <div className="container">
+                <div className="story-list">
+                {isLoading ? (
+                    <div className="spinner-container">
+                        <div className="spinner-loader"></div>
+                    </div>
+                ) : stories.length > 0 ? (
+                        <div className="container">
+                            <div className="row">
+                                {stories.map((story) => (
+                                    <StoryCard key={story._id} story={story} />
+                                ))}
+                            </div>
+                        </div>
                     ) : (
                         <p className="text-center no-stories">Không có câu chuyện nào.</p>
                     )}

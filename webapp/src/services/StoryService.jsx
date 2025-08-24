@@ -1,14 +1,37 @@
 const API_URL = "http://localhost:3000";
 
+let hasShownAlert = false;
 export const StoryService = {
-    async fetchStories(page = 1, limit = 2) {
+    async fetchStories(page = 1, limit = 6, filters = {}) {
         try {
-        const res = await fetch(`${API_URL}/story/api/story-list?page=${page}&limit=${limit}`);
-        const data = await res.json();
-        return data;
+            let query = `?page=${page}&limit=${limit}`;
+            if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;
+            if (filters.level) query += `&level=${encodeURIComponent(filters.level)}`;
+            const res = await fetch(`${API_URL}/story/api/story-list${query}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const data = await res.json();
+            hasShownAlert = false;
+            console.log('Fetch success:', data);
+            return data;
         } catch (error) {
-        console.error("Error fetching stories:", error);
-        return { stories: [], currentPage: 1, totalPages: 1 };
+            console.error("Error fetching stories:", error.message);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                window.alert("Không thể kết nối đến server. Vui lòng kiểm tra xem server (http://localhost:3000) đã được bật chưa hoặc có lỗi kết nối. Hệ thống sẽ hiển thị dữ liệu mặc định.");
+            }
+            return { data: [], currentPage: 1, totalPages: 1 };
         }
+    },
+
+    resetAlertFlag() {
+        hasShownAlert = false;
     }
 };

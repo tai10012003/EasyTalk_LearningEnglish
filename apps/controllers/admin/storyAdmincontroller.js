@@ -1,88 +1,120 @@
-var express = require("express");
+const express = require("express");
 const { ObjectId } = require("mongodb");
-var router = express.Router();
-var StoryService = require("./../../services/storyService");
 const multer = require("multer");
+const StoryService = require("./../../services/storyService");
 
+const router = express.Router();
+const storyService = new StoryService();
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-router.get("/", function (req, res) {
+router.get("/", (req, res) => {
     res.render("stories/story");
 });
 
-router.get("/add", function (req, res) {
+router.get("/add", (req, res) => {
     res.render("stories/addstory");
 });
 
-router.get("/update", async function (req, res) {
-    const storyService = new StoryService();
-    const story = await storyService.getStory(req.query.id);
-    res.render("stories/updatestory", { story });
-});
-
-router.get("/api/story-list", async function (req, res) {
-    const storyService = new StoryService();
-    const page = parseInt(req.query.page) || 1;
-    const limit = 2;
-    const { stories, totalStory } = await storyService.getStoryList(page, limit);
-    const totalPages = Math.ceil(totalStory / limit);
-    res.json({
-      stories,
-      currentPage: page,
-      totalPages,
-    });
-});
-
-router.post("/api/add", upload.single("image"), async function (req, res) {
-    const storyService = new StoryService();
-
+router.get("/update", async (req, res) => {
     try {
-        const stories = {
-            title: req.body.title,
-            description: req.body.description,
-            content: req.body.content,
-            images: req.file ? req.file.buffer : null
-        };
-        const result = await storyService.insertStory(stories);
-        res.status(201).json({ message: "Câu chuyện đã được thêm thành công !", result });
-    } catch (error) {
-        res.status(500).json({ message: "Error adding story", error });
+        const story = await storyService.getStory(req.query.id);
+        if (!story) return res.status(404).send("Câu chuyện không tìm thấy.");
+        res.render("stories/updatestory", { story });
+    } catch (err) {
+        res.status(500).send("Error retrieving story: " + err.message);
     }
 });
 
-router.put("/api/update/:id", upload.single("image"), async function (req, res) {
-    const storyService = new StoryService();
+router.get("/api/story-list", async (req, res) => {
     try {
-        const stories = {
-            _id: new ObjectId(req.params.id),
-            title: req.body.title,
-            description: req.body.description,
-            content: req.body.content,
-        };
-        if (req.file) {
-            stories.images = req.file.buffer;
-        } else {
-            const existingStory = await storyService.getStory(req.params.id);
-            if (!existingStory) {
-            return res.status(404).json({ message: "Câu chuyện không tìm thấy." });
-            }
-            stories.images = existingStory.images;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 6;
+        const { stories, totalStory } = await storyService.getStoryList(page, limit);
+        const totalPages = Math.ceil(totalStory / limit);
+
+        res.json({
+            success: true,
+            data: stories,
+            currentPage: page,
+            totalPages,
+        });
+    } catch (err) {
+        console.error("Error fetching stories:", err);
+        res.status(500).json({ success: false, message: "Error fetching stories", error: err.message });
+    }
+});
+
+router.post("/api/add", upload.single("image"), async (req, res) => {
+    try {
+        const { title, description, content, level, category } = req.body;
+
+        if (!title || title.trim() === "") {
+            return res.status(400).json({ success: false, message: "Tiêu đề không được để trống." });
         }
-        const result = await storyService.updateStory(stories);
-        res.json({ message: "Câu chuyện đã được cập nhật thành công !", result });
-    } catch (error) {
-        res.status(500).json({ message: "Error updating story", error });
+        if (!content || !Array.isArray(JSON.parse(content)) || JSON.parse(content).length === 0) {
+            return res.status(400).json({ success: false, message: "Nội dung câu chuyện không hợp lệ." });
+        }
+
+        const storyData = {
+            title,
+            description,
+            level,
+            category,
+            image: req.file ? req.file.buffer : "",
+            content: JSON.parse(content),
+        };
+
+        const result = await storyService.insertStory(storyData);
+        res.status(201).json({ success: true, message: "Câu chuyện đã được thêm thành công!", result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Error adding story", error: err.message });
     }
 });
 
-router.delete("/api/story/:id", async function (req, res) {
-    const storyService = new StoryService();
-    const result = await storyService.deleteStory(req.params.id);
-    if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "Câu chuyện không tìm thấy." });
+router.put("/api/update/:id", upload.single("image"), async (req, res) => {
+    try {
+        const { title, description, content, level, category } = req.body;
+        const storyId = req.params.id;
+
+        if (!title || title.trim() === "") {
+            return res.status(400).json({ success: false, message: "Tiêu đề không được để trống." });
+        }
+        if (!content || !Array.isArray(JSON.parse(content)) || JSON.parse(content).length === 0) {
+            return res.status(400).json({ success: false, message: "Nội dung câu chuyện không hợp lệ." });
+        }
+
+        const existingStory = await storyService.getStory(storyId);
+        if (!existingStory) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
+
+        const storyData = {
+            _id: storyId,
+            title,
+            description,
+            level,
+            category,
+            content: JSON.parse(content),
+            image: req.file ? req.file.buffer : existingStory.image,
+        };
+
+        const result = await storyService.updateStory(storyData);
+        res.json({ success: true, message: "Câu chuyện đã được cập nhật thành công!", result });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Error updating story", error: err.message });
     }
-    res.json({ message: "Câu chuyện đã xóa thành công !" });
+});
+
+router.delete("/api/story/:id", async (req, res) => {
+    try {
+        const result = await storyService.deleteStory(req.params.id);
+        if (result.deletedCount === 0) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
+        res.json({ success: true, message: "Câu chuyện đã xóa thành công!" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Error deleting story", error: err.message });
+    }
 });
 
 module.exports = router;

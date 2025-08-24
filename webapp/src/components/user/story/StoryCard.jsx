@@ -2,7 +2,7 @@ import React from 'react';
 
 function StoryCard({ story }) {
   return (
-    <div className="col-md-4">
+    <div className="col-md-4 col-lg-4 mb-4">
         <div className="story-card">
             {story.images ? (
                 <img src={`data:image/jpeg;base64,${story.images}`} alt={story.title} className="story-image" />
