@@ -15,12 +15,15 @@ class StoryService {
         this.storyCollection = this.storyDatabase.collection("stories");
     }
 
-    async getStoryList(page = 1, limit = 6, category = "", level = "") {
+    async getStoryList(page = 1, limit = 6, category = "", level = "", search = "") {
         try {
             const skip = (page - 1) * limit;
             const filter = {};
             if (category) filter.category = category;
             if (level) filter.level = level;
+            if (search) {
+                filter.title = { $regex: search, $options: "i" };
+            }
             const cursor = await this.storyCollection.find(filter).skip(skip).limit(limit);
             const stories = await cursor.toArray();
             const totalStory = await this.storyCollection.countDocuments(filter);
@@ -61,7 +64,7 @@ class StoryService {
                             ? {
                                   question: sentence.quiz.question,
                                   type: sentence.quiz.type,
-                                  correctAnswer: sentence.quiz.correctAnswer,
+                                  answer: sentence.quiz.answer,
                                   explanation: sentence.quiz.explanation || '',
                                   options: sentence.quiz.options || []
                               }
@@ -90,7 +93,7 @@ class StoryService {
                         ? {
                               question: sentence.quiz.question,
                               type: sentence.quiz.type,
-                              correctAnswer: sentence.quiz.correctAnswer,
+                              answer: sentence.quiz.answer,
                               explanation: sentence.quiz.explanation || '',
                               options: sentence.quiz.options || []
                           }

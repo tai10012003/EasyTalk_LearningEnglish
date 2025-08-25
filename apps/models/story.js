@@ -1,16 +1,16 @@
 class StoryQuiz {
     question;
     type;
-    correctAnswer;
+    answer;
     explanation;
     options = [];
 
-    constructor(question, type, correctAnswer, explanation = '', options = []) {
+    constructor(question, type, answer, explanation = '', options = []) {
         this.question = question;
         this.type = type;
-        this.correctAnswer = correctAnswer;
+        this.answer = answer;
         this.explanation = explanation;
-        this.options = type === 'multiple-choice' ? options : [];
+        this.options = type == 'multiple-choice' ? options : [];
     }
 }
 
@@ -20,16 +20,15 @@ class StorySentence {
     vocabulary = [];
     quiz = null;
 
-    constructor(en, vi, vocabulary = [], quiz = null, audioUrl = '') {
+    constructor(en, vi, vocabulary = [], quiz = null) {
         this.en = en;
         this.vi = vi;
         this.vocabulary = vocabulary;
         this.quiz = quiz;
-        this.audioUrl = audioUrl;
     }
 
-    addQuiz(question, type, correctAnswer, explanation = '', options = []) {
-        this.quiz = new StoryQuiz(question, type, correctAnswer, explanation, options);
+    addQuiz(question, type, answer, explanation = '', options = []) {
+        this.quiz = new StoryQuiz(question, type, answer, explanation, options);
     }
 }
 
@@ -38,17 +37,17 @@ class Story {
     title;
     description;
     content = [];
-    images;
+    image;
     level;
     category;
     createdAt;
 
-    constructor(title, description, level, category, images) {
+    constructor(title, description, level, category, image) {
         this.title = title;
         this.description = description;
         this.level = level;
         this.category = category;
-        this.images = images;
+        this.image = image;
     }
 
     addSentence(en, vi, vocabulary = []) {

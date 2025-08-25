@@ -9,7 +9,8 @@ router.get("/api/story-list", async (req, res) => {
         const limit = parseInt(req.query.limit) || 6;
         const category = req.query.category;
         const level = req.query.level;
-        const { stories, totalStory } = await storyService.getStoryList(page, limit, category, level);
+        const search = req.query.search;
+        const { stories, totalStory } = await storyService.getStoryList(page, limit, category, level, search);
         const totalPages = Math.ceil(totalStory / limit);
         res.json({
             success: true,
@@ -35,7 +36,7 @@ router.get("/detail/:id", (req, res) => {
     res.render("stories/story-detail");
 });
 
-router.get("/api/:id", async (req, res) => {
+router.get("/api/story/:id", async (req, res) => {
     try {
         const story = await storyService.getStory(req.params.id);
 

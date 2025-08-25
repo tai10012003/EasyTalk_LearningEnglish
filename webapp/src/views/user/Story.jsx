@@ -10,6 +10,7 @@ function Story() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedLevel, setSelectedLevel] = useState("");
+    const [searchKeyword, setSearchKeyword] = useState("");
 
     useEffect(() => {
         StoryService.resetAlertFlag();
@@ -19,6 +20,7 @@ function Story() {
                 const data = await StoryService.fetchStories(currentPage, 6, {
                     category: selectedCategory,
                     level: selectedLevel,
+                    search: searchKeyword,
                 });
                 setStories(data.data || []);
                 setTotalPages(data.totalPages);
@@ -29,45 +31,43 @@ function Story() {
             setIsLoading(false);
         };
         fetchData();
-    }, [currentPage, selectedCategory, selectedLevel]);
+    }, [currentPage, selectedCategory, selectedLevel, searchKeyword]);
 
     const renderPagination = () => {
         const pages = [];
         if (currentPage > 1) {
             pages.push(
                 <li className="page-item" key="prev">
-                <button
-                    className="page-link"
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                >
-                    &laquo; Previous
-                </button>
+                    <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                    >
+                        &laquo; Previous
+                    </button>
                 </li>
             );
         }
-
         for (let i = 1; i <= totalPages; i++) {
             pages.push(
                 <li
-                className={`page-item ${i === currentPage ? "active" : ""}`}
-                key={i}
+                    className={`page-item ${i == currentPage ? "active" : ""}`}
+                    key={i}
                 >
-                <button className="page-link" onClick={() => setCurrentPage(i)}>
-                    {i}
-                </button>
+                    <button className="page-link" onClick={() => setCurrentPage(i)}>
+                        {i}
+                    </button>
                 </li>
             );
         }
-
         if (currentPage < totalPages) {
             pages.push(
                 <li className="page-item" key="next">
-                <button
-                    className="page-link"
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                >
-                    Next &raquo;
-                </button>
+                    <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                    >
+                        Next &raquo;
+                    </button>
                 </li>
             );
         }
@@ -86,8 +86,21 @@ function Story() {
                         onClick={() => setIsModalOpen(true)}
                     ></i></h3>
                 <div className="search-bar">
-                    <input type="text" className="search-input" placeholder="Tìm kiếm câu chuyện..." />
-                    <button className="search-button">Search</button>
+                    <input
+                        type="text"
+                        className="search-input"
+                        placeholder="Tìm kiếm câu chuyện..."
+                        value={searchKeyword}
+                        onChange={(e) => setSearchKeyword(e.target.value)}
+                    />
+                    <button
+                        className="search-button"
+                        onClick={() => {
+                            setCurrentPage(1);
+                        }}
+                    >
+                        Search
+                    </button>
                 </div>
             </div>
             <div className="container">

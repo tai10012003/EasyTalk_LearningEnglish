@@ -5,6 +5,7 @@ import Gate from "../views/user/Gate";
 import Login from "../views/user/Login";
 import Register from "../views/user/Register";
 import Story from "../views/user/Story";
+import StoryDetail from "../views/user/StoryDetail";
 import NotFound from "../views/user/NotFound";
 
 const routes = [
@@ -27,6 +28,10 @@ const routes = [
   {
     path: "/story",
     element: <Story />,
+  },
+  {
+    path: "/story/:id",
+    element: <StoryDetail />,
   },
   {
     path: "/login",
