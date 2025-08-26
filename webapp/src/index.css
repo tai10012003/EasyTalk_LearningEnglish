@@ -1268,7 +1268,7 @@ p {
    STORY STYLES
    =============================================== */
 
-.story-container {
+.lesson-container {
   padding-bottom: 50px;
   position: relative;
 }
@@ -1344,11 +1344,11 @@ p {
   border: 1px solid #391679;
 }
 
-.story-list {
+.lesson-list {
   margin-bottom: 30px;
 }
 
-.story-card {
+.lesson-card {
   background: linear-gradient(135deg, #ffffff, #f9f9f9);
   border-radius: 12px;
   padding: 20px;
@@ -1358,11 +1358,11 @@ p {
   border: 1px solid #3d0d80;
 }
 
-.story-card:hover {
+.lesson-card:hover {
   transform: translateY(-8px);
 }
 
-.story-image {
+.lesson-image {
   width: 180px;
   height: 180px;
   object-fit: cover;
@@ -1376,24 +1376,24 @@ p {
   margin-bottom: 15px;
 }
 
-.story-info {
+.lesson-info {
   padding: 0 10px;
 }
 
-.story-title-card {
+.lesson-title-card {
   font-weight: 600;
   font-size: 1.3rem;
   color: #007bff;
   margin-bottom: 10px;
 }
 
-.story-description {
+.lesson-description, .lesson-category, .lesson-level {
   color: #555;
   font-size: 0.95rem;
-  margin-bottom: 15px;
+  margin-bottom: 12px;
 }
 
-.story-link {
+.lesson-link {
   display: inline-block;
   padding: 8px 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -1404,7 +1404,7 @@ p {
   transition: all 0.3s ease;
 }
 
-.story-link:hover {
+.lesson-link:hover {
   background: #fff;
   border: 1px solid #3d0d80;
   color: #3d0d80;
@@ -1569,32 +1569,32 @@ p {
 }
 
 @media screen and (max-width: 576px) {
-  .story-container {
+  .lesson-container {
     padding: 0 10px;
   }
 
-  .story-title {
+  .lesson-title {
     font-size: 1.5rem;
   }
 
-  .story-card {
+  .lesson-card {
     padding: 15px;
   }
 
-  .story-image {
+  .lesson-image {
     width: 120px;
     height: 120px;
   }
 
-  .story-title-card {
+  .lesson-title-card {
     font-size: 1.1rem;
   }
 
-  .story-description {
+  .lesson-description {
     font-size: 0.9rem;
   }
 
-  .story-link {
+  .lesson-link {
     padding: 6px 15px;
     font-size: 0.9rem;
   }
@@ -1605,24 +1605,24 @@ p {
 }
 
 @media screen and (min-width: 577px) and (max-width: 767px) {
-  .story-container {
+  .lesson-container {
     padding: 0 10px;
   }
 
-  .story-title {
+  .lesson-title {
     font-size: 1.7rem;
   }
 
-  .story-image {
+  .lesson-image {
     width: 140px;
     height: 140px;
   }
 
-  .story-title-card {
+  .lesson-title-card {
     font-size: 1.2rem;
   }
 
-  .story-description {
+  .lesson-description {
     font-size: 0.92rem;
   }
 }
@@ -1901,6 +1901,151 @@ p {
 .vocab-options button.unselected {
     background-color: #ecdb40;
     color: black;
+}
+
+/* ===============================================
+   GRAMMAR DETAIL STYLES
+   =============================================== */
+
+.grammar-detail-container {
+  position: relative;
+  padding: 50px 0;
+}
+
+.grammar-detail-title {
+  color: #681fbb;
+  font-weight: 700;
+  transition: color 0.3s ease;
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+  text-align: center;
+}
+.grammar-detail-description {
+  color: #555;
+  text-align: center;
+  font-size: 1.1rem;
+  margin-top: -15px;
+  margin-bottom: 30px;
+}
+
+.grammar-detail-title:hover {
+  color: #667eea;
+}
+
+.grammar-sentence {
+  width: 70%;
+  margin: 30px auto;
+  border-radius: 16px;
+  border: 1px solid #3c17c4;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.grammar-sentence:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+/* ===============================================
+   FLASHCARD STYLES
+   =============================================== */
+
+.flashcard-container {
+    margin: 105px auto 50px auto;
+    max-width: 1000px;
+    padding: 20px 50px 50px 50px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
+    border-radius: 10px;
+    background-color: #fff;
+}
+
+.flashcard-container .my-4 {
+    text-align: center;
+}
+
+.flashcard {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fefcfc;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.051);
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, transform 0.3s ease;
+    padding: 20px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.flashcard:hover {
+    background-color: #faf7f7;  
+    box-shadow: 0 16px 16px rgba(0, 0, 0, 0.1); 
+    border-color: #cccccc; 
+    transform: translateY(-5px);
+}
+
+.flashcard-title {
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.flashcard-content {
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.flashcard-user .avatar {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+}
+
+.flashcard-review-status {
+    font-size: 0.9rem;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.flashcard-review-status .text-danger {
+    font-weight: bold;
+}
+
+.btn-block {
+    width: 100%;
+}
+
+.btn-primary {
+    background-color: #333;
+    border-color: #333;
+    font-size: 16px;
+    padding: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #fff;
+    border-color: #333;
+    color: #333;
+}
+
+@media (max-width: 768px) {
+    .flashcard-container {
+        padding: 20px 10px;
+    }
+
+    .flashcard {
+        margin-bottom: 20px;
+    }
+
+    .flashcard-title {
+        font-size: 1.1rem;
+    }
+
+    .flashcard-content, 
+    .flashcard-review-status {
+        font-size: 0.8rem;
+    }
 }
 
 /* ===============================================
@@ -2471,6 +2616,10 @@ p {
   .vocab-quiz {
     width: 100%;
   }
+
+  .grammar-sentence {
+    width: 100%;
+  }
 }
 
 /* New 1024px breakpoint for iPad optimization */
@@ -2552,6 +2701,9 @@ p {
     width: 100%;
   }
 
+  .grammar-sentence {
+    width: 100%;
+  }
 }
 
 /* Existing 992px breakpoint with updates */
@@ -2710,6 +2862,10 @@ p {
   .vocab-quiz {
     width: 100%;
   }
+
+  .grammar-sentence {
+    width: 100%;
+  }
 }
 
 /* Existing 768px breakpoint remains unchanged */
@@ -2854,6 +3010,10 @@ p {
   .vocab-quiz {
     width: 100%;
   }
+
+  .grammar-sentence {
+    width: 100%;
+  }
 }
 
 @media (max-width: 576px) {
@@ -2940,6 +3100,10 @@ p {
   }
 
   .vocab-quiz {
+    width: 100%;
+  }
+
+  .grammar-sentence {
     width: 100%;
   }
 }

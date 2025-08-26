@@ -28,7 +28,7 @@ router.get('/detail/:id', (req, res) => {
   res.render('grammars/grammar-detail');
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/grammar/:id", async function (req, res) {
   const grammarService = new GrammarService();
   try {
     const grammar = await grammarService.getGrammar(req.params.id);

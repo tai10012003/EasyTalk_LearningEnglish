@@ -77,7 +77,7 @@ function Story() {
 
   return (
     <>
-        <div className="story-container">
+        <div className="lesson-container">
             <div className="hero-mini">
                 <h3 className="hero-title">DANH SÁCH CÁC CÂU CHUYỆN HAY
                     <i
@@ -136,7 +136,7 @@ function Story() {
                 </div>
             </div>
             <div className="container">
-                <div className="story-list">
+                <div className="lesson-list">
                 {isLoading ? (
                     <div className="spinner-container">
                         <div className="spinner-loader"></div>
@@ -164,7 +164,7 @@ function Story() {
             <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
                 <div
                     className="custom-modal"
-                    onClick={(e) => e.stopPropagation()} // tránh tắt khi click bên trong
+                    onClick={(e) => e.stopPropagation()}
                 >
                     <div className="custom-modal-header">
                     <h5>Hướng Dẫn Đọc Câu Chuyện</h5>

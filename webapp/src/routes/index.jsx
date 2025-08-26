@@ -6,6 +6,9 @@ import Login from "../views/user/Login";
 import Register from "../views/user/Register";
 import Story from "../views/user/Story";
 import StoryDetail from "../views/user/StoryDetail";
+import Grammar from "../views/user/Grammar";
+import GrammarDetail from "../views/user/GrammarDetail";
+import FlashcardList from "../views/user/FlashcardList";
 import NotFound from "../views/user/NotFound";
 
 const routes = [
@@ -32,6 +35,18 @@ const routes = [
   {
     path: "/story/:id",
     element: <StoryDetail />,
+  },
+  {
+    path: "/grammar",
+    element: <Grammar />,
+  },
+  {
+    path: "/grammar/:id",
+    element: <GrammarDetail />,
+  },
+  {
+    path: "/flashcards",
+    element: <FlashcardList />,
   },
   {
     path: "/login",
