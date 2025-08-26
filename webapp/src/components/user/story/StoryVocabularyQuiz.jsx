@@ -61,7 +61,10 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
         setHasContinued(true);
         setQuizCompleted(true);
         setShowResult(false); 
-        onNext();
+        const total = vocabulary.length;
+        const correct = Object.entries(answers).filter(([word, ans]) => ans === definitions[word]).length;
+        const unanswered = vocabulary.length - Object.keys(answers).length;
+        onNext({ type: "vocabQuiz", correct, total, unanswered });
     };
 
     return (
@@ -104,7 +107,7 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                     </button>
                 ) : (
                     <button className="btn_1 mt-4" onClick={handleContinue}>
-                        Tiếp tục
+                        Hoàn thành
                     </button>
                 )
             )}

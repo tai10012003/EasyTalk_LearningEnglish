@@ -11,6 +11,7 @@ function StoryDetail() {
     const [story, setStory] = useState(null);
     const [displayedItems, setDisplayedItems] = useState([]);
     const [showQuizOnly, setShowQuizOnly] = useState(false);
+    const [quizResults, setQuizResults] = useState([]);
     const contentRefs = useRef([]);
 
     useEffect(() => {
@@ -29,9 +30,16 @@ function StoryDetail() {
         return shuffled.slice(0, count);
     };
 
+    const handleQuizResult = (type, correct, total, unanswered) => {
+        setQuizResults(prev => [...prev, { type, correct, total, unanswered }]);
+    };
+
     const [vocabQuizShown, setVocabQuizShown] = useState(false);
 
-    const handleNext = (currentIndex) => {
+    const handleNext = (currentIndex, result) => {
+        if(result) {
+            handleQuizResult(result.type, result.correct, result.total, result.unanswered);
+        }
         if (!story) return;
         const content = story.content;
         const lastItem = displayedItems[displayedItems.length - 1];
@@ -100,9 +108,9 @@ function StoryDetail() {
                     }}
                 >
                     {item.type == "sentence" && <StorySentence sentence={item.data} onNext={() => handleNext(idx)} />}
-                    {item.type == "quiz" && <StoryQuiz quiz={item.data} onNext={() => handleNext(idx)} />}
-                    {item.type == "vocabQuiz" && <StoryVocabularyQuiz vocabulary={item.data} onNext={() => handleNext(idx)} />}
-                    {item.type == "complete" && <StoryComplete />}
+                    {item.type == "quiz" && <StoryQuiz quiz={item.data} onNext={(result) => handleNext(idx, result)} />}
+                    {item.type == "vocabQuiz" && <StoryVocabularyQuiz vocabulary={item.data} onNext={(result) => handleNext(idx, result)} />}
+                    {item.type == "complete" && <StoryComplete quizResults={quizResults} />}
                 </div>
             ))}
         </div>

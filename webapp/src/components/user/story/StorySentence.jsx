@@ -1,20 +1,75 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 function StorySentence({ sentence, onNext }) {
     const [showVietnamese, setShowVietnamese] = useState(false);
     const [hasContinued, setHasContinued] = useState(false);
+    const [canContinue, setCanContinue] = useState(false);
     const [definitions, setDefinitions] = useState({});
+    const [currentWordIndex, setCurrentWordIndex] = useState(-1);
+    const firstRender = useRef(true);
 
     const en = sentence.en;
     const vi = sentence.vi;
     const vocabulary = sentence.vocabulary;
+    const words = en ? en.split(" ") : [];
 
-    const handleSpeak = () => {
-        if ("speechSynthesis" in window && en) {
+    useEffect(() => {
+        if (!en || !("speechSynthesis" in window)) return;
+
+        speechSynthesis.cancel();
+        setCurrentWordIndex(-1);
+
         const utterance = new SpeechSynthesisUtterance(en);
         utterance.lang = "en-US";
-        speechSynthesis.speak(utterance);
+        utterance.onboundary = (event) => {
+            if (event.name == "word" || event.charIndex != undefined) {
+                const charIndex = event.charIndex;
+                let count = 0;
+                for (let i = 0; i < words.length; i++) {
+                    count += words[i].length + 1;
+                    if (charIndex < count) {
+                        setCurrentWordIndex(i);
+                        break;
+                    }
+                }
+            }
+        };
+        utterance.onend = () => {
+            setCurrentWordIndex(-1);
+            setCanContinue(true);
+        };
+        if (!firstRender.current) {
+            setCanContinue(false);
         }
+        speechSynthesis.speak(utterance);
+        firstRender.current = false;
+
+    }, [en]);
+
+    const handleSpeak = () => {
+        if (!en || !("speechSynthesis" in window)) return;
+        speechSynthesis.cancel();
+        setCurrentWordIndex(-1);
+        const utterance = new SpeechSynthesisUtterance(en);
+        utterance.lang = "en-US";
+        utterance.onboundary = (event) => {
+            if (event.name == "word" || event.charIndex !== undefined) {
+                const charIndex = event.charIndex;
+                let count = 0;
+                for (let i = 0; i < words.length; i++) {
+                    count += words[i].length + 1;
+                    if (charIndex < count) {
+                        setCurrentWordIndex(i);
+                        break;
+                    }
+                }
+            }
+        };
+        utterance.onend = () => {
+            setCurrentWordIndex(-1);
+            setCanContinue(true);
+        };
+        speechSynthesis.speak(utterance);
     };
 
     const handleNextClick = () => {
@@ -61,7 +116,17 @@ function StorySentence({ sentence, onNext }) {
                     onMouseEnter={() => setShowVietnamese(true)}
                     onMouseLeave={() => setShowVietnamese(false)}
                 >
-                    {en}
+                    {words.map((word, i) => (
+                        <span
+                            key={i}
+                            style={{
+                                backgroundColor: i == currentWordIndex ? "#ffd54f" : "transparent",
+                                transition: "background-color 0.2s"
+                            }}
+                        >
+                            {word}{" "}
+                        </span>
+                    ))}
                 </span>
             </div>
 
@@ -69,18 +134,8 @@ function StorySentence({ sentence, onNext }) {
                 <p className="sentence-vi text-success mt-2">{vi}</p>
             )}
 
-            <div className="mt-3">
-                <div className={!hasContinued ? "mt-4 mb-4" : "mt-4 mb-4"}>
-                    {!hasContinued && (
-                        <button className="btn_1" onClick={handleNextClick}>
-                            Tiếp tục
-                        </button>
-                    )}
-                </div>
-            </div>
-
             {vocabulary && vocabulary.length > 0 && (
-                <div className="mt-3">
+                <div className="mt-4">
                     <strong className="d-block mb-2">Từ vựng:</strong>
                     <div className="vocabulary-list d-flex flex-wrap gap-2">
                         {vocabulary.map((word, i) => (
@@ -91,8 +146,15 @@ function StorySentence({ sentence, onNext }) {
                     </div>
                 </div>
             )}
-        </div>
 
+            <div className="mt-4">
+                {!hasContinued && canContinue && (
+                    <button className="btn_1" onClick={handleNextClick}>
+                        Tiếp tục
+                    </button>
+                )}
+            </div>
+        </div>
     );
 }
 
