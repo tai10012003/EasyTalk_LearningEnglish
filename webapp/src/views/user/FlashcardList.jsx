@@ -1,72 +1,136 @@
 import React, { useState, useEffect } from "react";
-import FlashcardCard from "../../components/user/flashcard/FlashcardCard";
-import CreateFlashcard from "../../components/user/flashcard/CreateFlashcard";
-import { fetchFlashcardLists } from "../../services/flashcardService";
+import FlashCardListCard from "../../components/user/flashcardList/FlashCardListCard";
+import CreateFlashCardList from "../../components/user/flashcardList/CreateFlashCardList";
+import { FlashcardService } from "../../services/flashcardService";
 
-const FlashcardList = () => {
+const FlashCardList = () => {
     const [flashcards, setFlashcards] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [activeTab, setActiveTab] = useState("explore");
 
-    const loadFlashcards = async (page = 1) => {
+    const loadFlashcards = async (page = currentPage) => {
+        setIsLoading(true);
         try {
-            const data = await fetchFlashcardLists(page);
+            const data = await FlashcardService.fetchFlashcardLists(page, 3);
             setFlashcards(data.flashcardLists || []);
-            setCurrentPage(data.currentPage);
             setTotalPages(data.totalPages);
         } catch (err) {
             console.error(err);
-            alert("Lỗi khi tải danh sách flashcards");
+            setFlashcards([]);
         }
+        setIsLoading(false);
     };
 
     useEffect(() => {
-        loadFlashcards();
-    }, []);
+        FlashcardService.resetAlertFlag();
+        loadFlashcards(currentPage);
+    }, [currentPage, activeTab]);
 
-    const handlePageChange = (page) => {
-        loadFlashcards(page);
+    const renderPagination = () => {
+        const pages = [];
+        if (currentPage > 1) {
+            pages.push(
+                <li className="page-item" key="prev">
+                    <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(currentPage - 1)}
+                    >
+                        &laquo; Previous
+                    </button>
+                </li>
+            );
+        }
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(
+                <li
+                    className={`page-item ${i == currentPage ? "active" : ""}`}
+                    key={i}
+                >
+                    <button className="page-link" onClick={() => setCurrentPage(i)}>
+                        {i}
+                    </button>
+                </li>
+            );
+        }
+        if (currentPage < totalPages) {
+            pages.push(
+                <li className="page-item" key="next">
+                    <button
+                        className="page-link"
+                        onClick={() => setCurrentPage(currentPage + 1)}
+                    >
+                        Next &raquo;
+                    </button>
+                </li>
+            );
+        }
+        return pages;
     };
 
     return (
-        <div className="container flashcard-container">
-            <div className="d-flex justify-content-between align-items-center my-4">
-                <h3>DANH SÁCH ĐÃ TẠO</h3>
-                <button className="footer-btn" onClick={() => setIsModalOpen(true)}>Tạo mới</button>
+        <div className="lesson-container">
+            <div className="hero-mini d-flex justify-content-between align-items-center">
+                <h3 className="hero-title mb-0">DANH SÁCH TỪ VỰNG FLASHCARD</h3>
             </div>
-            <div className="row">
-                {flashcards.length > 0
-                ? flashcards.map(f => <FlashcardCard key={f._id} flashcardList={f} />)
-                : <p className="text-center">Không có danh sách flashcards nào.</p>
-                }
+            <div className="container">
+                <CreateFlashCardList
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onCreated={() => loadFlashcards(currentPage)}
+                />
+                <div className="flashcard-menu d-flex justify-content-between align-items-center mb-4">
+                    <div className="flashcard-btn-group btn-group">
+                        <button
+                            className={`flashcard-btn ${activeTab == "mine" ? "active" : ""}`}
+                            onClick={() => setActiveTab("mine")}
+                        >
+                            Dành cho bạn
+                        </button>
+                        <button
+                            className={`flashcard-btn ${activeTab == "explore" ? "active" : ""}`}
+                            onClick={() => setActiveTab("explore")}
+                        >
+                            Khám phá
+                        </button>
+                    </div>
+                </div>
+                <div className="lesson-list">
+                     <button
+                        className="btn_1 mb-4"
+                        onClick={() => setIsModalOpen(true)}
+                    >
+                        + Tạo mới
+                    </button>
+                    {isLoading ? (
+                        <div className="spinner-container">
+                            <div className="spinner-loader"></div>
+                        </div>
+                    ) : flashcards.length > 0 ? (
+                        <div className="container">
+                            <div className="row">
+                                {flashcards.map((flashcardLists) => (
+                                    <FlashCardListCard
+                                        key={flashcardLists._id}
+                                        flashcardLists={flashcardLists}
+                                    />
+                                ))}
+                            </div>
+                        </div>
+                    ) : (
+                        <p className="text-center no-stories">Không có flashcard nào.</p>
+                    )}
+                </div>
+                <nav aria-label="Page navigation">
+                    <ul className="pagination justify-content-center" id="pagination-controls">
+                        {renderPagination()}
+                    </ul>
+                </nav>
             </div>
-            <nav aria-label="Pagination" className="my-3">
-                <ul className="pagination justify-content-center">
-                    {currentPage > 1 && (
-                        <li className="page-item">
-                            <button className="page-link" onClick={() => handlePageChange(currentPage - 1)}>« Previous</button>
-                        </li>
-                    )}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                        <li key={page} className={`page-item ${page == currentPage ? "active" : ""}`}>
-                            <button className="page-link" onClick={() => handlePageChange(page)}>{page}</button>
-                        </li>
-                    ))}
-                    {currentPage < totalPages && (
-                        <li className="page-item">
-                            <button className="page-link" onClick={() => handlePageChange(currentPage + 1)}>Next »</button>
-                        </li>
-                    )}
-                </ul>
-            </nav>
-            <CreateFlashcard
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onCreated={() => loadFlashcards(currentPage)}
-            />
         </div>
     );
 };
 
-export default FlashcardList;
+export default FlashCardList;

@@ -1,22 +1,22 @@
 import React, { useState } from "react";
 import { FlashcardService } from "../../../services/flashcardService";
 
-const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
-  const [word, setWord] = useState("");
-  const [meaning, setMeaning] = useState("");
-  const [pos, setPos] = useState("");
-  const [pronunciation, setPronunciation] = useState("");
-  const [exampleSentence, setExampleSentence] = useState("");
+const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
+  const [word, setWord] = useState(flashcard.word || "");
+  const [meaning, setMeaning] = useState(flashcard.meaning || "");
+  const [pos, setPos] = useState(flashcard.pos || "");
+  const [pronunciation, setPronunciation] = useState(flashcard.pronunciation || "");
+  const [exampleSentence, setExampleSentence] = useState(flashcard.exampleSentence || "");
   const [image, setImage] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!word.trim() || !meaning.trim() || !exampleSentence.trim()) {
-    alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
-    return;
-  }
-  setLoading(true);
+    e.preventDefault();
+    if (!word.trim() || !meaning.trim() || !exampleSentence.trim()) {
+      alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
+      return;
+    }
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("word", word);
@@ -27,22 +27,18 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
       if (image) {
         formData.append("image", image);
       }
-      const data = await FlashcardService.createFlashcard(listId, formData);
+
+      const data = await FlashcardService.updateFlashcard(flashcard._id, formData);
+
       if (data.success) {
-        alert("✅ Tạo flashcard thành công!");
-        setWord("");
-        setMeaning("");
-        setPos("");
-        setPronunciation("");
-        setExampleSentence("");
-        setImage(null);
-        onCreated();
+        alert("✅ Cập nhật flashcard thành công!");
+        onUpdated();
         onClose();
       } else {
         alert("❌ Có lỗi xảy ra: " + data.message);
       }
     } catch (error) {
-      alert("❌ Lỗi khi tạo flashcard: " + error.message);
+      alert("❌ Lỗi khi cập nhật flashcard: " + error.message);
     }
     setLoading(false);
   };
@@ -53,7 +49,7 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
     <div className="custom-modal-overlay" onClick={onClose}>
       <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
         <div className="custom-modal-header">
-          <h5>THÊM TỪ VỰNG MỚI</h5>
+          <h5>CHỈNH SỬA TỪ VỰNG</h5>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -123,8 +119,15 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
             </div>
             <div className="mb-3">
               <label className="form-label">
-                <i className="bi bi-card-image"></i> Hình ảnh (tuỳ chọn):
+                <i className="bi bi-card-image"></i> Hình ảnh:
               </label>
+              {flashcard.image && (
+                <img
+                  src={`data:image/jpeg;base64,${flashcard.image}`}
+                  alt={flashcard.word}
+                  style={{ width: "130px", height: "auto", borderRadius: "5px", marginBottom: "10px" }}
+                />
+              )}
               <input
                 type="file"
                 className="form-control"
@@ -154,4 +157,4 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
   );
 };
 
-export default CreateFlashCard;
+export default UpdateFlashCard;

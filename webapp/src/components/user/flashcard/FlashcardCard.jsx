@@ -1,26 +1,92 @@
-import React from "react";
+import React, { useState } from "react";
+import UpdateFlashCard from "./UpdateFlashCard";
+import { FlashcardService } from "../../../services/flashcardService";
 
-const FlashcardCard = ({ flashcardList }) => {
-    return (
-        <div className="col-6 col-md-3 my-2">
-            <div
-                className="flashcard p-3 shadow-sm clickable-card"
-                onClick={() => window.location.href = `/flashcards/flashcardlist/${flashcardList._id}`}
+const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const handleDelete = async () => {
+    if (window.confirm("Bạn có chắc chắn muốn xóa flashcard này không?")) {
+      try {
+        const data = await FlashcardService.deleteFlashcard(flashcard._id);
+        if (data.success) {
+          alert("Flashcard đã bị xóa thành công!");
+          onDelete();
+        } else {
+          alert("Xóa thất bại: " + data.message);
+        }
+      } catch (error) {
+        alert("Lỗi khi xóa flashcard: " + error.message);
+      }
+    }
+  };
+
+  const speakWord = (word) => {
+    if ("speechSynthesis" in window) {
+      const utterance = new SpeechSynthesisUtterance(word);
+      utterance.lang = "en-US";
+      utterance.rate = 1;
+      speechSynthesis.speak(utterance);
+    } else {
+      alert("Trình duyệt của bạn không hỗ trợ tính năng phát âm!");
+    }
+  };
+
+  return (
+    <div className="flashcard-item row border rounded p-3 mb-3">
+      <div className="col-md-7">
+        <h5>
+          {flashcard.word}{" "}
+          <em className="pronunciation">({flashcard.pronunciation})</em>
+          <span className="audio-icons ms-2">
+            <button
+              onClick={() => speakWord(flashcard.word)}
+              className="btn btn-sm btn-outline-secondary"
             >
-                <h5 className="flashcard-title">{flashcardList.name}</h5>
-                <div className="flashcard-content">
-                    <p><i className="far fa-clone"></i> {flashcardList.wordCount || 0} từ</p>
-                </div>
-                <div className="flashcard-review-status">
-                    <p className="mb-1">Cần ôn tập: <span className="text-danger font-weight-bold">{flashcardList.toReview || 0}</span></p>
-                    <p>Đã nhớ: {flashcardList.remembered || 0}</p>
-                </div>
-                <div className="flashcard-review-status">
-                    <p>Ngày tạo: {new Date(flashcardList.createdAt).toLocaleDateString()}</p>
-                </div>
-            </div>
+              🔊 Nghe
+            </button>
+          </span>
+        </h5>
+        <p className="definition">
+          <strong>Định nghĩa:</strong> {flashcard.meaning}
+        </p>
+        <p className="example">
+          <strong>Ví dụ:</strong> {flashcard.exampleSentence}
+        </p>
+      </div>
+      <div className="col-md-5 text-center">
+        {flashcard.image && (
+          <div className="flashcard-image mb-2">
+            <img
+              src={`data:image/jpeg;base64,${flashcard.image}`}
+              alt={flashcard.word}
+              width="130px"
+            />
+          </div>
+        )}
+        <div className="actions d-flex justify-content-center gap-2">
+          <button
+            className="btn btn-sm btn-primary"
+            onClick={() => setIsEditModalOpen(true)}
+          >
+            Sửa
+          </button>
+          <button
+            className="btn btn-sm btn-danger"
+            onClick={handleDelete}
+          >
+            Xóa
+          </button>
         </div>
-    );
+      </div>
+      <UpdateFlashCard
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        flashcard={flashcard}
+        onUpdated={onUpdate}
+      />
+    </div>
+  );
 };
 
-export default FlashcardCard;
+export default FlashCardCard;

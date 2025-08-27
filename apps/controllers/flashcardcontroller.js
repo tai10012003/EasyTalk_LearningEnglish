@@ -68,7 +68,7 @@ router.put("/flashcardlist/:id", async (req, res) => {
   }
 });
 
-router.get("/flashcardlist/:id", async (req, res) => {
+router.get("/api/flashcardlist/:id", async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 5;
@@ -77,22 +77,23 @@ router.get("/flashcardlist/:id", async (req, res) => {
     const { flashcardList, flashcards } = await flashcardsService.getFlashcardListById(req.params.id);
 
     if (!flashcardList) {
-      return res.status(404).send("Không tìm thấy danh sách flashcards.");
+      return res.status(404).json({ success: false, message: "Không tìm thấy danh sách flashcards." });
     }
 
     const totalFlashcards = flashcards.length;
     const paginatedFlashcards = flashcards.slice(skip, skip + limit);
 
-    res.render("flashcards/flashcard_list_detail", {
-      flashcardList: flashcardList,
+    res.json({
+      success: true,
+      flashcardList,
       flashcards: paginatedFlashcards,
       currentPage: page,
       totalPages: Math.ceil(totalFlashcards / limit),
-      totalFlashcards: totalFlashcards,
-      limit: limit,
+      totalFlashcards,
+      limit,
     });
   } catch (err) {
-    res.status(500).send("Có lỗi xảy ra: " + err.message);
+    res.status(500).json({ success: false, message: "Có lỗi xảy ra", error: err.message });
   }
 });
 

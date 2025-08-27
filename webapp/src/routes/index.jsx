@@ -8,7 +8,8 @@ import Story from "../views/user/Story";
 import StoryDetail from "../views/user/StoryDetail";
 import Grammar from "../views/user/Grammar";
 import GrammarDetail from "../views/user/GrammarDetail";
-import FlashcardList from "../views/user/FlashcardList";
+import FlashCardList from "../views/user/FlashCardList";
+import FlashCard from "../views/user/FlashCard";
 import NotFound from "../views/user/NotFound";
 
 const routes = [
@@ -46,7 +47,11 @@ const routes = [
   },
   {
     path: "/flashcards",
-    element: <FlashcardList />,
+    element: <FlashCardList />,
+  },
+  {
+    path: "/flashcards/flashcardlist/:id",
+    element: <FlashCard />,
   },
   {
     path: "/login",
