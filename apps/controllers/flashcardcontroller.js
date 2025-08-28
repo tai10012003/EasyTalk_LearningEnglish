@@ -161,7 +161,6 @@ router.put("/update-flashcard/:id", upload.single("image"), async (req, res) => 
   }
 });
 
-
 router.get("/flashcardlist/:listId/review", async (req, res) => {
   try {
     const { flashcards, flashcardList } = await flashcardsService.getFlashcardListById(req.params.listId);
@@ -172,10 +171,10 @@ router.get("/flashcardlist/:listId/review", async (req, res) => {
         message: "Không có flashcard nào trong danh sách này.",
       });
     }
-
-    res.render("flashcards/flashcard_review", {
-      flashcards: flashcards,
-      flashcardList: flashcardList,
+    res.json({
+      success: true,
+      flashcardList,
+      flashcards
     });
   } catch (err) {
     res.status(500).json({

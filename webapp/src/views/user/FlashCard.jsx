@@ -7,15 +7,13 @@ import UpdateFlashCardList from "../../components/user/flashcardList/UpdateFlash
 
 const FlashCard = () => {
   const { id } = useParams();
-  const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
-  const page = parseInt(searchParams.get("page") || "1");
-  const limit = parseInt(searchParams.get("limit") || "5");
-
   const [flashcardList, setFlashcardList] = useState(null);
   const [flashcards, setFlashcards] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalFlashcards, setTotalFlashcards] = useState(0);
+  const [limit] = useState(5);
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
@@ -24,7 +22,7 @@ const FlashCard = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await FlashcardService.fetchFlashcards(id, page, limit);
+      const data = await FlashcardService.fetchFlashcards(id, currentPage, limit);
       setFlashcardList(data.flashcardList);
       setFlashcards(data.flashcards || []);
       setTotalPages(data.totalPages || 1);
@@ -34,7 +32,7 @@ const FlashCard = () => {
       alert("Lỗi khi tải danh sách flashcard: " + error.message);
     }
     setLoading(false);
-  }, [id, page, limit]);
+  }, [id, currentPage, limit]);
 
   useEffect(() => {
     fetchData();
@@ -56,8 +54,45 @@ const FlashCard = () => {
     }
   };
 
-  const handlePageChange = (newPage) => {
-    setSearchParams({ page: newPage, limit });
+  const renderPagination = () => {
+    const pages = [];
+    if (currentPage > 1) {
+      pages.push(
+        <li className="page-item" key="prev">
+          <button
+            className="page-link"
+            onClick={() => setCurrentPage(currentPage - 1)}
+          >
+            &laquo; Previous
+          </button>
+        </li>
+      );
+    }
+    for (let i = 1; i <= totalPages; i++) {
+      pages.push(
+        <li
+          className={`page-item ${i == currentPage ? "active" : ""}`}
+          key={i}
+        >
+          <button className="page-link" onClick={() => setCurrentPage(i)}>
+            {i}
+          </button>
+        </li>
+      );
+    }
+    if (currentPage < totalPages) {
+      pages.push(
+        <li className="page-item" key="next">
+          <button
+            className="page-link"
+            onClick={() => setCurrentPage(currentPage + 1)}
+          >
+            Next &raquo;
+          </button>
+        </li>
+      );
+    }
+    return pages;
   };
 
   if (loading) return <div>Loading...</div>;
@@ -65,118 +100,57 @@ const FlashCard = () => {
 
   return (
     <div>
-      <div className="container flashcard-container">
-        <div className="custom-container d-flex justify-content-center my-4">
-          <div className="content">
-            <div className="row align-items-center">
-              <div className="col-md-8">
-                <h2 className="my-4">Flashcards: {flashcardList.name}</h2>
-              </div>
-              <div className="col-md-4 d-flex justify-content-end">
-                <div className="d-flex">
-                  <button
-                    className="btn btn-primary mx-2 flashcard-list-action-btn"
-                    onClick={() => setIsEditListModalOpen(true)}
-                  >
-                    Chỉnh sửa
-                  </button>
-                  <button
-                    className="btn btn-primary mx-2 flashcard-list-action-btn"
-                    onClick={() => setIsCreateModalOpen(true)}
-                  >
-                    Thêm từ mới
-                  </button>
-                  <button
-                    className="btn btn-danger mx-2 flashcard-list-action-btn"
-                    onClick={handleDeleteList}
-                  >
-                    Xoá
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div
-              className="alert alert-success"
-              style={{ margin: "10px 0 20px 0" }}
-            >
-              Chú ý: nếu như list từ vựng của bạn là tiếng Trung, Nhật, hay Hàn,
-              click vào nút chỉnh sửa để thay đổi ngôn ngữ. Audio mặc định là
-              tiếng Anh-Anh và Anh-Mỹ. Các ngôn ngữ khác chỉ hỗ trợ trên máy
-              tính.
-            </div>
-            <p>Mô tả: {flashcardList.description}</p>
-            <a
-              className="btn btn-outline-success btn-lg btn-block mb-4 w-100"
-              href={`/flashcards/flashcardlist/${flashcardList._id}/review`}
-            >
-              Luyện tập flashcards
-            </a>
+      <div className="flashcard-detail-container container">
+        <div className="flashcard-detail-header">
+          <div className="section_tittle">
+            <h3>Flashcards: {flashcardList.name}</h3>
           </div>
+          <p className="flashcard-detail-description">{flashcardList.description}</p>
         </div>
-        <div className="custom-container mt-4">
-          <div className="row">
-            <div className="col-12">
-              <div className="d-flex justify-content-center align-items-center mb-4">
-                <h3>DANH SÁCH TỪ VỰNG</h3>
-              </div>
-              {flashcards.length === 0 ? (
-                <p>Không có flashcards nào trong danh sách này.</p>
-              ) : (
-                flashcards.map((flashcard) => (
-                  <FlashCardCard
-                    key={flashcard._id}
-                    flashcard={flashcard}
-                    onUpdate={fetchData}
-                    onDelete={fetchData}
-                  />
-                ))
-              )}
-              <div className="pagination-container mt-4">
-                <nav aria-label="Page navigation">
-                  <ul className="pagination justify-content-center">
-                    {page > 1 && (
-                      <li className="page-item">
-                        <button
-                          className="page-link"
-                          onClick={() => handlePageChange(page - 1)}
-                        >
-                          &lt;&lt;
-                        </button>
-                      </li>
-                    )}
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
-                      (p) => (
-                        <li
-                          key={p}
-                          className={`page-item ${
-                            page === p ? "active" : ""
-                          }`}
-                        >
-                          <button
-                            className="page-link"
-                            onClick={() => handlePageChange(p)}
-                          >
-                            {p}
-                          </button>
-                        </li>
-                      )
-                    )}
-                    {page < totalPages && (
-                      <li className="page-item">
-                        <button
-                          className="page-link"
-                          onClick={() => handlePageChange(page + 1)}
-                        >
-                          &gt;&gt;
-                        </button>
-                      </li>
-                    )}
-                  </ul>
-                </nav>
-              </div>
-            </div>
+        <div className="flashcard-detail-actions">
+          <button className="btn_4 mx-2" onClick={() => setIsCreateModalOpen(true)}>
+            Thêm từ mới
+          </button>
+          <button className="btn_4 mx-2" onClick={() => setIsEditListModalOpen(true)}>
+            Chỉnh sửa danh sách
+          </button>
+          <button className="btn_4 mx-2" onClick={handleDeleteList}>
+            Xoá danh sách
+          </button>
+        </div>
+        <div className="flashcard-detail-alert alert alert-success">
+          Chú ý: nếu như list từ vựng của bạn là tiếng Trung, Nhật, hay Hàn,
+          click vào nút chỉnh sửa để thay đổi ngôn ngữ. Audio mặc định là
+          tiếng Anh-Anh và Anh-Mỹ. Các ngôn ngữ khác chỉ hỗ trợ trên máy tính.
+        </div>
+        <a
+          className="btn_1 btn-lg btn-block flashcard-detail-review"
+          href={`/flashcards/flashcardlist/${flashcardList._id}/review`}
+        >
+          Luyện tập flashcards
+        </a>
+        <div className="flashcard-detail-list">
+          <div className="section_tittle">
+            <h4>DANH SÁCH TỪ VỰNG</h4>
           </div>
+          {flashcards.length == 0 ? (
+            <p className="flashcard-detail-empty">Không có flashcards nào trong danh sách này.</p>
+          ) : (
+            flashcards.map((flashcard) => (
+              <FlashCardCard
+                key={flashcard._id}
+                flashcard={flashcard}
+                onUpdate={fetchData}
+                onDelete={fetchData}
+              />
+            ))
+          )}
         </div>
+        <nav aria-label="Page navigation">
+          <ul className="pagination justify-content-center" id="pagination-controls">
+            {renderPagination()}
+          </ul>
+        </nav>
       </div>
       <CreateFlashCard
         isOpen={isCreateModalOpen}

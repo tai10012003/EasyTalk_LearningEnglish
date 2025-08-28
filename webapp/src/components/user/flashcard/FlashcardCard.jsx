@@ -33,19 +33,19 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
   };
 
   return (
-    <div className="flashcard-item row border rounded p-3 mb-3">
+    <div className="flashcard-item row shadow-sm p-4 my-4 mb-3">
       <div className="col-md-7">
         <h5>
-          {flashcard.word}{" "}
-          <em className="pronunciation">({flashcard.pronunciation})</em>
           <span className="audio-icons ms-2">
             <button
               onClick={() => speakWord(flashcard.word)}
-              className="btn btn-sm btn-outline-secondary"
+              className="btn-speak me-2"
             >
-              🔊 Nghe
+              🔊
             </button>
           </span>
+          {flashcard.word}{" "}
+          <em className="pronunciation">({flashcard.pronunciation})</em>
         </h5>
         <p className="definition">
           <strong>Định nghĩa:</strong> {flashcard.meaning}
@@ -64,15 +64,15 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
             />
           </div>
         )}
-        <div className="actions d-flex justify-content-center gap-2">
+        <div className="actions d-flex justify-content-center align-items-center gap-2">
           <button
-            className="btn btn-sm btn-primary"
+            className="btn_4"
             onClick={() => setIsEditModalOpen(true)}
           >
             Sửa
           </button>
           <button
-            className="btn btn-sm btn-danger"
+            className="btn_4"
             onClick={handleDelete}
           >
             Xóa

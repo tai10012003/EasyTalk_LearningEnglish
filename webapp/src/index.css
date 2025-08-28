@@ -1760,24 +1760,12 @@ p {
   padding: 50px 0;
 }
 
-.grammar-detail-title {
-  color: #681fbb;
-  font-weight: 700;
-  transition: color 0.3s ease;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  text-align: center;
-}
 .grammar-detail-description {
   color: #555;
   text-align: center;
   font-size: 1.1rem;
   margin-top: -15px;
   margin-bottom: 30px;
-}
-
-.grammar-detail-title:hover {
-  color: #667eea;
 }
 
 .grammar-sentence {
@@ -1827,6 +1815,246 @@ p {
 .flashcard-menu .flashcard-btn.active {
   background-color: #564797;
   color: #fff;
+}
+
+.flashcard-detail-container {
+  position: relative;
+  padding: 50px 0;
+  width: 50%;
+}
+
+.flashcard-detail-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.flashcard-detail-description {
+  color: #555;
+  text-align: center;
+  font-size: 1.1rem;
+  margin-top: -15px;
+  margin-bottom: 30px;
+}
+
+.flashcard-detail-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.flashcard-detail-actions .btn_1,
+.flashcard-detail-actions .btn_4 {
+  min-width: 150px;
+  font-size: 14px;
+  padding: 8px 16px;
+}
+
+.flashcard-detail-alert {
+  font-size: 14px;
+  margin: 20px 0;
+}
+
+.flashcard-detail-review {
+  display: block;
+  text-align: center;
+  margin: 20px 0;
+  font-size: 16px;
+}
+
+.flashcard-detail-list {
+  margin-top: 30px;
+}
+
+.flashcard-detail-list-title {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.flashcard-detail-empty {
+  text-align: center;
+  color: #888;
+}
+
+.flashcard-item {
+  margin: 30px auto;
+  border-radius: 16px;
+  border: 1px solid #3c17c4;
+  background: #fff;
+  transition: transform 0.2s ease;
+}
+
+.flashcard-item h5 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 10px;
+}
+
+.flashcard-item .pronunciation {
+  font-size: 0.95rem;
+  font-style: italic;
+  color: #6b7280;
+}
+
+.flashcard-item .definition,
+.flashcard-item .example {
+  margin: 10px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: #374151;
+}
+
+.flashcard-item .example strong {
+  color: #2563eb;
+}
+
+.flashcard-item .flashcard-image img {
+  border-radius: 12px;
+  max-width: 100%;
+  height: auto;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.flashcard-item .actions .btn_4 {
+  border-radius: 8px;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  margin: 10px;
+  transition: all 0.2s ease;
+}
+
+.flashcard-review-container {
+  position: relative;
+  padding: 50px 0;
+  text-align: center;
+}
+
+.title {
+  margin: 20px 0;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+/* --- Flashcard (flip) --- */
+.flashcard-review-card {
+  width: 350px;
+  height: 220px;
+  perspective: 1000px;
+  margin: 20px auto;
+  cursor: pointer;
+}
+
+.flashcard-review-inner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.flashcard-review-card.is-flipped .flashcard-review-inner {
+  transform: rotateY(180deg);
+}
+
+.flashcard-review-front,
+.flashcard-review-back {
+  position: absolute;
+  backface-visibility: hidden;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.flashcard-review-front {
+  background: #fdfdfd;
+}
+
+.flashcard-review-back {
+  background: #fafafa;
+  transform: rotateY(180deg);
+}
+
+.flashcard-review-back img {
+  max-width: 100px;
+  margin-top: 10px;
+  border-radius: 8px;
+}
+
+/* --- Multiple Choice --- */
+.flashcard-review-mc,
+.flashcard-review-fill {
+  margin: 20px auto;
+  max-width: 600px;
+  text-align: center;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.choice-btn {
+  margin: 5px;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid #007bff;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.choice-btn:hover:not(:disabled) {
+  background: #007bff;
+  color: white;
+}
+
+.choice-btn.correct {
+  background-color: #4caf50 !important;
+  border-color: #4caf50;
+  color: white;
+}
+
+.choice-btn.wrong {
+  background-color: #f44336 !important;
+  border-color: #f44336;
+  color: white;
+}
+
+/* --- Fill Mode --- */
+.flashcard-review-fill input {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  margin-right: 10px;
+}
+
+.flashcard-review-fill button {
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: #007bff;
+  color: white;
+  cursor: pointer;
+}
+
+.flashcard-review-actions {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 12px;
 }
 
 /* ===============================================

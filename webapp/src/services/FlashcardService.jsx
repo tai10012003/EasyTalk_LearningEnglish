@@ -151,6 +151,22 @@ export const FlashcardService = {
         }
     },
 
+    async fetchReview(listId) {
+        try {
+            const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}/review`);
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            hasShownAlert = false;
+            return data;
+        } catch (error) {
+            console.error("Error fetching flashcard review:", error.message);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                alert("Không thể kết nối đến server!");
+            }
+        }
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     }
