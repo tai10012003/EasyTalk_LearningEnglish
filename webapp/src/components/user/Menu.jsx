@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 
+const parseJwt = (token) => {
+  try {
+    return JSON.parse(atob(token.split('.')[1]));
+  } catch (e) {
+    return null;
+  }
+};
+
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [username, setUsername] = useState('User');
@@ -31,6 +39,17 @@ function Menu() {
   const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);
 
   useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      const decoded = parseJwt(token);
+      if (decoded && decoded.username) {
+        setIsLoggedIn(true);
+        setUsername(decoded.username);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
@@ -40,8 +59,10 @@ function Menu() {
 
   const handleLogout = () => {
     if (window.confirm('Bạn có muốn đăng xuất tài khoản không?')) {
+      localStorage.removeItem("token");
       setIsLoggedIn(false);
       setUsername('User');
+      window.location.href = "/";
     }
   };
 
@@ -247,13 +268,18 @@ function Menu() {
                   </li>
                   <li className={`nav-item dropdown ${dropdownOpen.login ? 'show' : ''}`}>
                     <a
-                      className="btn_1"
-                      href={isLoggedIn ? '#' : '/login'}
-                      onClick={() => isLoggedIn && toggleDropdown('login')}
+                      className={isLoggedIn ? "btn_2" : "btn_1"}
+                      href={isLoggedIn ? "#" : "/login"}
+                      onClick={(e) => {
+                        if (isLoggedIn) {
+                          e.preventDefault();
+                          toggleDropdown("login");
+                        }
+                      }}
                       role="button"
                       aria-expanded={dropdownOpen.login}
                     >
-                      {isLoggedIn ? username : 'ĐĂNG NHẬP'}
+                      {isLoggedIn ? username : "Đăng nhập"}
                     </a>
                     {isLoggedIn && (
                       <div

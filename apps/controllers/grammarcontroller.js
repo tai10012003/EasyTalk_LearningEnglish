@@ -3,29 +3,20 @@ const router = express.Router();
 const GrammarService = require("../services/grammarService");
 
 router.get("/api/grammar-list", async function (req, res) {
-    const grammarService = new GrammarService();
-    const page = parseInt(req.query.page) || 1;
-    const limit = 3;
-    try {
-      const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit);
-      const totalPages = Math.ceil(totalGrammars / limit);
-  
-      res.json({
-        grammars,
-        currentPage: page,
-        totalPages,
-      });
-    } catch (err) {
-      res.status(500).json({ message: "Error fetching grammars", error: err });
-    }
-  });
-  
-router.get('/', (req, res) => {
-    res.render('grammars/grammar-list');
-});
-
-router.get('/detail/:id', (req, res) => {
-  res.render('grammars/grammar-detail');
+  const grammarService = new GrammarService();
+  const page = parseInt(req.query.page) || 1;
+  const limit = 3;
+  try {
+    const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit);
+    const totalPages = Math.ceil(totalGrammars / limit);
+    res.json({
+      grammars,
+      currentPage: page,
+      totalPages,
+    });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching grammars", error: err });
+  }
 });
 
 router.get("/api/grammar/:id", async function (req, res) {

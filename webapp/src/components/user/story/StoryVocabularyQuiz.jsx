@@ -62,7 +62,7 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
         setQuizCompleted(true);
         setShowResult(false); 
         const total = vocabulary.length;
-        const correct = Object.entries(answers).filter(([word, ans]) => ans === definitions[word]).length;
+        const correct = Object.entries(answers).filter(([word, ans]) => ans == definitions[word]).length;
         const unanswered = vocabulary.length - Object.keys(answers).length;
         onNext({ type: "vocabQuiz", correct, total, unanswered });
     };
@@ -77,10 +77,10 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                         {options[word]?.map((opt, i) => {
                             let className = "";
                             if (showResult || quizCompleted) {
-                                if (opt === definitions[word]) className = "correct";
+                                if (opt == definitions[word]) className = "correct";
                                 else if (!answers[word]) className = "unselected";
-                                else if (answers[word] === opt && opt !== definitions[word]) className = "wrong";
-                            } else if (answers[word] === opt) className = "selected";
+                                else if (answers[word] == opt && opt !== definitions[word]) className = "wrong";
+                            } else if (answers[word] == opt) className = "selected";
                             return (
                                 <button
                                     key={i}

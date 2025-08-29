@@ -7,6 +7,7 @@ const FlashCardReview = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const [flashcards, setFlashcards] = useState([]);
+    const [listName, setListName] = useState(""); 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mode, setMode] = useState("flip");
     const [loading, setLoading] = useState(false);
@@ -17,6 +18,7 @@ const FlashCardReview = () => {
             try {
                 const data = await FlashcardService.fetchReview(id);
                 setFlashcards(data.flashcards);
+                setListName(data.flashcardList.name);  
                 setCurrentIndex(0);
                 randomMode();
             } catch (err) {
@@ -42,15 +44,15 @@ const FlashCardReview = () => {
 
     const handleRemove = () => {
         if (window.confirm("Bạn có muốn loại từ này khỏi luyện tập?")) {
-        const updated = flashcards.filter((_, idx) => idx !== currentIndex);
-        setFlashcards(updated);
-        if (updated.length == 0) {
-            alert("Không còn từ nào để luyện tập.");
-            navigate("/flashcards");
-        } else {
-            setCurrentIndex(0);
-            randomMode();
-        }
+            const updated = flashcards.filter((_, idx) => idx !== currentIndex);
+            setFlashcards(updated);
+            if (updated.length == 0) {
+                alert("Không còn từ nào để luyện tập.");
+                navigate("/flashcards");
+            } else {
+                setCurrentIndex(0);
+                randomMode();
+            }
         }
     };
 
@@ -67,20 +69,20 @@ const FlashCardReview = () => {
 
     return (
         <div className="flashcard-review-container">
-            <div className="section_tittle">
-                <h3 className="title">Luyện tập: {flashcards[currentIndex].listName}</h3>
+            <div className="section_tittle" style={{ marginBottom: "30px" }}>
+                <h3 className="title">Luyện tập: {listName}</h3> 
             </div>
-        <FlashCardReviewCard
-            card={flashcards[currentIndex]}
-            mode={mode}
-            onCheckAnswer={handleCheckAnswer}
-            allWords={flashcards.map(c => c.word)}
-        />
-        <div className="flashcard-review-actions">
-            <button className="btn_4 danger" onClick={handleRemove}>Loại từ</button>
-            <button className="btn_4 primary" onClick={handleNext}>Tiếp theo</button>
-            <button className="btn_1 outline" onClick={() => navigate("/flashcards")}>Dừng học</button>
-        </div>
+            <button className="btn_1" onClick={() => navigate("/flashcards")}>Dừng học</button>
+            <FlashCardReviewCard
+                card={flashcards[currentIndex]}
+                mode={mode}
+                onCheckAnswer={handleCheckAnswer}
+                allWords={flashcards.map(c => c.word)}
+            />
+            <div className="flashcard-review-actions">
+                <button className="btn_1 danger" onClick={handleRemove}>Loại từ khỏi danh sách</button>
+                <button className="btn_1 primary" onClick={handleNext}>Tiếp theo</button>
+            </div>
         </div>
     );
 };

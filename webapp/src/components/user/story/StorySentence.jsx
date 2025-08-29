@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-
+// thêm onStepChange dưới
 function StorySentence({ sentence, onNext }) {
     const [showVietnamese, setShowVietnamese] = useState(false);
     const [hasContinued, setHasContinued] = useState(false);
@@ -76,6 +76,12 @@ function StorySentence({ sentence, onNext }) {
         setHasContinued(true);
         onNext();
     };
+
+    // useEffect(() => {
+    //     if (onStepChange) {
+    //         onStepChange(1, 1);
+    //     }
+    // }, []);
 
     useEffect(() => {
         const fetchDefinitions = async () => {

@@ -3,12 +3,16 @@ import React, { useState, useMemo, useEffect } from "react";
 const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
     const [flipped, setFlipped] = useState(false);
     const [userAnswer, setUserAnswer] = useState("");
+    const [status, setStatus] = useState(null);
     const [selected, setSelected] = useState(null);
+    const [error, setError] = useState(""); 
 
     useEffect(() => {
         setSelected(null);
         setUserAnswer("");
         setFlipped(false);
+        setStatus(null);
+        setError("");
     }, [card, mode]);
 
     useEffect(() => {
@@ -27,20 +31,35 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
     };
 
     const handleCheckFill = () => {
-        onCheckAnswer(userAnswer.trim(), card.word);
+        const answer = userAnswer.trim();
+        if (!answer) {
+            alert("Vui lòng nhập từ trước khi kiểm tra!");
+            return;
+        }
+        if (answer.toLowerCase() === card.word.toLowerCase()) {
+            setStatus("correct");
+        } else {
+            setStatus("wrong");
+        }
+        onCheckAnswer(answer, card.word);
+    };
+
+    const handleShowAnswer = () => {
+        setUserAnswer(card.word);
+        setStatus("show");
     };
 
     const mcQuestion = useMemo(() => {
         if (!card || !card.word || !card.exampleSentence) return null;
-        const question = card.exampleSentence.replace(
-        new RegExp(`\\b${card.word}\\b`, "gi"),
-        "______"
+        const wordPattern = new RegExp(
+            `\\b${card.word}(s|d|ed|ing)?\\b`, 
+            "gi"
         );
+        const question = card.exampleSentence.replace(wordPattern, "______");
         const correctAnswer = card.word;
         let wrongAnswers = allWords.filter((w) => w !== card.word);
         wrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 3);
         const choices = [correctAnswer, ...wrongAnswers].sort(() => 0.5 - Math.random());
-
         return { question, choices, correctAnswer };
     }, [card, allWords]);
 
@@ -52,19 +71,33 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
 
     if (mode == "flip") {
         return (
-        <div className={`flashcard-review-card ${flipped ? "is-flipped" : ""}`} onClick={handleFlip}>
-            <div className="flashcard-review-inner">
-            <div className="flashcard-review-front">
-                <h3>{card.word}</h3>
-                <p className="pronunciation">({card.pos}) {card.pronunciation}</p>
+            <div
+                className={`flashcard-review-card ${flipped ? "is-flipped" : ""}`}
+                onClick={handleFlip}
+            >
+                <div className="flashcard-review-inner">
+                    <div className="flashcard-review-front">
+                        <h3>{card.word}</h3>
+                        <p className="pronunciation">
+                            ({card.pos}) {card.pronunciation}
+                        </p>
+                    </div>
+                    <div className="flashcard-review-back">
+                        <p>
+                            <strong>Định nghĩa:</strong> {card.meaning}
+                        </p>
+                        <p>
+                            <strong>Ví dụ:</strong> {card.exampleSentence}
+                        </p>
+                        {card.image && (
+                            <img
+                                src={`data:image/jpeg;base64,${card.image}`}
+                                alt={card.word}
+                            />
+                        )}
+                    </div>
+                </div>
             </div>
-            <div className="flashcard-review-back">
-                <p><strong>Định nghĩa:</strong> {card.meaning}</p>
-                <p><strong>Ví dụ:</strong> {card.exampleSentence}</p>
-                {card.image && <img src={`data:image/jpeg;base64,${card.image}`} alt={card.word} />}
-            </div>
-            </div>
-        </div>
         );
     }
 
@@ -74,46 +107,79 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
         return (
             <div className="flashcard-review-mc">
                 <p>
-                    <strong>Chọn đáp án đúng:</strong> {question}
+                    <strong>Định nghĩa:</strong> ({card.pos}) {card.meaning}
                 </p>
-                <div className="choices">
+                <p>
+                    <strong>Chọn đáp án đúng cho câu ví dụ sau:</strong> {question}
+                </p>
+                <div className="flashcard-review-choices">
                     {choices.map((choice, i) => {
-                    let btnClass = "choice-btn";
-                    if (selected) {
-                        if (choice == correctAnswer) btnClass += " correct";
-                        else if (choice == selected) btnClass += " wrong";
-                    }
-                    return (
-                        <button
-                        key={i}
-                        className={btnClass}
-                        onClick={() => handleChoiceClick(choice)}
-                        disabled={!!selected}
-                        >
-                        {choice}
-                        </button>
-                    );
+                        let btnClass = "flashcard-review-choice-btn";
+                        if (selected) {
+                            if (choice == correctAnswer) btnClass += " correct";
+                            else if (choice == selected) btnClass += " wrong";
+                        }
+                        return (
+                            <button
+                                key={i}
+                                className={btnClass}
+                                onClick={() => handleChoiceClick(choice)}
+                                disabled={!!selected}
+                            >
+                                {choice}
+                            </button>
+                        );
                     })}
                 </div>
             </div>
         );
     }
 
-    if (mode == "fill") {
+    if (mode === "fill") {
         return (
-        <div className="flashcard-review-fill">
-            <p><strong>Điền từ vào chỗ trống:</strong> {card.exampleSentence.replace(card.word, "______")}</p>
-            <input
-            type="text"
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder="Nhập từ"
-            />
-            <button onClick={handleCheckFill}>Kiểm tra</button>
-        </div>
+            <div className="flashcard-review-fill">
+                <p>
+                    <strong>Định nghĩa:</strong> ({card.pos}) {card.meaning}
+                </p>
+                <p>
+                    <strong>Điền từ cho câu ví dụ sau:</strong>{" "}
+                    {card.exampleSentence.replace(card.word, "______")}
+                </p>
+                <input
+                    type="text"
+                    value={userAnswer}
+                    onChange={(e) => setUserAnswer(e.target.value)}
+                    placeholder="Nhập từ"
+                    disabled={status == "show"}
+                    className={
+                        status == "correct"
+                            ? "flashcard-review-input-correct"
+                            : status == "wrong"
+                            ? "flashcard-review-input-wrong"
+                            : status == "show"
+                            ? "flashcard-review-input-show"
+                            : ""
+                    }
+                />
+                {status == "wrong" && (
+                    <p className="flashcard-correct-answer" style={{ marginTop: "20px" }}>
+                        ✅ Đáp án đúng là: <strong>{card.word}</strong>
+                    </p>
+                )}
+                {status == null && (
+                    <div style={{ marginTop: "30px" }}>
+                        <button
+                            onClick={handleShowAnswer}
+                            style={{ marginRight: "30px" }}
+                        >
+                            Hiện đáp án
+                        </button>
+                        <button onClick={handleCheckFill}>Kiểm tra</button>
+                    </div>
+                )}
+            </div>
         );
     }
-
     return null;
 };
 

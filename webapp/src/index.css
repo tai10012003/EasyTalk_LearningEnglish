@@ -140,6 +140,28 @@ p {
   text-decoration: none;
 }
 
+.btn_2 {
+  display: inline-block;
+  padding: 12px 28px;
+  background: #fff;
+  color: rgb(55, 38, 151);
+  text-decoration: none;
+  border-radius: 50px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  border: 2px solid rgb(55, 38, 151);
+  cursor: pointer;
+  font-size: 14px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn_2:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 30px rgba(102, 126, 234, 0.199);
+}
+
 .btn_4 {
   margin: 15px 0;
   display: inline-block;
@@ -1416,64 +1438,6 @@ p {
   padding: 20px;
 }
 
-@media screen and (max-width: 576px) {
-  .lesson-container {
-    padding: 0 10px;
-  }
-
-  .lesson-title {
-    font-size: 1.5rem;
-  }
-
-  .lesson-card {
-    padding: 15px;
-  }
-
-  .lesson-image {
-    width: 120px;
-    height: 120px;
-  }
-
-  .lesson-title-card {
-    font-size: 1.1rem;
-  }
-
-  .lesson-description {
-    font-size: 0.9rem;
-  }
-
-  .lesson-link {
-    padding: 6px 15px;
-    font-size: 0.9rem;
-  }
-
-  .pagination {
-    margin-top: 15px;
-  }
-}
-
-@media screen and (min-width: 577px) and (max-width: 767px) {
-  .lesson-container {
-    padding: 0 10px;
-  }
-
-  .lesson-title {
-    font-size: 1.7rem;
-  }
-
-  .lesson-image {
-    width: 140px;
-    height: 140px;
-  }
-
-  .lesson-title-card {
-    font-size: 1.2rem;
-  }
-
-  .lesson-description {
-    font-size: 0.92rem;
-  }
-}
 
 /* ===============================================
    STORY DETAIL STYLES
@@ -1782,6 +1746,42 @@ p {
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
+.grammar-sentence strong {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.grammar-sentence em {
+  display: inline-block;
+  margin-bottom: 10px;
+}
+
+.grammar-progress-container {
+  width: 70%;
+  margin: 30px auto;
+  background-color: #e0e0e0;
+  border-radius: 12px;
+  height: 24px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.grammar-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #28a745, #85d68c);
+  text-align: center;
+  color: white;
+  font-weight: bold;
+  line-height: 24px;
+  transition: width 0.4s ease;
+}
+
+.grammar-step-counter {
+  margin: 20px auto;
+  font-weight: bold;
+  text-align: center;
+}
+
 /* ===============================================
    FLASHCARD STYLES
    =============================================== */
@@ -1894,9 +1894,15 @@ p {
 }
 
 .flashcard-item .pronunciation {
+  margin-left: 5px;
   font-size: 0.95rem;
   font-style: italic;
   color: #6b7280;
+}
+
+.flashcard-item .pos {
+  font-size: 0.95rem;
+  font-style: italic;
 }
 
 .flashcard-item .definition,
@@ -1933,18 +1939,15 @@ p {
   text-align: center;
 }
 
-.title {
-  margin: 20px 0;
-  text-transform: uppercase;
-  font-weight: 700;
+.flashcard-review-container .btn_1 {
+  width: 30%;
 }
 
-/* --- Flashcard (flip) --- */
 .flashcard-review-card {
-  width: 350px;
-  height: 220px;
-  perspective: 1000px;
-  margin: 20px auto;
+  width: 500px;
+  height: 280px;
+  perspective: 1200px;
+  margin: 50px auto 30px auto;
   cursor: pointer;
 }
 
@@ -1986,75 +1989,92 @@ p {
 }
 
 .flashcard-review-back img {
-  max-width: 100px;
-  margin-top: 10px;
+  max-width: 180px;
+  margin: auto;
   border-radius: 8px;
+  display: block;
 }
 
-/* --- Multiple Choice --- */
 .flashcard-review-mc,
 .flashcard-review-fill {
-  margin: 20px auto;
+  margin: 50px auto 30px auto;
   max-width: 600px;
   text-align: center;
+  border: 1px solid #3d0d80;
+  border-radius: 10px;
+  padding: 30px;
 }
 
-.choices {
+.flashcard-review-choices {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   margin-top: 15px;
 }
 
-.choice-btn {
-  margin: 5px;
+.flashcard-review-choice-btn {
+  margin: 10px 15px;
   padding: 10px 15px;
   border-radius: 6px;
-  border: 1px solid #007bff;
+  border: 1px solid #5729a1;
   background: white;
   cursor: pointer;
   transition: all 0.3s;
 }
 
-.choice-btn:hover:not(:disabled) {
-  background: #007bff;
+.flashcard-review-choice-btn:hover:not(:disabled) {
+  background: #6c5592;
   color: white;
 }
 
-.choice-btn.correct {
-  background-color: #4caf50 !important;
+.flashcard-review-choice-btn.correct {
+  background-color: #4caf50;
   border-color: #4caf50;
   color: white;
 }
 
-.choice-btn.wrong {
-  background-color: #f44336 !important;
+.flashcard-review-choice-btn.wrong {
+  background-color: #f44336;
   border-color: #f44336;
   color: white;
 }
 
-/* --- Fill Mode --- */
+.flashcard-review-input-correct {
+  border: 2px solid #4caf50;
+  background: #e6ffe6;
+}
+
+.flashcard-review-input-wrong {
+  border: 2px solid #f44336;
+  background: #ffe6e6;
+}
+
+.flashcard-review-input-show {
+  border: 2px solid #ff9800;
+  background: #fff3cd;
+}
+
 .flashcard-review-fill input {
-  padding: 8px 12px;
+  padding: 12px 20px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  margin-right: 10px;
+  margin-top: 10px;
+  font-size: 16px;
 }
 
 .flashcard-review-fill button {
-  padding: 8px 16px;
+  padding: 12px 20px;
   border-radius: 6px;
   border: none;
-  background: #007bff;
+  background: #6f37d8;
   color: white;
   cursor: pointer;
 }
 
-.flashcard-review-actions {
+.flashcard-review-container .flashcard-review-actions .btn_1 {
   margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  gap: 12px;
+  margin: 0 20px;
+  width: 20%;
 }
 
 /* ===============================================
@@ -2818,6 +2838,15 @@ p {
   .grammar-sentence {
     width: 100%;
   }
+
+  .flashcard-detail-container {
+    width: 60%;
+  }
+
+  .flashcard-review-card {
+    width: 420px;
+    height: 250px;
+  }
 }
 
 /* New 1024px breakpoint for iPad optimization */
@@ -2901,6 +2930,19 @@ p {
 
   .grammar-sentence {
     width: 100%;
+  }
+
+  .flashcard-detail-container {
+    width: 70%;
+  }
+
+  .flashcard-review-card {
+    width: 420px;
+    height: 250px;
+  }
+
+  .flashcard-review-container .btn_1 {
+    width: 40%;
   }
 }
 
@@ -3064,6 +3106,26 @@ p {
   .grammar-sentence {
     width: 100%;
   }
+
+  .flashcard-detail-container {
+    width: 80%;
+    padding: 30px 0;
+  }
+
+  .flashcard-review-mc,
+  .flashcard-review-fill {
+    max-width: 90%;
+    padding: 20px;
+  }
+
+  .flashcard-review-card {
+    width: 360px;
+    height: 230px;
+  }
+
+  .flashcard-review-container .flashcard-review-actions .btn_1 {
+    width: 35%;
+  }
 }
 
 /* Existing 768px breakpoint remains unchanged */
@@ -3212,6 +3274,92 @@ p {
   .grammar-sentence {
     width: 100%;
   }
+
+  .flashcard-detail-container {
+    width: 90%;
+    padding: 20px 0;
+  }
+
+  .flashcard-review-card {
+    width: 320px;
+    height: 220px;
+  }
+
+  .flashcard-review-container .btn_1 {
+    width: 60%;
+  }
+
+  .flashcard-review-choices {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .flashcard-detail-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .flashcard-detail-actions .btn_1,
+  .flashcard-detail-actions .btn_4 {
+    min-width: unset;
+    width: 100%;
+    text-align: center;
+    font-size: 15px;
+  }
+
+  .flashcard-review-container {
+    padding: 30px 10px;
+  }
+
+  .flashcard-review-container .flashcard-review-actions {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .flashcard-review-container .flashcard-review-actions .btn_1 {
+    margin-top: 10px;
+    width: 100%;
+    margin: 0;
+  }
+
+  .flashcard-review-mc,
+  .flashcard-review-fill {
+    padding: 20px;
+    margin: 30px auto 20px auto;
+    width: 100%;
+  }
+
+  .flashcard-review-choices {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .flashcard-review-choice-btn {
+    width: 100%;
+    margin: 8px 0;
+    padding: 14px;
+    font-size: 15px;
+  }
+
+  .flashcard-review-card {
+    max-width: 90%;
+    min-height: 200px;
+  }
+
+  .flashcard-review-front,
+  .flashcard-review-back {
+    min-height: 300px;
+    font-size: 14px;
+  }
+
+  .flashcard-review-back img {
+    max-width: 140px;
+    margin-top: 12px;
+  }
 }
 
 @media (max-width: 576px) {
@@ -3303,6 +3451,56 @@ p {
 
   .grammar-sentence {
     width: 100%;
+  }
+
+  .flashcard-detail-container {
+    width: 95%;
+    padding: 15px 0;
+  }
+
+  .flashcard-review-card {
+    max-width: 280px;
+    min-height: 180px;
+  }
+
+  .flashcard-review-container .flashcard-review-actions .btn_1.danger {
+    margin-top: 70px;
+    font-size: 14px;
+    padding: 10px 12px;
+  }
+
+  .flashcard-review-mc,
+  .flashcard-review-fill {
+    padding: 15px;
+    font-size: 0.9rem;
+  }
+  
+  .flashcard-review-fill input {
+    width: 100%;
+  }
+
+  .flashcard-review-container .btn_1 {
+    width: 90%;
+  }
+
+   .flashcard-detail-actions {
+    gap: 10px;
+  }
+
+  .flashcard-review-fill input {
+    width: 100%;
+    font-size: 14px;
+  }
+
+  .flashcard-review-fill button {
+    width: 100%;
+    margin-top: 12px;
+  }
+
+  .flashcard-review-mc,
+  .flashcard-review-fill {
+    padding: 15px;
+    margin-bottom: -70px;
   }
 }
 

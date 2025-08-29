@@ -45,6 +45,7 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
             </button>
           </span>
           {flashcard.word}{" "}
+          <em className="pos">({flashcard.pos})</em>
           <em className="pronunciation">({flashcard.pronunciation})</em>
         </h5>
         <p className="definition">

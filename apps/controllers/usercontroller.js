@@ -20,7 +20,7 @@ router.get("/login", (req, res) => {
   res.render("users/login");
 });
 
-router.post("/register", async (req, res) => {
+router.post("/api/register", async (req, res) => {
   const { username, email, password, confirmPassword, role = "user" } = req.body;
 
   if (password !== confirmPassword) {
@@ -30,13 +30,13 @@ router.post("/register", async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = { username, email, password: hashedPassword, role, active: true };
       await userService.insertUser(user);
-      res.status(201).json({ message: "User registered successfully" });
+      res.status(201).json({ message: "Đăng ký thành công !!" });
   } catch (error) {
-      res.status(500).json({ message: "Registration error", error });
+      res.status(500).json({ message: "Đăng ký thất bại !!", error });
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/api/login", async (req, res) => {
   try {
       const user = await userService.getUserByEmail(req.body.email);
       if (!user) 
