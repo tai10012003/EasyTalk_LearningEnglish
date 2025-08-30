@@ -21,7 +21,7 @@ function StoryCard({ story }) {
                     {story.description.length > 80 ? `${story.description.substring(0, 80)}...` : story.description}
                 </p> */}
                 <a href={`/story/${story._id}`} className="lesson-link">
-                    Vào đọc
+                    <i className="fas fa-book-open me-2"></i>Vào đọc
                 </a>
             </div>
         </div>

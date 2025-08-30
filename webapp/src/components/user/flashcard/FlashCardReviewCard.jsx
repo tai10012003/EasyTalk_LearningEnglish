@@ -51,6 +51,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
 
     const mcQuestion = useMemo(() => {
         if (!card || !card.word || !card.exampleSentence) return null;
+        if (allWords.length < 4) return null;
         const wordPattern = new RegExp(
             `\\b${card.word}(s|d|ed|ing)?\\b`, 
             "gi"
@@ -59,6 +60,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
         const correctAnswer = card.word;
         let wrongAnswers = allWords.filter((w) => w !== card.word);
         wrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 3);
+        if (wrongAnswers.length < 3) return null;
         const choices = [correctAnswer, ...wrongAnswers].sort(() => 0.5 - Math.random());
         return { question, choices, correctAnswer };
     }, [card, allWords]);
@@ -172,9 +174,9 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
                             onClick={handleShowAnswer}
                             style={{ marginRight: "30px" }}
                         >
-                            Hiện đáp án
+                            <i className="fas fa-eye"></i>Hiện đáp án
                         </button>
-                        <button onClick={handleCheckFill}>Kiểm tra</button>
+                        <button onClick={handleCheckFill}><i className="fas fa-check"></i>Kiểm tra</button>
                     </div>
                 )}
             </div>

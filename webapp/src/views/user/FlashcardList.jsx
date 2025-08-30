@@ -102,7 +102,7 @@ const FlashCardList = () => {
                         className="btn_1 mb-4"
                         onClick={() => setIsModalOpen(true)}
                     >
-                        + Tạo mới
+                        <i className="fas fa-plus mr-2"></i>Tạo mới
                     </button>
                     {isLoading ? (
                         <div className="spinner-container">

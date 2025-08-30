@@ -15,7 +15,7 @@ function GrammarCard({ grammar }) {
                     {grammar.description.length > 80 ? `${grammar.description.substring(0, 80)}...` : grammar.description}
                 </p>
                 <a href={`/grammar/${grammar._id}`} className="lesson-link">
-                    Vào học
+                    <i className="fas fa-book-open me-2"></i>Vào học
                 </a>
             </div>
         </div>

@@ -142,7 +142,7 @@ p {
 
 .btn_2 {
   display: inline-block;
-  padding: 12px 28px;
+  padding: 10px 25px;
   background: #fff;
   color: rgb(55, 38, 151);
   text-decoration: none;
@@ -253,6 +253,20 @@ p {
   border-radius: 2px;
 }
 
+.nav-link i {
+  margin-right: 7px;
+}
+
+.dropdown-item i {
+  margin-right: 7px;
+}
+
+.btn_1 i,
+.btn_2 i,
+.btn_4 i {
+  margin-right: 7px;
+}
+
 /* Navigation Menu */
 .main-menu-item {
   display: flex;
@@ -277,8 +291,7 @@ p {
   color: #2d3748;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  padding: 12px 18px;
+  padding: 12px 16px;
   border-radius: 25px;
   transition: all 0.3s ease;
   text-decoration: none;
@@ -326,12 +339,14 @@ p {
   border: none;
   padding: 15px 0;
   margin-top: 10px;
-  min-width: 220px;
+  min-width: 230px;
   opacity: 0;
   visibility: hidden;
   transform: translateY(-10px);
   transition: all 0.3s ease;
   z-index: 1000;
+  border-bottom-right-radius: 10px;
+  border-bottom-left-radius: 10px;
 }
 
 .dropdown:hover .dropdown-menu {
@@ -1432,12 +1447,15 @@ p {
   color: #3d0d80;
 }
 
+.lesson-link i {
+  margin-right: 7px;
+}
+
 .no-stories {
   color: #555;
   font-style: italic;
   padding: 20px;
 }
-
 
 /* ===============================================
    STORY DETAIL STYLES
@@ -2071,6 +2089,10 @@ p {
   cursor: pointer;
 }
 
+.flashcard-review-fill button i {
+  margin-right: 7px;
+}
+
 .flashcard-review-container .flashcard-review-actions .btn_1 {
   margin-top: 20px;
   margin: 0 20px;
@@ -2251,9 +2273,14 @@ p {
   font-weight: 500;
   transition: all 0.25s ease;
 }
+
 .footer-btn:hover {
   background: linear-gradient(135deg, #0056b3, #0096c7);
   transform: translateY(-2px);
+}
+
+.footer-btn i {
+  margin-right: 7px;
 }
 
 @keyframes fadeIn {

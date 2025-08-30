@@ -54,7 +54,7 @@ function StoryQuiz({ quiz, onNext }) {
                     </p>
                     {!hasContinued && (
                         <button className="btn_1" onClick={handleNextClick}>
-                            Tiếp tục
+                            <i className="fas fa-arrow-right ms-2"></i>Tiếp tục
                         </button>
                     )}
                 </div>

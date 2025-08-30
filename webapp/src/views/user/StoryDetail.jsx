@@ -12,16 +12,22 @@ function StoryDetail() {
     const [displayedItems, setDisplayedItems] = useState([]);
     const [showQuizOnly, setShowQuizOnly] = useState(false);
     const [quizResults, setQuizResults] = useState([]);
+    const [currentStep, setCurrentStep] = useState(0);   // 👈 thêm
+    const [totalSteps, setTotalSteps] = useState(1); 
     const contentRefs = useRef([]);
 
     useEffect(() => {
         StoryService.getStoryById(id).then((res) => {
             setStory(res);
-            if (res.content.length > 0) {
-                setTimeout(() => {
-                    setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
-                }, 2000);
-            }
+            setTimeout(() => {
+                setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
+                const quizCount = res.content.filter(c => c.quiz).length;
+                const total = res.content.length + quizCount + 1 + 1;
+                setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
+                setCurrentStep(1); 
+                setTotalSteps(total);
+
+            }, 2000);
         });
     },  [id]);
 
@@ -79,14 +85,25 @@ function StoryDetail() {
         } 
         // VocabularyQuiz → hiển thị hoàn thành
         else if (lastItem.type == "vocabQuiz") {
-            setDisplayedItems([...displayedItems, { type: "complete" }]);
-            setShowQuizOnly(false); // <-- Thêm dòng này để hiện lại các câu sau khi quiz xong
+            if(result.type == "vocabQuizCheck") {
+                setCurrentStep(prev => prev + 1);
+                return;
+            }
+            if(result.type == "vocabQuiz") {
+                const newDisplayed = [...displayedItems, { type: "complete" }];
+                setDisplayedItems(newDisplayed);
+                setCurrentStep(newDisplayed.length);
+                setShowQuizOnly(false);
+                return;
+            }
         }
         // Scroll xuống
         setTimeout(() => {
             const lastRef = contentRefs.current[contentRefs.current.length - 1];
             if (lastRef) lastRef.scrollIntoView({ behavior: "smooth", block: "center" });
         }, 100);
+        const step = displayedItems.length;
+        setCurrentStep(step);
     };
 
     if (!story) return <p className="no-stories">Đang tải...</p>;
@@ -99,6 +116,15 @@ function StoryDetail() {
                 </div>
                 <p className="story-detail-description">{story.description}</p>
             </div>
+            <div className="grammar-progress-container">
+                <div
+                    className="grammar-progress-bar-fill"
+                    style={{ width: `${Math.round((currentStep / totalSteps) * 100)}%` }}
+                >
+                    {Math.round((currentStep / totalSteps) * 100)}%
+                </div>
+            </div>
+            <p className="grammar-step-counter">Step {currentStep} / {totalSteps}</p>
             {displayedItems.map((item, idx) => (
                 <div
                     key={idx}

@@ -70,13 +70,13 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
             className="btn_4"
             onClick={() => setIsEditModalOpen(true)}
           >
-            Sửa
+            <i className="fas fa-edit"></i>Sửa
           </button>
           <button
             className="btn_4"
             onClick={handleDelete}
           >
-            Xóa
+            <i className="fas fa-trash-alt"></i>Xóa
           </button>
         </div>
       </div>

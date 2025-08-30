@@ -56,15 +56,26 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
         setAnswers(prev => ({ ...prev, [word]: choice }));
     };
 
-    const handleSubmit = () => setShowResult(true);
+    const handleSubmit = () => {
+        setShowResult(true);
+        onNext({
+            type: "vocabQuizCheck",
+            correct: Object.entries(answers).filter(([w, a]) => a == definitions[w]).length,
+            total: vocabulary.length,
+            unanswered: vocabulary.length - Object.keys(answers).length
+        });
+    };
+
     const handleContinue = () => {
         setHasContinued(true);
         setQuizCompleted(true);
-        setShowResult(false); 
-        const total = vocabulary.length;
-        const correct = Object.entries(answers).filter(([word, ans]) => ans == definitions[word]).length;
-        const unanswered = vocabulary.length - Object.keys(answers).length;
-        onNext({ type: "vocabQuiz", correct, total, unanswered });
+        setShowResult(false);
+        onNext({
+            type: "vocabQuiz",
+            correct: Object.entries(answers).filter(([w, a]) => a == definitions[w]).length,
+            total: vocabulary.length,
+            unanswered: vocabulary.length - Object.keys(answers).length
+        });
     };
 
     return (
@@ -103,11 +114,11 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                         onClick={handleSubmit}
                         disabled={Object.keys(options).length == 0}
                     >
-                        Kiểm tra
+                        <i className="fas fa-check me-2"></i>Kiểm tra
                     </button>
                 ) : (
                     <button className="btn_1 mt-4" onClick={handleContinue}>
-                        Hoàn thành
+                        <i className="fas fa-flag-checkered ms-2"></i>Hoàn thành
                     </button>
                 )
             )}

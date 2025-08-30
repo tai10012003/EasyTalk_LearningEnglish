@@ -113,10 +113,10 @@ function Menu() {
                       end
                       onClick={handleLinkClick}
                     >
-                      TRANG CHỦ
+                      <i className="fas fa-home me-2"></i>TRANG CHỦ
                     </NavLink>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <NavLink
                       className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/about"
@@ -124,14 +124,14 @@ function Menu() {
                     >
                       VỀ CHÚNG TÔI
                     </NavLink>
-                  </li>
+                  </li> */}
                   <li className="nav-item">
                     <NavLink
                       className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/journey"
                       onClick={handleLinkClick}
                     >
-                      HÀNH TRÌNH
+                      <i className="fas fa-road me-2"></i>HÀNH TRÌNH
                     </NavLink>
                   </li>
                   <li className={`nav-item dropdown ${showLessons ? 'show' : ''}`}>
@@ -141,7 +141,7 @@ function Menu() {
                       role="button"
                       aria-expanded={showLessons}
                     >
-                      BÀI HỌC
+                      <i className="fas fa-book-open me-2"></i>BÀI HỌC
                     </a>
                     <div
                       className={`dropdown-menu ${showLessons ? 'show' : ''}`}
@@ -152,28 +152,28 @@ function Menu() {
                         to="/story"
                         onClick={handleLinkClick}
                       >
-                        CÂU CHUYỆN
+                        <i className="fas fa-book me-2"></i>CÂU CHUYỆN
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/grammar"
                         onClick={handleLinkClick}
                       >
-                        NGỮ PHÁP
+                        <i className="fas fa-language me-2"></i>NGỮ PHÁP
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/flashcards"
                         onClick={handleLinkClick}
                       >
-                        TỪ VỰNG FLASHCARD
+                        <i className="fas fa-clone me-2"></i>TỪ VỰNG FLASHCARD
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/pronunciation"
                         onClick={handleLinkClick}
                       >
-                        PHÁT ÂM
+                        <i className="fas fa-microphone me-2"></i>PHÁT ÂM
                       </NavLink>
                     </div>
                   </li>
@@ -184,7 +184,7 @@ function Menu() {
                       role="button"
                       aria-expanded={showPractice}
                     >
-                      LUYỆN TẬP
+                      <i className="fas fa-dumbbell me-2"></i>LUYỆN TẬP
                     </a>
                     <div
                       className={`dropdown-menu ${showPractice ? 'show' : ''}`}
@@ -195,60 +195,60 @@ function Menu() {
                         to="/grammar-exercise"
                         onClick={handleLinkClick}
                       >
-                        NGỮ PHÁP
+                        <i className="fas fa-pen me-2"></i>NGỮ PHÁP
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/vocabulary-exercise"
                         onClick={handleLinkClick}
                       >
-                        TỪ VỰNG
+                        <i className="fas fa-spell-check me-2"></i>TỪ VỰNG
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/pronunciation-exercise"
                         onClick={handleLinkClick}
                       >
-                        PHÁT ÂM
+                        <i className="fas fa-volume-up me-2"></i>PHÁT ÂM
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/dictation-exercise"
                         onClick={handleLinkClick}
                       >
-                        NGHE CHÉP CHÍNH TẢ
+                        <i className="fas fa-headphones me-2"></i>NGHE CHÉP CHÍNH TẢ
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/dictionary"
                         onClick={handleLinkClick}
                       >
-                        TRA CỨU TỪ ĐIỂN
+                        <i className="fas fa-bookmark me-2"></i>TRA CỨU TỪ ĐIỂN
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/chat"
                         onClick={handleLinkClick}
                       >
-                        TRÒ CHUYỆN VỚI AI
+                        <i className="fas fa-comments me-2"></i>TRÒ CHUYỆN VỚI AI
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/communicate"
                         onClick={handleLinkClick}
                       >
-                        GIAO TIẾP VỚI AI
+                        <i className="fas fa-user-group me-2"></i>GIAO TIẾP VỚI AI
                       </NavLink>
                       <NavLink
                         className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                         to="/writing"
                         onClick={handleLinkClick}
                       >
-                        LUYỆN VIẾT VỚI AI
+                        <i className="fas fa-keyboard me-2"></i>LUYỆN VIẾT VỚI AI
                       </NavLink>
                     </div>
                   </li>
-                  <li className="nav-item">
+                  {/* <li className="nav-item">
                     <NavLink
                       className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/blog"
@@ -256,8 +256,26 @@ function Menu() {
                     >
                       BÀI VIẾT
                     </NavLink>
+                  </li> */}
+                  <li className="nav-item">
+                    <NavLink
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                      to="/leaderboard"
+                      onClick={handleLinkClick}
+                    >
+                      <i className="fas fa-trophy me-2"></i>BẢNG XẾP HẠNG
+                    </NavLink>
                   </li>
                   <li className="nav-item">
+                    <NavLink
+                      className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                      to="/statistic"
+                      onClick={handleLinkClick}
+                    >
+                      <i className="fas fa-chart-line me-2"></i>THỐNG KÊ
+                    </NavLink>
+                  </li>
+                  {/* <li className="nav-item">
                     <NavLink
                       className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
                       to="/contact"
@@ -265,7 +283,7 @@ function Menu() {
                     >
                       LIÊN HỆ
                     </NavLink>
-                  </li>
+                  </li> */}
                   <li className={`nav-item dropdown ${dropdownOpen.login ? 'show' : ''}`}>
                     <a
                       className={isLoggedIn ? "btn_2" : "btn_1"}
@@ -279,40 +297,40 @@ function Menu() {
                       role="button"
                       aria-expanded={dropdownOpen.login}
                     >
-                      {isLoggedIn ? username : "Đăng nhập"}
+                      <i className="fas fa-user-circle me-2"></i>{isLoggedIn ? username : "Đăng nhập"}
                     </a>
                     {isLoggedIn && (
                       <div
                         className={`dropdown-menu ${dropdownOpen.login ? 'show' : ''}`}
                         aria-labelledby="loginBtn"
                       >
-                        <NavLink
+                        {/* <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/profile"
                           onClick={handleLinkClick}
                         >
                           THÔNG TIN CÁ NHÂN
-                        </NavLink>
+                        </NavLink> */}
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/reminder"
                           onClick={handleLinkClick}
                         >
-                          NHẮC NHỞ HỌC TẬP
+                          <i className="fas fa-bell me-2"></i>NHẮC NHỞ HỌC TẬP
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/change-password"
                           onClick={handleLinkClick}
                         >
-                          ĐỔI MẬT KHẨU
+                          <i className="fas fa-key me-2"></i>ĐỔI MẬT KHẨU
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/setting"
                           onClick={handleLinkClick}
                         >
-                          CÀI ĐẶT
+                          <i className="fas fa-cog me-2"></i>CÀI ĐẶT
                         </NavLink>
                         <a
                           className="dropdown-item"
@@ -322,7 +340,7 @@ function Menu() {
                             handleLinkClick();
                           }}
                         >
-                          ĐĂNG XUẤT
+                          <i className="fas fa-sign-out-alt me-2"></i>ĐĂNG XUẤT
                         </a>
                       </div>
                     )}

@@ -12,10 +12,10 @@ function Banner() {
                 <h3 className="text-4xl font-bold mb-4">CẢI THIỆN KỸ NĂNG TIẾNG ANH CỦA BẠN</h3>
                 <p className="text-gray-700 mb-4">
                   Cho dù bạn là người mới bắt đầu hay muốn cải thiện kỹ năng của mình, 
-                  hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày.
+                  hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày. Hãy bắt đầu đăng nhập tài khoản của bạn và trải nghiệm nhé !!
                 </p>
-                <a href="/journey" className="btn_1 inline-block px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700">
-                  BẮT ĐẦU NÀO !!
+                <a href="/login" className="btn_1 inline-block px-6 py-3 bg-blue-600 text-white rounded hover:bg-blue-700">
+                  <i className="fas fa-play me-2"></i>BẮT ĐẦU NÀO !!
                 </a>
               </div>
             </div>

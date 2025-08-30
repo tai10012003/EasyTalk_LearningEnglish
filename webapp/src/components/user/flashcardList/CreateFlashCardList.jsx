@@ -87,14 +87,14 @@ const CreateFlashCardList = ({ isOpen, onClose, onCreated }) => {
                             onClick={onClose}
                             disabled={loading}
                         >
-                            Đóng
+                            <i className="fas fa-times"></i>Đóng
                         </button>
                         <button
                             type="submit"
                             className="footer-btn"
                             disabled={loading}
                         >
-                            {loading ? "Đang lưu..." : "Lưu"}
+                            <i className="fas fa-save"></i>{loading ? "Đang lưu..." : "Lưu"}
                         </button>
                     </div>
                 </form>

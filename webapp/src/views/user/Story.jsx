@@ -99,7 +99,7 @@ function Story() {
                             setCurrentPage(1);
                         }}
                     >
-                        Search
+                        <i className="fas fa-search me-2"></i>
                     </button>
                 </div>
             </div>

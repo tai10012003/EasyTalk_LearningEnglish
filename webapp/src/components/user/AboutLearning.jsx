@@ -25,7 +25,6 @@ function AboutLearning() {
                                 Các ví dụ và bài tập thực tế giúp xây dựng sự tự tin trong giao tiếp
                             </li>
                         </ul>
-                        <a href="/about" className="btn_1">HỌC HỎI THÊM</a>
                     </div>
                 </div>
             </div>

@@ -31,7 +31,10 @@ const FlashCardReview = () => {
     }, [id]);
 
     const randomMode = () => {
-        const modes = ["flip", "choice", "fill"];
+        let modes = ["flip", "choice", "fill"];
+        if (flashcards.length < 4) {
+            modes = modes.filter(m => m != "choice");
+        }
         setMode(modes[Math.floor(Math.random() * modes.length)]);
     };
 
@@ -43,12 +46,12 @@ const FlashCardReview = () => {
     };
 
     const handleRemove = () => {
-        if (window.confirm("Bạn có muốn loại từ này khỏi luyện tập?")) {
+        if (window.confirm("Bạn đã nhớ từ này rồi chứ? Hệ thống sẽ tự động xóa từ vựng đã ghi nhớ khỏi danh sách luyện tập !")) {
             const updated = flashcards.filter((_, idx) => idx !== currentIndex);
             setFlashcards(updated);
-            if (updated.length == 0) {
-                alert("Không còn từ nào để luyện tập.");
-                navigate("/flashcards");
+            if (updated.length === 0) {
+                alert("🎉 Bạn đã hoàn thành luyện tập!");
+                navigate(`/flashcards/flashcardlist/${id}`);
             } else {
                 setCurrentIndex(0);
                 randomMode();
@@ -64,6 +67,12 @@ const FlashCardReview = () => {
         }
     };
 
+    const handleStop = () => {
+        if (window.confirm("Bạn có chắc chắn muốn dừng học không?")) {
+           navigate(`/flashcards/flashcardlist/${id}`);
+        }
+    };
+
     if (loading) return <div className="loading">Đang tải...</div>;
     if (flashcards.length == 0) return <p>Không có flashcards nào.</p>;
 
@@ -72,7 +81,9 @@ const FlashCardReview = () => {
             <div className="section_tittle" style={{ marginBottom: "30px" }}>
                 <h3 className="title">Luyện tập: {listName}</h3> 
             </div>
-            <button className="btn_1" onClick={() => navigate("/flashcards")}>Dừng học</button>
+            <button className="btn_1" onClick={handleStop}>
+                <i className="fas fa-stop-circle mr-2"></i>Dừng học
+            </button>
             <FlashCardReviewCard
                 card={flashcards[currentIndex]}
                 mode={mode}
@@ -80,8 +91,8 @@ const FlashCardReview = () => {
                 allWords={flashcards.map(c => c.word)}
             />
             <div className="flashcard-review-actions">
-                <button className="btn_1 danger" onClick={handleRemove}>Loại từ khỏi danh sách</button>
-                <button className="btn_1 primary" onClick={handleNext}>Tiếp theo</button>
+                <button className="btn_1 danger" onClick={handleRemove}><i className="fas fa-check-circle"></i>Đã nhớ từ vựng</button>
+                <button className="btn_1 primary" onClick={handleNext}><i className="fas fa-arrow-right"></i>Tiếp theo</button>
             </div>
         </div>
     );

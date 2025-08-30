@@ -12,6 +12,7 @@ function YourJourney() {
                             Bắt đầu hành trình cá nhân hóa để thành thạo tiếng Anh, phù hợp với tiến trình và mục tiêu của bạn. Hãy tận dụng từng bước đi!
                         </p>
                         <a href="/journey" className="btn_1 inline-block px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                            {/* <i className="fas fa-play me-2"></i> */}
                             BẮT ĐẦU NGAY
                         </a>
                     </div>

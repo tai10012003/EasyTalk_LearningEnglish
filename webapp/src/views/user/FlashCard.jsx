@@ -109,13 +109,13 @@ const FlashCard = () => {
         </div>
         <div className="flashcard-detail-actions">
           <button className="btn_4 mx-2" onClick={() => setIsCreateModalOpen(true)}>
-            Thêm từ mới
+            <i className="fas fa-plus"></i>Thêm từ mới
           </button>
           <button className="btn_4 mx-2" onClick={() => setIsEditListModalOpen(true)}>
-            Chỉnh sửa danh sách
+            <i className="fas fa-edit"></i>Chỉnh sửa danh sách
           </button>
           <button className="btn_4 mx-2" onClick={handleDeleteList}>
-            Xoá danh sách
+            <i className="fas fa-trash-alt"></i>Xoá danh sách
           </button>
         </div>
         <div className="flashcard-detail-alert alert alert-success">
@@ -127,7 +127,7 @@ const FlashCard = () => {
           className="btn_1 btn-lg btn-block flashcard-detail-review"
           href={`/flashcards/flashcardlist/${flashcardList._id}/review`}
         >
-          Luyện tập flashcards
+          <i className="fas fa-dumbbell"></i>Luyện tập flashcards
         </a>
         <div className="flashcard-detail-list">
           <div className="section_tittle">

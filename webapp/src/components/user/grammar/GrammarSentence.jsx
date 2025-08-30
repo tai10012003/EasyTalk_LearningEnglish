@@ -56,7 +56,7 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
                     <div dangerouslySetInnerHTML={{ __html: step }} />
                     {idx == currentIndex && currentIndex < steps.length - 1 && showButton && (
                         <button className="btn_1 mt-4" onClick={handleNext}>
-                            Tiếp tục
+                            <i className="fas fa-arrow-right ms-2"></i>Tiếp tục
                         </button>
                     )}
                 </div>

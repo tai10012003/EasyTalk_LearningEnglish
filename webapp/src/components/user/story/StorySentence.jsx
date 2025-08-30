@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
-// thêm onStepChange dưới
-function StorySentence({ sentence, onNext }) {
+
+function StorySentence({ sentence, onNext, onStepChange }) {
     const [showVietnamese, setShowVietnamese] = useState(false);
     const [hasContinued, setHasContinued] = useState(false);
     const [canContinue, setCanContinue] = useState(false);
@@ -77,11 +77,11 @@ function StorySentence({ sentence, onNext }) {
         onNext();
     };
 
-    // useEffect(() => {
-    //     if (onStepChange) {
-    //         onStepChange(1, 1);
-    //     }
-    // }, []);
+    useEffect(() => {
+        if (onStepChange) {
+            onStepChange(1, 1);
+        }
+    }, []);
 
     useEffect(() => {
         const fetchDefinitions = async () => {
@@ -156,7 +156,7 @@ function StorySentence({ sentence, onNext }) {
             <div className="mt-4">
                 {!hasContinued && canContinue && (
                     <button className="btn_1" onClick={handleNextClick}>
-                        Tiếp tục
+                        <i className="fas fa-arrow-right ms-2"></i>Tiếp tục
                     </button>
                 )}
             </div>
