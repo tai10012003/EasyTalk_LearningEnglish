@@ -1800,6 +1800,134 @@ p {
   text-align: center;
 }
 
+.grammar-quiz-container { 
+  width: 70%;
+  margin: 30px auto;
+  border-radius: 16px;
+  border: 1px solid #3c17c4;
+  background: #fff;
+  padding: 30px;
+  transition: transform 0.2s ease;
+}
+
+.grammar-quiz-container:hover { 
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+
+.grammar-quiz-container h4 {
+  margin-bottom: 20px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.grammar-quiz-question {
+  font-weight: 600;
+  font-size: 1rem;
+  color: #2c3e50;
+  margin-bottom: 15px;
+}
+
+.grammar-quiz-options {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-left: 0;
+}
+
+.grammar-quiz-option {
+  width: 100%;
+  padding: 10px 15px;
+  margin: 3px 0;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  background: #f9f9f9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: left;
+  font-size: 1rem;
+}
+
+.grammar-quiz-option.active {
+  border-color: #3c17c4;
+  background: #d9e3ff;
+  font-weight: 600;
+}
+
+.grammar-quiz-option.correct {
+  background: #e6f9ed;
+  border-color: #2ecc71;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.grammar-quiz-option.wrong {
+  background: #ffe6e6;
+  border-color: #e74c3c;
+  color: #c62828;
+  font-weight: 600;
+}
+
+.grammar-quiz-option:disabled {
+  cursor: not-allowed;
+  opacity: 0.9;
+}
+
+.grammar-quiz-fill {
+  width: 100%;
+  padding: 15px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  border: 2px solid #ddd;
+  border-radius: 12px;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.grammar-quiz-fill:focus {
+  outline: none;
+  border-color: #3c17c4;
+  box-shadow: 0 0 5px rgba(60, 23, 196, 0.4);
+}
+
+.grammar-quiz-fill.correct {
+  background: #e6f9ed;
+  border-color: #2ecc71;
+  color: #2e7d32;
+  font-weight: 600;
+}
+
+.grammar-quiz-fill.wrong {
+  background: #ffe6e6;
+  border-color: #e74c3c;
+  color: #c62828;
+  font-weight: 600;
+}
+
+.grammar-quiz-explanation {
+  font-size: 1rem;
+  margin: 20px 0 40px 0;
+  padding: 10px 12px;
+  border-left: 4px solid #3c17c4;
+  background: #f5f5f5;
+  border-radius: 8px;
+}
+
+.grammar-quiz-explanation.correct {
+  border-left-color: #2ecc71;
+  color: #2e7d32;
+}
+
+.grammar-quiz-explanation.incorrect {
+  border-left-color: #e74c3c;
+  color: #c62828;
+}
+
+.grammar-quiz button {
+  margin-top: 12px;
+}
+
 /* ===============================================
    FLASHCARD STYLES
    =============================================== */

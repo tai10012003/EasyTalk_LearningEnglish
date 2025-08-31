@@ -12,7 +12,7 @@ function StoryDetail() {
     const [displayedItems, setDisplayedItems] = useState([]);
     const [showQuizOnly, setShowQuizOnly] = useState(false);
     const [quizResults, setQuizResults] = useState([]);
-    const [currentStep, setCurrentStep] = useState(0);   // 👈 thêm
+    const [currentStep, setCurrentStep] = useState(0);
     const [totalSteps, setTotalSteps] = useState(1); 
     const contentRefs = useRef([]);
 
@@ -23,10 +23,8 @@ function StoryDetail() {
                 setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
                 const quizCount = res.content.filter(c => c.quiz).length;
                 const total = res.content.length + quizCount + 1 + 1;
-                setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
                 setCurrentStep(1); 
                 setTotalSteps(total);
-
             }, 2000);
         });
     },  [id]);
@@ -43,7 +41,7 @@ function StoryDetail() {
     const [vocabQuizShown, setVocabQuizShown] = useState(false);
 
     const handleNext = (currentIndex, result) => {
-        if(result) {
+        if(result && result.type !== "vocabQuizCheck") { 
             handleQuizResult(result.type, result.correct, result.total, result.unanswered);
         }
         if (!story) return;

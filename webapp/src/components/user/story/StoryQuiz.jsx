@@ -12,7 +12,7 @@ function StoryQuiz({ quiz, onNext }) {
 
     const handleNextClick = () => {
         setHasContinued(true);
-        const total = quiz.options.length;
+        const total = 1;
         const correct = selected == quiz.answer ? 1 : 0;
         const unanswered = selected ? 0 : 1;
         onNext({ type: "quiz", correct, total, unanswered });

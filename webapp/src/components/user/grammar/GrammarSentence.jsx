@@ -4,6 +4,7 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
     const [steps, setSteps] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showButton, setShowButton] = useState(false);
+    const [quizStarted, setQuizStarted] = useState(false);
     const stepRefs = useRef([]);
 
     useEffect(() => {
@@ -15,6 +16,7 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
         stepRefs.current = [];
         setCurrentIndex(0);
         setShowButton(false);
+        setQuizStarted(false);
     }, [content]);
 
     useEffect(() => {
@@ -28,9 +30,7 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
         if (currentIndex < steps.length - 1) {
             const timer = setTimeout(() => setShowButton(true), 5000);
             return () => clearTimeout(timer);
-        }
-        if (currentIndex == steps.length - 1 && onComplete) {
-            onComplete();
+            // setShowButton(true)
         }
     }, [currentIndex, steps.length, onComplete]);
 
@@ -45,20 +45,43 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
         }
     };
 
+    const handleQuizStart = () => {
+        setQuizStarted(true);
+        if (onComplete) {
+            onComplete();
+            setTimeout(() => {
+                const quizElement = document.querySelector(".grammar-quiz-container");
+                if (quizElement) {
+                    quizElement.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+            }, 300);
+        }
+    };
+
     return (
         <>
             {steps.slice(0, currentIndex + 1).map((step, idx) => (
                 <div
-                    key={idx}
-                    ref={el => stepRefs.current[idx] = el}
-                    className="grammar-sentence shadow-sm p-4 my-4"
+                key={idx}
+                ref={el => (stepRefs.current[idx] = el)}
+                className="grammar-sentence shadow-sm p-4 my-4"
                 >
-                    <div dangerouslySetInnerHTML={{ __html: step }} />
-                    {idx == currentIndex && currentIndex < steps.length - 1 && showButton && (
+                <div dangerouslySetInnerHTML={{ __html: step }} />
+                {idx == currentIndex && (
+                    currentIndex < steps.length - 1 ? (
+                    showButton && (
                         <button className="btn_1 mt-4" onClick={handleNext}>
-                            <i className="fas fa-arrow-right ms-2"></i>Tiếp tục
+                        <i className="fas fa-arrow-right ms-2"></i> Tiếp tục
                         </button>
-                    )}
+                    )
+                    ) : (
+                    !quizStarted && (
+                        <button className="btn_1 mt-4" onClick={handleQuizStart}>
+                        Làm bài quiz
+                        </button>
+                    )
+                    )
+                )}
                 </div>
             ))}
         </>
