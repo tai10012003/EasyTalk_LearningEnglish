@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import confetti from "canvas-confetti";
 
 function StoryQuiz({ quiz, onNext }) {
     const [selected, setSelected] = useState(null);
@@ -8,6 +9,14 @@ function StoryQuiz({ quiz, onNext }) {
     const handleAnswer = (option) => {
         setSelected(option);
         setIsAnswered(true);
+        if (option == quiz.answer) {
+            // ✅ Hiệu ứng confetti
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 }
+            });
+        }
     };
 
     const handleNextClick = () => {
@@ -29,7 +38,7 @@ function StoryQuiz({ quiz, onNext }) {
                                 isAnswered && opt == quiz.answer
                                     ? "correct"
                                     : isAnswered && opt == selected
-                                    ? "wrong"
+                                    ? "wrong shake"
                                     : ""
                             }`}
                             onClick={() => handleAnswer(opt)}

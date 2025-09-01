@@ -19,16 +19,8 @@ router.get("/api/pronunciation-list", async function (req, res) {
         res.status(500).json({ message: "Error fetching pronunciations", error: err });
     }
 });
-  
-router.get('/', (req, res) => {
-    res.render('pronunciations/pronunciation-list');
-});
 
-router.get('/detail/:id', (req, res) => {
-    res.render('pronunciations/pronunciation-detail');
-});
-
-router.get("/api/:id", async function (req, res) {
+router.get("/api/pronunciation/:id", async function (req, res) {
     const pronunciationService = new PronunciationService();
     try {
         const pronunciation = await pronunciationService.getPronunciation(req.params.id);

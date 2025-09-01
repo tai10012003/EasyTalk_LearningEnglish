@@ -1612,6 +1612,18 @@ p {
   font-weight: 600;
 }
 
+.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
 .feedback-text.correct {
   margin: 20px 0;
   color: #28a745;
@@ -3002,6 +3014,9 @@ p {
     width: 420px;
     height: 250px;
   }
+  .grammar-quiz-container {
+    width: 100%;
+  }
 }
 
 /* New 1024px breakpoint for iPad optimization */
@@ -3098,6 +3113,9 @@ p {
 
   .flashcard-review-container .btn_1 {
     width: 40%;
+  }
+  .grammar-quiz-container {
+    width: 100%;
   }
 }
 
@@ -3515,6 +3533,9 @@ p {
     max-width: 140px;
     margin-top: 12px;
   }
+  .grammar-quiz-container {
+    width: 100%;
+  }
 }
 
 @media (max-width: 576px) {
@@ -3656,6 +3677,9 @@ p {
   .flashcard-review-fill {
     padding: 15px;
     margin-bottom: -70px;
+  }
+  .grammar-quiz-container {
+    width: 100%;
   }
 }
 

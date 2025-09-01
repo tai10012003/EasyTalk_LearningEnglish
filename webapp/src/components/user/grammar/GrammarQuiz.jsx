@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 
 function GrammarQuiz({ quizzes, onComplete }) {
-  const [answers, setAnswers] = useState(Array(quizzes.length).fill(""));
+  // Hàm shuffle chuẩn Fisher–Yates
+  const shuffleArray = (array) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+  const [shuffledQuizzes] = useState(() => shuffleArray(quizzes));
+  const [answers, setAnswers] = useState(Array(shuffledQuizzes.length).fill(""));
   const [checked, setChecked] = useState(false);
   const [finished, setFinished] = useState(false);
 
@@ -28,7 +38,7 @@ function GrammarQuiz({ quizzes, onComplete }) {
   return (
     <div className="grammar-quiz-container">
       <h4>Bài tập ngữ pháp</h4>
-      {quizzes.map((quiz, idx) => (
+      {shuffledQuizzes.map((quiz, idx) => (
         <div key={idx} className="mb-4">
           <p className="grammar-quiz-question">{idx + 1}. {quiz.question}</p>
 
