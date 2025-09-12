@@ -4,7 +4,7 @@ import AboutLearning from '../../components/user/AboutLearning';
 import YourJourney from '../../components/user/YourJourney';
 import SpecialCourse from '../../components/user/home/SpecialCourse';
 import AdvancedCourse from '../../components/user/home/AdvancedCourse';
-// import OurBlog from '../../components/user/home/OurBlog';
+import OurBlog from '../../components/user/home/OurBlog';
 
 function Home() {
   return (
@@ -14,7 +14,7 @@ function Home() {
       <YourJourney />
       <SpecialCourse />
       <AdvancedCourse />
-      {/* <OurBlog /> */}
+      <OurBlog />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-function GrammarSentence({ content, onComplete, onStepChange  }) {
+function PronunciationSentence({ content, onComplete, onStepChange  }) {
     const [steps, setSteps] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showButton, setShowButton] = useState(false);
@@ -28,9 +28,9 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
     useEffect(() => {
         setShowButton(false);
         if (currentIndex < steps.length - 1) {
-            const timer = setTimeout(() => setShowButton(true), 5000);
-            return () => clearTimeout(timer);
-            // setShowButton(true)
+            // const timer = setTimeout(() => setShowButton(true), 5000);
+            // return () => clearTimeout(timer);
+            setShowButton(true)
         }
     }, [currentIndex, steps.length, onComplete]);
 
@@ -88,4 +88,4 @@ function GrammarSentence({ content, onComplete, onStepChange  }) {
     );
 }
 
-export default GrammarSentence;
+export default PronunciationSentence;

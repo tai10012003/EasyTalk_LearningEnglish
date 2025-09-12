@@ -114,15 +114,15 @@ function StoryDetail() {
                 </div>
                 <p className="story-detail-description">{story.description}</p>
             </div>
-            <div className="grammar-progress-container">
+            <div className="lesson-progress-container">
                 <div
-                    className="grammar-progress-bar-fill"
+                    className="lesson-progress-bar-fill"
                     style={{ width: `${Math.round((currentStep / totalSteps) * 100)}%` }}
                 >
                     {Math.round((currentStep / totalSteps) * 100)}%
                 </div>
             </div>
-            <p className="grammar-step-counter">Step {currentStep} / {totalSteps}</p>
+            <p className="lesson-step-counter">Step {currentStep} / {totalSteps}</p>
             {displayedItems.map((item, idx) => (
                 <div
                     key={idx}

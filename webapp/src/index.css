@@ -1749,12 +1749,12 @@ p {
    GRAMMAR DETAIL STYLES
    =============================================== */
 
-.grammar-detail-container {
+.lesson-detail-container {
   position: relative;
   padding: 50px 0;
 }
 
-.grammar-detail-description {
+.lesson-detail-description {
   color: #555;
   text-align: center;
   font-size: 1.1rem;
@@ -1762,7 +1762,7 @@ p {
   margin-bottom: 30px;
 }
 
-.grammar-sentence {
+.lesson-sentence {
   width: 70%;
   margin: 30px auto;
   border-radius: 16px;
@@ -1771,22 +1771,22 @@ p {
   transition: transform 0.2s ease;
 }
 
-.grammar-sentence:hover {
+.lesson-sentence:hover {
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-.grammar-sentence strong {
+.lesson-sentence strong {
   display: inline-block;
   margin-bottom: 10px;
 }
 
-.grammar-sentence em {
+.lesson-sentence em {
   display: inline-block;
   margin-bottom: 10px;
 }
 
-.grammar-progress-container {
+.lesson-progress-container {
   width: 70%;
   margin: 30px auto;
   background-color: #e0e0e0;
@@ -1796,7 +1796,7 @@ p {
   margin-bottom: 8px;
 }
 
-.grammar-progress-bar-fill {
+.lesson-progress-bar-fill {
   height: 100%;
   background: linear-gradient(90deg, #28a745, #85d68c);
   text-align: center;
@@ -1806,13 +1806,13 @@ p {
   transition: width 0.4s ease;
 }
 
-.grammar-step-counter {
+.lesson-step-counter {
   margin: 20px auto;
   font-weight: bold;
   text-align: center;
 }
 
-.grammar-quiz-container { 
+.lesson-quiz-container { 
   width: 70%;
   margin: 30px auto;
   border-radius: 16px;
@@ -1822,25 +1822,25 @@ p {
   transition: transform 0.2s ease;
 }
 
-.grammar-quiz-container:hover { 
+.lesson-quiz-container:hover { 
   transform: translateY(-3px);
   box-shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-.grammar-quiz-container h4 {
+.lesson-quiz-container h4 {
   margin-bottom: 20px;
   text-align: center;
   text-transform: uppercase;
 }
 
-.grammar-quiz-question {
+.lesson-quiz-question {
   font-weight: 600;
   font-size: 1rem;
   color: #2c3e50;
   margin-bottom: 15px;
 }
 
-.grammar-quiz-options {
+.lesson-quiz-options {
   list-style-type: none;
   display: flex;
   flex-direction: column;
@@ -1848,7 +1848,7 @@ p {
   padding-left: 0;
 }
 
-.grammar-quiz-option {
+.lesson-quiz-option {
   width: 100%;
   padding: 10px 15px;
   margin: 3px 0;
@@ -1861,32 +1861,32 @@ p {
   font-size: 1rem;
 }
 
-.grammar-quiz-option.active {
+.lesson-quiz-option.active {
   border-color: #3c17c4;
   background: #d9e3ff;
   font-weight: 600;
 }
 
-.grammar-quiz-option.correct {
+.lesson-quiz-option.correct {
   background: #e6f9ed;
   border-color: #2ecc71;
   color: #2e7d32;
   font-weight: 600;
 }
 
-.grammar-quiz-option.wrong {
+.lesson-quiz-option.wrong {
   background: #ffe6e6;
   border-color: #e74c3c;
   color: #c62828;
   font-weight: 600;
 }
 
-.grammar-quiz-option:disabled {
+.lesson-quiz-option:disabled {
   cursor: not-allowed;
   opacity: 0.9;
 }
 
-.grammar-quiz-fill {
+.lesson-quiz-fill {
   width: 100%;
   padding: 15px;
   margin-top: 8px;
@@ -1897,27 +1897,27 @@ p {
   transition: all 0.3s ease;
 }
 
-.grammar-quiz-fill:focus {
+.lesson-quiz-fill:focus {
   outline: none;
   border-color: #3c17c4;
   box-shadow: 0 0 5px rgba(60, 23, 196, 0.4);
 }
 
-.grammar-quiz-fill.correct {
+.lesson-quiz-fill.correct {
   background: #e6f9ed;
   border-color: #2ecc71;
   color: #2e7d32;
   font-weight: 600;
 }
 
-.grammar-quiz-fill.wrong {
+.lesson-quiz-fill.wrong {
   background: #ffe6e6;
   border-color: #e74c3c;
   color: #c62828;
   font-weight: 600;
 }
 
-.grammar-quiz-explanation {
+.lesson-quiz-explanation {
   font-size: 1rem;
   margin: 20px 0 40px 0;
   padding: 10px 12px;
@@ -1926,17 +1926,17 @@ p {
   border-radius: 8px;
 }
 
-.grammar-quiz-explanation.correct {
+.lesson-quiz-explanation.correct {
   border-left-color: #2ecc71;
   color: #2e7d32;
 }
 
-.grammar-quiz-explanation.incorrect {
+.lesson-quiz-explanation.incorrect {
   border-left-color: #e74c3c;
   color: #c62828;
 }
 
-.grammar-quiz button {
+.lesson-quiz button {
   margin-top: 12px;
 }
 
@@ -2237,6 +2237,198 @@ p {
   margin-top: 20px;
   margin: 0 20px;
   width: 20%;
+}
+
+/* ===============================================
+   CHAT AI STYLES
+   =============================================== */
+
+.chat-ai-container {
+  margin: 70px auto 50px auto;
+  max-width: 800px;
+  min-width: 300px;
+  padding: 25px;
+  box-shadow: 0 5px 5px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  background-color: #fff;
+}
+
+.chat-ai-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.chat-ai-header h3 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #333;
+}
+
+.chat-ai-box {
+  background-color: #f7f7f7;
+  border-radius: 10px;
+  padding: 20px;
+  height: 60vh;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  margin-bottom: 15px;
+}
+
+.chat-ai-message {
+  margin-bottom: 15px;
+  display: flex;
+  align-items: center;
+  animation: chat-ai-fadeIn 0.4s ease;
+}
+
+.chat-ai-message p {
+  margin: 0;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
+  word-wrap: break-word;
+}
+
+.chat-ai-user-message p {
+  background-color: #d1e7ff;
+  color: #004085;
+  margin-left: auto;
+  text-align: right;
+}
+
+.chat-ai-bot-message p {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.chat-ai-input-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.chat-ai-input {
+  width: 75%;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+  transition: border-color 0.3s ease;
+}
+
+.chat-ai-input:focus {
+  border-color: #007bff;
+  outline: none;
+}
+
+.chat-ai-send-btn {
+  background-image: linear-gradient(45deg, #007bff, #00c6ff);
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 16px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+}
+
+.chat-ai-send-btn:hover {
+  background-image: linear-gradient(45deg, #0056b3, #0096c7);
+  box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes chat-ai-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.chat-ai-message img {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.chat-ai-user-message img {
+  margin-left: 10px;
+  margin-right: 0;
+}
+
+.word-highlight {
+  background: linear-gradient(120deg, #ffe259, #ffa751);
+  border-radius: 6px;
+  padding: 2px 4px;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  color: #000;
+}
+
+.chat-ai-bot-message span {
+  transition: all 0.3s ease;
+}
+
+.chat-ai-input-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chat-ai-mode-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 20px;
+  background: #5a3ee9;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chat-ai-mode-btn:hover {
+  background: #007bff;
+  transform: scale(1.05);
+}
+
+.chat-ai-mic-btn {
+  background: #00c6ff;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  font-size: 25px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.chat-ai-mic-btn:hover {
+  background-color: #159cc2;
+}
+
+.chat-ai-mic-btn.listening {
+  background-color: #e74c3c;
+  animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+  }
+  50% {
+    transform: scale(1.15);
+    box-shadow: 0 0 20px 10px rgba(231, 76, 60, 0.4);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.7);
+  }
 }
 
 /* ===============================================
@@ -3002,7 +3194,7 @@ p {
     width: 100%;
   }
 
-  .grammar-sentence {
+  .lesson-sentence {
     width: 100%;
   }
 
@@ -3014,7 +3206,7 @@ p {
     width: 420px;
     height: 250px;
   }
-  .grammar-quiz-container {
+  .lesson-quiz-container {
     width: 100%;
   }
 }
@@ -3098,7 +3290,7 @@ p {
     width: 100%;
   }
 
-  .grammar-sentence {
+  .lesson-sentence {
     width: 100%;
   }
 
@@ -3114,7 +3306,7 @@ p {
   .flashcard-review-container .btn_1 {
     width: 40%;
   }
-  .grammar-quiz-container {
+  .lesson-quiz-container {
     width: 100%;
   }
 }
@@ -3276,7 +3468,7 @@ p {
     width: 100%;
   }
 
-  .grammar-sentence {
+  .lesson-sentence {
     width: 100%;
   }
 
@@ -3444,7 +3636,7 @@ p {
     width: 100%;
   }
 
-  .grammar-sentence {
+  .lesson-sentence {
     width: 100%;
   }
 
@@ -3533,7 +3725,7 @@ p {
     max-width: 140px;
     margin-top: 12px;
   }
-  .grammar-quiz-container {
+  .lesson-quiz-container {
     width: 100%;
   }
 }
@@ -3625,7 +3817,7 @@ p {
     width: 100%;
   }
 
-  .grammar-sentence {
+  .lesson-sentence {
     width: 100%;
   }
 
@@ -3678,7 +3870,7 @@ p {
     padding: 15px;
     margin-bottom: -70px;
   }
-  .grammar-quiz-container {
+  .lesson-quiz-container {
     width: 100%;
   }
 }

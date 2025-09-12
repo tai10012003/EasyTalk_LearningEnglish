@@ -9,9 +9,11 @@ import StoryDetail from "../views/user/StoryDetail";
 import Grammar from "../views/user/Grammar";
 import GrammarDetail from "../views/user/GrammarDetail";
 import Pronunciation from "../views/user/Pronunciation";
+import PronunciationDetail from "../views/user/PronunciationDetail";
 import FlashCardList from "../views/user/FlashcardList";
 import FlashCard from "../views/user/FlashCard";
 import FlashCardReview from "../views/user/FlashCardReview";
+import ChatAI from "../views/user/ChatAI";
 import NotFound from "../views/user/NotFound";
 
 const routes = [
@@ -52,6 +54,10 @@ const routes = [
     element: <Pronunciation />,
   },
   {
+    path: "/pronunciation/:id",
+    element: <PronunciationDetail />,
+  },
+  {
     path: "/flashcards",
     element: <FlashCardList />,
   },
@@ -62,6 +68,10 @@ const routes = [
   {
     path: "/flashcards/flashcardlist/:id/review",
     element: <FlashCardReview />,
+  },
+  {
+    path: "/chat",
+    element: <ChatAI />,
   },
   {
     path: "/login",

@@ -1,13 +1,13 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import GrammarSentence from "../../components/user/grammar/GrammarSentence";
-import GrammarQuiz from "../../components/user/grammar/GrammarQuiz";
-import GrammarComplete from "../../components/user/grammar/GrammarComplete";
-import { GrammarService } from "../../services/GrammarService";
+import PronunciationSentence from "../../components/user/pronunciation/PronunciationSentence";
+import PronunciationQuiz from "../../components/user/pronunciation/PronunciationQuiz";
+import PronunciationComplete from "../../components/user/pronunciation/PronunciationComplete";
+import { PronunciationService } from "../../services/PronunciationService";
 
-function GrammarDetail() {
+function PronunciationDetail() {
     const { id } = useParams();
-    const [grammar, setGrammar] = useState(null);
+    const [pronunciation, setPronunciation] = useState(null);
     const [displayContent, setDisplayContent] = useState("");
     const [showQuiz, setShowQuiz] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
@@ -16,9 +16,9 @@ function GrammarDetail() {
     const [totalSteps, setTotalSteps] = useState(1);
 
     useEffect(() => {
-        GrammarService.getGrammarById(id).then((res) => {
+        PronunciationService.getPronunciationById(id).then((res) => {
             if (res && res.content) {
-                setGrammar(res);
+                setPronunciation(res);
                 setTimeout(() => {
                     setDisplayContent(res.content);
                     setTimeout(() => {
@@ -37,15 +37,15 @@ function GrammarDetail() {
     };
     const progressPercent = Math.round((currentStep / totalSteps) * 100);
 
-    if (!grammar) return <p className="no-grammar">Đang tải...</p>;
+    if (!pronunciation) return <p className="no-pronunciation">Đang tải...</p>;
 
     return (
         <div className="lesson-detail-container container">
             <div className="lesson-detail-header my-4">
                 <div className="section_tittle">
-                    <h3>{grammar.title}</h3>
+                    <h3>{pronunciation.title}</h3>
                 </div>
-                <p className="lesson-detail-description">{grammar.description}</p>
+                <p className="lesson-detail-description">{pronunciation.description}</p>
             </div>
             <div className="lesson-progress-container"> 
                 <div
@@ -57,23 +57,23 @@ function GrammarDetail() {
             </div>
             <p className="lesson-step-counter">Step {currentStep} / {totalSteps}</p>
             <div ref={contentRef} className="lesson-content" style={{ display: showQuiz && !isComplete ? "none" : "block" }}>
-                <GrammarSentence
+                <PronunciationSentence
                     content={displayContent}
                     onComplete={() => setShowQuiz(true)}
                     onStepChange={handleStepChange}
                 />
             </div>
-            {grammar.quizzes && (
+            {pronunciation.quizzes && (
                 <div style={{ display: showQuiz ? "block" : "none" }}>
-                    <GrammarQuiz
-                        quizzes={grammar.quizzes}
+                    <PronunciationQuiz
+                        quizzes={pronunciation.quizzes}
                         onComplete={() => setIsComplete(true)}
                     />
                 </div>
             )}
-            {isComplete && <GrammarComplete />}
+            {isComplete && <PronunciationComplete />}
         </div>
     );
 }
 
-export default GrammarDetail;
+export default PronunciationDetail;

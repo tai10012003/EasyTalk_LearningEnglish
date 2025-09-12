@@ -5,7 +5,7 @@ function OurBlog() {
     <section className="blog_part">
         <div className="container">
             <div className="section_tittle">
-                <h3>BÀI VIẾT CỦA CHÚNG TÔI</h3>
+                <h3>TIN TỨC VÀ SỰ KIỆN</h3>
             </div>
             <div className="row">
                 <div className="col-sm-6 col-lg-4 col-xl-4">
@@ -47,6 +47,9 @@ function OurBlog() {
                         </div>
                     </div>
                 </div>
+            </div>
+            <div className="text-center mt-4">
+                <a href="/blog" className="btn_1">Xem tất cả</a>
             </div>
         </div>
     </section>

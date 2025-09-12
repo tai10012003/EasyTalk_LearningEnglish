@@ -35,19 +35,23 @@ function GrammarQuiz({ quizzes, onComplete }) {
     if (onComplete) onComplete();
   };
 
+  const normalizeString = (str) => {
+    return str.toLowerCase().replace(/[^a-z0-9]/g, "");
+  };
+
   return (
-    <div className="grammar-quiz-container">
+    <div className="lesson-quiz-container">
       <h4>Bài tập ngữ pháp</h4>
       {shuffledQuizzes.map((quiz, idx) => (
         <div key={idx} className="mb-4">
-          <p className="grammar-quiz-question">{idx + 1}. {quiz.question}</p>
+          <p className="lesson-quiz-question">{idx + 1}. {quiz.question}</p>
 
           {quiz.type == "multiple-choice" ? (
-            <ul className="grammar-quiz-options">
+            <ul className="lesson-quiz-options">
               {quiz.options.map((opt, i) => (
                 <li
                   key={i}
-                  className={`grammar-quiz-option ${
+                  className={`lesson-quiz-option ${
                     checked
                       ? opt == quiz.correctAnswer
                         ? "correct"
@@ -67,12 +71,12 @@ function GrammarQuiz({ quizzes, onComplete }) {
           ) : (
             <input
               type="text"
-              className={`grammar-quiz-fill ${
+              className={`lesson-quiz-fill ${
                 checked
-                  ? answers[idx].trim().toLowerCase() == quiz.correctAnswer.toLowerCase()
-                    ? "correct"
-                    : "wrong"
-                  : ""
+                ? normalizeString(answers[idx]) == normalizeString(quiz.correctAnswer)
+                ? "correct"
+                : "wrong"
+                : ""
               }`}
               value={answers[idx]}
               disabled={checked}
@@ -82,10 +86,10 @@ function GrammarQuiz({ quizzes, onComplete }) {
 
           {checked && quiz.explanation && (
             <div
-              className={`grammar-quiz-explanation ${
-                answers[idx].trim().toLowerCase() == quiz.correctAnswer.toLowerCase()
-                  ? "correct"
-                  : "incorrect"
+              className={`lesson-quiz-explanation ${
+                normalizeString(answers[idx]) == normalizeString(quiz.correctAnswer)
+                ? "correct"
+                : "incorrect"
               }`}
             >
               Giải thích đáp án: {quiz.explanation}
