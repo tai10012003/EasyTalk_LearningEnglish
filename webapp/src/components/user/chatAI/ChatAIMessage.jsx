@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 
 function ChatAIMessage({ message, speakingWordIndex }) {
-    const { sender, text } = message;
+    const { sender, text, suggestion } = message;
+    const [showSuggestion, setShowSuggestion] = useState(false);
 
     const avatarSrc =
         sender == "user"
@@ -27,10 +28,27 @@ function ChatAIMessage({ message, speakingWordIndex }) {
             }`}
         >
             <img src={avatarSrc} alt={`${sender} avatar`} />
-            <p>
-                <strong>{sender == "user" ? "You" : "Chat AI"}:</strong>{" "}
-                {words}
-            </p>
+            <div className="chat-ai-content">
+                <p>
+                    <strong>{sender == "user" ? "You" : "Chat AI"}:</strong>{" "}
+                    {words}
+                </p>
+                {sender == "bot" && suggestion && (
+                <div className="chat-ai-suggestion-row">
+                    <button
+                    className="chat-ai-suggestion-btn"
+                    onClick={() => setShowSuggestion((prev) => !prev)}
+                    >
+                    💡
+                    </button>
+                    {showSuggestion && (
+                    <div className="chat-ai-suggestion">
+                        {suggestion}
+                    </div>
+                    )}
+                </div>
+                )}
+            </div>
         </div>
     );
 }

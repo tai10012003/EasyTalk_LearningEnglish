@@ -16,7 +16,7 @@ function ChatAI() {
         const startConversation = async () => {
             try {
                 const data = await ChatAIService.startConversation();
-                setMessages([{ sender: "bot", text: data.response }]);
+                setMessages([{ sender: "bot", text: data.response, suggestion: data.suggestion }]);
                 setStep(data.step);
                 setLastBotText(data.response);
                 speakText(data.response);
@@ -86,7 +86,7 @@ function ChatAI() {
 
             setMessages((prev) => [
                 ...prev,
-                { sender: "bot", text: data.response || "..." },
+                { sender: "bot", text: data.response || "...", suggestion: data.suggestion }
             ]);
             setLastBotText(data.response || "...");
         } catch (error) {
