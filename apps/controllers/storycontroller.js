@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const verifyToken = require("./../util/VerifyToken");
 const StoryService = require("./../services/storyService");
 const storyService = new StoryService();
 
-router.get("/api/story-list", async (req, res) => {
+router.get("/api/story-list", verifyToken, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 6;
@@ -28,15 +29,7 @@ router.get("/api/story-list", async (req, res) => {
     }
 });
 
-router.get("/", (req, res) => {
-    res.render("stories/story-list");
-});
-
-router.get("/detail/:id", (req, res) => {
-    res.render("stories/story-detail");
-});
-
-router.get("/api/story/:id", async (req, res) => {
+router.get("/api/story/:id", verifyToken, async (req, res) => {
     try {
         const story = await storyService.getStory(req.params.id);
 

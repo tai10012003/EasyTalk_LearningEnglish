@@ -1,12 +1,13 @@
 var express = require("express");
 var router = express.Router();
+const verifyToken = require("./../util/VerifyToken");
 const OpenAI = require("openai");
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-router.get("/api/chat/start", async (req, res) => {
+router.get("/api/chat/start", verifyToken, async (req, res) => {
     try {
         const prompt = `
             You are a cheerful, friendly, and emotionally expressive AI English conversation partner.
@@ -46,7 +47,7 @@ router.get("/api/chat/start", async (req, res) => {
     }
 });
 
-router.post("/api/chat", async (req, res) => {
+router.post("/api/chat", verifyToken, async (req, res) => {
     const { message, step, sessionTopic } = req.body;
     if (!message || message.trim().length == 0) {
         return res.status(400).json({ error: "Message is required" });

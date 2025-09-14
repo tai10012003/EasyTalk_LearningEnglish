@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
+const verifyToken = require("./../util/VerifyToken");
 const PronunciationService = require("../services/pronunciationService");
 
-router.get("/api/pronunciation-list", async function (req, res) {
+router.get("/api/pronunciation-list", verifyToken, async function (req, res) {
     const pronunciationService = new PronunciationService();
     const page = parseInt(req.query.page) || 1;
     const limit = 3;  
@@ -20,7 +21,7 @@ router.get("/api/pronunciation-list", async function (req, res) {
     }
 });
 
-router.get("/api/pronunciation/:id", async function (req, res) {
+router.get("/api/pronunciation/:id", verifyToken, async function (req, res) {
     const pronunciationService = new PronunciationService();
     try {
         const pronunciation = await pronunciationService.getPronunciation(req.params.id);

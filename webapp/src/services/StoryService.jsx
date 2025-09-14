@@ -8,10 +8,12 @@ export const StoryService = {
             if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;
             if (filters.level) query += `&level=${encodeURIComponent(filters.level)}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/story/api/story-list${query}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 
@@ -34,10 +36,12 @@ export const StoryService = {
 
     async getStoryById(id) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/api/story/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 

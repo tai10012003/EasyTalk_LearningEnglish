@@ -28,9 +28,9 @@ function PronunciationSentence({ content, onComplete, onStepChange  }) {
     useEffect(() => {
         setShowButton(false);
         if (currentIndex < steps.length - 1) {
-            // const timer = setTimeout(() => setShowButton(true), 5000);
-            // return () => clearTimeout(timer);
-            setShowButton(true)
+            const timer = setTimeout(() => setShowButton(true), 5000);
+            return () => clearTimeout(timer);
+            // setShowButton(true)
         }
     }, [currentIndex, steps.length, onComplete]);
 

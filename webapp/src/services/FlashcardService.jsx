@@ -6,7 +6,14 @@ export const FlashcardService = {
     async fetchFlashcardLists(page = 1, limit = 6) {
         try {
             let query = `?page=${page}&limit=${limit}`;
-            const res = await fetch(`${API_URL}/flashcards/api/flashcard-list${query}`);
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/flashcards/api/flashcard-list${query}`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             hasShownAlert = false;
@@ -23,9 +30,13 @@ export const FlashcardService = {
 
     async createFlashcardList(name, description) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/create`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify({ name, description }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -43,9 +54,13 @@ export const FlashcardService = {
 
     async updateFlashcardList(id, name, description) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/flashcardlist/${id}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: JSON.stringify({ name, description }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -63,8 +78,12 @@ export const FlashcardService = {
 
     async deleteFlashcardList(id) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/${id}`, {
                 method: "DELETE",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
@@ -81,7 +100,14 @@ export const FlashcardService = {
 
     async fetchFlashcards(listId, page = 1, limit = 5) {
         try {
-            const res = await fetch(`${API_URL}/flashcards/api/flashcardlist/${listId}?page=${page}&limit=${limit}`);
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/flashcards/api/flashcardlist/${listId}?page=${page}&limit=${limit}`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             hasShownAlert = false;
@@ -97,8 +123,13 @@ export const FlashcardService = {
 
     async createFlashcard(listId, formData) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}`, {
                 method: "POST",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -116,8 +147,13 @@ export const FlashcardService = {
 
     async updateFlashcard(id, formData) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/update-flashcard/${id}`, {
                 method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -135,8 +171,12 @@ export const FlashcardService = {
 
     async deleteFlashcard(id) {
         try {
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/delete-flashcard/${id}`, {
                 method: "DELETE",
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
@@ -153,7 +193,14 @@ export const FlashcardService = {
 
     async fetchReview(listId) {
         try {
-            const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}/review`);
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}/review`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             hasShownAlert = false;

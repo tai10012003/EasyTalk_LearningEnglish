@@ -6,10 +6,12 @@ export const PronunciationService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/pronunciation/api/pronunciation-list${query}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
                 },
             });
 
@@ -32,7 +34,14 @@ export const PronunciationService = {
 
     async getPronunciationById(id) {
         try {
-            const res = await fetch(`${API_URL}/api/pronunciation/${id}`);
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/pronunciation/${id}`, {
+                method: "GET",
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

@@ -15,6 +15,7 @@ import FlashCard from "../views/user/FlashCard";
 import FlashCardReview from "../views/user/FlashCardReview";
 import ChatAI from "../views/user/ChatAI";
 import NotFound from "../views/user/NotFound";
+import PrivateRoute from "../components/user/auth/PrivateRoute";
 
 const routes = [
   {
@@ -35,43 +36,83 @@ const routes = [
   },
   {
     path: "/story",
-    element: <Story />,
+    element: (
+      <PrivateRoute>
+        <Story />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/story/:id",
-    element: <StoryDetail />,
+    element: (
+      <PrivateRoute>
+        <StoryDetail />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/grammar",
-    element: <Grammar />,
+    element: (
+      <PrivateRoute>
+        <Grammar />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/grammar/:id",
-    element: <GrammarDetail />,
+    element: (
+      <PrivateRoute>
+        <GrammarDetail />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/pronunciation",
-    element: <Pronunciation />,
+    element: (
+      <PrivateRoute>
+        <Pronunciation />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/pronunciation/:id",
-    element: <PronunciationDetail />,
+    element: (
+      <PrivateRoute>
+        <PronunciationDetail />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/flashcards",
-    element: <FlashCardList />,
+    element: (
+      <PrivateRoute>
+        <FlashCardList />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/flashcards/flashcardlist/:id",
-    element: <FlashCard />,
+    element: (
+      <PrivateRoute>
+        <FlashCard />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/flashcards/flashcardlist/:id/review",
-    element: <FlashCardReview />,
+    element: (
+      <PrivateRoute>
+        <FlashCardReview />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/chat",
-    element: <ChatAI />,
+    element: (
+      <PrivateRoute>
+        <ChatAI />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/login",
