@@ -49,7 +49,7 @@ const FlashCardReview = () => {
         if (window.confirm("Bạn đã nhớ từ này rồi chứ? Hệ thống sẽ tự động xóa từ vựng đã ghi nhớ khỏi danh sách luyện tập !")) {
             const updated = flashcards.filter((_, idx) => idx !== currentIndex);
             setFlashcards(updated);
-            if (updated.length === 0) {
+            if (updated.length == 0) {
                 alert("🎉 Bạn đã hoàn thành luyện tập!");
                 navigate(`/flashcards/flashcardlist/${id}`);
             } else {

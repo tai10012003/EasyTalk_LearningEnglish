@@ -1,33 +1,64 @@
 import React, { useEffect, useState } from "react";
 import PronunciationCard from "../../components/user/pronunciation/PronunciationCard";
+import { useNavigate } from "react-router-dom";
 import { PronunciationService } from "../../services/PronunciationService";
 
 function Pronunciation() {
+    const [allPronunciations, setAllPronunciations] = useState([]);
     const [pronunciations, setPronunciations] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [unlockedPronunciations, setUnlockedPronunciations] = useState([]); 
+    const navigate = useNavigate();
+    const pageLimit = 6;
 
     useEffect(() => {
         PronunciationService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                const allResp = await PronunciationService.fetchPronunciations(1, 10000, {
+                    search: searchKeyword,
+                });
+                const all = allResp.pronunciations || [];
+                setAllPronunciations(all);
                 const data = await PronunciationService.fetchPronunciations(currentPage, 6, {
                     search: searchKeyword,
                 });
                 setPronunciations(data.pronunciations  || []);
                 setTotalPages(data.totalPages);
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await PronunciationService.getPronunciationDetail(all[0]._id);
+                        const userProg = detailResp?.userProgress || null;
+                        setUnlockedPronunciations(
+                            Array.isArray(userProg?.unlockedPronunciations) ? userProg.unlockedPronunciations.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedPronunciations([]);
+                    }
+                } else {
+                    setUnlockedPronunciations([]);
+                }
             } catch (err) {
                 console.error(err);
+                setAllPronunciations([]);
                 setPronunciations([]);
+                setTotalPages(1);
+                setUnlockedPronunciations([]);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         fetchData();
     }, [currentPage, searchKeyword]);
+
+    const isPronunciationLocked = (pronunciationId) => {
+        return !unlockedPronunciations.includes(pronunciationId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -109,7 +140,7 @@ function Pronunciation() {
                             <div className="container">
                                 <div className="row">
                                     {pronunciations.map((pronunciation) => (
-                                        <PronunciationCard key={pronunciation._id} pronunciation={pronunciation} />
+                                        <PronunciationCard key={pronunciation._id} pronunciation={pronunciation} isLocked={isPronunciationLocked(pronunciation._id)} />
                                     ))}
                                 </div>
                             </div>

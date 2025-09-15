@@ -1,6 +1,6 @@
 import React from "react";
 
-function StoryComplete({ quizResults }) {
+function StoryComplete({ quizResults, onComplete }) {
     const totalQuestions = quizResults.reduce((sum, q) => sum + q.total, 0);
     const totalCorrect = quizResults.reduce((sum, q) => sum + q.correct, 0);
     const totalUnanswered = quizResults.reduce((sum, q) => sum + q.unanswered, 0);
@@ -21,6 +21,9 @@ function StoryComplete({ quizResults }) {
                     <p>Tỷ lệ chính xác: {percentage}%</p>
                 </div>
             )}
+            <button className="btn_1 mt-4" onClick={onComplete}>
+                <i className="fas fa-unlock-alt me-2"></i>Mở khóa câu chuyện tiếp theo
+            </button>
         </div>
     );
 }

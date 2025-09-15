@@ -32,8 +32,8 @@ function Menu() {
     '/communicate',
     '/writing',
   ];
-  const isLessonsActive = lessonRoutes.some((p) => location.pathname === p);
-  const isPracticeActive = practiceRoutes.some((p) => location.pathname === p);
+  const isLessonsActive = lessonRoutes.some((p) => location.pathname == p);
+  const isPracticeActive = practiceRoutes.some((p) => location.pathname == p);
   const isMobile = window.innerWidth <= 991;
   const showLessons = isMobile ? dropdownOpen.lessons : (dropdownOpen.lessons || isLessonsActive);
   const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);

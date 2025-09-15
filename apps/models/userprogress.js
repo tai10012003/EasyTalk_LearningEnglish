@@ -3,6 +3,9 @@ class userprogresses {
     user;
     unlockedGates = [];
     unlockedStages = [];
+    unlockedStories = [];
+    unlockedGrammars = [];
+    unlockedPronunciations = [];
     experiencePoints;
     constructor() {
     }

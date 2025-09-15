@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import StoryCard from "../../components/user/story/StoryCard";
 import { StoryService } from "../../services/StoryService";
 
 function Story() {
+    const [allStories, setAllStories] = useState([]);
     const [stories, setStories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -11,27 +13,59 @@ function Story() {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedLevel, setSelectedLevel] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [unlockedStories, setUnlockedStories] = useState([]); 
+    const navigate = useNavigate();
+    const pageLimit = 6;
 
     useEffect(() => {
         StoryService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const data = await StoryService.fetchStories(currentPage, 6, {
+                const allResp = await StoryService.fetchStories(1, 10000, {
+                    category: selectedCategory,
+                    level: selectedLevel,
+                    search: searchKeyword,
+                });
+                const all = allResp.data || [];
+                setAllStories(all);
+                const data = await StoryService.fetchStories(currentPage, pageLimit, {
                     category: selectedCategory,
                     level: selectedLevel,
                     search: searchKeyword,
                 });
                 setStories(data.data || []);
                 setTotalPages(data.totalPages);
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await StoryService.getStoryDetail(all[0]._id);
+                        const userProg = detailResp?.userProgress || null;
+
+                        setUnlockedStories(
+                            Array.isArray(userProg?.unlockedStories) ? userProg.unlockedStories.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedStories([]);
+                    }
+                } else {
+                    setUnlockedStories([]);
+                }
             } catch (err) {
                 console.error(err);
+                setAllStories([]);
                 setStories([]);
+                setTotalPages(1);
+                setUnlockedStories([]);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
-        fetchData();
-    }, [currentPage, selectedCategory, selectedLevel, searchKeyword]);
+    fetchData();
+    }, [currentPage, selectedCategory, selectedLevel, searchKeyword, navigate]);
+
+    const isStoryLocked = (storyId) => {
+        return !unlockedStories.includes(storyId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -96,10 +130,10 @@ function Story() {
                     <button
                         className="search-button"
                         onClick={() => {
-                            setCurrentPage(1);
-                        }}
+                        setCurrentPage(1);
+                    }}
                     >
-                        <i className="fas fa-search me-2"></i>
+                    <i className="fas fa-search me-2"></i>
                     </button>
                 </div>
             </div>
@@ -137,18 +171,18 @@ function Story() {
             </div>
             <div className="container">
                 <div className="lesson-list">
-                {isLoading ? (
+                    {isLoading ? (
                     <div className="spinner-container">
                         <div className="spinner-loader"></div>
                     </div>
-                ) : stories.length > 0 ? (
-                        <div className="container">
-                            <div className="row">
-                                {stories.map((story) => (
-                                    <StoryCard key={story._id} story={story} />
-                                ))}
-                            </div>
+                    ) : stories.length > 0 ? (
+                    <div className="container">
+                        <div className="row">
+                            {stories.map((story) => (
+                                <StoryCard key={story._id} story={story} isLocked={isStoryLocked(story._id)} />
+                            ))}
                         </div>
+                    </div>
                     ) : (
                         <p className="text-center no-stories">Không có câu chuyện nào.</p>
                     )}
@@ -158,7 +192,7 @@ function Story() {
                         {renderPagination()}
                     </ul>
                 </nav>
-            </div>
+            </div>    
         </div>
         {isModalOpen && (
             <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
@@ -167,31 +201,31 @@ function Story() {
                     onClick={(e) => e.stopPropagation()}
                 >
                     <div className="custom-modal-header">
-                    <h5>Hướng Dẫn Đọc Câu Chuyện</h5>
-                    <button className="close-btn" onClick={() => setIsModalOpen(false)}>
-                        &times;
-                    </button>
+                        <h5>Hướng Dẫn Đọc Câu Chuyện</h5>
+                        <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+                            &times;
+                        </button>
                     </div>
                     <div className="custom-modal-body">
-                    <p>Câu chuyện được chia thành nhiều đoạn nhỏ, hiển thị từng đoạn để bạn dễ dàng đọc và hiểu.</p>
-                    <p>
-                        <strong>Các chức năng:</strong>
-                    </p>
-                    <ul>
-                        <li><strong>Tiếp theo:</strong> Nhấn nút <strong>Tiếp theo</strong> để chuyển sang đoạn tiếp theo.</li>
-                        <li><strong>Quay lại:</strong> Nhấn nút <strong>Quay lại</strong> để đọc lại đoạn trước đó.</li>
-                        <li><strong>Dịch nghĩa:</strong> Xem bản dịch tiếng Việt của đoạn hiện tại.</li>
-                        <li><strong>Nghe:</strong> Hệ thống đọc to đoạn hiện tại bằng tiếng Anh.</li>
-                    </ul>
-                    <p><strong>Lưu ý:</strong></p>
-                    <ul>
-                        <li>Đọc kỹ từng đoạn và tận dụng các chức năng.</li>
-                        <li>Sau khi hoàn thành, sẽ hiển thị thông báo "Bạn đã hoàn thành câu chuyện".</li>
-                    </ul>
-                    <p>🎉 Chúc bạn học vui vẻ!</p>
+                        <p>Câu chuyện được chia thành nhiều đoạn nhỏ, hiển thị từng đoạn để bạn dễ dàng đọc và hiểu.</p>
+                        <p>
+                            <strong>Các chức năng:</strong>
+                        </p>
+                        <ul>
+                            <li><strong>Tiếp theo:</strong> Nhấn nút <strong>Tiếp theo</strong> để chuyển sang đoạn tiếp theo.</li>
+                            <li><strong>Quay lại:</strong> Nhấn nút <strong>Quay lại</strong> để đọc lại đoạn trước đó.</li>
+                            <li><strong>Dịch nghĩa:</strong> Xem bản dịch tiếng Việt của đoạn hiện tại.</li>
+                            <li><strong>Nghe:</strong> Hệ thống đọc to đoạn hiện tại bằng tiếng Anh.</li>
+                        </ul>
+                        <p><strong>Lưu ý:</strong></p>
+                        <ul>
+                            <li>Đọc kỹ từng đoạn và tận dụng các chức năng.</li>
+                            <li>Sau khi hoàn thành, sẽ hiển thị thông báo "Bạn đã hoàn thành câu chuyện".</li>
+                        </ul>
+                        <p>🎉 Chúc bạn học vui vẻ!</p>
                     </div>
                     <div className="custom-modal-footer">
-                    <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                        <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
                     </div>
                 </div>
             </div>

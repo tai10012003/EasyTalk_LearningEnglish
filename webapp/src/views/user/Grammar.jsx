@@ -1,33 +1,64 @@
 import React, { useEffect, useState } from "react";
 import GrammarCard from "../../components/user/grammar/GrammarCard";
+import { useNavigate } from "react-router-dom";
 import { GrammarService } from "../../services/GrammarService";
 
 function Grammar() {
+    const [allGrammars, setAllGrammars] = useState([]);
     const [grammars, setGrammars] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [unlockedGrammars, setUnlockedGrammars] = useState([]); 
+    const navigate = useNavigate();
+    const pageLimit = 6;
 
     useEffect(() => {
         GrammarService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const data = await GrammarService.fetchGrammars(currentPage, 6, {
+                const allResp = await GrammarService.fetchGrammars(1, 10000, {
+                    search: searchKeyword,
+                });
+                const all = allResp.grammars || [];
+                setAllGrammars(all);
+                const data = await GrammarService.fetchGrammars(currentPage, pageLimit, {
                     search: searchKeyword,
                 });
                 setGrammars(data.grammars  || []);
                 setTotalPages(data.totalPages);
-            } catch (err) {
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await GrammarService.getGrammarDetail(all[0]._id);
+                        const userProg = detailResp?.userProgress || null;
+                        setUnlockedGrammars(
+                            Array.isArray(userProg?.unlockedGrammars) ? userProg.unlockedGrammars.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedGrammars([]);
+                    }
+                } else {
+                    setUnlockedGrammars([]);
+                }
+             } catch (err) {
                 console.error(err);
+                setAllGrammars([]);
                 setGrammars([]);
+                setTotalPages(1);
+                setUnlockedGrammars([]);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         fetchData();
     }, [currentPage, searchKeyword]);
+
+    const isGrammarLocked = (grammarId) => {
+        return !unlockedGrammars.includes(grammarId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -109,7 +140,7 @@ function Grammar() {
                             <div className="container">
                                 <div className="row">
                                     {grammars.map((grammar) => (
-                                        <GrammarCard key={grammar._id} grammar={grammar} />
+                                        <GrammarCard key={grammar._id} grammar={grammar} isLocked={isGrammarLocked(grammar._id)} />
                                     ))}
                                 </div>
                             </div>

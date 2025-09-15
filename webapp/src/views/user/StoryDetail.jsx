@@ -134,7 +134,21 @@ function StoryDetail() {
                     {item.type == "sentence" && <StorySentence sentence={item.data} onNext={() => handleNext(idx)} />}
                     {item.type == "quiz" && <StoryQuiz quiz={item.data} onNext={(result) => handleNext(idx, result)} />}
                     {item.type == "vocabQuiz" && <StoryVocabularyQuiz vocabulary={item.data} onNext={(result) => handleNext(idx, result)} />}
-                    {item.type == "complete" && <StoryComplete quizResults={quizResults} />}
+                    {item.type == "complete" && (
+                        <StoryComplete 
+                            quizResults={quizResults} 
+                            onComplete={async () => {
+                                try {
+                                    await StoryService.completeStory(story._id);
+                                    window.alert("Chúc mừng! Bạn đã hoàn thành câu chuyện. Câu chuyện tiếp theo đã được mở khóa.");
+                                    window.location.href = "/story";
+                                } catch (err) {
+                                    console.error("Error completing story:", err);
+                                    window.alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                                }
+                            }} 
+                        />
+                    )}
                 </div>
             ))}
         </div>

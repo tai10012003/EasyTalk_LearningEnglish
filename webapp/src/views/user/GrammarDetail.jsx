@@ -17,10 +17,10 @@ function GrammarDetail() {
 
     useEffect(() => {
         GrammarService.getGrammarById(id).then((res) => {
-            if (res && res.content) {
-                setGrammar(res);
+            if (res && res.grammar && res.grammar.content) {
+                setGrammar(res.grammar);
                 setTimeout(() => {
-                    setDisplayContent(res.content);
+                    setDisplayContent(res.grammar.content);
                     setTimeout(() => {
                         if (contentRef.current) {
                             contentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -71,7 +71,20 @@ function GrammarDetail() {
                     />
                 </div>
             )}
-            {isComplete && <GrammarComplete />}
+            {isComplete && (
+                <GrammarComplete 
+                    onComplete={async () => {
+                        try {
+                            await GrammarService.completeGrammar(grammar._id);
+                            window.alert("Chúc mừng! Bạn đã hoàn thành bài ngữ pháp. Bài tiếp theo đã được mở khóa.");
+                            window.location.href = "/grammar";
+                        } catch (err) {
+                            console.error("Error completing grammar:", err);
+                            window.alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                        }
+                    }} 
+                />
+            )}
         </div>
     );
 }

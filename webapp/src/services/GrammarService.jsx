@@ -53,5 +53,52 @@ export const GrammarService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async getGrammarDetail(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/grammar/${id}`, {
+                method: "GET",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token || ""}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async completeGrammar(grammarId) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/grammar/complete/${grammarId}`, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token || ""}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
     }
 };

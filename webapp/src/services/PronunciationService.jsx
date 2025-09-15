@@ -53,5 +53,52 @@ export const PronunciationService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async getPronunciationDetail(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/pronunciation/${id}`, {
+                method: "GET",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token || ""}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async completePronunciation(pronunciationId) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/pronunciation/complete/${pronunciationId}`, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token || ""}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
     }
 };

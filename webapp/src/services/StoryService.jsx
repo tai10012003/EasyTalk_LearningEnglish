@@ -2,7 +2,7 @@ const API_URL = "http://localhost:3000";
 
 let hasShownAlert = false;
 export const StoryService = {
-    async fetchStories(page = 1, limit = 6, filters = {}) {
+  async fetchStories(page = 1, limit = 6, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;
@@ -59,5 +59,52 @@ export const StoryService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async getStoryDetail(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/story/${id}`, {
+                method: "GET",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token || ""}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async completeStory(storyId) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/api/story/complete/${storyId}`, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token || ""}`,
+                },
+            });
+
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
     }
 };

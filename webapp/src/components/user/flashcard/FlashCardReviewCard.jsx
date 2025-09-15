@@ -36,7 +36,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
             alert("Vui lòng nhập từ trước khi kiểm tra!");
             return;
         }
-        if (answer.toLowerCase() === card.word.toLowerCase()) {
+        if (answer.toLowerCase() == card.word.toLowerCase()) {
             setStatus("correct");
         } else {
             setStatus("wrong");
@@ -137,7 +137,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
         );
     }
 
-    if (mode === "fill") {
+    if (mode == "fill") {
         return (
             <div className="flashcard-review-fill">
                 <p>

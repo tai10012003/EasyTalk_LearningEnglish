@@ -17,10 +17,10 @@ function PronunciationDetail() {
 
     useEffect(() => {
         PronunciationService.getPronunciationById(id).then((res) => {
-            if (res && res.content) {
-                setPronunciation(res);
+            if (res && res.pronunciation && res.pronunciation.content) {
+                setPronunciation(res.pronunciation);
                 setTimeout(() => {
-                    setDisplayContent(res.content);
+                    setDisplayContent(res.pronunciation.content);
                     setTimeout(() => {
                         if (contentRef.current) {
                             contentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
@@ -71,7 +71,20 @@ function PronunciationDetail() {
                     />
                 </div>
             )}
-            {isComplete && <PronunciationComplete />}
+            {isComplete && (
+                <PronunciationComplete 
+                    onComplete={async () => {
+                        try {
+                            await PronunciationService.completePronunciation(pronunciation._id);
+                            window.alert("Chúc mừng! Bạn đã hoàn thành bài phát âm. Bài tiếp theo đã được mở khóa.");
+                            window.location.href = "/pronunciation";
+                        } catch (err) {
+                            console.error("Error completing pronunciation:", err);
+                            window.alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                        }
+                    }} 
+                />
+            )}
         </div>
     );
 }
