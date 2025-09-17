@@ -26,15 +26,7 @@ router.get("/api/dictation-exercises", async (req, res) => {
     }
 });
 
-router.get("/", (req, res) => {
-    res.render("dictationexercises/dictationexercise-list");
-});
-
-router.get("/detail/:id", (req, res) => {
-    res.render("dictationexercises/dictationexercise-detail");
-});
-
-router.get("/api/:id", async (req, res) => {
+router.get("/api/dictationexercise/:id", async (req, res) => {
     try {
         const dictationExercise = await dictationExerciseService.getDictation(req.params.id);
 

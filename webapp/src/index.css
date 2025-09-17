@@ -190,6 +190,64 @@ p {
    HEADER / NAVIGATION STYLES
    =============================================== */
 
+.top-bar {
+  background-color: #483981;
+  border-bottom: 1px solid #222;
+  padding: 10px 0;
+  font-size: 14px;
+  color: #fff;
+}
+
+.top-bar .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+
+.top-bar-center {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  margin: 0 20px;
+}
+
+.marquee {
+  display: inline-block;
+  white-space: nowrap;
+  animation: marquee 15s linear infinite;
+  color: #fff;
+  font-weight: 600;
+  font-size: 15px;
+}
+
+@keyframes marquee {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.top-bar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.top-bar-right .xp,
+.top-bar-right .streak {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  color: #fff;
+}
+
+.top-bar-right strong {
+  margin-left: 4px;
+  color: #f1c40f;
+}
+
 .main_menu {
   display: flex;
   align-items: center;
@@ -2262,6 +2320,192 @@ p {
 }
 
 /* ===============================================
+   DICTATION EXERCISE STYLES
+   =============================================== */
+
+.dictation-container {
+  position: relative;
+  padding: 40px 0;
+  width: 50%;
+}
+
+.dictation-learning {
+  padding: 30px;
+  background-color: #ffffff;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.15);
+}
+
+.dictation-container h2 {
+  text-align: center;
+  color: #2c3e50;
+  margin-bottom: 25px;
+  font-size: 26px;
+  font-weight: bold;
+}
+
+.dictation-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%;
+}
+
+.dictation-controls button {
+  padding: 10px 16px;
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dictation-controls button:hover {
+  background-color: #2980b9;
+}
+
+#dictation-checkButton {
+  background-color: #8e44ad;
+}
+#dictation-checkButton:hover {
+  background-color: #6c3483;
+}
+
+#dictation-skipButton {
+  background-color: #e67e22;
+}
+#dictation-skipButton:hover {
+  background-color: #d35400;
+}
+
+#dictation-nextButton {
+  background-color: #27ae60;
+}
+#dictation-nextButton:hover {
+  background-color: #1e8449;
+}
+
+.dictation-speed-label {
+  font-weight: bold;
+  font-size: 17px;
+  margin: 0 10px;
+}
+
+#dictation-speedControl {
+  vertical-align: middle;
+  margin: 0 8px;
+}
+
+#dictation-speedDisplay {
+  font-weight: bold;
+  margin-left: 5px;
+  color: #2c3e50;
+}
+
+.dictation-textarea {
+  width: 100%;
+  min-height: 80px;
+  resize: vertical;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+}
+
+#dictation-result {
+  min-height: 28px;
+  font-size: 15px;
+  color: green;
+  font-weight: bold;
+}
+
+#dictation-currentSentenceDisplay {
+  font-style: italic;
+  color: #34495e;
+}
+
+.full-script-container {
+  margin-top: 40px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  padding: 20px;
+  border: 1px solid transparent;
+}
+
+.full-script-container h3 {
+  text-align: center;
+  color: #2c3e50;
+  margin: 15px 0 25px 0;
+  font-size: 22px;
+  font-weight: bold;
+}
+
+#playFullScriptButton {
+  padding: 8px 14px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  margin-right: 10px;
+  transition: background-color 0.2s ease-in-out;
+}
+#playFullScriptButton:hover {
+  background-color: #2980b9;
+}
+
+#fullScriptSpeedControl {
+  vertical-align: middle;
+  margin: 0 8px;
+}
+#fullScriptSpeedDisplay {
+  font-weight: bold;
+  margin-left: 5px;
+  color: #2c3e50;
+}
+
+#toggleScriptButton {
+  margin-top: 30px;
+  padding: 10px 16px;
+  background-color: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background-color 0.2s ease-in-out;
+}
+#toggleScriptButton:hover {
+  background-color: #1e8449;
+}
+
+#fullScriptText {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  line-height: 1.8;
+  color: #2c3e50;
+  font-size: 15px;
+  white-space: pre-line;
+}
+
+.dictation-complete-card {
+  background: linear-gradient(135deg, #ddf89e, #b7fac0);
+  border-radius: 16px;
+  box-shadow: 0 8px 10px rgba(0, 0, 0, 0.15);
+  color: #333;
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+/* ===============================================
    CHAT AI STYLES
    =============================================== */
 
@@ -3474,6 +3718,55 @@ p {
   .lesson-quiz-container {
     width: 100%;
   }
+  .dictation-container {
+    width: 100%;
+  }
+
+  .dictation-learning {
+    padding: 25px;
+  }
+
+  .dictation-container h2 {
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+
+  .dictation-controls button {
+    font-size: 14px;
+    padding: 8px 14px;
+  }
+
+  .dictation-textarea {
+    min-height: 70px;
+    font-size: 14px;
+  }
+
+  .full-script-container h3 {
+    font-size: 20px;
+  }
+
+  #fullScriptText {
+    font-size: 14px;
+    padding: 15px;
+  }
+  .dictation-complete-card {
+    padding: 40px 30px;
+    font-size: 16px;
+  }
+
+  .dictation-complete-card h4 {
+      font-size: 22px;
+  }
+
+  .dictation-complete-card p {
+      font-size: 15px;
+  }
+
+  .dictation-complete-card button {
+      font-size: 15px;
+      padding: 8px 14px;
+      margin-right: 10px;
+  }
 }
 
 /* Existing 992px breakpoint with updates */
@@ -3681,6 +3974,26 @@ p {
   .py-8 { padding: 1.5rem 0; }
   .p-4 { padding: 1rem; }
   .p-5 { padding: 1.5rem; }
+
+  .top-bar .container {
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .top-bar-center {
+    order: -1;
+    width: 100%;
+  }
+
+  .marquee {
+    font-size: 14px;
+    animation-duration: 18s;
+  }
+
+  .top-bar-right {
+    gap: 20px;
+  }
 
   .navbar {
     display: flex;
@@ -3893,12 +4206,110 @@ p {
   .lesson-quiz-container {
     width: 100%;
   }
+
+  .dictation-container {
+    width: 100%;
+    margin: 20px 0;
+  }
+
+  .dictation-learning {
+    padding: 20px;
+  }
+
+  .dictation-container h2 {
+    font-size: 22px;
+    margin-bottom: 15px;
+  }
+
+  .dictation-controls {
+    gap: 10px;
+  }
+
+  .dictation-controls button {
+    font-size: 13px;
+    padding: 7px 12px;
+  }
+
+  .dictation-textarea {
+    margin: 15px 0;
+    min-height: 60px;
+    font-size: 13px;
+  }
+
+  .dictation-speed-label {
+    font-size: 15px;
+  }
+
+  #dictation-currentSentenceDisplay {
+    font-size: 14px;
+  }
+
+  .full-script-container {
+    padding: 15px;
+  }
+
+  .full-script-container h3 {
+    font-size: 18px;
+  }
+
+  #fullScriptText {
+    margin: 15px 0;
+    font-size: 13px;
+    padding: 12px;
+  }
+
+  #toggleScriptButton,
+  #playFullScriptButton {
+    margin: 15px 0;
+    font-size: 14px;
+    padding: 7px 12px;
+  }
+
+  .dictation-complete-card {
+    padding: 30px 20px;
+    font-size: 15px;
+  }
+
+  .dictation-complete-card h4 {
+    font-size: 20px;
+  }
+
+  .dictation-complete-card p {
+    font-size: 14px;
+  }
+
+  .dictation-complete-card button {
+    font-size: 13px;
+    display: block;
+    width: 100%;
+    margin: 10px 0 0 0;
+    padding: 10px 0;
+  }
+  #fullScriptSpeedDisplay {
+    font-weight: bold;
+    margin-left: 0;
+    color: #2c3e50;
+  }
 }
 
 @media (max-width: 576px) {
   .container {
     max-width: 540px;
     padding: 0 15px;
+  }
+  
+  .top-bar {
+    font-size: 13px;
+    padding: 6px 0;
+  }
+
+  .marquee {
+    font-size: 13px;
+    animation-duration: 20s;
+  }
+
+  .top-bar-right {
+    gap: 20px;
   }
 
   .col-sm-6 { flex: 0 0 100%; max-width: 100%; }

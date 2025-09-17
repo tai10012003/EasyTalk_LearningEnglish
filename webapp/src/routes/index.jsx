@@ -13,6 +13,11 @@ import PronunciationDetail from "../views/user/PronunciationDetail";
 import FlashCardList from "../views/user/FlashcardList";
 import FlashCard from "../views/user/FlashCard";
 import FlashCardReview from "../views/user/FlashCardReview";
+import GrammarExercise from "../views/user/GrammarExercise";
+import VocabularyExercise from "../views/user/VocabularyExercise";
+import PronunciationExercise from "../views/user/PronunciationExercise";
+import DictationExercise from "../views/user/DictationExercise";
+import DictationExerciseDetail from "../views/user/DictationExerciseDetail";
 import ChatAI from "../views/user/ChatAI";
 import NotFound from "../views/user/NotFound";
 import PrivateRoute from "../components/user/auth/PrivateRoute";
@@ -104,6 +109,36 @@ const routes = [
       <PrivateRoute>
         <FlashCardReview />
       </PrivateRoute>
+    ),
+  },
+  {
+    path: "/grammar-exercise",
+    element: (
+      <GrammarExercise />
+    ),
+  },
+  {
+    path: "/vocabulary-exercise",
+    element: (
+      <VocabularyExercise />
+    ),
+  },
+  {
+    path: "/pronunciation-exercise",
+    element: (
+      <PronunciationExercise />
+    ),
+  },
+  {
+    path: "/dictation-exercise",
+    element: (
+      <DictationExercise />
+    ),
+  },
+  {
+    path: "/dictation-exercise/:id",
+    element: (
+      <DictationExerciseDetail />
     ),
   },
   {
