@@ -239,26 +239,26 @@ function Menu() {
                         >
                           <i className="fas fa-headphones me-2"></i>NGHE CHÉP CHÍNH TẢ
                         </NavLink>
-                        <NavLink
+                        {/* <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/dictionary"
                           onClick={handleLinkClick}
                         >
                           <i className="fas fa-bookmark me-2"></i>TRA CỨU TỪ ĐIỂN
-                        </NavLink>
+                        </NavLink> */}
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/chat"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-comments me-2"></i>TRÒ CHUYỆN VỚI AI
+                          <i className="fas fa-comments me-2"></i>GIAO TIẾP VỚI AI
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
-                          to="/communicate"
+                          to="/reading"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-user-group me-2"></i>GIAO TIẾP VỚI AI
+                          <i className="fas fas fa-book me-2"></i>LUYỆN ĐỌC
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}

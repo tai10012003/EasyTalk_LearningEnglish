@@ -14,8 +14,11 @@ import FlashCardList from "../views/user/FlashcardList";
 import FlashCard from "../views/user/FlashCard";
 import FlashCardReview from "../views/user/FlashCardReview";
 import GrammarExercise from "../views/user/GrammarExercise";
+import GrammarExerciseDetail from "../views/user/GrammarExerciseDetail";
 import VocabularyExercise from "../views/user/VocabularyExercise";
+import VocabularyExerciseDetail from "../views/user/VocabularyExerciseDetail";
 import PronunciationExercise from "../views/user/PronunciationExercise";
+import PronunciationExerciseDetail from "../views/user/PronunciationExerciseDetail";
 import DictationExercise from "../views/user/DictationExercise";
 import DictationExerciseDetail from "../views/user/DictationExerciseDetail";
 import ChatAI from "../views/user/ChatAI";
@@ -118,15 +121,33 @@ const routes = [
     ),
   },
   {
+    path: "/grammar-exercise/:id",
+    element: (
+      <GrammarExerciseDetail />
+    ),
+  },
+  {
     path: "/vocabulary-exercise",
     element: (
       <VocabularyExercise />
     ),
   },
   {
+    path: "/vocabulary-exercise/:id",
+    element: (
+      <VocabularyExerciseDetail />
+    ),
+  },
+  {
     path: "/pronunciation-exercise",
     element: (
       <PronunciationExercise />
+    ),
+  },
+  {
+    path: "/pronunciation-exercise/:id",
+    element: (
+      <PronunciationExerciseDetail />
     ),
   },
   {

@@ -32,7 +32,7 @@ export const GrammarExerciseService = {
 
     async getGrammarExerciseById(id) {
         try {
-            const res = await fetch(`${API_URL}/grammar-exercise/api/grammar-exercises/${id}`);
+            const res = await fetch(`${API_URL}/api/grammar-exercises/${id}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

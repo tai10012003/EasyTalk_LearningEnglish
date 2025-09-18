@@ -253,7 +253,7 @@
             const exerciseId = window.location.pathname.split('/').pop();
 
             $.ajax({
-                url: `/grammar-exercise/api/${exerciseId}`,
+                url: `/grammar-exercise/api/grammar-exercises/${exerciseId}`,
                 method: 'GET',
                 success: function(data) {
                     if (data && data.questions && data.questions.length > 0) {

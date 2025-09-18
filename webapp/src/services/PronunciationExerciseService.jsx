@@ -42,6 +42,25 @@ export const PronunciationExerciseService = {
         }
     },
 
+    async analyzePronunciation(exerciseId, questionIndex, audioBlob) {
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+
+            const res = await fetch(`${API_URL}/analyze/${exerciseId}/${questionIndex}`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            console.error("Error analyzing audio:", err);
+            return { success: false, message: "Lỗi khi phân tích giọng nói." };
+        }
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     }

@@ -32,7 +32,7 @@ router.get('/detail/:id', (req, res) => {
     res.render('grammarexercises/grammarexercise-detail');
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/grammar-exercises/:id", async function (req, res) {
     try {
         const exercise = await grammarExerciseService.getGrammarexerciseById(req.params.id);
 

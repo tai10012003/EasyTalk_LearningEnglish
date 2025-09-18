@@ -43,7 +43,7 @@ router.get('/detail/:id', (req, res) => {
     res.render('pronunciationexercises/pronunciationexercise-detail');
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/pronunciation-exercises/:id", async function (req, res) {
     try {
         const exercise = await pronunciationExerciseService.getPronunciationexerciseById(req.params.id);
 

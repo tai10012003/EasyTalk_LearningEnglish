@@ -3,15 +3,6 @@ const router = express.Router();
 const VocabularyExerciseService = require("./../services/vocabularyexerciseService");
 const vocabularyExerciseService = new VocabularyExerciseService();
 
-router.get("/", async (req, res) => {
-    try {
-        const { vocabularyExercises } = await vocabularyExerciseService.getVocabularyExerciseList();
-        res.render("vocabularyexercises/vocabularyexercise-list", { exercises: vocabularyExercises });
-    } catch (err) {
-        res.status(500).send("Error retrieving vocabulary exercises: " + err.message);
-    }
-});
-
 router.get("/api/vocabulary-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -30,11 +21,7 @@ router.get("/api/vocabulary-exercises", async (req, res) => {
     }
 });
 
-router.get('/detail/:id', (req, res) => {
-    res.render('vocabularyexercises/vocabularyexercise-detail');
-});
-
-router.get("/api/:id", async function (req, res) {
+router.get("/api/vocabulary-exercises/:id", async function (req, res) {
     try {
         const exercise = await vocabularyExerciseService.getVocabularyExerciseById(req.params.id);
 
