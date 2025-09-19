@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 
-const GrammarExerciseCarousel = ({
+const StageCarousel = ({
     questions,
     currentQuestionIndex,
     onAnswerSubmit,
     onQuestionNavigation,
     onSpeakText,
     questionResults,
-    isCompleted
+    isCompleted,
+    onSubmitStage
 }) => {
     const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
     const [userAnswers, setUserAnswers] = useState({});
-
     const currentQuestion = questions[currentQuestionIndex];
 
     const handleAnswerChange = useCallback((value) => {
@@ -23,7 +23,6 @@ const GrammarExerciseCarousel = ({
 
     const handleSubmitAnswer = useCallback(() => {
         const userAnswer = userAnswers[currentQuestionIndex];
-        
         if (!userAnswer || userAnswer.trim() == '') {
             alert("Vui lòng nhập câu trả lời.");
             return;
@@ -43,19 +42,12 @@ const GrammarExerciseCarousel = ({
         }
     }, [currentQuestionIndex, questions.length, onQuestionNavigation]);
 
-    const handlePrevQuestion = useCallback(() => {
-        if (currentQuestionIndex > 0) {
-            onQuestionNavigation(currentQuestionIndex - 1);
-        }
-    }, [currentQuestionIndex, onQuestionNavigation]);
-
     const isQuestionAnswered = answeredQuestions.has(currentQuestionIndex);
     const questionResult = questionResults[currentQuestionIndex];
 
-    const renderMultipleChoice = () => {
-        return (
-            <div className="exercise-question-form">
-                {currentQuestion.options
+    const renderMultipleChoice = () => (
+        <div className="exercise-question-form">
+            {currentQuestion.options
                 .filter(option => option.trim() !== "")
                 .map((option, optIndex) => (
                     <div key={optIndex} className="exercise-form-check">
@@ -86,31 +78,28 @@ const GrammarExerciseCarousel = ({
                         </label>
                     </div>
                 ))}
-            </div>
-        );
-    };
+        </div>
+    );
 
-    const renderTextInput = () => {
-        return (
-            <div className="exercise-question-form">
-                <textarea
-                    className={`form-control exercise-question-input ${
-                        isQuestionAnswered
-                            ? questionResult.isCorrect
-                                ? 'exercise-correct-answer'
-                                : 'exercise-incorrect-answer'
-                            : ''
-                    }`}
-                    name="exercise-answer"
-                    rows="4"
-                    placeholder="Nhập câu trả lời của bạn"
-                    value={userAnswers[currentQuestionIndex] || ''}
-                    onChange={(e) => handleAnswerChange(e.target.value)}
-                    disabled={isQuestionAnswered}
-                />
-            </div>
-        );
-    };
+    const renderTextInput = () => (
+        <div className="exercise-question-form">
+            <textarea
+                className={`form-control exercise-question-input ${
+                    isQuestionAnswered
+                        ? questionResult.isCorrect
+                            ? 'exercise-correct-answer'
+                            : 'exercise-incorrect-answer'
+                        : ''
+                }`}
+                name="exercise-answer"
+                rows="4"
+                placeholder="Nhập câu trả lời của bạn"
+                value={userAnswers[currentQuestionIndex] || ''}
+                onChange={(e) => handleAnswerChange(e.target.value)}
+                disabled={isQuestionAnswered}
+            />
+        </div>
+    );
 
     const getQuestionTitle = () => {
         switch (currentQuestion.type) {
@@ -129,7 +118,6 @@ const GrammarExerciseCarousel = ({
         <div className="exercise-carousel-container">
             <div className="exercise-question-card">
                 <h4 className="exercise-question-title">{getQuestionTitle()}</h4>
-                
                 <h5 className="exercise-question-text" id={`exercise-ques-${currentQuestionIndex}`}>
                     <button
                         className="exercise-speak-button btn-sm btn-outline mr-2"
@@ -143,7 +131,7 @@ const GrammarExerciseCarousel = ({
 
                 <form id={`exercise-question-form-${currentQuestionIndex}`} className="exercise-question-form-container mt-4">
                     {currentQuestion.type == 'multiple-choice' ? renderMultipleChoice() : renderTextInput()}
-                    
+
                     {isQuestionAnswered && (
                         <div className="exercise-explanation mt-4">
                             {questionResult.isCorrect ? (
@@ -159,7 +147,7 @@ const GrammarExerciseCarousel = ({
                             )}
                         </div>
                     )}
-                    
+
                     {!isQuestionAnswered && !isCompleted && (
                         <button
                             type="button"
@@ -170,31 +158,30 @@ const GrammarExerciseCarousel = ({
                         </button>
                     )}
                 </form>
-
-                <hr />
-
-                <div className="d-flex justify-content-between mt-3">
-                    <button
-                        className="btn_2"
-                        style={{ marginRight: '20px', marginTop: '20px' }}
-                        type="button"
-                        onClick={handlePrevQuestion}
-                        disabled={currentQuestionIndex == 0}
-                    >
-                        Quay lại
-                    </button>
-                    <button
-                        className="btn_2"
-                        type="button"
-                        onClick={handleNextQuestion}
-                        disabled={currentQuestionIndex == questions.length - 1}
-                    >
-                        Tiếp theo
-                    </button>
-                </div>
+                {isQuestionAnswered && !isCompleted && (
+                    <div className="d-flex justify-content-end mt-3">
+                        {currentQuestionIndex == questions.length - 1 ? (
+                            <button
+                                className="btn_2"
+                                type="button"
+                                onClick={onSubmitStage}
+                            >
+                                Hoàn thành
+                            </button>
+                        ) : (
+                            <button
+                                className="btn_2"
+                                type="button"
+                                onClick={handleNextQuestion}
+                            >
+                                Tiếp tục
+                            </button>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
     );
 };
 
-export default GrammarExerciseCarousel;
+export default StageCarousel;

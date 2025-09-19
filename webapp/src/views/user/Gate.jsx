@@ -1,36 +1,52 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import AchievementPanel from "../../components/user/AchievementPanel";
 import GateCard from "../../components/user/gate/GateCard";
 import LeaderboardPanel from "../../components/user/LeaderboardPanel";
+import { GateService } from "../../services/GateService";
 
 const Gate = () => {
-    const gateData = {
-        id: "gate1",
-        title: "Cổng 1: Khởi động",
-            stages: [
-            { id: "stage1", title: "Chặng 1: Làm quen", unlocked: true },
-            { id: "stage2", title: "Chặng 2: Cơ bản", unlocked: false },
-            { id: "stage3", title: "Chặng 3: Giao tiếp", unlocked: false },
-            ],
+    const [gates, setGates] = useState([]);
+    const [achievements, setAchievements] = useState({});
+    const [leaderboard, setLeaderboard] = useState([]);
+    const [dailyTasks, setDailyTasks] = useState([]);
+
+    useEffect(() => {
+        const fetchJourneyData = async () => {
+            try {
+                const journeyId = window.location.pathname.split("/").pop();
+                const data = await GateService.getGate(journeyId);
+                if (!data || !data.journey) {
+                    console.error("Không tìm thấy journey với id", journeyId);
+                    return;
+                }
+                const formattedGates = data.journey.gates.map((gate) => ({
+                    ...gate,
+                    unlocked: data.userProgress.unlockedGates.includes(gate._id),
+                    stages: gate.stages.map((stage) => ({
+                        id: stage._id,
+                        title: stage.title,
+                        unlocked: data.userProgress.unlockedStages.includes(stage._id),
+                    })),
+                }));
+
+                setGates(formattedGates);
+                setAchievements({
+                experiencePoints: data.userProgress.experiencePoints,
+                completedGates: data.completedGates,
+                completedStages: data.completedStages,
+                });
+                setLeaderboard(data.leaderboard);
+                setDailyTasks([
+                    "Hoàn thành 1 chặng",
+                    "Học từ vựng mới: 5 từ",
+                    "Thực hành 10 phút giao tiếp",
+                ]);
+            } catch (error) {
+                console.error("Lỗi khi fetch journey data:", error);
+            }
         };
-
-        const dailyTasks = [
-            "Hoàn thành 1 chặng",
-            "Học từ vựng mới: 5 từ",
-            "Thực hành 10 phút giao tiếp",
-        ];
-
-        const achievements = {
-            experiencePoints: 250,
-            completedGates: 5,
-            completedStages: 2,
-        };
-
-        const leaderboard = [
-            { username: "Alice", experiencePoints: 1200 },
-            { username: "Bob", experiencePoints: 950 },
-            { username: "Charlie", experiencePoints: 800 },
-        ];
+        fetchJourneyData();
+    }, []);
 
     return (
         <div className="your_journey">
@@ -43,8 +59,11 @@ const Gate = () => {
                         <div className="section_tittle">
                             <h4 className="journey-title">HÀNH TRÌNH: CƠ BẢN</h4>
                         </div>
-                        <GateCard gate={gateData} />
+                        {gates.map((gate) => (
+                            <GateCard key={gate._id} gate={gate} />
+                        ))}
                     </div>
+
                     <div className="col-sm-6 col-lg-3 col-xl-3">
                         <LeaderboardPanel leaderboard={leaderboard} />
                     </div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 function DictationControls({
     playSentence,
@@ -13,6 +13,23 @@ function DictationControls({
     currentSentenceDisplay,
     showNext,
 }) {
+    useEffect(() => {
+        const handleKeyDown = (e) => {
+            if (e.ctrlKey && e.key == "Control") {
+                e.preventDefault();
+                playSentence();
+            }
+        };
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [playSentence]);
+
+    const handleKeyDownInTextarea = (e) => {
+        if (e.key == "Enter") {
+            e.preventDefault();
+            checkDictation();
+        }
+    };
     return (
         <div className="dictation-controls">
             <div>
@@ -42,6 +59,7 @@ function DictationControls({
                 className="dictation-textarea"
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
+                onKeyDown={handleKeyDownInTextarea}
                 placeholder="Nhập lại nội dung bạn nghe được..."
                 rows="3"
             />

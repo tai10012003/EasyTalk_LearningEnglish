@@ -212,7 +212,7 @@ const VocabularyExerciseDetail = () => {
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
                                 onRestart={handleRestart}
-                                onExit={() => window.location.href = '/grammar-exercise'}
+                                onExit={() => window.location.href = '/vocabulary-exercise'}
                             />
                         ) : (
                             <VocabularyExerciseCarousel

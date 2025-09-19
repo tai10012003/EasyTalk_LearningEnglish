@@ -79,7 +79,7 @@ router.get('/detail/:id', (req, res) => {
     res.render('gates/gate-list');
 });
 
-router.get("/api/:id", verifyToken, async (req, res) => {
+router.get("/api/gate/:id", verifyToken, async (req, res) => {
     try {
         const journeyId = req.params.id;
         const userId = req.user.id;

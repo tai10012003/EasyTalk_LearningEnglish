@@ -4,7 +4,7 @@ import StageCard from "../stage/StageCard";
 const GateCard = ({ gate }) => {
   return (
     <section className="gate-card-wrapper">
-      <div className="gate-card unlocked">
+      <div className={`gate-card ${gate.unlocked ? "unlocked" : "locked"}`}>
         <h5 className="gate-title text-center">{gate.title}</h5>
         <p className="card-text text-center">
           Số lượng chặng: {gate.stages.length}

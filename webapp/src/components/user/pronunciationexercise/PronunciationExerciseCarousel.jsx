@@ -14,10 +14,14 @@ function buildDetailedAnalysis(correctSentence, transcription) {
         .split(/\s+/)
         .filter(Boolean);
 
-    return correctWords.map((word, idx) => ({
-        text: word,
-        isCorrect: spokenWords[idx] == word || spokenWords.includes(word)
-    }));
+    return correctWords.map((word, idx) => {
+        const spokenWord = spokenWords[idx] || null;
+        return {
+            correct: word,
+            spoken: spokenWord,
+            isCorrect: spokenWord == word
+        };
+    });
 }
 
 const PronunciationExerciseCarousel = ({
@@ -34,9 +38,10 @@ const PronunciationExerciseCarousel = ({
     const [analysisResults, setAnalysisResults] = useState({});
     const [mediaRecorders, setMediaRecorders] = useState({});
     const exerciseId = window.location.pathname.split('/').pop();
-
     const currentQuestion = questions[currentQuestionIndex];
     const isQuestionAnswered = questionResults[currentQuestionIndex]?.userAnswer !== "Chưa trả lời";
+    const [micError, setMicError] = useState(null);
+    const [pronunciationAttempts, setPronunciationAttempts] = useState({});
 
     const getQuestionTitle = () => {
         switch (currentQuestion.type) {
@@ -73,7 +78,11 @@ const PronunciationExerciseCarousel = ({
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 const audioURL = URL.createObjectURL(audioBlob);
                 setAudioSrc(prev => ({ ...prev, [questionIndex]: audioURL }));
-                const response = await PronunciationExerciseService.analyzePronunciation(exerciseId, questionIndex, audioBlob);
+                const response = await PronunciationExerciseService.analyzePronunciation(
+                    exerciseId,
+                    questionIndex,
+                    audioBlob
+                );
 
                 if (response?.success) {
                     response.detailedAnalysisWords = buildDetailedAnalysis(
@@ -82,14 +91,32 @@ const PronunciationExerciseCarousel = ({
                     );
                 }
                 setAnalysisResults(prev => ({ ...prev, [questionIndex]: response }));
+                setPronunciationAttempts(prev => ({
+                    ...prev,
+                    [questionIndex]: (prev[questionIndex] || 0) + 1
+                }));
+                const accuracy = Number(response?.accuracy || 0);
+                const isCorrect = accuracy >= 50;
+                onAnswerSubmit(
+                    questionIndex,
+                    response?.transcription || "Không rõ",
+                    isCorrect,
+                    accuracy
+                );
             };
-
+            setMicError(null);
             mediaRecorder.start();
             setMediaRecorders(prev => ({ ...prev, [questionIndex]: mediaRecorder }));
             setRecordingState(prev => ({ ...prev, [questionIndex]: true }));
         } catch (err) {
             console.error(err);
-            alert('Không thể truy cập microphone.');
+            if (err.name == "NotAllowedError") {
+                setMicError("Bạn đã chặn quyền micro. Vui lòng bật lại trong trình duyệt.");
+            } else if (err.name == "NotFoundError") {
+                setMicError("Không tìm thấy thiết bị micro. Hãy kiểm tra lại máy của bạn.");
+            } else {
+                setMicError("Không thể truy cập micro: " + err.message);
+            }
         }
     }, [currentQuestionIndex, exerciseId, mediaRecorders, recordingState, currentQuestion]);
 
@@ -121,10 +148,10 @@ const PronunciationExerciseCarousel = ({
                 <form className="exercise-question-form-container mt-4">
                     {currentQuestion.type == 'multiple-choice' && (
                         <>
-                            <h5 className="exercise-question-text" id={`exercise-ques-${currentQuestionIndex}`}>
+                            <h5 id={`exercise-ques-${currentQuestionIndex}`}>
                                 {onSpeakText && (
                                     <button
-                                        className="exercise-speak-button btn-sm btn-outline mr-2"
+                                        className="exercise-speak-button-pronun btn-sm btn-outline mr-2"
                                         onClick={() => onSpeakText(currentQuestion.question)}
                                         type="button"
                                     >
@@ -133,7 +160,9 @@ const PronunciationExerciseCarousel = ({
                                 )}
                             </h5>
                             <div className="exercise-question-form">
-                                {currentQuestion.options.map((option, optIndex) => (
+                                {currentQuestion.options
+                                .filter(option => option.trim() !== "")
+                                .map((option, optIndex) => (
                                     <div key={optIndex} className="exercise-form-check">
                                         <input
                                             className="exercise-form-check-input"
@@ -181,16 +210,26 @@ const PronunciationExerciseCarousel = ({
                                         🔊
                                     </button>
                                 )}
-                                {currentQuestionIndex + 1}. {currentQuestion.question}
+                                {currentQuestion.question}
                             </h5>
-                            <button
-                                type="button"
-                                className="btn btn_1 mb-4"
-                                onClick={handleRecordToggle}
-                            >
-                                {recordingState[currentQuestionIndex] ? 'Dừng ghi âm' : 'Ghi âm'}
-                            </button>
-
+                            {(pronunciationAttempts[currentQuestionIndex] || 0) >= 3 ? (
+                                <p style={{ color: "red", marginTop: "10px", fontWeight: "bold" }}>
+                                    Bạn đã hết số lần phát âm cho câu này (3 lần).
+                                </p>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn_1"
+                                    onClick={handleRecordToggle}
+                                >
+                                    {recordingState[currentQuestionIndex] ? 'Dừng ghi âm' : 'Ghi âm'}
+                                </button>
+                            )}
+                            {micError && (
+                                <div style={{ color: "red", marginTop: "10px", fontWeight: "bold" }}>
+                                    {micError}
+                                </div>
+                            )}
                             {audioSrc[currentQuestionIndex] && (
                                 <div className="mt-2">
                                     <audio controls src={audioSrc[currentQuestionIndex]} />
@@ -235,15 +274,19 @@ const PronunciationExerciseCarousel = ({
                                     <p>
                                         <strong>Chi tiết phát âm: </strong>
                                         {(analysisResults[currentQuestionIndex].detailedAnalysisWords || []).map((word, idx) => (
-                                            <span
-                                                key={idx}
-                                                className={word.isCorrect ? 'correct-word' : 'incorrect-word'}
-                                                style={{
-                                                    marginRight: '6px',
-                                                    fontWeight: word.isCorrect ? 'bold' : 'normal'
-                                                }}
-                                            >
-                                                {word.text}
+                                            <span key={idx} style={{ marginRight: "12px" }}>
+                                            {word.isCorrect ? (
+                                                <span style={{ color: "green", fontWeight: "bold" }}>{word.correct}</span>
+                                            ) : (
+                                                <>
+                                                <span style={{ color: "red", textDecoration: "line-through" }}>
+                                                    {word.spoken || "∅"}
+                                                </span>
+                                                <span style={{ color: "blue", marginLeft: "4px" }}>
+                                                    ({word.correct})
+                                                </span>
+                                                </>
+                                            )}
                                             </span>
                                         ))}
                                     </p>

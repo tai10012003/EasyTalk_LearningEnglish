@@ -10,7 +10,7 @@ const StageCard = ({ stage }) => {
         </a>
       ) : (
         <button className="btn btn-journey" disabled>
-          KHÓA
+          <i className="fas fa-lock me-2"></i>
         </button>
       )}
     </section>

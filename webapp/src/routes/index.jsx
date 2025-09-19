@@ -2,6 +2,7 @@ import Home from "../views/user/Home";
 import About from "../views/user/About";
 import Journey from "../views/user/Journey";
 import Gate from "../views/user/Gate";
+import Stage from "../views/user/Stage";
 import Login from "../views/user/Login";
 import Register from "../views/user/Register";
 import Story from "../views/user/Story";
@@ -39,8 +40,12 @@ const routes = [
     element: <Journey />,
   },
   {
-    path: "/gate",
+    path: "/journey/detail/:id",
     element: <Gate />,
+  },
+  {
+    path: "/stage/:id",
+    element: <Stage />,
   },
   {
     path: "/story",

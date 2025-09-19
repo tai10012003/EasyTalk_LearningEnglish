@@ -323,7 +323,7 @@
             const token = localStorage.getItem("token");
 
             try {
-                const response = await fetch(`/journey/api/${journeyId}`, {
+                const response = await fetch(`/journey/api/gate/${journeyId}`, {
                     method: "GET",
                     headers: {
                         "Authorization": `Bearer ${token}`,

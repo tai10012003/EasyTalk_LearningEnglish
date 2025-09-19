@@ -1,6 +1,6 @@
 import React from "react";
 
-function JourneyCard({ title, progress }) {
+function JourneyCard({ id, title, progress }) {
   return (
     <section className="card journey-card">
         <h5 className="card-title">{title}</h5>
@@ -19,8 +19,8 @@ function JourneyCard({ title, progress }) {
                 ></div>
             </div>
         </div>
-        <a href="/gate" className="btn btn-journey mt-3">
-           TIẾP TỤC
+        <a href={`/journey/detail/${id}`} className="btn btn-journey mt-3">
+            TIẾP TỤC
         </a>
     </section>
   );

@@ -4,7 +4,7 @@ import { PronunciationExerciseService } from "../../services/PronunciationExerci
 import PronunciationExerciseSidebar from "../../components/user/pronunciationexercise/PronunciationExerciseSidebar";
 import PronunciationExerciseCarousel from "../../components/user/pronunciationexercise/PronunciationExerciseCarousel";
 import PronunciationExerciseResultScreen from "../../components/user/pronunciationexercise/PronunciationExerciseResultScreen";
-// import PronunciationExerciseHistory from "../../components/user/pronunciationexercise/PronunciationExerciseHistory";
+import PronunciationExerciseHistory from "../../components/user/pronunciationexercise/PronunciationExerciseHistory";
 
 const PronunciationExerciseDetail = () => {
     const { id } = useParams();
@@ -84,13 +84,14 @@ const PronunciationExerciseDetail = () => {
         return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
     };
 
-    const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect) => {
+    const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect, accuracy = null) => {
         setQuestionResults(prev => {
             const newResults = [...prev];
             newResults[questionIndex] = {
                 ...newResults[questionIndex],
                 userAnswer: userAnswer || "Không trả lời",
-                isCorrect: isCorrect
+                isCorrect,
+                ...(accuracy != null ? { accuracy } : {})
             };
             return newResults;
         });
@@ -212,7 +213,7 @@ const PronunciationExerciseDetail = () => {
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
                                 onRestart={handleRestart}
-                                onExit={() => window.location.href = '/grammar-exercise'}
+                                onExit={() => window.location.href = '/pronunciation-exercise'}
                             />
                         ) : (
                             <PronunciationExerciseCarousel
@@ -244,11 +245,11 @@ const PronunciationExerciseDetail = () => {
                 </div>
             </div>
 
-            {/* <PronunciationExerciseHistory
+            <PronunciationExerciseHistory
                 show={showHistory}
                 onClose={handleCloseHistory}
                 questionResults={questionResults}
-            /> */}
+            />
         </div>
     );
 };

@@ -177,9 +177,10 @@ function DictationExerciseDetail() {
                         toggleScript={() => setShowScript(!showScript)}
                         showScript={showScript}
                         playFullScript={() => {
+                            speechSynthesis.cancel();
                             const utterance = new SpeechSynthesisUtterance(sentences.join(" "));
                             utterance.lang = "en-US";
-                            utterance.rate = fullScriptSpeed;
+                            utterance.rate = Number(fullScriptSpeed);
                             speechSynthesis.speak(utterance);
                         }}
                         fullScriptSpeed={fullScriptSpeed}

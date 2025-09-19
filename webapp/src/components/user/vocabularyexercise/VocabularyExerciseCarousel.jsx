@@ -55,7 +55,9 @@ const VocabularyExerciseCarousel = ({
     const renderMultipleChoice = () => {
         return (
             <div className="exercise-question-form">
-                {currentQuestion.options.map((option, optIndex) => (
+                {currentQuestion.options
+                .filter(option => option.trim() !== "")
+                .map((option, optIndex) => (
                     <div key={optIndex} className="exercise-form-check">
                         <input
                             className="exercise-form-check-input"
