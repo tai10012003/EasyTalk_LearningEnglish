@@ -82,38 +82,41 @@ router.post("/api/story/complete/:id", verifyToken, async (req, res) => {
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPage = await storyService.getStoryList(1, 1);
-            const firstStory = (firstPage && firstPage.stories && firstPage.stories[0]) ? firstPage.stories[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, firstStory ? firstStory._id : null, null, null);
+            const firstStory = firstPage?.stories?.[0] || null;
+            userProgress = await userProgressService.createUserProgress(userId, null, firstStory?._id || null, null, null);
         }
-        const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
+        const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() === storyId.toString());
         if (!isUnlocked) {
             return res.status(403).json({ success: false, message: "You cannot complete a locked story." });
         }
         const all = await storyService.getStoryList(1, 10000);
-        const allStories = all && all.stories ? all.stories : [];
-
-        const idx = allStories.findIndex(s => s._id.toString() == storyId.toString());
+        const allStories = all?.stories || [];
+        
+        const idx = allStories.findIndex(s => s._id.toString() === storyId.toString());
         let nextStory = null;
         if (idx !== -1 && idx < allStories.length - 1) {
             nextStory = allStories[idx + 1];
         }
-
         if (nextStory) {
             userProgress = await userProgressService.unlockNextStory(userProgress, nextStory._id, 10);
-            return res.json({
-                success: true,
-                message: "Story completed. Next story unlocked.",
-                unlockedStories: userProgress.unlockedStories
-            });
         } else {
             userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-            await userProgressService.updateUserProgress(userProgress);
-            return res.json({
-                success: true,
-                message: "Story completed. You have finished all stories.",
-                unlockedStories: userProgress.unlockedStories
-            });
         }
+        await userProgressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        return res.json({
+            success: true,
+            message: nextStory 
+                ? "Story completed. Next story unlocked." 
+                : "Story completed. You have finished all stories.",
+            userProgress: {
+                unlockedStories: updatedUserProgress.unlockedStories,
+                experiencePoints: updatedUserProgress.experiencePoints,
+                streak: updatedUserProgress.streak,
+                maxStreak: updatedUserProgress.maxStreak,
+                studyDates: updatedUserProgress.studyDates
+            }
+        });
     } catch (error) {
         console.error("Error completing story:", error);
         res.status(500).json({ success: false, message: "Error processing completion", error: error.message });

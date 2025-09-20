@@ -1,6 +1,6 @@
 import React from 'react';
 
-const StageResultScreen = ({ correctAnswers, totalQuestions, onRestart, onExit }) => {
+const StageResultScreen = ({ correctAnswers, totalQuestions, onShowHistory, onExit }) => {
     const incorrectAnswers = totalQuestions - correctAnswers;
     const percentageCorrect = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
     const iconSrc = percentageCorrect >= 50 ? '/src/assets/images/iconhappy.png' : '/src/assets/images/iconsad.png';
@@ -32,10 +32,11 @@ const StageResultScreen = ({ correctAnswers, totalQuestions, onRestart, onExit }
             
             <div className="d-flex flex-column align-items-center mt-4">
                 <button
-                    className="btn btn-danger exercise-restart-btn"
-                    onClick={onRestart}
+                    className="btn btn-secondary mt-3"
+                    id="exercise-viewHistoryBtnStage"
+                    onClick={onShowHistory}
                 >
-                    Làm lại
+                    Xem lịch sử
                 </button>
                 <button
                     className="btn btn-secondary exercise-exit-btn"

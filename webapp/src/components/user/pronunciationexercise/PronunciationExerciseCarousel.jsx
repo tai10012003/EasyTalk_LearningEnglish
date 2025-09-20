@@ -170,6 +170,7 @@ const PronunciationExerciseCarousel = ({
                                             name={`answer-${currentQuestionIndex}`}
                                             value={option}
                                             id={`exercise-option-${optIndex}-${currentQuestionIndex}`}
+                                            checked={userAnswers[currentQuestionIndex] == option}
                                             disabled={isQuestionAnswered || isCompleted}
                                         />
                                         <label

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
+import { UserProgressService } from '../../services/UserProgressService';
 
 const parseJwt = (token) => {
   try {
@@ -19,6 +20,7 @@ function Menu() {
     practice: false,
     login: false,
   });
+  const [streakData, setStreakData] = useState({ streak: 0});
 
   const location = useLocation();
   const lessonRoutes = ['/story', '/grammar', '/flashcards', '/pronunciation'];
@@ -45,6 +47,13 @@ function Menu() {
       if (decoded && decoded.username) {
         setIsLoggedIn(true);
         setUsername(decoded.username);
+        UserProgressService.getUserStreak()
+          .then((data) => {
+            setStreakData({
+              streak: data.streak || 0,
+            });
+          })
+          .catch((err) => console.error("Error fetching streak:", err));
       }
     }
   }, []);
@@ -98,7 +107,9 @@ function Menu() {
               ⭐ XP: <strong>1200</strong>
             </div>
             <div className="streak">
-              🔥 Streak: <strong>7 ngày</strong>
+              <Link to="/streak" className="text-decoration-none text-dark" style={{ textDecoration: 'none' }}>
+                🔥 <strong>{streakData.streak} ngày</strong>
+              </Link>
             </div>
           </div>
         </div>

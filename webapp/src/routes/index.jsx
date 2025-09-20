@@ -23,6 +23,7 @@ import PronunciationExerciseDetail from "../views/user/PronunciationExerciseDeta
 import DictationExercise from "../views/user/DictationExercise";
 import DictationExerciseDetail from "../views/user/DictationExerciseDetail";
 import ChatAI from "../views/user/ChatAI";
+import UserStreak from "../views/user/UserStreak";
 import NotFound from "../views/user/NotFound";
 import PrivateRoute from "../components/user/auth/PrivateRoute";
 
@@ -37,15 +38,27 @@ const routes = [
   },
   {
     path: "/journey",
-    element: <Journey />,
+    element: (
+      <PrivateRoute>
+        <Journey />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/journey/detail/:id",
-    element: <Gate />,
+    element: (
+      <PrivateRoute>
+        <Gate />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/stage/:id",
-    element: <Stage />,
+    element: (
+      <PrivateRoute>
+        <Stage />
+      </PrivateRoute>
+    ),
   },
   {
     path: "/story",
@@ -172,6 +185,14 @@ const routes = [
     element: (
       <PrivateRoute>
         <ChatAI />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/streak",
+    element: (
+      <PrivateRoute>
+        <UserStreak />
       </PrivateRoute>
     ),
   },

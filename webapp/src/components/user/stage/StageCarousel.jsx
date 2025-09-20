@@ -24,7 +24,7 @@ const StageCarousel = ({
     const handleSubmitAnswer = useCallback(() => {
         const userAnswer = userAnswers[currentQuestionIndex];
         if (!userAnswer || userAnswer.trim() == '') {
-            alert("Vui lòng nhập câu trả lời.");
+            alert("Vui lòng chọn/nhập câu trả lời !!");
             return;
         }
 
@@ -58,6 +58,7 @@ const StageCarousel = ({
                             value={option}
                             id={`exercise-option-${optIndex}-${currentQuestionIndex}`}
                             onChange={() => handleAnswerChange(option)}
+                            checked={userAnswers[currentQuestionIndex] == option}
                             disabled={isQuestionAnswered}
                         />
                         <label
@@ -162,15 +163,17 @@ const StageCarousel = ({
                     <div className="d-flex justify-content-end mt-3">
                         {currentQuestionIndex == questions.length - 1 ? (
                             <button
-                                className="btn_2"
+                                className="btn_2 mt-4 mb-4"
+                                style ={{ width: '100%' }}
                                 type="button"
                                 onClick={onSubmitStage}
                             >
-                                Hoàn thành
+                                HOÀN THÀNH
                             </button>
                         ) : (
                             <button
-                                className="btn_2"
+                                className="btn_1 mt-4 mb-4"
+                                style ={{ width: '100%' }}
                                 type="button"
                                 onClick={handleNextQuestion}
                             >

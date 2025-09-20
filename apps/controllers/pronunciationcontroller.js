@@ -72,22 +72,31 @@ router.post("/api/pronunciation/complete/:id", verifyToken, async (req, res) => 
         }
         if (nextPronunciation) {
             userProgress = await userProgressService.unlockNextPronunciation(userProgress, nextPronunciation._id, 10);
-            return res.json({
-                success: true,
-                message: "Pronunciation completed. Next lesson unlocked.",
-                unlockedPronunciations: userProgress.unlockedPronunciations
-            });
         } else {
             userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-            await userProgressService.updateUserProgress(userProgress);
-            return res.json({
-                success: true,
-                message: "Pronunciation completed. You have finished all lessons.",
-                unlockedPronunciations: userProgress.unlockedPronunciations
-            });
         }
+        await userProgressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        return res.json({
+            success: true,
+            message: nextPronunciation 
+                ? "Pronunciation completed. Next lesson unlocked." 
+                : "Pronunciation completed. You have finished all lessons.",
+            userProgress: {
+                unlockedPronunciations: updatedUserProgress.unlockedPronunciations,
+                experiencePoints: updatedUserProgress.experiencePoints,
+                streak: updatedUserProgress.streak,
+                maxStreak: updatedUserProgress.maxStreak,
+                studyDates: updatedUserProgress.studyDates
+            }
+        });
     } catch (err) {
-        res.status(500).json({ success: false, message: "Error processing completion", error: err.message });
+        console.error("Error in pronunciation complete:", err);
+        res.status(500).json({ 
+            success: false, 
+            message: "Error processing completion", 
+            error: err.message 
+        });
     }
 });
 

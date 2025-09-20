@@ -49,7 +49,7 @@ router.get("/api/grammar/:id", verifyToken, async function (req, res) {
 });
 
 router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
-  const grammarService = new GrammarService();
+    const grammarService = new GrammarService();
     try {
         const userId = req.user.id;
         const grammarId = req.params.id;
@@ -62,38 +62,41 @@ router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPage = await grammarService.getGrammarList(1, 1);
-            const firstGrammar = (firstPage && firstPage.grammars && firstPage.grammars[0]) ? firstPage.grammars[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
+            const firstGrammar = (firstPage?.grammars?.[0]) || null;
+            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar?._id || null, null);
         }
-        const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
+        const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() === grammarId.toString());
         if (!isUnlocked) {
             return res.status(403).json({ success: false, message: "You cannot complete a locked grammar." });
         }
         const all = await grammarService.getGrammarList(1, 10000);
-        const allGrammars = all && all.grammars ? all.grammars : [];
-
-        const idx = allGrammars.findIndex(s => s._id.toString() == grammarId.toString());
+        const allGrammars = all?.grammars || [];
+        
+        const idx = allGrammars.findIndex(s => s._id.toString() === grammarId.toString());
         let nextGrammar = null;
         if (idx !== -1 && idx < allGrammars.length - 1) {
             nextGrammar = allGrammars[idx + 1];
         }
-
         if (nextGrammar) {
             userProgress = await userProgressService.unlockNextGrammar(userProgress, nextGrammar._id, 10);
-            return res.json({
-                success: true,
-                message: "Grammar completed. Next grammar unlocked.",
-                unlockedGrammars: userProgress.unlockedGrammars
-            });
         } else {
             userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-            await userProgressService.updateUserProgress(userProgress);
-            return res.json({
-                success: true,
-                message: "Grammar completed. You have finished all grammars.",
-                unlockedGrammars: userProgress.unlockedGrammars
-            });
         }
+        await userProgressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        return res.json({
+            success: true,
+            message: nextGrammar 
+                ? "Grammar completed. Next grammar unlocked." 
+                : "Grammar completed. You have finished all grammars.",
+            userProgress: {
+                unlockedGrammars: updatedUserProgress.unlockedGrammars,
+                experiencePoints: updatedUserProgress.experiencePoints,
+                streak: updatedUserProgress.streak,
+                maxStreak: updatedUserProgress.maxStreak,
+                studyDates: updatedUserProgress.studyDates
+            }
+        });
     } catch (error) {
         console.error("Error completing grammar:", error);
         res.status(500).json({ success: false, message: "Error processing completion", error: error.message });

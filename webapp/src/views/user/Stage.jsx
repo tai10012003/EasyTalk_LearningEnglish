@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { StageService } from "../../services/StageService";
 import StageCarousel from "../../components/user/stage/StageCarousel";
 import StageResultScreen from "../../components/user/stage/StageResultScreen";
+import StageHistory from "../../components/user/stage/StageHistory";
 
 const Stage = () => {
     const { id } = useParams();
@@ -12,6 +13,7 @@ const Stage = () => {
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [isCompleted, setIsCompleted] = useState(false);
     const [showResult, setShowResult] = useState(false);
+    const [showHistory, setShowHistory] = useState(false);
     const [stageTitle, setStageTitle] = useState("");
     const [loading, setLoading] = useState(true);
 
@@ -74,11 +76,20 @@ const Stage = () => {
         }
     }, [id]);
 
+    const handleShowHistory = useCallback(() => {
+        setShowHistory(true);
+    }, []);
+    
+    const handleCloseHistory = useCallback(() => {
+        setShowHistory(false);
+    }, []);
+
     const handleRestart = useCallback(() => {
         setCorrectAnswers(0);
         setCurrentQuestionIndex(0);
         setIsCompleted(false);
         setShowResult(false);
+        setShowHistory(false);
 
         const resetResults = questions.map(q => ({
             question: q.question,
@@ -105,7 +116,7 @@ const Stage = () => {
         return (
             <div className="exercise-container">
                 <div className="exercise-loading">
-                    <p>Đang tải bài học...</p>
+                    <p>Đang tải chặng...</p>
                 </div>
             </div>
         );
@@ -125,13 +136,13 @@ const Stage = () => {
         <div className="container exercise-main-container">
             <div className="row">
                 <div className="col-md-12">
-                    <h3 className="text-center mb-4">{stageTitle}</h3>
                     <div className="exercise-content-container">
                         {showResult ? (
                             <StageResultScreen
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
                                 onRestart={handleRestart}
+                                onShowHistory={handleShowHistory}
                                 onExit={() => window.location.href = '/journey'}
                             />
                         ) : (
@@ -149,6 +160,11 @@ const Stage = () => {
                     </div>
                 </div>
             </div>
+            <StageHistory
+                show={showHistory}
+                onClose={handleCloseHistory}
+                questionResults={questionResults}
+            />
         </div>
     );
 };

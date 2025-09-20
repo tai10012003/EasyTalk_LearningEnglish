@@ -3238,7 +3238,7 @@ p {
   background: linear-gradient(135deg, #c82333 0%, #a71d2a 100%);
 }
 
-.exercise-exit-btn {
+.exercise-exit-btn, #exercise-viewHistoryBtnStage{
   background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
   border: none;
   color: #fff;
@@ -3252,7 +3252,7 @@ p {
   box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
 }
 
-.exercise-exit-btn:hover {
+.exercise-exit-btn, #exercise-viewHistoryBtnStage:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4);
   background: linear-gradient(135deg, #495057 0%, #343a40 100%);
@@ -3310,6 +3310,145 @@ p {
   margin: 10px 20px 30px 20px;
   width: 30%;
   padding: 12px 0;
+}
+
+/* ===============================================
+   STREAK USER STYLES
+   =============================================== */
+
+.streak-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 1.25rem;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.streak-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+}
+
+.streak-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  text-align: center;
+  color: #111827;
+  margin-bottom: 1.5rem;
+}
+
+.streak-stats {
+  display: flex;
+  justify-content: space-around;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+  margin-bottom: 1.5rem;
+}
+
+.streak-stats p:first-child {
+  font-size: 2.5rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+
+.streak-stats .current {
+  color: #16a34a;
+}
+
+.streak-stats .max {
+  color: #2563eb;
+}
+
+.streak-calendar-wrapper {
+  margin-top: 1rem;
+}
+
+.streak-calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.streak-month {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.streak-nav-btn {
+  background: #f3f4f6;
+  border: none;
+  border-radius: 0.5rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.25rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.streak-nav-btn:hover {
+  background: #e5e7eb;
+}
+
+.streak-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 0.25rem;
+  text-align: center;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.streak-weekday {
+  padding: 0.25rem;
+}
+
+.streak-calendar {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.4rem;
+}
+
+.streak-day {
+  position: relative;
+  /* width: 2.6rem; */
+  height: 2.6rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: #f9fafb;
+  color: #374151;
+  transition: all 0.25s ease;
+}
+
+.streak-day:hover {
+  background: #e5e7eb;
+  cursor: pointer;
+}
+
+.streak-day.studied {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: white;
+  box-shadow: 0 3px 10px rgba(239, 68, 68, 0.35);
+  transform: scale(1.05);
+}
+
+.streak-day.today {
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+.streak-fire {
+  position: absolute;
+  bottom: -8px;
+  font-size: 0.85rem;
 }
 
 /* ===============================================

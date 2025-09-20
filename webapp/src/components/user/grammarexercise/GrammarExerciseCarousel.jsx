@@ -66,6 +66,7 @@ const GrammarExerciseCarousel = ({
                             value={option}
                             id={`exercise-option-${optIndex}-${currentQuestionIndex}`}
                             onChange={() => handleAnswerChange(option)}
+                            checked={userAnswers[currentQuestionIndex] == option}
                             disabled={isQuestionAnswered}
                         />
                         <label

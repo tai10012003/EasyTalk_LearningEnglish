@@ -10,10 +10,6 @@ const userProgressService = new UserProgressService();
 const gateService = new GateService();
 const journeyService = new JourneyService();
 
-router.get('/stage/detail/:id', (req, res) => {
-    res.render('stages/stage-detail');
-});
-
 router.get("/stage/api/stage/detail/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -54,27 +50,27 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
             userProgress = await userProgressService.createUserProgress(userId, journey);
         }
 
-        if (!userProgress.unlockedStages.some(stage => stage.toString() === stageId)) {
+        if (!userProgress.unlockedStages.some(stage => stage.toString() == stageId)) {
             userProgress.unlockedStages.push(new ObjectId(stageId));
         }
         const allStagesInGate = await stageService.getStagesInGate(currentStage.gate);
-        const currentStageIndex = allStagesInGate.findIndex(stage => stage._id.toString() === stageId);
+        const currentStageIndex = allStagesInGate.findIndex(stage => stage._id.toString() == stageId);
 
         if (currentStageIndex !== -1 && currentStageIndex < allStagesInGate.length - 1) {
             const nextStage = allStagesInGate[currentStageIndex + 1];
-            if (!userProgress.unlockedStages.some(stage => stage.toString() === nextStage._id.toString())) {
+            if (!userProgress.unlockedStages.some(stage => stage.toString() == nextStage._id.toString())) {
                 userProgress.unlockedStages.push(nextStage._id);
             }
         } else {
             const allGatesInJourney = await gateService.getGatesInJourney(currentJourneyId);
-            const currentGateIndex = allGatesInJourney.findIndex(gate => gate._id.toString() === currentStage.gate.toString());
+            const currentGateIndex = allGatesInJourney.findIndex(gate => gate._id.toString() == currentStage.gate.toString());
 
             if (currentGateIndex !== -1 && currentGateIndex < allGatesInJourney.length - 1) {
                 const nextGate = allGatesInJourney[currentGateIndex + 1];
-                if (!userProgress.unlockedGates.some(gate => gate.toString() === nextGate._id.toString())) {
+                if (!userProgress.unlockedGates.some(gate => gate.toString() == nextGate._id.toString())) {
                     userProgress.unlockedGates.push(nextGate._id);
                     const firstStageOfNextGate = await stageService.getStagesInGate(nextGate._id);
-                    if (firstStageOfNextGate.length > 0 && !userProgress.unlockedStages.some(stage => stage.toString() === firstStageOfNextGate[0]._id.toString())) {
+                    if (firstStageOfNextGate.length > 0 && !userProgress.unlockedStages.some(stage => stage.toString() == firstStageOfNextGate[0]._id.toString())) {
                         userProgress.unlockedStages.push(firstStageOfNextGate[0]._id);
                     }
                 }

@@ -7,6 +7,9 @@ class userprogresses {
     unlockedGrammars = [];
     unlockedPronunciations = [];
     experiencePoints;
+    streak = 0;
+    maxStreak = 0;
+    studyDates = [];
     constructor() {
     }
 };

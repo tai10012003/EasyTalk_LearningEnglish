@@ -1,0 +1,23 @@
+const API_URL = "http://localhost:3000";
+
+export const UserProgressService = {
+    async getUserStreak() {
+        try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            throw new Error("Không tìm thấy token trong localStorage");
+        }
+        const res = await fetch(`${API_URL}/userprogress/api/userprogress/streak`, {
+            headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+            },
+        });
+        if (!res.ok) throw new Error("Failed to fetch streak data");
+        return await res.json();
+        } catch (err) {
+        console.error("Error fetching streak data:", err);
+        throw err;
+        }
+    },
+};
