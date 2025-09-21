@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import LoginForm from '../../components/user/auth/loginForm';
 import Mascot from '../../components/user/auth/Mascot';
 import SocialLoginButtons from '../../components/user/auth/SocialLoginButtons';
@@ -6,7 +6,10 @@ import { AuthService } from '../../services/AuthService';
 
 function Login() {
   const [message, setMessage] = useState(null);
-
+  
+  useEffect(() => {
+    document.title = "Đăng nhập - EasyTalk";
+  }, []);
   const handleLogin = async (email, password) => {
     try {
       const data = await AuthService.login(email, password);

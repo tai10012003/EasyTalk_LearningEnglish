@@ -7,6 +7,7 @@ function UserStreak() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = "Streak Học Tập - EasyTalk";
         async function fetchStreak() {
             try {
                 const data = await UserProgressService.getUserStreak();

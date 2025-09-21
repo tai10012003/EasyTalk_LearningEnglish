@@ -35,6 +35,7 @@ const FlashCard = () => {
   }, [id, currentPage, limit]);
 
   useEffect(() => {
+    document.title = "Flashcard - EasyTalk";
     fetchData();
   }, [fetchData]);
 

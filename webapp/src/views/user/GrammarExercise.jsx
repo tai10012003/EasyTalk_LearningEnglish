@@ -12,6 +12,7 @@ function GrammarExercise() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài luyện tập ngữ pháp - EasyTalk";
         GrammarExerciseService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);

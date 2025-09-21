@@ -25,6 +25,7 @@ const FlashCardList = () => {
     };
 
     useEffect(() => {
+        document.title = "Danh sách flashcard - EasyTalk";
         FlashcardService.resetAlertFlag();
         loadFlashcards(currentPage);
     }, [currentPage, activeTab]);

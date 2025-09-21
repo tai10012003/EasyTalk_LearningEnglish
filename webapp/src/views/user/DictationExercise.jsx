@@ -13,6 +13,7 @@ function DictationExercise() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài nghe chép chính tả - EasyTalk";
         DictationExerciseService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);

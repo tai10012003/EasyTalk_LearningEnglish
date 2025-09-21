@@ -8,11 +8,13 @@ function ChatAI() {
     const [isSending, setIsSending] = useState(false);
     const [sessionTopic, setSessionTopic] = useState(null);
     const [step, setStep] = useState("ask_name");
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const [lastBotText, setLastBotText] = useState("");
     const [speakingWordIndex, setSpeakingWordIndex] = useState(null);
     const [isFirstMessage, setIsFirstMessage] = useState(true);
 
     useEffect(() => {
+        document.title = "Giao tiếp với AI - EasyTalk";
         const startConversation = async () => {
             try {
                 const data = await ChatAIService.startConversation();
@@ -100,25 +102,70 @@ function ChatAI() {
     };
 
     return (
-        <div className="container chat-ai-container">
-            <div className="chat-ai-header text-center">
-                <h3>Trò Chuyện Với AI - Thực Hành Tiếng Anh</h3>
+        <>
+            <div className="container chat-ai-container">
+                <div className="chat-ai-header text-center">
+                    <h3>Giao Tiếp Với AI - Thực Hành Tiếng Anh
+                        <i
+                            className="fas fa-question-circle help-icon"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setIsModalOpen(true)}
+                        ></i>
+                    </h3>
+                </div>
+                <div id="chat-ai-box" className="chat-ai-box">
+                    {messages.map((msg, idx) => (
+                        <ChatAIMessage
+                            key={idx}
+                            message={msg}
+                            speakingWordIndex={
+                                msg.sender == "bot" && idx == messages.length - 1
+                                    ? speakingWordIndex
+                                    : null
+                            }
+                        />
+                    ))}
+                </div>
+                <ChatAIInput onSend={handleSendMessage} disabled={isSending} />
             </div>
-            <div id="chat-ai-box" className="chat-ai-box">
-                {messages.map((msg, idx) => (
-                    <ChatAIMessage
-                        key={idx}
-                        message={msg}
-                        speakingWordIndex={
-                            msg.sender == "bot" && idx == messages.length - 1
-                                ? speakingWordIndex
-                                : null
-                        }
-                    />
-                ))}
-            </div>
-            <ChatAIInput onSend={handleSendMessage} disabled={isSending} />
-        </div>
+            {isModalOpen && (
+                <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
+                    <div
+                        className="custom-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="custom-modal-header">
+                            <h5>Hướng Dẫn Luyện Giao Tiếp Với AI</h5>
+                            <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+                                &times;
+                            </button>
+                        </div>
+                        <div className="custom-modal-body">
+                            <p>Chào mừng bạn đến với chức năng <strong>Giao tiếp với AI</strong>. Tại đây, bạn có thể luyện tập nói tiếng Anh trực tiếp với AI.</p>
+                            <p>
+                                <strong>Các bước thực hiện:</strong>
+                            </p>
+                            <ul>
+                                <li><strong>Trò chuyện:</strong> Nhập câu hỏi hoặc phản hồi của bạn vào ô chat và nhấn gửi.</li>
+                                <li><strong>Phản hồi từ AI:</strong> AI sẽ trả lời bạn bằng tiếng Anh, giúp bạn luyện tập phản xạ và ngữ pháp.</li>
+                                <li><strong>Nghe phát âm:</strong> AI sẽ đọc to câu trả lời, bạn có thể theo dõi từ nào đang được phát âm.</li>
+                                <li><strong>Đánh dấu từ:</strong> Các từ AI đang phát âm sẽ được đánh dấu, giúp bạn dễ theo dõi và luyện phát âm.</li>
+                                <li><strong>Tiếp tục hội thoại:</strong> Nhập thêm câu hỏi hoặc phản hồi để AI tiếp tục trò chuyện cùng bạn.</li>
+                            </ul>
+                            <p><strong>Lưu ý:</strong></p>
+                            <ul>
+                                <li>Nghe kỹ câu trả lời và cố gắng nhại theo để cải thiện phát âm.</li>
+                                <li>Đừng ngần ngại thử các câu hỏi khác nhau để nâng cao kỹ năng giao tiếp.</li>
+                            </ul>
+                            <p>🎉 Chúc bạn luyện tập giao tiếp hiệu quả và tự tin hơn mỗi ngày!</p>
+                        </div>
+                        <div className="custom-modal-footer">
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </>
     );
 }
 

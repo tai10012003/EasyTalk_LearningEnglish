@@ -19,6 +19,7 @@ function Journey() {
     ];
 
     useEffect(() => {
+        document.title = "Hành Trình - EasyTalk";
         async function loadJourney() {
             const data = await JourneyService.fetchJourney();
             if (data) {

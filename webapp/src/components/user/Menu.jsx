@@ -20,7 +20,8 @@ function Menu() {
     practice: false,
     login: false,
   });
-  const [streakData, setStreakData] = useState({ streak: 0});
+  const [streakData, setStreakData] = useState({ streak: 0 });
+  const [leaderData, setLeaderData] = useState({ experiencePoints: 0 });
 
   const location = useLocation();
   const lessonRoutes = ['/story', '/grammar', '/flashcards', '/pronunciation'];
@@ -54,6 +55,13 @@ function Menu() {
             });
           })
           .catch((err) => console.error("Error fetching streak:", err));
+        UserProgressService.getUserExperiencePoints()
+          .then((data) => {
+            setLeaderData({
+              experiencePoints: data.experiencePoints || 0,
+            });
+          })
+          .catch((err) => console.error("Error fetching experience points:", err));
       }
     }
   }, []);
@@ -102,16 +110,18 @@ function Menu() {
               </span>
             </div>
           </div>
-          <div className="top-bar-right d-flex align-items-center">
-            <div className="xp me-4">
-              ⭐ XP: <strong>1200</strong>
+          {isLoggedIn && (
+            <div className="top-bar-right d-flex align-items-center">
+              <div className="xp me-4">
+                ⭐ <strong>XP: {leaderData.experiencePoints}</strong>
+              </div>
+              <div className="streak">
+                <Link to="/streak" className="text-decoration-none text-dark" style={{ textDecoration: 'none' }}>
+                  🔥 <strong>{streakData.streak} ngày</strong>
+                </Link>
+              </div>
             </div>
-            <div className="streak">
-              <Link to="/streak" className="text-decoration-none text-dark" style={{ textDecoration: 'none' }}>
-                🔥 <strong>{streakData.streak} ngày</strong>
-              </Link>
-            </div>
-          </div>
+          )}
         </div>
       </div>
 

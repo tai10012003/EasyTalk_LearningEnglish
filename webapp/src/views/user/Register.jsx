@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import RegisterForm from '../../components/user/auth/RegisterForm';
 import Mascot from '../../components/user/auth/Mascot';
 import { AuthService } from '../../services/AuthService';
 
 function Register() {
   const [message, setMessage] = useState(null);
+  
+  useEffect(() => {
+    document.title = "Đăng ký - EasyTalk";
+  }, []);
 
   const handleRegister = async (username, email, password, confirmPassword) => {
     const response = await AuthService.register(username, email, password, confirmPassword);

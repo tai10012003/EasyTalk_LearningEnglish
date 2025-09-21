@@ -16,6 +16,7 @@ function GrammarDetail() {
     const [totalSteps, setTotalSteps] = useState(1);
 
     useEffect(() => {
+        document.title = "Chi tiết bài học ngữ pháp - EasyTalk";
         GrammarService.getGrammarById(id).then((res) => {
             if (res && res.grammar && res.grammar.content) {
                 setGrammar(res.grammar);

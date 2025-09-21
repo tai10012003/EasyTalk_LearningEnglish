@@ -17,6 +17,7 @@ function StoryDetail() {
     const contentRefs = useRef([]);
 
     useEffect(() => {
+        document.title = "Chi tiết bài học câu chuyện - EasyTalk";
         StoryService.getStoryById(id).then((res) => {
             setStory(res);
             setTimeout(() => {

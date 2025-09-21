@@ -2778,6 +2778,10 @@ p {
   animation: pulse 1.2s infinite;
 }
 
+.chat-ai-header .help-icon {
+  margin-left: 10px;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
@@ -2793,102 +2797,153 @@ p {
   }
 }
 
-@media (max-width: 1024px) {
-  .chat-ai-container {
-    margin: 20px auto 30px auto;
-    max-width: 95%;
-    padding: 15px;
-  }
+/* ===============================================
+   WRITING AI STYLES
+   =============================================== */
 
-  .chat-ai-header h3 {
-    margin-top: 20px;
-    font-size: 20px;
-  }
-
-  .chat-ai-box {
-    padding: 15px;
-    height: 80vh;
-  }
-
-  .chat-ai-input {
-    width: 70%;
-    font-size: 15px;
-  }
-
-  .chat-ai-send-btn {
-    padding: 10px 16px;
-    font-size: 14px;
-  }
-
-  .chat-ai-mic-btn {
-    width: 60px;
-    height: 60px;
-    font-size: 22px;
-  }
+.writingai-container {
+  margin: 30px auto 50px auto;
+  max-width: 900px;
+  min-width: 300px;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
 }
 
-@media (max-width: 768px) {
-  .chat-ai-container {
-    margin: 10px auto;
-    max-width: 100%;
-    min-width: unset;
-    padding: 10px;
-    border-radius: 8px;
-  }
+.writingai-header h3 {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
 
-  .chat-ai-header h3 {
-    margin-top: 20px;
-    font-size: 18px;
-  }
+.writingai-topic {
+  background: linear-gradient(120deg, #ffecb3, #ffe082);
+  padding: 15px;
+  border-radius: 12px;
+  border: 2px solid #ffd54f;
+  margin-bottom: 15px;
+  font-size: 16px;
+  color: #5d4037;
+  position: relative;
+}
 
-  .chat-ai-box {
-    padding: 10px;
-    height: 75vh;
-  }
+.writingai-topic button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: #ffb74d;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 5px 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
 
-  .chat-ai-message img {
-    width: 32px;
-    height: 32px;
-    margin-right: 8px;
-  }
+.writingai-topic button:hover {
+  background: #fb8c00;
+  transform: scale(1.05);
+}
 
-  .chat-ai-content p {
-    font-size: 14px;
-    padding: 8px;
-  }
+.writingai-textarea {
+  width: 100%;
+  min-height: 220px;
+  font-size: 16px;
+  padding: 15px;
+  border-radius: 12px;
+  border: 1px solid #ddd;
+  resize: vertical;
+  transition: all 0.3s ease;
+  background-color: #ffffff;
+  box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+}
 
-  .chat-ai-suggestion {
-    font-size: 0.8rem;
-    padding: 6px 8px;
-  }
+.writingai-textarea:focus {
+  border-color: #ddd;
+  outline: none;
+}
 
-  .chat-ai-input-area {
-    padding: 15px 0;
-    flex-direction: row;
-    gap: 6px;
-  }
+.writingai-continue-btn {
+  margin-top: 15px;
+  padding: 12px 30px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  background-image: linear-gradient(45deg, #2196f3, #21cbf3);
+  color: #fff;
+  transition: all 0.3s ease;
+}
 
-  .chat-ai-input {
-    width: 65%;
-    font-size: 14px;
-    padding: 8px;
-  }
+.writingai-continue-btn:hover {
+  background-image: linear-gradient(45deg, #1976d2, #00bcd4);
+  box-shadow: 0 3px 8px rgba(33, 203, 243, 0.6);
+}
 
-  .chat-ai-send-btn {
-    padding: 8px 14px;
-    font-size: 14px;
-  }
+.writingai-result {
+  padding: 20px;
+  margin-top: 25px;
+  border-radius: 15px;
+  border-left: 6px solid #8052c5;
+  /* box-shadow: 0 5px 15px rgba(121, 30, 233, 0.3); */
+}
 
-  .chat-ai-mic-btn {
-    width: 50px;
-    height: 50px;
-    font-size: 20px;
-  }
+.writingai-result h5 {
+  margin-bottom: 15px;
+  color: #5c18c2;
+  font-weight: 700;
+  text-shadow: 1px 1px 1px #fff;
+}
 
-  .chat-ai-mode-btn {
-    padding: 6px 10px;
-    font-size: 14px;
-  }
+.writingai-feedback {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #4e342e;
+}
+
+.writingai-error {
+  background: #ffcdd2;
+  color: #b71c1c;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.writingai-suggestion {
+  background: #dcedc8;
+  color: #33691e;
+  font-weight: bold;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.writingai-score {
+  margin-top: 15px;
+  color: #5c18c2;
+  font-size: 16px;
+}
+
+.word-highlight {
+  background: linear-gradient(120deg, #ffe259, #ffa751);
+  border-radius: 6px;
+  padding: 2px 4px;
+  transition: all 0.3s ease;
+  color: #000;
+}
+
+.writingai-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.writingai-header .help-icon {
+  margin-left: 10px;
 }
 
 /* ===============================================
@@ -4326,9 +4381,43 @@ p {
   .flashcard-review-container .btn_1 {
     width: 40%;
   }
+
   .lesson-quiz-container {
     width: 100%;
   }
+
+  .chat-ai-container {
+    margin: 20px auto 30px auto;
+    max-width: 95%;
+    padding: 15px;
+  }
+
+  .chat-ai-header h3 {
+    margin-top: 20px;
+    font-size: 20px;
+  }
+
+  .chat-ai-box {
+    padding: 15px;
+    height: 80vh;
+  }
+
+  .chat-ai-input {
+    width: 70%;
+    font-size: 15px;
+  }
+
+  .chat-ai-send-btn {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+
+  .chat-ai-mic-btn {
+    width: 60px;
+    height: 60px;
+    font-size: 22px;
+  }
+
   .dictation-container {
     width: 100%;
   }
@@ -4577,6 +4666,10 @@ p {
 
   .flashcard-review-container .flashcard-review-actions .btn_1 {
     width: 35%;
+  }
+
+  .streak-container {
+    width: 90%;
   }
 }
 
@@ -4832,8 +4925,71 @@ p {
     max-width: 140px;
     margin-top: 12px;
   }
+
   .lesson-quiz-container {
     width: 100%;
+  }
+
+  .chat-ai-container {
+    margin: 10px auto;
+    max-width: 100%;
+    min-width: unset;
+    padding: 10px;
+    border-radius: 8px;
+  }
+
+  .chat-ai-header h3 {
+    margin-top: 20px;
+    font-size: 18px;
+  }
+
+  .chat-ai-box {
+    padding: 10px;
+    height: 75vh;
+  }
+
+  .chat-ai-message img {
+    width: 32px;
+    height: 32px;
+    margin-right: 8px;
+  }
+
+  .chat-ai-content p {
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .chat-ai-suggestion {
+    font-size: 0.8rem;
+    padding: 6px 8px;
+  }
+
+  .chat-ai-input-area {
+    padding: 15px 0;
+    flex-direction: row;
+    gap: 6px;
+  }
+
+  .chat-ai-input {
+    width: 65%;
+    font-size: 14px;
+    padding: 8px;
+  }
+
+  .chat-ai-send-btn {
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+
+  .chat-ai-mic-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+
+  .chat-ai-mode-btn {
+    padding: 6px 10px;
+    font-size: 14px;
   }
 
   .dictation-container {
@@ -4949,6 +5105,10 @@ p {
 
   .exercise-result-content p {
     font-size: 16px;
+  }
+
+  .streak-container {
+    width: 90%;
   }
 }
 

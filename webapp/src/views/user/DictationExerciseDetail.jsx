@@ -22,6 +22,7 @@ function DictationExerciseDetail() {
     const [showScript, setShowScript] = useState(false);
 
     useEffect(() => {
+        document.title = "Chi tiết bài nghe chép chính tả - EasyTalk";
         async function fetchDictation() {
         try {
             const data = await DictationExerciseService.getDictationExerciseById(id);

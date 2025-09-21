@@ -6,8 +6,26 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-router.get("/", function(req, res) {
-    res.render("writing");
+router.get("/api/writing/random-topic", async (req, res) => {
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [
+        {
+          role: "system",
+          content: "Bạn là một giáo viên tiếng Anh. Hãy tạo ra 1 đề bài viết tiếng Anh với đa dạng chủ đề thường ngày phù hợp để người học để luyện viết tiếng Anh. Trả về chỉ 1 câu duy nhất, không giải thích thêm."
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 50,
+    });
+
+    const topic = response.choices[0].message.content.trim();
+    res.json({ topic });
+  } catch (error) {
+    console.error("Error generating topic:", error);
+    res.status(500).json({ error: "Không thể tạo đề bài." });
+  }
 });
 
 router.post("/api/analyze", async function (req, res) {
@@ -23,44 +41,27 @@ router.post("/api/analyze", async function (req, res) {
       messages: [
         {
           role: "system",
-          content: `Bạn là một chuyên gia tiếng Anh và thông thạo tiếng Việt. 
-            Nhiệm vụ của bạn là đánh giá bài viết của người dùng dựa trên các tiêu chí sau:
-            1. Ngữ pháp (Grammar): Kiểm tra các lỗi về cấu trúc ngữ pháp. Nếu có lỗi, giải thích lỗi và cách sửa bằng tiếng Việt.
-            2. Chính tả (Spelling): Tìm các lỗi chính tả, giải thích lý do sai và cung cấp cách viết đúng.
-            3. Cấu trúc câu (Sentence structure): Đánh giá cách sắp xếp câu, độ rõ ràng và mạch lạc. Gợi ý cách cải thiện cấu trúc nếu cần.
-            4. Từ vựng (Vocabulary): Phân tích cách sử dụng từ vựng, đánh giá sự phù hợp của từ và gợi ý các từ thay thế nếu cần.
-
-            Hãy trả về phản hồi chi tiết bằng tiếng Việt, bao gồm:
-            - Lỗi sai và cách sửa tương ứng.
-            - Gợi ý cải thiện bài viết để người dùng hiểu rõ hơn.
-            - Điểm cụ thể cho từng tiêu chí (1-10).
-            - Điểm tổng quan (Overall score: X/10) cùng với lời nhận xét chung.
-
-            Ví dụ:
-            - Ngữ pháp: Bạn đã sử dụng ngữ pháp tốt, nhưng có lỗi trong câu "She go to school every day." Lỗi: Sai chia động từ 'go'. Sửa: 'She goes to school every day.' Điểm: 9/10.
-            - Chính tả: Không phát hiện lỗi chính tả. Điểm: 10/10.
-            - Cấu trúc câu: Câu văn rõ ràng, nhưng cần cải thiện sự liên kết giữa các ý. Gợi ý: Sử dụng từ nối như 'However', 'Furthermore'. Điểm: 8/10.
-            - Từ vựng: Sử dụng từ ngữ phong phú. Có thể thay từ 'big problem' bằng 'significant issue' để phù hợp hơn. Điểm: 9/10.
-            - Điểm tổng quan: 9/10. Nhận xét: Bài viết tốt, cần cải thiện sự liên kết giữa các ý để mạch lạc hơn.
-
-            Phản hồi cần rõ ràng và dễ hiểu cho người dùng Việt Nam.`
+          content: `Bạn là chuyên gia tiếng Anh và thông thạo tiếng Việt. 
+          Nhiệm vụ của bạn:
+          1. Đánh giá bài viết của người dùng về ngữ pháp, chính tả, cấu trúc câu, từ vựng.
+          2. Cung cấp đề xuất cải thiện bài viết.
+          3. Trả lại phiên bản bài viết đã được cải thiện (Improved version).
+          4. Trả điểm từng phần và điểm tổng quan (THANG ĐIỂM 10).
+          Phản hồi bằng tiếng Việt, rõ ràng và dễ hiểu.`
         },
-        {
-          role: "user",
-          content: userText,
-        },
+        { role: "user", content: userText },
       ],
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 1200,
     });
 
     const aiFeedback = response.choices[0].message.content;
-    const overallScoreMatch = aiFeedback.match(/Điểm tổng quan:\s*(\d+(\.\d+)?)/i);
-    const overallScore = overallScoreMatch ? overallScoreMatch[1] : "Không xác định";
+    const overallScoreMatch = aiFeedback.match(/Điểm tổng quan:\s*([\d\.]+|Không xác định)(\/10)?/i);
+    const overallScore = overallScoreMatch ? (overallScoreMatch[1] + (overallScoreMatch[2] || "")) : "Không xác định";
 
     res.json({
       suggestions: aiFeedback,
-      score: overallScore,
+      score: overallScore
     });
   } catch (error) {
     console.error("Error with OpenAI API:", error);

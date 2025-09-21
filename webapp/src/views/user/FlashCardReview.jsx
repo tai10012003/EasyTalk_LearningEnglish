@@ -13,6 +13,7 @@ const FlashCardReview = () => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
+        document.title = "Ôn tập flashcard - EasyTalk";
         const load = async () => {
             setLoading(true);
             try {

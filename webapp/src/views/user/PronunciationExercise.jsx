@@ -12,6 +12,7 @@ function PronunciationExercise() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài luyện tập phát âm - EasyTalk";
         PronunciationExerciseService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);

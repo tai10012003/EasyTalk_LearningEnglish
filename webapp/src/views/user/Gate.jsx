@@ -11,6 +11,7 @@ const Gate = () => {
     const [dailyTasks, setDailyTasks] = useState([]);
 
     useEffect(() => {
+        document.title = "Cổng hành trình - EasyTalk";
         const fetchJourneyData = async () => {
             try {
                 const journeyId = window.location.pathname.split("/").pop();

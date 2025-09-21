@@ -16,6 +16,7 @@ function Grammar() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài học ngữ pháp - EasyTalk";
         GrammarService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);

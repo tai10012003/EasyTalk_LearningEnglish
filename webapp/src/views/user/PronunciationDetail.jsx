@@ -16,6 +16,7 @@ function PronunciationDetail() {
     const [totalSteps, setTotalSteps] = useState(1);
 
     useEffect(() => {
+        document.title = "Chi tiết bài học phát âm - EasyTalk";
         PronunciationService.getPronunciationById(id).then((res) => {
             if (res && res.pronunciation && res.pronunciation.content) {
                 setPronunciation(res.pronunciation);

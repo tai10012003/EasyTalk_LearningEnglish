@@ -23,6 +23,7 @@ import PronunciationExerciseDetail from "../views/user/PronunciationExerciseDeta
 import DictationExercise from "../views/user/DictationExercise";
 import DictationExerciseDetail from "../views/user/DictationExerciseDetail";
 import ChatAI from "../views/user/ChatAI";
+import WritingAI from "../views/user/WritingAI";
 import UserStreak from "../views/user/UserStreak";
 import NotFound from "../views/user/NotFound";
 import PrivateRoute from "../components/user/auth/PrivateRoute";
@@ -185,6 +186,14 @@ const routes = [
     element: (
       <PrivateRoute>
         <ChatAI />
+      </PrivateRoute>
+    ),
+  },
+  {
+    path: "/writing",
+    element: (
+      <PrivateRoute>
+        <WritingAI />
       </PrivateRoute>
     ),
   },

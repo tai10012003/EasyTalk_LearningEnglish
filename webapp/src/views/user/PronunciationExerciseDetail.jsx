@@ -23,6 +23,7 @@ const PronunciationExerciseDetail = () => {
     const [hasStarted, setHasStarted] = useState(false);
 
     useEffect(() => {
+        document.title = "Chi tiết luyện tập phát âm - EasyTalk";
         const fetchExerciseData = async () => {
             try {
                 setLoading(true);

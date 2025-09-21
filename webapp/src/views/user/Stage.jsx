@@ -18,6 +18,7 @@ const Stage = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        document.title = "Chặng hành trình - EasyTalk";
         const fetchStageData = async () => {
             try {
                 setLoading(true);

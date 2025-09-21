@@ -12,6 +12,7 @@ function VocabularyExercise() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài luyện tập từ vựng - EasyTalk";
         VocabularyExerciseService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);

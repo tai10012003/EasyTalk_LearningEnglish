@@ -23,6 +23,7 @@ const VocabularyExerciseDetail = () => {
     const [hasStarted, setHasStarted] = useState(false);
 
     useEffect(() => {
+        document.title = "Chi tiết luyện tập từ vựng - EasyTalk";
         const fetchExerciseData = async () => {
             try {
                 setLoading(true);

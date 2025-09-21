@@ -16,6 +16,7 @@ function Pronunciation() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài học phát âm - EasyTalk";
         PronunciationService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);

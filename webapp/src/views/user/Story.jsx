@@ -18,6 +18,7 @@ function Story() {
     const pageLimit = 6;
 
     useEffect(() => {
+        document.title = "Bài học câu chuyện - EasyTalk";
         StoryService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
