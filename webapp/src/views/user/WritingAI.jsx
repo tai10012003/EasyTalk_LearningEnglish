@@ -27,9 +27,9 @@ function WritingAI() {
 
     const handleSubmit = async () => {
         const trimmedText = userText.trim();
-        if (!trimmedText) return alert("Vui lòng viết bài trước khi nộp.");
-        if (trimmedText.length < 100) {
-            return alert("Bài viết của bạn phải ít nhất 100 ký tự trước khi nộp.");
+        if (!trimmedText) return alert("Vui lòng viết bài trước khi nộp bài !!");
+        if (trimmedText.length < 200) {
+            return alert("Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài !!");
         }
         setIsSubmitting(true);
         try {

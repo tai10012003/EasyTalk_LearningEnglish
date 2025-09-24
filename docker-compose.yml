@@ -1,0 +1,18 @@
+version: "3.9"
+
+services:
+  backend:
+    build: ./apps
+    container_name: backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./apps/.env
+
+  frontend:
+    build: ./webapp
+    container_name: frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
