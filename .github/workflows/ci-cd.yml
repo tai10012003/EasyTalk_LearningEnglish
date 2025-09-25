@@ -1,0 +1,82 @@
+name: Learning English CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  ci-cd:
+    runs-on: ubuntu-latest
+    env:
+      BACKEND_IMAGE: taidepzai/backend
+      FRONTEND_IMAGE: taidepzai/frontend
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Node.js for tests
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # 3️⃣ Run backend tests
+      - name: Install backend dependencies
+        run: |
+          cd apps
+          npm ci
+
+      - name: Run backend tests
+        run: |
+          cd apps
+          npm test
+
+      # 4️⃣ Build frontend app
+      - name: Install frontend dependencies
+        run: |
+          cd webapp
+          npm ci
+
+      - name: Build frontend
+        run: |
+          cd webapp
+          npm run build
+
+      # 5️⃣ Login Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      # 6️⃣ Build & push backend image
+      - name: Build & push backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./apps
+          file: ./apps/Dockerfile
+          push: true
+          tags: |
+            ${{ env.BACKEND_IMAGE }}:latest
+            ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
+
+      # 7️⃣ Build & push frontend image
+      - name: Build & push frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./webapp
+          file: ./webapp/Dockerfile
+          push: true
+          tags: |
+            ${{ env.FRONTEND_IMAGE }}:latest
+            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
+
+      # 8️⃣ (Tùy chọn) Deploy sau này
+      # - name: Deploy to server
+      #   run: ssh user@server "docker pull taidepzai/backend:latest && docker pull taidepzai/frontend:latest && docker-compose up -d"
