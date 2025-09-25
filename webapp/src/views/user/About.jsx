@@ -1,7 +1,7 @@
 import {React, useEffect } from "react";
-import AboutLearning from '../../components/user/AboutLearning';
-import YourJourney from '../../components/user/YourJourney';
-import Testimonial from "../../components/user/about/Testimonial";
+import AboutLearning from '@/components/user/AboutLearning.jsx';
+import YourJourney from '@/components/user/YourJourney.jsx';
+import Testimonial from "@/components/user/about/Testimonial.jsx";
 
 function About() {
   useEffect(() => {

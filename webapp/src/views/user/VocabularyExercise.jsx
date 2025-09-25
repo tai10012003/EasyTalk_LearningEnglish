@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import VocabularyExerciseCard from "../../components/user/vocabularyexercise/VocabularyExerciseCard";
-import { VocabularyExerciseService } from "../../services/VocabularyExerciseService";
+import VocabularyExerciseCard from "@/components/user/vocabularyexercise/VocabularyExerciseCard.jsx";
+import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
 
 function VocabularyExercise() {
     const [exercises, setExercises] = useState([]);

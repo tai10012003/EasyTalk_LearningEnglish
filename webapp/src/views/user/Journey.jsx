@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import AchievementPanel from "../../components/user/AchievementPanel";
-import JourneyCard from "../../components/user/journey/JourneyCard";
-import LeaderboardPanel from "../../components/user/LeaderboardPanel";
-import { JourneyService } from "../../services/JourneyService";
+import AchievementPanel from "@/components/user/AchievementPanel.jsx";
+import JourneyCard from "@/components/user/journey/JourneyCard.jsx";
+import LeaderboardPanel from "@/components/user/LeaderboardPanel.jsx";
+import { JourneyService } from "@/services/JourneyService.jsx";
 
 function Journey() {
     const [journeys, setJourneys] = useState([]);

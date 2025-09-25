@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import PronunciationSentence from "../../components/user/pronunciation/PronunciationSentence";
-import PronunciationQuiz from "../../components/user/pronunciation/PronunciationQuiz";
-import PronunciationComplete from "../../components/user/pronunciation/PronunciationComplete";
-import { PronunciationService } from "../../services/PronunciationService";
+import PronunciationSentence from "@/components/user/pronunciation/PronunciationSentence.jsx";
+import PronunciationQuiz from "@/components/user/pronunciation/PronunciationQuiz.jsx";
+import PronunciationComplete from "@/components/user/pronunciation/PronunciationComplete.jsx";
+import { PronunciationService } from "@/services/PronunciationService.jsx";
 
 function PronunciationDetail() {
     const { id } = useParams();

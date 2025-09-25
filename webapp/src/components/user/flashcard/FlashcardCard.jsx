@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import UpdateFlashCard from "./UpdateFlashCard";
-import { FlashCardService } from "../../../services/FlashCardService";
+import UpdateFlashCard from "@/components/user/flashcard/UpdateFlashCard.jsx";
+import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);

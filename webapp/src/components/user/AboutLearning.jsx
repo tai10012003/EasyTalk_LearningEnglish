@@ -1,4 +1,5 @@
 import React from 'react';
+import learningenglish from "@/assets/images/learningenglish.png"
 
 function AboutLearning() {
   return (
@@ -7,7 +8,7 @@ function AboutLearning() {
             <div className="row">
                 <div className="col-md-7 col-lg-7">
                     <div className="learning_img">
-                        <img src="/src/assets/images/learningenglish.png" alt="Learning English Online" />
+                        <img src={learningenglish} alt="Learning English Online" />
                     </div>
                 </div>
                 <div className="col-md-5 col-lg-5">

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { UserProgressService } from "../../services/UserProgressService";
-import StudyCalendarStreak from "../../components/user/userprogress/StudyCalendarStreak";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
+import StudyCalendarStreak from "@/components/user/userprogress/StudyCalendarStreak.jsx";
 
 function UserStreak() {
     const [streakData, setStreakData] = useState(null);

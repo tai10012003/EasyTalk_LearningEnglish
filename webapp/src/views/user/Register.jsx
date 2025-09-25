@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import RegisterForm from '../../components/user/auth/RegisterForm';
-import Mascot from '../../components/user/auth/Mascot';
-import { AuthService } from '../../services/AuthService';
+import RegisterForm from '@/components/user/auth/RegisterForm.jsx';
+import Mascot from '@/components/user/auth/Mascot.jsx';
+import { AuthService } from '@/services/AuthService.jsx';
 
 function Register() {
   const [message, setMessage] = useState(null);

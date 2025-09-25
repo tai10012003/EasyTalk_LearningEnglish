@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlashCardService } from "../../../services/FlashCardService";
+import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const CreateFlashCardList = ({ isOpen, onClose, onCreated }) => {
     const [name, setName] = useState("");

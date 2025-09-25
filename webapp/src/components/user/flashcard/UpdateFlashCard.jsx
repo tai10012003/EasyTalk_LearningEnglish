@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlashCardService } from "../../../services/FlashCardService";
+import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
   const [word, setWord] = useState(flashcard.word || "");

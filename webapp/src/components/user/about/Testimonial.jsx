@@ -1,12 +1,17 @@
 import React from 'react';
+import phamductai from '@/assets/images/testimonial/phamductai.jpeg';
+import toandinh from '@/assets/images/testimonial/toandinh.jpeg';
+import lebao from '@/assets/images/testimonial/lebao.jpeg';
+import tohoangtuan from '@/assets/images/testimonial/tohoangtuan.jpeg';
+import kiet from '@/assets/images/testimonial/kiet.jpeg';
 
 function Testimonial() {
     const founders = [
-        { name: "Phạm Đức Tài", role: "Leader", img: "phamductai.jpeg", content:"Một sản phẩm rất tuyệt vời của chúng tôi"},
-        { name: "Đinh Cao Toàn", role: "BA/BM", img: "toandinh.jpeg", content:"Hy vọng dự án sẽ giúp mọi người học tiếng Anh tốt hơn"},
-        { name: "Lê Dương Chí Bảo", role: "Developer", img: "lebao.jpeg", content:"Quá chất lượng"},
-        { name: "Tô Hoàng Tuấn", role: "UI/UX", img: "tohoangtuan.jpeg", content:"Chúng tôi không ngừng nâng cấp và cải thiện sản phẩm"},
-        { name: "Phạm Tuấn Kiệt", role: "Tester", img: "kiet.jpeg", content:"Dự án này sẽ giúp ích rất nhiều cho việc học tập của mọi người"},
+        { name: "Phạm Đức Tài", role: "Leader", img: phamductai, content:"Một sản phẩm rất tuyệt vời của chúng tôi"},
+        { name: "Đinh Cao Toàn", role: "BA/BM", img: toandinh, content:"Hy vọng dự án sẽ giúp mọi người học tiếng Anh tốt hơn"},
+        { name: "Lê Dương Chí Bảo", role: "Developer", img: lebao, content:"Quá chất lượng"},
+        { name: "Tô Hoàng Tuấn", role: "UI/UX", img: tohoangtuan, content:"Chúng tôi không ngừng nâng cấp và cải thiện sản phẩm"},
+        { name: "Phạm Tuấn Kiệt", role: "Tester", img: kiet, content:"Dự án này sẽ giúp ích rất nhiều cho việc học tập của mọi người"},
     ];
 
     return (
@@ -26,7 +31,7 @@ function Testimonial() {
                     <div className="testimonial_slider_text">
                         <div className="testimonial_slider_img">
                             <img 
-                                src={`/src/assets/images/testimonial/${f.img}`} 
+                                src={f.img} 
                                 alt={f.name} 
                                 style={{ 
                                     width: "150px", 

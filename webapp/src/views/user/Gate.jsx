@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import AchievementPanel from "../../components/user/AchievementPanel";
-import GateCard from "../../components/user/gate/GateCard";
-import LeaderboardPanel from "../../components/user/LeaderboardPanel";
-import { GateService } from "../../services/GateService";
+import AchievementPanel from "@/components/user/AchievementPanel.jsx";
+import GateCard from "@/components/user/gate/GateCard.jsx";
+import LeaderboardPanel from "@/components/user/LeaderboardPanel.jsx";
+import { GateService } from "@/services/GateService.jsx";
 
 const Gate = () => {
     const [gates, setGates] = useState([]);

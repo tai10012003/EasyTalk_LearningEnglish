@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import logo from "@/assets/images/logo.png"
 
 function Footer() {
   const [email, setEmail] = useState('');
@@ -19,7 +20,7 @@ function Footer() {
           <div className="col-sm-6 col-md-4">
             <div className="single-footer-widget footer_1">
               <Link to="/">
-                <img src="/src/assets/images/logo.png" alt="logo" width="120" />
+                <img src={logo} alt="logo" width="120" />
               </Link>
               <p>
                 Khi tham gia EasyTalk, người dùng sẽ có trải nghiệm giao tiếp liền mạch. Cho dù đang học hay đang thực hành, nền tảng này sẽ hướng dẫn người học dễ dàng qua từng giai đoạn, đảm bảo tiến trình suôn sẻ và cải thiện đáng kể.

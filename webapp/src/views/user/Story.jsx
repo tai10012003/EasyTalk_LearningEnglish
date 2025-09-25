@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import StoryCard from "../../components/user/story/StoryCard";
-import { StoryService } from "../../services/StoryService";
+import StoryCard from "@/components/user/story/StoryCard.jsx";
+import { StoryService } from "@/services/StoryService.jsx";
 
 function Story() {
     const [allStories, setAllStories] = useState([]);

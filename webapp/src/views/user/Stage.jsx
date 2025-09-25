@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { StageService } from "../../services/StageService";
-import StageCarousel from "../../components/user/stage/StageCarousel";
-import StageResultScreen from "../../components/user/stage/StageResultScreen";
-import StageHistory from "../../components/user/stage/StageHistory";
+import { StageService } from "@/services/StageService.jsx";
+import StageCarousel from "@/components/user/stage/StageCarousel.jsx";
+import StageResultScreen from "@/components/user/stage/StageResultScreen.jsx";
+import StageHistory from "@/components/user/stage/StageHistory.jsx";
 
 const Stage = () => {
     const { id } = useParams();

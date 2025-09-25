@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import Menu from './components/user/Menu';
-import Footer from './components/user/Footer';
-import routes from "./routes";
-import LoadingScreen from './components/user/LoadingScreen';
+import Menu from '@/components/user/Menu.jsx';
+import Footer from '@/components/user/Footer.jsx';
+import routes from "@/routes";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 
 function Layout({ children }) {
   return (

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { GrammarExerciseService } from "../../services/GrammarExerciseService";
-import GrammarExerciseSidebar from "../../components/user/grammarexercise/GrammarExerciseSidebar";
-import GrammarExerciseCarousel from "../../components/user/grammarexercise/GrammarExerciseCarousel";
-import GrammarExerciseResultScreen from "../../components/user/grammarexercise/GrammarExerciseResultScreen";
-import GrammarExerciseHistory from "../../components/user/grammarexercise/GrammarExerciseHistory";
+import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
+import GrammarExerciseSidebar from "@/components/user/grammarexercise/GrammarExerciseSidebar.jsx";
+import GrammarExerciseCarousel from "@/components/user/grammarexercise/GrammarExerciseCarousel.jsx";
+import GrammarExerciseResultScreen from "@/components/user/grammarexercise/GrammarExerciseResultScreen.jsx";
+import GrammarExerciseHistory from "@/components/user/grammarexercise/GrammarExerciseHistory.jsx";
 
 const GrammarExerciseDetail = () => {
     const { id } = useParams();

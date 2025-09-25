@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import GrammarCard from "../../components/user/grammar/GrammarCard";
+import GrammarCard from "@/components/user/grammar/GrammarCard.jsx";
 import { useNavigate } from "react-router-dom";
-import { GrammarService } from "../../services/GrammarService";
+import { GrammarService } from "@/services/GrammarService.jsx";
 
 function Grammar() {
     const [allGrammars, setAllGrammars] = useState([]);

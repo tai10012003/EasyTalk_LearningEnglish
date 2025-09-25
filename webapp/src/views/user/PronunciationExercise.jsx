@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import PronunciationExerciseCard from "../../components/user/pronunciationexercise/PronunciationExerciseCard";
-import { PronunciationExerciseService } from "../../services/PronunciationExerciseService";
+import PronunciationExerciseCard from "@/components/user/pronunciationexercise/PronunciationExerciseCard.jsx";
+import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
 
 function PronunciationExercise() {
     const [exercises, setExercises] = useState([]);

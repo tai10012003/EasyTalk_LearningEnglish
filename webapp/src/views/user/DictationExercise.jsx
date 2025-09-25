@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import DictationExerciseCard from "../../components/user/dictationexercise/DictationExerciseCard";
-import { DictationExerciseService } from "../../services/DictationExerciseService";
+import DictationExerciseCard from "@/components/user/dictationexercise/DictationExerciseCard.jsx";
+import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 
 function DictationExercise() {
     const [exercises, setExercises] = useState([]);

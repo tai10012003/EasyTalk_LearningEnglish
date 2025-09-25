@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import DictationControls from "../../components/user/dictationexercise/DictationControls";
-import DictationComplete from "../../components/user/dictationexercise/DictationComplete";
-import DictationFullScript from "../../components/user/dictationexercise/DictationFullScript";
-import { DictationExerciseService } from "../../services/DictationExerciseService";
+import DictationControls from "@/components/user/dictationexercise/DictationControls.jsx";
+import DictationComplete from "@/components/user/dictationexercise/DictationComplete.jsx";
+import DictationFullScript from "@/components/user/dictationexercise/DictationFullScript.jsx";
+import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 
 function DictationExerciseDetail() {
     const { id } = useParams();

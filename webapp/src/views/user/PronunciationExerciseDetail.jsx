@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { PronunciationExerciseService } from "../../services/PronunciationExerciseService";
-import PronunciationExerciseSidebar from "../../components/user/pronunciationexercise/PronunciationExerciseSidebar";
-import PronunciationExerciseCarousel from "../../components/user/pronunciationexercise/PronunciationExerciseCarousel";
-import PronunciationExerciseResultScreen from "../../components/user/pronunciationexercise/PronunciationExerciseResultScreen";
-import PronunciationExerciseHistory from "../../components/user/pronunciationexercise/PronunciationExerciseHistory";
+import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
+import PronunciationExerciseSidebar from "@/components/user/pronunciationexercise/PronunciationExerciseSidebar.jsx";
+import PronunciationExerciseCarousel from "@/components/user/pronunciationexercise/PronunciationExerciseCarousel.jsx";
+import PronunciationExerciseResultScreen from "@/components/user/pronunciationexercise/PronunciationExerciseResultScreen.jsx";
+import PronunciationExerciseHistory from "@/components/user/pronunciationexercise/PronunciationExerciseHistory.jsx";
 
 const PronunciationExerciseDetail = () => {
     const { id } = useParams();

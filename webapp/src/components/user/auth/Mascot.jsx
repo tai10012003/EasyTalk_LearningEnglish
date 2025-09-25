@@ -1,5 +1,5 @@
 import React from 'react';
-import mascot from '/src/assets/images/mascot.png';
+import mascot from '@/assets/images/mascot.png';
 
 function Mascot() {
   return (

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import FlashCardListCard from "../../components/user/flashcardList/FlashCardListCard";
-import CreateFlashCardList from "../../components/user/flashcardList/CreateFlashCardList";
-import { FlashCardService } from "../../services/FlashCardService";
+import FlashCardListCard from "@/components/user/flashcardList/FlashCardListCard.jsx";
+import CreateFlashCardList from "@/components/user/flashcardList/CreateFlashCardList.jsx";
+import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const FlashCardList = () => {
     const [flashcards, setFlashcards] = useState([]);

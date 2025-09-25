@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FlashCardService } from "../../services/FlashCardService";
-import FlashCardReviewCard from "../../components/user/flashcard/FlashCardReviewCard";
+import { FlashCardService } from "@/services/FlashCardService.jsx";
+import FlashCardReviewCard from "@/components/user/flashcard/FlashCardReviewCard.jsx";
 
 const FlashCardReview = () => {
     const { id } = useParams();

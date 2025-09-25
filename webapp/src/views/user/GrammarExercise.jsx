@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import GrammarExerciseCard from "../../components/user/grammarexercise/GrammarExerciseCard";
-import { GrammarExerciseService } from "../../services/GrammarExerciseService";
+import GrammarExerciseCard from "@/components/user/grammarexercise/GrammarExerciseCard.jsx";
+import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 
 function GrammarExercise() {
     const [exercises, setExercises] = useState([]);

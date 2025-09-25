@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { PronunciationExerciseService } from "../../../services/PronunciationExerciseService";
+import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
 
 function buildDetailedAnalysis(correctSentence, transcription) {
     const correctWords = correctSentence

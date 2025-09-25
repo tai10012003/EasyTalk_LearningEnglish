@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import ChatAIMessage from "../../components/user/chatAI/ChatAIMessage";
-import ChatAIInput from "../../components/user/chatAI/ChatAIInput";
-import { ChatAIService } from "../../services/ChatAIService";
+import ChatAIMessage from "@/components/user/chatAI/ChatAIMessage.jsx";
+import ChatAIInput from "@/components/user/chatAI/ChatAIInput.jsx";
+import { ChatAIService } from "@/services/ChatAIService.jsx";
 
 function ChatAI() {
     const [messages, setMessages] = useState([]);

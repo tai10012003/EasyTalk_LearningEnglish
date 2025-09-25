@@ -1,4 +1,7 @@
 import React from 'react';
+import special_cource_1 from "@/assets/images/special_cource/special_cource_1.png";
+import special_cource_2 from "@/assets/images/special_cource/special_cource_2.png";
+import special_cource_3 from "@/assets/images/special_cource/special_cource_3.png";
 
 function SpecialCourse() {
   return (
@@ -10,7 +13,7 @@ function SpecialCourse() {
             <div className="row">
                 <div className="col-sm-6 col-lg-4">
                     <div className="single_special_cource">
-                        <img src="/src/assets/images/special_cource/special_cource_1.png" className="special_img" alt="Grammar Course" />
+                        <img src={special_cource_1} className="special_img" alt="Grammar Course" />
                         <div className="special_cource_text">
                             <a href="/grammar" className="btn_4">NGỮ PHÁP</a>
                             <a href="/grammar">
@@ -24,7 +27,7 @@ function SpecialCourse() {
                 </div>
                 <div className="col-sm-6 col-lg-4">
                     <div className="single_special_cource">
-                        <img src="/src/assets/images/special_cource/special_cource_2.png" className="special_img" alt="Vocabulary Course" />
+                        <img src={special_cource_2} className="special_img" alt="Vocabulary Course" />
                         <div className="special_cource_text">
                             <a href="/flashcards" className="btn_4">TỪ VỰNG</a>
                             <a href="/flashcards">
@@ -38,7 +41,7 @@ function SpecialCourse() {
                 </div>
                 <div className="col-sm-6 col-lg-4">
                     <div className="single_special_cource">
-                        <img src="/src/assets/images/special_cource/special_cource_3.png" className="special_img" alt="Pronunciation Course" />
+                        <img src={special_cource_3} className="special_img" alt="Pronunciation Course" />
                         <div className="special_cource_text">
                             <a href="/pronunciation" className="btn_4">PHÁT ÂM</a>
                             <a href="/pronunciation">

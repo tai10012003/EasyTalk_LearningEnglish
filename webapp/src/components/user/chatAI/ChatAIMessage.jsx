@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import user from "@/assets/images/user.png";
+import AI_chat from "@/assets/images/AI_chat.png";
 
 function ChatAIMessage({ message, speakingWordIndex }) {
     const { sender, text, suggestion } = message;
@@ -6,8 +8,8 @@ function ChatAIMessage({ message, speakingWordIndex }) {
 
     const avatarSrc =
         sender == "user"
-            ? "/src/assets/images/user.png"
-            : "/src/assets/images/AI_chat.png";
+            ? user
+            : AI_chat;
 
     const words =
         sender == "bot" && text

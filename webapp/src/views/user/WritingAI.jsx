@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { WritingAIService } from "../../services/WritingAIService";
-import WritingAIInput from "../../components/user/writingAI/WritingAIInput";
-import WritingAIResult from "../../components/user/writingAI/WritingAIResult";
+import { WritingAIService } from "@/services/WritingAIService.jsx";
+import WritingAIInput from "@/components/user/writingAI/WritingAIInput.jsx";
+import WritingAIResult from "@/components/user/writingAI/WritingAIResult.jsx";
 
 function WritingAI() {
     const [topic, setTopic] = useState("");

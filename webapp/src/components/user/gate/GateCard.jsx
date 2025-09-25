@@ -1,5 +1,5 @@
 import React from "react";
-import StageCard from "../stage/StageCard";
+import StageCard from "@/components/user/stage/StageCard.jsx";
 
 const GateCard = ({ gate }) => {
   return (

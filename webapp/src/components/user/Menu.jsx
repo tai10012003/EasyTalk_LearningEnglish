@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
-import { UserProgressService } from '../../services/UserProgressService';
+import { UserProgressService } from '@/services/UserProgressService.jsx';
+import logo from '@/assets/images/logo.png';
 
 const parseJwt = (token) => {
   try {
@@ -131,7 +132,7 @@ function Menu() {
             <div className="col-lg-12">
               <nav className="navbar">
                 <Link className="navbar-brand" to="/" onClick={handleLinkClick}>
-                  <img src="/src/assets/images/logo.png" alt="logo" width="75" />
+                  <img src={logo} alt="logo" width="75" />
                 </Link>
                 <button
                   className={`navbar-toggler ${menuOpen ? 'active' : ''}`}

@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { FlashCardService } from "../../services/FlashCardService";
-import FlashCardCard from "../../components/user/flashcard/FlashCardCard";
-import CreateFlashCard from "../../components/user/flashcard/CreateFlashCard";
-import UpdateFlashCardList from "../../components/user/flashcardList/UpdateFlashCardList";
+import FlashCardCard from "@/components/user/flashcard/FlashCardCard.jsx";
+import CreateFlashCard from "@/components/user/flashcard/CreateFlashCard.jsx";
+import UpdateFlashCardList from "@/components/user/flashcardList/UpdateFlashCardList.jsx";
 
 const FlashCard = () => {
   const { id } = useParams();

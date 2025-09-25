@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import PronunciationCard from "../../components/user/pronunciation/PronunciationCard";
+import PronunciationCard from "@/components/user/pronunciation/PronunciationCard.jsx";
 import { useNavigate } from "react-router-dom";
-import { PronunciationService } from "../../services/PronunciationService";
+import { PronunciationService } from "@/services/PronunciationService.jsx";
 
 function Pronunciation() {
     const [allPronunciations, setAllPronunciations] = useState([]);

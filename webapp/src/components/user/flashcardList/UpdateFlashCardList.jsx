@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { FlashCardService } from "../../../services/FlashCardService";
+import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
   const [name, setName] = useState(flashcardList.name || "");

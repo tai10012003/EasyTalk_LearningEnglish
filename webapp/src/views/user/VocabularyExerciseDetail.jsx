@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
-import { VocabularyExerciseService } from "../../services/VocabularyExerciseService";
-import VocabularyExerciseSidebar from "../../components/user/vocabularyexercise/VocabularyExerciseSidebar";
-import VocabularyExerciseCarousel from "../../components/user/vocabularyexercise/VocabularyExerciseCarousel";
-import VocabularyExerciseResultScreen from "../../components/user/vocabularyexercise/VocabularyExerciseResultScreen";
-import VocabularyExerciseHistory from "../../components/user/vocabularyexercise/VocabularyExerciseHistory";
+import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
+import VocabularyExerciseSidebar from "@/components/user/vocabularyexercise/VocabularyExerciseSidebar.jsx";
+import VocabularyExerciseCarousel from "@/components/user/vocabularyexercise/VocabularyExerciseCarousel.jsx";
+import VocabularyExerciseResultScreen from "@/components/user/vocabularyexercise/VocabularyExerciseResultScreen.jsx";
+import VocabularyExerciseHistory from "@/components/user/vocabularyexercise/VocabularyExerciseHistory.jsx";
 
 const VocabularyExerciseDetail = () => {
     const { id } = useParams();

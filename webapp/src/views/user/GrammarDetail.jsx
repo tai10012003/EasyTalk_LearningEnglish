@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import GrammarSentence from "../../components/user/grammar/GrammarSentence";
-import GrammarQuiz from "../../components/user/grammar/GrammarQuiz";
-import GrammarComplete from "../../components/user/grammar/GrammarComplete";
-import { GrammarService } from "../../services/GrammarService";
+import GrammarSentence from "@/components/user/grammar/GrammarSentence.jsx";
+import GrammarQuiz from "@/components/user/grammar/GrammarQuiz.jsx";
+import GrammarComplete from "@/components/user/grammar/GrammarComplete.jsx";
+import { GrammarService } from "@/services/GrammarService.jsx";
 
 function GrammarDetail() {
     const { id } = useParams();

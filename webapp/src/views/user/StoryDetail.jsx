@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
-import StorySentence from "../../components/user/story/StorySentence";
-import StoryQuiz from "../../components/user/story/StoryQuiz";
-import StoryComplete from "../../components/user/story/StoryComplete";
-import StoryVocabularyQuiz from "../../components/user/story/StoryVocabularyQuiz";
-import { StoryService } from "../../services/StoryService";
+import StorySentence from "@/components/user/story/StorySentence.jsx";
+import StoryQuiz from "@/components/user/story/StoryQuiz.jsx";
+import StoryComplete from "@/components/user/story/StoryComplete.jsx";
+import StoryVocabularyQuiz from "@/components/user/story/StoryVocabularyQuiz.jsx";
+import { StoryService } from "@/services/StoryService.jsx";
 
 function StoryDetail() {
     const { id } = useParams();

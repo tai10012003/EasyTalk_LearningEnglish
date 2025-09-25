@@ -1,9 +1,11 @@
 import React from 'react';
+import iconhappy from "@/assets/images/iconhappy.png";
+import iconsad from "@/assets/images/iconsad.png";
 
 const VocabularyExerciseResultScreen = ({ correctAnswers, totalQuestions, onRestart, onExit }) => {
     const incorrectAnswers = totalQuestions - correctAnswers;
     const percentageCorrect = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
-    const iconSrc = percentageCorrect >= 50 ? '/src/assets/images/iconhappy.png' : '/src/assets/images/iconsad.png';
+    const iconSrc = percentageCorrect >= 50 ? iconhappy : iconsad;
 
     return (
         <div className="exercise-result-screen text-center">

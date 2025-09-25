@@ -1,4 +1,7 @@
 import React from 'react';
+import blog1 from "@/assets/images/blog/single_blog_1.jpeg";
+import blog2 from "@/assets/images/blog/single_blog_2.png";
+import blog3 from "@/assets/images/blog/single_blog_3.png";
 
 function OurBlog() {
   return (
@@ -11,7 +14,7 @@ function OurBlog() {
                 <div className="col-sm-6 col-lg-4 col-xl-4">
                     <div className="single-home-blog">
                         <div className="card">
-                            <img src="/src/assets/images/blog/single_blog_1.jpeg" className="card-img-top" alt="blog" />
+                            <img src={blog1} className="card-img-top" alt="blog" />
                             <div className="card-body">
                                 <a href="/single-blog">
                                 <h5 className="section-tittle">Giao lưu văn hóa anh ngữ</h5>
@@ -24,7 +27,7 @@ function OurBlog() {
                 <div className="col-sm-6 col-lg-4 col-xl-4">
                     <div className="single-home-blog">
                         <div className="card">
-                            <img src="/src/assets/images/blog/single_blog_2.png" className="card-img-top" alt="blog" />
+                            <img src={blog2} className="card-img-top" alt="blog" />
                             <div className="card-body">
                                 <a href="/single-blog-1">
                                 <h5 className="section-tittle">Top 10 thí sinh lọt top cuộc thi tìm kiếm tài năng Anh-Việt</h5>
@@ -37,7 +40,7 @@ function OurBlog() {
                 <div className="col-sm-6 col-lg-4 col-xl-4">
                     <div className="single-home-blog">
                         <div className="card">
-                            <img src="/src/assets/images/blog/single_blog_3.png" className="card-img-top" alt="blog" />
+                            <img src={blog3} className="card-img-top" alt="blog" />
                             <div className="card-body">
                                 <a href="/single-blog-1">
                                 <h5 className="section-tittle">Ngành Ngôn ngữ Anh – con đường của sự đam mê ngoại ngữ Anh</h5>
