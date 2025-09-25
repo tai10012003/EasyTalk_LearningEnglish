@@ -11,7 +11,7 @@ import Grammar from "../views/user/Grammar";
 import GrammarDetail from "../views/user/GrammarDetail";
 import Pronunciation from "../views/user/Pronunciation";
 import PronunciationDetail from "../views/user/PronunciationDetail";
-import FlashCardList from "../views/user/FlashcardList";
+import FlashCardList from "../views/user/FlashCardList";
 import FlashCard from "../views/user/FlashCard";
 import FlashCardReview from "../views/user/FlashCardReview";
 import GrammarExercise from "../views/user/GrammarExercise";

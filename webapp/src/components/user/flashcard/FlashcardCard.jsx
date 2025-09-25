@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import UpdateFlashCard from "./UpdateFlashCard";
-import { FlashcardService } from "../../../services/flashcardService";
+import { FlashCardService } from "../../../services/FlashCardService";
 
 const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -8,7 +8,7 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
   const handleDelete = async () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa flashcard này không?")) {
       try {
-        const data = await FlashcardService.deleteFlashcard(flashcard._id);
+        const data = await FlashCardService.deleteFlashcard(flashcard._id);
         if (data.success) {
           alert("Flashcard đã bị xóa thành công!");
           onDelete();

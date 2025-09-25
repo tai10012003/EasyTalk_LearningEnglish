@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { FlashcardService } from "../../services/flashcardService";
-import FlashCardCard from "../../components/user/flashcard/FlashcardCard";
-import CreateFlashCard from "../../components/user/flashcard/CreateFlashcard";
+import { FlashCardService } from "../../services/FlashCardService";
+import FlashCardCard from "../../components/user/flashcard/FlashCardCard";
+import CreateFlashCard from "../../components/user/flashcard/CreateFlashCard";
 import UpdateFlashCardList from "../../components/user/flashcardList/UpdateFlashCardList";
 
 const FlashCard = () => {
@@ -22,7 +22,7 @@ const FlashCard = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await FlashcardService.fetchFlashcards(id, currentPage, limit);
+      const data = await FlashCardService.fetchFlashcards(id, currentPage, limit);
       setFlashcardList(data.flashcardList);
       setFlashcards(data.flashcards || []);
       setTotalPages(data.totalPages || 1);
@@ -42,7 +42,7 @@ const FlashCard = () => {
   const handleDeleteList = async () => {
     if (window.confirm("Bạn có chắc chắn muốn xóa danh sách từ này không?")) {
       try {
-        const data = await FlashcardService.deleteFlashcardList(id);
+        const data = await FlashCardService.deleteFlashcardList(id);
         if (data.success) {
           alert("Danh sách từ đã bị xóa");
           navigate("/flashcards");

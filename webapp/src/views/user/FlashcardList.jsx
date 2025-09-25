@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import FlashCardListCard from "../../components/user/flashcardList/FlashCardListCard";
 import CreateFlashCardList from "../../components/user/flashcardList/CreateFlashCardList";
-import { FlashcardService } from "../../services/flashcardService";
+import { FlashCardService } from "../../services/FlashCardService";
 
 const FlashCardList = () => {
     const [flashcards, setFlashcards] = useState([]);
@@ -14,7 +14,7 @@ const FlashCardList = () => {
     const loadFlashcards = async (page = currentPage) => {
         setIsLoading(true);
         try {
-            const data = await FlashcardService.fetchFlashcardLists(page, 3);
+            const data = await FlashCardService.fetchFlashcardLists(page, 3);
             setFlashcards(data.flashcardLists || []);
             setTotalPages(data.totalPages);
         } catch (err) {
@@ -26,7 +26,7 @@ const FlashCardList = () => {
 
     useEffect(() => {
         document.title = "Danh sách flashcard - EasyTalk";
-        FlashcardService.resetAlertFlag();
+        FlashCardService.resetAlertFlag();
         loadFlashcards(currentPage);
     }, [currentPage, activeTab]);
 

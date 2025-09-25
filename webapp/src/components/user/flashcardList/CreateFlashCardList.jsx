@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlashcardService } from "../../../services/flashcardService";
+import { FlashCardService } from "../../../services/FlashCardService";
 
 const CreateFlashCardList = ({ isOpen, onClose, onCreated }) => {
     const [name, setName] = useState("");
@@ -14,7 +14,7 @@ const CreateFlashCardList = ({ isOpen, onClose, onCreated }) => {
         }
         setLoading(true);
         try {
-            const data = await FlashcardService.createFlashcardList(name, description);
+            const data = await FlashCardService.createFlashcardList(name, description);
             if (data.success) {
                 alert("✅ Tạo danh sách flashcard thành công!");
                 setName("");

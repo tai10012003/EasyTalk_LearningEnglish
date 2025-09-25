@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FlashcardService } from "../../services/flashcardService";
+import { FlashCardService } from "../../services/FlashCardService";
 import FlashCardReviewCard from "../../components/user/flashcard/FlashCardReviewCard";
 
 const FlashCardReview = () => {
@@ -17,7 +17,7 @@ const FlashCardReview = () => {
         const load = async () => {
             setLoading(true);
             try {
-                const data = await FlashcardService.fetchReview(id);
+                const data = await FlashCardService.fetchReview(id);
                 setFlashcards(data.flashcards);
                 setListName(data.flashcardList.name);  
                 setCurrentIndex(0);

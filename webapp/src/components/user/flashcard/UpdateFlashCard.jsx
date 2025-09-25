@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FlashcardService } from "../../../services/flashcardService";
+import { FlashCardService } from "../../../services/FlashCardService";
 
 const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
   const [word, setWord] = useState(flashcard.word || "");
@@ -28,7 +28,7 @@ const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
         formData.append("image", image);
       }
 
-      const data = await FlashcardService.updateFlashcard(flashcard._id, formData);
+      const data = await FlashCardService.updateFlashcard(flashcard._id, formData);
 
       if (data.success) {
         alert("✅ Cập nhật flashcard thành công!");

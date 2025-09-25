@@ -2,7 +2,7 @@ const API_URL = "http://localhost:3000";
 
 let hasShownAlert = false;
 
-export const FlashcardService = {
+export const FlashCardService = {
     async fetchFlashcardLists(page = 1, limit = 6) {
         try {
             let query = `?page=${page}&limit=${limit}`;

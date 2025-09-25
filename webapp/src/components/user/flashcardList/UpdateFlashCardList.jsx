@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { FlashcardService } from "../../../services/flashcardService";
+import { FlashCardService } from "../../../services/FlashCardService";
 
 const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
   const [name, setName] = useState(flashcardList.name || "");
@@ -15,7 +15,7 @@ const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
     }
     setLoading(true);
     try {
-      const data = await FlashcardService.updateFlashcardList(flashcardList._id, name, description);
+      const data = await FlashCardService.updateFlashcardList(flashcardList._id, name, description);
       if (data.success) {
         alert("✅ Cập nhật danh sách flashcard thành công!");
         onUpdated();

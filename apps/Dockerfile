@@ -1,18 +1,14 @@
-# Sử dụng Node.js image
-FROM node:18
-
-# Tạo thư mục app
+# Stage 1: Dependencies
+FROM node:18-alpine AS deps
 WORKDIR /app
-
-# Copy file cấu hình và cài dependencies
+RUN apk add --no-cache python3 make g++
 COPY package*.json ./
-RUN npm install --production
+RUN npm ci --omit=dev
 
-# Copy toàn bộ source backend
+# Stage 2: Runtime
+FROM node:18-alpine
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
-# Expose port
 EXPOSE 3000
-
-# Run app
 CMD ["npm", "start"]
