@@ -12,8 +12,8 @@ jobs:
   ci-cd:
     runs-on: ubuntu-latest
     env:
-      BACKEND_IMAGE: taidepzai/backend
-      FRONTEND_IMAGE: taidepzai/frontend
+      BACKEND_IMAGE: taidepzai/backend_learningenglish
+      FRONTEND_IMAGE: taidepzai/frontend_learningenglish
 
     steps:
       # 1️⃣ Checkout code

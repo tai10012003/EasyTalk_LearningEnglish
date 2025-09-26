@@ -3,7 +3,7 @@ version: "3.9"
 services:
   backend:
     build: ./apps
-    image: taidepzai/backend:latest
+    image: taidepzai/backend_learningenglish:latest
     container_name: backend
     ports:
       - "3000:3000"
@@ -12,7 +12,7 @@ services:
 
   frontend:
     build: ./webapp
-    image: taidepzai/frontend:latest
+    image: taidepzai/frontend_learningenglish:latest
     container_name: frontend
     ports:
       - "5173:80"
