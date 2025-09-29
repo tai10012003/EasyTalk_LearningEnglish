@@ -16,17 +16,17 @@ jobs:
       FRONTEND_IMAGE: taidepzai/frontend_learningenglish
 
     steps:
-      # 1️⃣ Checkout code
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up Node.js for tests
+      # 2️⃣ Set up Node.js for build
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # 3️⃣ Run backend tests
+      # 3️⃣ Build & test backend (nếu có test)
       - name: Install backend dependencies
         run: |
           cd apps
@@ -39,9 +39,7 @@ jobs:
       - name: Skip backend tests
         run: echo "Skipping backend tests (no tests defined yet)"
 
-
-
-      # 4️⃣ Build frontend app
+      # 4️⃣ Build frontend
       - name: Install frontend dependencies
         run: |
           cd webapp
@@ -59,7 +57,7 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 6️⃣ Build & push backend image
+      # 6️⃣ Build & push backend Docker image
       - name: Build & push backend Docker image
         uses: docker/build-push-action@v5
         with:
@@ -70,7 +68,7 @@ jobs:
             ${{ env.BACKEND_IMAGE }}:latest
             ${{ env.BACKEND_IMAGE }}:${{ github.sha }}
 
-      # 7️⃣ Build & push frontend image
+      # 7️⃣ Build & push frontend Docker image
       - name: Build & push frontend Docker image
         uses: docker/build-push-action@v5
         with:
@@ -81,6 +79,25 @@ jobs:
             ${{ env.FRONTEND_IMAGE }}:latest
             ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
 
-      # 8️⃣ (Tùy chọn) Deploy sau này
-      # - name: Deploy to server
-      #   run: ssh user@server "docker pull taidepzai/backend:latest && docker pull taidepzai/frontend:latest && docker-compose up -d"
+      # 8️⃣ Deploy lên EC2
+      - name: Deploy to EC2
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_USER: ${{ secrets.EC2_USER }}
+        run: |
+          # Decode key và lưu tạm
+          echo "${{ secrets.EC2_KEY }}" | base64 --decode > ec2_key.pem
+          chmod 600 ec2_key.pem
+
+          ssh -o StrictHostKeyChecking=no -i ec2_key.pem $EC2_USER@$EC2_HOST << 'EOF'
+            cd ~/EasyTalk_LearningEnglish || exit
+            echo "Pull latest Docker images"
+            docker pull taidepzai/backend_learningenglish:latest
+            docker pull taidepzai/frontend_learningenglish:latest
+
+            echo "Stop current containers if running"
+            docker-compose down
+
+            echo "Start containers with new images"
+            docker-compose up -d
+          EOF

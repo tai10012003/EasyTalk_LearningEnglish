@@ -41,6 +41,7 @@ const PronunciationExerciseCarousel = ({
     const currentQuestion = questions[currentQuestionIndex];
     const isQuestionAnswered = questionResults[currentQuestionIndex]?.userAnswer !== "Chưa trả lời";
     const [micError, setMicError] = useState(null);
+    const [userAnswers, setUserAnswers] = useState({});
     const [pronunciationAttempts, setPronunciationAttempts] = useState({});
 
     const getQuestionTitle = () => {
@@ -132,6 +133,13 @@ const PronunciationExerciseCarousel = ({
         onAnswerSubmit(questionIndex, userAnswer, isCorrect);
     }, [currentQuestionIndex, currentQuestion, onAnswerSubmit]);
 
+    const handleAnswerChange = useCallback((value) => {
+        setUserAnswers(prev => ({
+            ...prev,
+            [currentQuestionIndex]: value
+        }));
+    }, [currentQuestionIndex]);
+
     const handleNext = () => {
         if (currentQuestionIndex < questions.length - 1) onQuestionNavigation(currentQuestionIndex + 1);
     };
@@ -172,6 +180,7 @@ const PronunciationExerciseCarousel = ({
                                             id={`exercise-option-${optIndex}-${currentQuestionIndex}`}
                                             checked={userAnswers[currentQuestionIndex] == option}
                                             disabled={isQuestionAnswered || isCompleted}
+                                            onChange={() => handleAnswerChange(option)}
                                         />
                                         <label
                                             className={`exercise-form-check-label ${
