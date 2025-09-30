@@ -16,9 +16,10 @@ function Login() {
       // console.log("Login response:", data);
       // console.log("Token nhận được:", data.token);
       localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
       setMessage({ type: "success", text: "Đăng nhập thành công !!" });
       setTimeout(() => {
-        window.location.href = data.role == "admin" ? "/admin" : "/";
+        window.location.href = data.role == "admin" ? "/admin/dashboard" : "/";
       }, 1000);
     } catch (error) {
       setMessage({ type: "error", text: error.message });

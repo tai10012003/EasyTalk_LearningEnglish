@@ -2,10 +2,10 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 
 function NotFound() {
-  
   useEffect(() => {
     document.title = "404 - EasyTalk";
   }, []);
+  
   return (
     <div className="notfound-container">
       <h1 className="notfound-title">404</h1>
