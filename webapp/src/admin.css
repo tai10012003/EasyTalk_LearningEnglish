@@ -573,17 +573,10 @@
 }
 
 .admin-dashboard-title {
-  font-size: 32px;
-  margin-bottom: 30px;
-  color: #1e293b;
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
   text-align: center;
-  font-weight: 700;
-}
-
-.admin-dashboard-subtitle {
-  font-size: 16px;
-  color: #64748b;
-  margin-bottom: 30px;
 }
 
 .admin-dashboard-cards {
@@ -729,6 +722,7 @@
   }
 }
 
+/* === NOT FOUND === */
 .admin-notfound-container {
   display: flex;
   flex-direction: column;
@@ -773,4 +767,507 @@
 .admin-notfound-button:hover {
   background: linear-gradient(90deg, #3742fa, #1e90ff);
   transform: scale(1.05);
+}
+
+/* === COMMON LESSON === */
+.admin-lesson-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-lesson-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-lesson-add {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.admin-lesson-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-lesson-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-lesson-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-lesson-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-lesson-table th,
+.admin-lesson-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-lesson-table th:last-child,
+.admin-lesson-table td:last-child {
+  border-right: none;
+}
+
+.admin-lesson-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-lesson-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-lesson-image {
+  width: 120px;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.admin-lesson-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-lesson-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin: 11px 0;
+}
+
+.admin-lesson-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-lesson-btn-delete {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+  margin: 11px 0;
+}
+
+.admin-lesson-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-lesson-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-lesson-page-item {
+  display: inline-block;
+}
+
+.admin-lesson-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-lesson-page-item.active .admin-lesson-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-lesson-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-lesson-table {
+    min-width: 600px;
+  }
+  .admin-lesson-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-lesson-table {
+    min-width: 100%;
+  }
+  .admin-lesson-title {
+    font-size: 20px;
+  }
+  .admin-lesson-actions button,
+  .admin-lesson-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* === ADD LESSON === */
+.admin-lesson-add-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-lesson-add-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-lesson-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-lesson-add-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-lesson-add-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-lesson-add-group input[type="text"],
+.admin-lesson-add-group select,
+.admin-lesson-add-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-lesson-add-group input[type="text"]:focus,
+.admin-lesson-add-group select:focus,
+.admin-lesson-add-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-lesson-add-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-lesson-add-group input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #555;
+}
+
+.admin-lesson-add-group input[type="file"]:hover {
+  border-color: #4a90e2;
+  background-color: #f0f8ff;
+  color: #222;
+}
+
+.admin-lesson-add-group input[type="file"]:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.admin-lesson-add-question {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fafafa;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.admin-lesson-add-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-lesson-add-question-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.admin-lesson-add-question-header .btn-danger {
+  background: #e74c3c;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.admin-lesson-add-question-header .btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.admin-lesson-add-question-header .btn-danger:active {
+  transform: translateY(0px);
+}
+
+#admin-lesson-add-btn-add-question,
+.admin-lesson-add-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+#admin-lesson-add-btn-add-question {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff;
+}
+
+#admin-lesson-add-btn-add-question:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+.admin-lesson-add-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-lesson-add-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-lesson-add-btn:active {
+  transform: translateY(0px);
+}
+
+
+
+/* === UPDATE LESSON === */
+.admin-lesson-update-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-lesson-update-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-lesson-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-lesson-update-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-lesson-update-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-lesson-update-group input[type="text"],
+.admin-lesson-update-group select,
+.admin-lesson-update-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-lesson-update-group input[type="text"]:focus,
+.admin-lesson-update-group select:focus,
+.admin-lesson-update-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-lesson-update-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-lesson-update-group input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #555;
+}
+
+.admin-lesson-update-group input[type="file"]:hover {
+  border-color: #4a90e2;
+  background-color: #f0f8ff;
+  color: #222;
+}
+
+.admin-lesson-update-group input[type="file"]:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.admin-lesson-update-question {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fafafa;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.admin-lesson-update-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-lesson-update-question-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.admin-lesson-update-question-header .btn-danger {
+  background: #e74c3c;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.admin-lesson-update-question-header .btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.admin-lesson-update-question-header .btn-danger:active {
+  transform: translateY(0px);
+}
+
+#admin-lesson-update-btn-add-question,
+.admin-lesson-update-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+#admin-lesson-update-btn-add-question {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff;
+}
+
+#admin-lesson-update-btn-add-question:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+.admin-lesson-update-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-lesson-update-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-lesson-update-btn:active {
+  transform: translateY(0px);
 }

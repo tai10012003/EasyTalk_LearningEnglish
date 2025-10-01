@@ -38,15 +38,49 @@ class GrammarsService {
     }
 
     async insertGrammar(grammar) {
-        grammar.createdAt = new Date();
-        return await this.grammarsCollection.insertOne(grammar);
+        const newGrammar = {
+            title: grammar.title,
+            description: grammar.description,
+            content: grammar.content,
+            images: grammar.images,
+            quizzes: [],
+            createdAt: new Date()
+        };
+        if (grammar.quizzes && Array.isArray(grammar.quizzes)) {
+            grammar.quizzes.forEach(question => {
+                newGrammar.quizzes.push({
+                    question: question.question,
+                    type: question.type,
+                    correctAnswer: question.correctAnswer,
+                    explanation: question.explanation || "",
+                    options: question.options || []
+                });
+            });
+        }
+        return await this.grammarsCollection.insertOne(newGrammar);
     }
 
-    async updateGrammar(grammar) {
-        return await this.grammarsCollection.updateOne(
-            { _id: new ObjectId(grammar._id) },
-            { $set: grammar }
-        );
+    async updateGrammar(id, grammar) {
+        const objectId = new ObjectId(id);
+        const formattedQuestions = grammar.quizzes.map((question) => {
+            return {
+                question: question.question,
+                type: question.type,
+                correctAnswer: question.correctAnswer,
+                explanation: question.explanation || "",
+                options: question.options || [],
+            };
+        });
+        const update = {
+            title: grammar.title.trim(),
+            description: grammar.description.trim(),
+            content: grammar.content.trim(),
+            images: grammar.images.trim(),
+            quizzes: formattedQuestions,
+            updatedAt: new Date(),
+        };
+        const result = await this.grammarsCollection.updateOne({ _id: objectId }, { $set: update });
+        return result.modifiedCount > 0;
     }
 
     async deleteGrammar(id) {

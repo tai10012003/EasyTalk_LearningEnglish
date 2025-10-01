@@ -1,0 +1,297 @@
+import React, { useState, useEffect } from "react";
+
+const UpdateLesson = ({ onSubmit, title, initialData }) => {
+    const [formData, setFormData] = useState({
+        title: "",
+        description: "",
+        content: "",
+        type: "",
+        image: null,
+        quizzes: [],
+    });
+
+    useEffect(() => {
+        if (initialData) {
+            setFormData({
+                title: initialData.title || "",
+                description: initialData.description || "",
+                content: initialData.content || "",
+                type: initialData.type || "",
+                image: null,
+                quizzes: initialData.quizzes || [],
+            });
+        }
+    }, [initialData]);
+
+    const handleChange = (e) => {
+        const { name, value, files } = e.target;
+        setFormData((prev) => ({
+            ...prev,
+            [name]: files ? files[0] : value,
+        }));
+    };
+
+    const handleAddQuestion = () => {
+        if (!formData.type) {
+            alert("Vui lòng chọn loại bài tập trước khi thêm!");
+            return;
+        }
+        const newQuestion = {
+            type: formData.type,
+            question: "",
+            correctAnswer: "",
+            explanation: "",
+            options: formData.type == "multiple-choice" ? ["", "", "", ""] : [],
+        };
+        setFormData((prev) => ({
+            ...prev,
+            quizzes: [...prev.quizzes, newQuestion],
+        }));
+    };
+
+    const handleDeleteQuestion = (index) => {
+        const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này không?");
+        if (!confirmDelete) return;
+        const updated = formData.quizzes.filter((_, i) => i !== index);
+        setFormData((prev) => ({ ...prev, quizzes: updated }));
+    };
+
+    const handleQuestionChange = (index, field, value) => {
+        setFormData((prevData) => {
+            const newQuizzes = [...prevData.quizzes];
+            const question = { ...newQuizzes[index] };
+            if (field == "type") {
+                question.type = value;
+                question.question = "";
+                question.correctAnswer = "";
+                question.explanation = "";
+                question.options = value == "multiple-choice" ? ["", "", "", ""] : [];
+            } else {
+                question[field] = value;
+            }
+            newQuizzes[index] = question;
+            return { ...prevData, quizzes: newQuizzes };
+        });
+    };
+
+    const handleOptionChange = (qIndex, oIndex, value) => {
+        const updated = [...formData.quizzes];
+        updated[qIndex].options[oIndex] = value;
+        setFormData((prev) => ({ ...prev, quizzes: updated }));
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        for (const q of formData.quizzes) {
+            if (q.type == "multiple-choice") {
+                const filledOptions = q.options.filter((opt) => opt.trim() !== "");
+                if (filledOptions.length < 2) {
+                    alert("Mỗi câu trắc nghiệm phải có ít nhất 2 lựa chọn hợp lệ!");
+                    return;
+                }
+            }
+        }
+        const dataToSubmit = new FormData();
+        dataToSubmit.append("title", formData.title);
+        dataToSubmit.append("description", formData.description);
+        dataToSubmit.append("content", formData.content);
+        dataToSubmit.append("type", formData.type);
+        if (formData.image) {
+            dataToSubmit.append("image", formData.image);
+        }
+        dataToSubmit.append("quizzes", JSON.stringify(formData.quizzes));
+        onSubmit(dataToSubmit, initialData._id);
+    };
+
+    return (
+        <div className="admin-lesson-update-container">
+            <h1 className="admin-lesson-update-title">{title}</h1>
+            <form
+                id="admin-lesson-update-form"
+                className="admin-lesson-update-form"
+                onSubmit={handleSubmit}
+            >
+                <div className="admin-lesson-update-group">
+                    <label htmlFor="admin-lesson-update-title">Tiêu đề:</label>
+                    <input
+                        type="text"
+                        id="admin-lesson-update-title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                        className="form-control"
+                    />
+                </div>
+                <div className="admin-lesson-update-group">
+                    <label htmlFor="admin-update-lesson-description">Mô tả:</label>
+                    <textarea
+                        id="admin-update-lesson-description"
+                        name="description"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                        className="form-control"
+                    ></textarea>
+                </div>
+                <div className="admin-lesson-update-group">
+                    <label htmlFor="admin-update-lesson-content">Nội dung:</label>
+                    <textarea
+                        id="admin-update-lesson-content"
+                        name="content"
+                        rows="10"
+                        value={formData.content}
+                        onChange={handleChange}
+                        required
+                        className="form-control"
+                    ></textarea>
+                </div>
+                <div className="admin-lesson-update-group admin-lesson-update-image">
+                    <label htmlFor="admin-update-lesson-image">Hình ảnh:</label>
+                    <input
+                        type="file"
+                        id="admin-update-lesson-image"
+                        name="image"
+                        accept="image/*"
+                        onChange={handleChange}
+                    />
+                    {initialData?.images && (
+                        <div className="mt-2">
+                            <small>Ảnh hiện tại:</small>
+                            <br />
+                            <img src={initialData.images} alt="current" width="150" />
+                        </div>
+                    )}
+                </div>
+                <div id="admin-lesson-update-questions" className="mt-3">
+                    {formData.quizzes.map((q, index) => (
+                        <div key={index} className="admin-lesson-update-question">
+                            <div className="admin-lesson-update-question-header">
+                                <h5>
+                                    Câu hỏi {index + 1} (
+                                    {q.type == "multiple-choice"
+                                        ? "Trắc nghiệm"
+                                        : "Điền vào chỗ trống"}
+                                    )
+                                </h5>
+                                <button
+                                    type="button"
+                                    className="btn btn-danger btn-sm"
+                                    onClick={() => handleDeleteQuestion(index)}
+                                >
+                                    Xóa
+                                </button>
+                            </div>
+                            <div className="admin-lesson-update-group">
+                                <label>Câu hỏi:</label>
+                                <input
+                                    type="text"
+                                    value={q.question}
+                                    onChange={(e) => handleQuestionChange(index, "question", e.target.value)}
+                                    className="form-control"
+                                    required
+                                />
+                            </div>
+                            <div className="admin-lesson-update-group">
+                                <label>Đổi loại bài tập:</label>
+                                <select
+                                    value={q.type}
+                                    onChange={(e) =>
+                                        handleQuestionChange(index, "type", e.target.value)
+                                    }
+                                    className="form-control"
+                                    required
+                                >
+                                    <option value="">Chọn loại</option>
+                                    <option value="multiple-choice">Trắc nghiệm</option>
+                                    <option value="fill-in-the-blank">Điền vào chỗ trống</option>
+                                </select>
+                            </div>
+                            {q.type == "multiple-choice" && (
+                                <div className="admin-lesson-update-group">
+                                    <label>Lựa chọn:</label>
+                                    {q.options.map((opt, oIndex) => (
+                                        <input
+                                            key={oIndex}
+                                            type="text"
+                                            placeholder={`Lựa chọn ${oIndex + 1}`}
+                                            value={opt}
+                                            onChange={(e) =>
+                                                handleOptionChange(index, oIndex, e.target.value)
+                                            }
+                                            className="form-control"
+                                        />
+                                    ))}
+                                </div>
+                            )}
+                            <div className="admin-lesson-update-group">
+                                <label>Đáp án chính xác:</label>
+                                <input
+                                    type="text"
+                                    value={q.correctAnswer}
+                                    onChange={(e) =>
+                                        handleQuestionChange(index, "correctAnswer", e.target.value)
+                                    }
+                                    className="form-control"
+                                    required
+                                />
+                            </div>
+
+                            <div className="admin-lesson-update-group">
+                                <label>Giải thích:</label>
+                                <textarea
+                                    value={q.explanation}
+                                    onChange={(e) =>
+                                        handleQuestionChange(index, "explanation", e.target.value)
+                                    }
+                                    className="form-control"
+                                    required
+                                ></textarea>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {initialData.updatedAt && (
+                    <div className="admin-lesson-update-group">
+                        <label>Cập nhật gần nhất:</label>
+                        <p className="form-control-plaintext">
+                            {new Date(initialData.updatedAt).toLocaleString("vi-VN")}
+                        </p>
+                    </div>
+                )}
+                <div className="admin-lesson-update-group">
+                    <label htmlFor="admin-lesson-update-type">
+                        Chọn loại bài tập (khi thêm mới):
+                    </label>
+                    <select
+                        id="admin-lesson-update-type"
+                        name="type"
+                        value={formData.type}
+                        onChange={handleChange}
+                        className="form-control"
+                    >
+                        <option value="">Chọn loại</option>
+                        <option value="multiple-choice">Trắc nghiệm</option>
+                        <option value="fill-in-the-blank">Điền vào chỗ trống</option>
+                    </select>
+                </div>
+                <button
+                    type="button"
+                    id="admin-lesson-update-btn-add-question"
+                    className="btn btn-secondary mt-3"
+                    onClick={handleAddQuestion}
+                >
+                    Thêm câu hỏi
+                </button>
+                <button
+                    type="submit"
+                    className="btn btn-primary admin-lesson-update-btn mt-3"
+                >
+                    Cập nhật
+                </button>
+            </form>
+        </div>
+    );
+};
+
+export default UpdateLesson;

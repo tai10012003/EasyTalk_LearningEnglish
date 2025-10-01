@@ -1,0 +1,48 @@
+import React, { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import UpdateLesson from "../../components/admin/UpdateLesson";
+import { GrammarService } from "@/services/GrammarService.jsx";
+
+const UpdateGrammar = () => {
+    const { id } = useParams();
+    const [grammar, setGrammar] = useState(null);
+
+    useEffect(() => {
+        const fetchGrammar = async () => {
+            try {
+                const token = localStorage.getItem("token");
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/grammar/api/${id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                const data = await res.json();
+                setGrammar(data);
+            } catch (err) {
+                console.error("Error fetching grammar:", err);
+            }
+        };
+        fetchGrammar();
+    },  [id]);
+
+    const handleSubmit = async (formData, id) => {
+        try {
+            await GrammarService.updateGrammar(id, formData);
+            alert("Cập nhật bài luyện tập ngữ pháp thành công!");
+            window.location.href = "/admin/grammar";
+        } catch (err) {
+            console.error("Error updating grammar:", err);
+            alert("Có lỗi khi cập nhật!");
+        }
+    };
+
+    if (!grammar) return <p>Đang tải dữ liệu...</p>;
+
+    return (
+        <UpdateLesson
+            title="CẬP NHẬT BÀI LUYỆN TẬP NGỮ PHÁP"
+            onSubmit={handleSubmit}
+            initialData={grammar}
+        />
+    );
+};
+
+export default UpdateGrammar;
