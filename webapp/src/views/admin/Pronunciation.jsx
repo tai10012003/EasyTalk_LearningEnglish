@@ -13,7 +13,7 @@ function Pronunciation() {
     };
 
     const deletePronunciation = async (id) => {
-        return await GrammarService.deleteGrammar(id);
+        return await PronunciationService.deletePronunciation(id);
     };
 
     return (
@@ -24,6 +24,7 @@ function Pronunciation() {
                 title="DANH SÁCH BÀI HỌC PHÁT ÂM"
                 dataKey="lessons"
                 addUrl="/admin/pronunciation/add"
+                updateUrl="/admin/pronunciation/update"
             />
         </div>
     );

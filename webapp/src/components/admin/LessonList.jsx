@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-function LessonList({ fetchData, deleteItem, title, dataKey, addUrl }) {
+function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
     const [lessons, setLessons] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -116,20 +116,20 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl }) {
                                             <td>
                                                 {lesson.images ? (
                                                     <img
-                                                    src={lesson.images}
-                                                    alt={lesson.title}
-                                                    className="admin-lesson-image"
+                                                        src={lesson.images}
+                                                        alt={lesson.title}
+                                                        className="admin-lesson-image"
                                                     />
                                                 ) : (
                                                     "Không có hình ảnh"
                                                 )}
                                             </td>
                                             <td>{lesson.title}</td>
-                                            <td>{lesson.description?.length > 50 ? `${lesson.description.slice(0,80)} ...` : lesson.description}</td>
+                                            <td>{lesson.description.length > 50 ? `${lesson.description.slice(0,80)} ...` : lesson.description}</td>
                                             <td>{createdAt}</td>
                                             <td className="admin-lesson-actions">
                                                 <a
-                                                    href={`/admin/grammar/update/${lesson._id}`}
+                                                    href={`${updateUrl}/${lesson._id}`}
                                                     className="admin-lesson-btn-edit"
                                                 >
                                                     Sửa

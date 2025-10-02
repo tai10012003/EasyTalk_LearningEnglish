@@ -24,6 +24,7 @@ function Grammar() {
                 title="DANH SÁCH BÀI HỌC NGỮ PHÁP"
                 dataKey="lessons"
                 addUrl="/admin/grammar/add"
+                updateUrl="/admin/grammar/update"
             />
         </div>
     );

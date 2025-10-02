@@ -1,5 +1,7 @@
 const { ObjectId } = require('mongodb');
 const config = require("./../config/setting.json");
+const fs = require("fs");
+const path = require("path");
 
 class StoryService {
     databaseConnection = require('./../database/database');
@@ -13,6 +15,8 @@ class StoryService {
         this.client = this.databaseConnection.getMongoClient();
         this.storyDatabase = this.client.db(config.mongodb.database);
         this.storyCollection = this.storyDatabase.collection("stories");
+        this.imageFolder = path.join(__dirname, "../public/images/story");
+        if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
 
     async getStoryList(page = 1, limit = 6, category = "", level = "", search = "") {
@@ -118,6 +122,24 @@ class StoryService {
             console.error("Error in deleteStory:", error);
             throw new Error("Error deleting story");
         }
+    }
+
+    getNextImageFilename(ext) {
+        const files = fs.readdirSync(this.imageFolder)
+            .filter(f => f.startsWith("story-"));
+        const numbers = files
+            .map(f => parseInt(f.match(/^story-(\d+)\./)?.[1]))
+            .filter(n => !isNaN(n))
+            .sort((a, b) => a - b);
+        let nextNumber = 1;
+        for (let i = 0; i < numbers.length; i++) {
+            if (numbers[i] !== i + 1) {
+                nextNumber = i + 1;
+                break;
+            }
+            nextNumber = numbers.length + 1;
+        }
+        return `story-${nextNumber}${ext}`;
     }
 }
 

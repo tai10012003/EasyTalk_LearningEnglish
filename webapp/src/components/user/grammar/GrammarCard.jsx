@@ -7,7 +7,7 @@ function GrammarCard({ grammar, isLocked }) {
             <div className={`lesson-card ${isLocked ? "locked" : ""}`}>
                 {grammar.images ? (
                 <img
-                    src={`data:image/jpeg;base64,${grammar.images}`}
+                    src={`${grammar.images}`}
                     alt={grammar.title}
                     className="lesson-image"
                 />

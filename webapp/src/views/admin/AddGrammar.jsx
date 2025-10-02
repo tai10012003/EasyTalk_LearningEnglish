@@ -6,16 +6,16 @@ const AddGrammar = () => {
     const handleSubmit = async (data) => {
         try {
             const res = await GrammarService.addGrammar(data);
-            alert("Bài luyện tập ngữ pháp đã được thêm thành công!");
+            alert("Bài học ngữ pháp đã được thêm thành công!");
             window.location.href = "/admin/grammar";
             return res;
         } catch (err) {
             console.error("Error adding grammar:", err);
-            alert("Có lỗi xảy ra khi thêm bài luyện tập ngữ pháp!");
+            alert("Có lỗi xảy ra khi thêm bài học ngữ pháp!");
         }
     };
     
-    return <AddLesson onSubmit={handleSubmit} title="THÊM BÀI LUYỆN TẬP NGỮ PHÁP" />;
+    return <AddLesson onSubmit={handleSubmit} returnUrl="/admin/grammar" title="THÊM BÀI HỌC NGỮ PHÁP" />;
 };
 
 export default AddGrammar;

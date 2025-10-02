@@ -1,5 +1,7 @@
 const { ObjectId } = require('mongodb');
 var config = require("./../config/setting.json");
+const fs = require("fs");
+const path = require("path");
 
 class GrammarsService {
     databaseConnection = require('./../database/database');
@@ -13,6 +15,8 @@ class GrammarsService {
         this.client = this.databaseConnection.getMongoClient();
         this.grammarsDatabase = this.client.db(config.mongodb.database);
         this.grammarsCollection = this.grammarsDatabase.collection("grammars");
+        this.imageFolder = path.join(__dirname, "../public/images/grammar");
+        if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
 
     async getGrammarList(page = 1, limit = 5, search = "") {
@@ -85,6 +89,24 @@ class GrammarsService {
 
     async deleteGrammar(id) {
         return await this.grammarsCollection.deleteOne({ "_id": new ObjectId(id) });
+    }
+
+    getNextImageFilename(ext) {
+        const files = fs.readdirSync(this.imageFolder)
+            .filter(f => f.startsWith("grammar-"));
+        const numbers = files
+            .map(f => parseInt(f.match(/^grammar-(\d+)\./)?.[1]))
+            .filter(n => !isNaN(n))
+            .sort((a, b) => a - b);
+        let nextNumber = 1;
+        for (let i = 0; i < numbers.length; i++) {
+            if (numbers[i] !== i + 1) {
+                nextNumber = i + 1;
+                break;
+            }
+            nextNumber = numbers.length + 1;
+        }
+        return `grammar-${nextNumber}${ext}`;
     }
 }
 

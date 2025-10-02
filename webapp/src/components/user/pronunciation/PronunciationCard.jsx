@@ -7,7 +7,7 @@ function PronunciationCard({ pronunciation, isLocked }) {
             <div className={`lesson-card ${isLocked ? "locked" : ""}`}>
                 {pronunciation.images ? (
                 <img
-                    src={`data:image/jpeg;base64,${pronunciation.images}`}
+                    src={`${pronunciation.images}`}
                     alt={pronunciation.title}
                     className="lesson-image"
                 />

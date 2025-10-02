@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const UpdateLesson = ({ onSubmit, title, initialData }) => {
+const UpdateLesson = ({ onSubmit, title, initialData, returnUrl }) => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: "",
         description: "",
@@ -288,6 +290,13 @@ const UpdateLesson = ({ onSubmit, title, initialData }) => {
                     className="btn btn-primary admin-lesson-update-btn mt-3"
                 >
                     Cập nhật
+                </button>
+                <button
+                    type="button"
+                    className="mt-3 admin-lesson-return-btn btn btn-secondary"
+                    onClick={() => navigate(`${returnUrl}`)}
+                >
+                    Quay lại
                 </button>
             </form>
         </div>

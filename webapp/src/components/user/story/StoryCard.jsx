@@ -5,9 +5,9 @@ function StoryCard({ story, isLocked }) {
     return (
         <div className="col-md-4 col-lg-4 mb-4">
             <div className={`lesson-card ${isLocked ? "locked" : ""}`}>
-                {story.images ? (
+                {story.image ? (
                     <img
-                        src={`data:image/jpeg;base64,${story.images}`}
+                        src={`${story.image}`}
                         alt={story.title}
                         className="lesson-image"
                     />

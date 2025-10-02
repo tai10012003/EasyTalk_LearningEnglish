@@ -10,6 +10,11 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/static': 'http://localhost:3000', // redirect /static tới backend
+    }
+  }
 })
 // Nghĩa là thay vì phải import dài dòng theo kiểu tương đối
 // Dùng alias @ (trỏ đến ./src) để viết gọn hơn:

@@ -26,7 +26,7 @@ const UpdateGrammar = () => {
     const handleSubmit = async (formData, id) => {
         try {
             await GrammarService.updateGrammar(id, formData);
-            alert("Cập nhật bài luyện tập ngữ pháp thành công!");
+            alert("Cập nhật bài học ngữ pháp thành công!");
             window.location.href = "/admin/grammar";
         } catch (err) {
             console.error("Error updating grammar:", err);
@@ -38,8 +38,9 @@ const UpdateGrammar = () => {
 
     return (
         <UpdateLesson
-            title="CẬP NHẬT BÀI LUYỆN TẬP NGỮ PHÁP"
+            title="CẬP NHẬT BÀI HỌC NGỮ PHÁP"
             onSubmit={handleSubmit}
+            returnUrl="/admin/grammar"
             initialData={grammar}
         />
     );
