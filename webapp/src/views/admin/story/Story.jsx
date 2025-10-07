@@ -1,5 +1,5 @@
 import React from "react";
-import StoryList from "@/components/admin/StoryList.jsx";
+import StoryList from "@/components/admin/story/StoryList.jsx";
 import { StoryService } from "@/services/StoryService.jsx";
 
 function Story() {

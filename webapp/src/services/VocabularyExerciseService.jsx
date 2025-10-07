@@ -44,5 +44,60 @@ export const VocabularyExerciseService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async addVocabularyExercise(formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/vocabulary-exercise/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error adding vocabulary:", err);
+            throw err;
+        }
+    },
+
+    async updateVocabularyExercise(id, formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/vocabulary-exercise/update/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error updating vocabulary:", err);
+            throw err;
+        }
+    },
+
+    async deleteVocabularyExercise(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/vocabulary-exercise/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error deleting vocabulary:", err);
+            throw err;
+        }
     }
 };

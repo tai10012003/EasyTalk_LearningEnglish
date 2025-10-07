@@ -41,7 +41,7 @@ router.use("/admin/grammar-exercise", require(__dirname + "/admin/grammarexercis
 router.use("/admin/pronunciation",require(__dirname + "/admin/pronunciationAdmincontroller"));
 router.use("/admin/pronunciation-exercise",require(__dirname + "/admin/pronunciationexerciseAdmincontroller"));
 router.use("/admin/vocabulary-exercise",require(__dirname + "/admin/vocabularyexerciseAdmincontroller"));
-router.use("/admin/users", require(__dirname + "/admin/userAdmincontroller"));
+router.use("/admin/user", require(__dirname + "/admin/userAdmincontroller"));
 
 router.get('/admin',(req, res) => {
     res.render('admin/dashboard');

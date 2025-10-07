@@ -142,7 +142,7 @@ var dictationexerciseController = require(__dirname + "/controllers/dictationcon
 app.use(dictationexerciseController);
 
 var userAdminController = require(__dirname + "/controllers/admin/userAdmincontroller");
-app.use("/admin/users", userAdminController);
+app.use("/admin/user", userAdminController);
 
 var userController = require(__dirname + "/controllers/usercontroller");
 app.use(userController);

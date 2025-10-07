@@ -479,7 +479,7 @@
   gap: 8px;
   font-weight: 500;
   color: #334155;
-  margin-right: 40px;
+  margin-right: 10px;
 }
 
 .admin-profile i {
@@ -1737,5 +1737,1123 @@
 
 .admin-story-add-btn-content:hover {
   background: linear-gradient(135deg, #000, #2c3e50);
+  transform: translateY(-2px);
+}
+
+/* === UPDATE STORY === */
+.admin-story-update-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-story-update-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-story-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-story-update-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-story-update-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-story-update-group input[type="text"],
+.admin-story-update-group select,
+.admin-story-update-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-story-update-group input[type="text"]:focus,
+.admin-story-update-group select:focus,
+.admin-story-update-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-story-update-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-story-update-group input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #555;
+}
+
+.admin-story-update-group input[type="file"]:hover {
+  border-color: #4a90e2;
+  background-color: #f0f8ff;
+  color: #222;
+}
+
+.admin-story-update-group input[type="file"]:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.admin-story-update-group .vocabulary-item {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.admin-story-update-group .vocabulary-item input {
+  flex: 1;
+}
+
+.admin-story-update-group .btn-danger {
+  background: #e74c3c;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.admin-story-update-group .btn-danger:hover {
+  background: #c0392b;
+}
+
+.admin-story-update-group .btn-secondary {
+  background: #7f8c8d;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.admin-story-update-group .btn-secondary:hover {
+  background: #636e72;
+}
+
+.admin-story-update-form button {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  margin-top: 5px;
+}
+
+.admin-story-update-form .btn-primary {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-story-update-form .btn-primary:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-story-update-form .btn-secondary {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff;
+}
+
+.admin-story-update-form .btn-secondary:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+.admin-story-update-form .btn-danger {
+  margin-left: 10px;
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: #fff;
+}
+
+/* === COMMON EXERCISE === */
+.admin-exercise-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-exercise-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-exercise-add {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.admin-exercise-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-exercise-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-exercise-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-exercise-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-exercise-table th,
+.admin-exercise-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-exercise-table th:last-child,
+.admin-exercise-table td:last-child {
+  border-right: none;
+}
+
+.admin-exercise-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-exercise-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-exercise-image {
+  width: 120px;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.admin-exercise-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-exercise-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-exercise-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-exercise-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-exercise-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-exercise-page-item {
+  display: inline-block;
+}
+
+.admin-exercise-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-exercise-page-item.active .admin-exercise-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-exercise-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-exercise-table {
+    min-width: 600px;
+  }
+  .admin-exercise-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-exercise-table {
+    min-width: 100%;
+  }
+  .admin-exercise-title {
+    font-size: 20px;
+  }
+  .admin-exercise-actions button,
+  .admin-exercise-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* === ADD EXERCISE === */
+.admin-exercise-add-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-exercise-add-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-exercise-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-exercise-add-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-exercise-add-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-exercise-add-group input[type="text"],
+.admin-exercise-add-group select,
+.admin-exercise-add-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-exercise-add-group input[type="text"]:focus,
+.admin-exercise-add-group select:focus,
+.admin-exercise-add-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-exercise-add-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-exercise-add-group input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #555;
+}
+
+.admin-exercise-add-group input[type="file"]:hover {
+  border-color: #4a90e2;
+  background-color: #f0f8ff;
+  color: #222;
+}
+
+.admin-exercise-add-group input[type="file"]:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.admin-exercise-add-question {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fafafa;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.admin-exercise-add-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-exercise-add-question-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.admin-exercise-add-question-header .btn-danger {
+  background: #e74c3c;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.admin-exercise-add-question-header .btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.admin-exercise-add-question-header .btn-danger:active {
+  transform: translateY(0px);
+}
+
+#admin-exercise-add-btn-add-question,
+.admin-exercise-add-btn, .admin-exercise-return-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+#admin-exercise-add-btn-add-question {
+  background: linear-gradient(135deg, #b63e3e, #c92929);
+  color: #fff;
+}
+
+#admin-exercise-add-btn-add-question:hover {
+  background: linear-gradient(135deg, #b92c2c, #801717);
+  transform: translateY(-2px);
+}
+
+.admin-exercise-add-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-exercise-add-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-exercise-add-btn:active {
+  transform: translateY(0px);
+}
+
+.admin-exercise-return-btn {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff
+}
+
+.admin-exercise-return-btn:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+/* === UPDATE EXERCISE === */
+.admin-exercise-update-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-exercise-update-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-exercise-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-exercise-update-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-exercise-update-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-exercise-update-group input[type="text"],
+.admin-exercise-update-group select,
+.admin-exercise-update-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-exercise-update-group input[type="text"]:focus,
+.admin-exercise-update-group select:focus,
+.admin-exercise-update-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-exercise-update-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-exercise-update-group input[type="file"] {
+  padding: 10px;
+  border: 2px dashed #bbb;
+  border-radius: 8px;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  color: #555;
+}
+
+.admin-exercise-update-group input[type="file"]:hover {
+  border-color: #4a90e2;
+  background-color: #f0f8ff;
+  color: #222;
+}
+
+.admin-exercise-update-group input[type="file"]:focus {
+  outline: none;
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
+}
+
+.admin-exercise-update-question {
+  border: 1px solid #e0e0e0;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fafafa;
+  margin-bottom: 15px;
+  position: relative;
+}
+
+.admin-exercise-update-question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-exercise-update-question-header h5 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.admin-exercise-update-question-header .btn-danger {
+  background: #e74c3c;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.admin-exercise-update-question-header .btn-danger:hover {
+  background: #c0392b;
+  transform: translateY(-1px);
+}
+
+.admin-exercise-update-question-header .btn-danger:active {
+  transform: translateY(0px);
+}
+
+#admin-exercise-update-btn-add-question,
+.admin-exercise-update-btn, .admin-exercise-return-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+#admin-exercise-update-btn-add-question {
+  background: linear-gradient(135deg, #b63e3e, #c92929);
+  color: #fff;
+}
+
+#admin-exercise-update-btn-add-question:hover {
+  background: linear-gradient(135deg, #b92c2c, #801717);
+  transform: translateY(-2px);
+}
+
+.admin-exercise-update-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-exercise-update-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-exercise-update-btn:active {
+  transform: translateY(0px);
+}
+
+.admin-exercise-return-btn {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff
+}
+
+.admin-exercise-return-btn:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+/* === USER LIST === */
+.admin-user-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-user-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-user-actions-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.admin-user-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-user-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.role-filter {
+  width: 200px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #1c1f1e 0%, #2c3130 100%);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.role-filter option {
+  color: #000;
+}
+
+.role-filter:hover {
+  transform: translateY(-1px);
+}
+
+.admin-user-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-user-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-user-table th,
+.admin-user-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-user-table th:last-child,
+.admin-user-table td:last-child {
+  border-right: none;
+}
+
+.admin-user-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-user-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.role-user {
+  background-color: #007bff;
+}
+
+.role-admin {
+  background-color: #dc3545;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.status-active {
+  background-color: #28a745;
+}
+
+.status-locked {
+  background-color: #dc3545;
+}
+
+.admin-user-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-user-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-user-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-user-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-user-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-user-page-item {
+  display: inline-block;
+}
+
+.admin-user-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-user-page-item.active .admin-user-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-user-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-user-table {
+    min-width: 600px;
+  }
+  .admin-user-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-user-table {
+    min-width: 100%;
+  }
+  .admin-user-title {
+    font-size: 20px;
+  }
+  .admin-user-actions button,
+  .admin-user-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* === ADD USER === */
+.admin-user-add-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-user-add-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-user-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-user-add-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-add-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-user-add-group input[type="text"],
+.admin-user-add-group select,
+.admin-user-add-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-user-add-group input[type="text"]:focus,
+.admin-user-add-group select:focus,
+.admin-user-add-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-user-add-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-user-add-group input[type="password"] {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-user-add-group input[type="password"]:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-user-add-btn, .admin-user-return-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.admin-user-add-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-user-add-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-user-add-btn:active {
+  transform: translateY(0px);
+}
+
+.admin-user-return-btn {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff
+}
+
+.admin-user-return-btn:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+/* === UPDATE USER === */
+.admin-user-update-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-user-update-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-user-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-user-update-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-user-update-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-user-update-group input[type="text"],
+.admin-user-update-group select,
+.admin-user-update-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-user-update-group input[type="text"]:focus,
+.admin-user-update-group select:focus,
+.admin-user-update-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-user-update-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-user-update-group input[type="password"] {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-user-update-group input[type="password"]:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-user-update-btn, .admin-user-return-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.admin-user-update-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-user-update-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-user-update-btn:active {
+  transform: translateY(0px);
+}
+
+.admin-user-return-btn {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff
+}
+
+.admin-user-return-btn:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
   transform: translateY(-2px);
 }

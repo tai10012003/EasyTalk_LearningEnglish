@@ -1,7 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
+const parseJwt = (token) => {
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch (e) {
+        return null;
+    }
+};
+
 function Navbar() {
+    const [username, setUsername] = useState("Admin");
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            const decoded = parseJwt(token);
+            if (decoded && decoded.username) {
+                setUsername(decoded.username);
+            } else if (decoded && decoded.name) {
+                setUsername(decoded.name);
+            } else if (decoded && decoded.email) {
+                setUsername(decoded.email);
+            }
+        }
+    }, []);
+    
     const notifications = [
         "Người dùng mới đăng ký",
         "Bài học mới được thêm",
@@ -20,7 +43,7 @@ function Navbar() {
         <nav className="admin-navbar">
             <div className="admin-navbar-left">
                 <marquee behavior="scroll" direction="right">
-                    Chào mừng đến với trang quản trị viên EasyTalk!
+                Chào mừng đến với trang quản trị viên EasyTalk!
                 </marquee>
             </div>
             <div className="admin-navbar-right">
@@ -34,7 +57,7 @@ function Navbar() {
                     </div>
                 </div>
                 <div className="admin-profile">
-                    <i className="fas fa-user-circle"></i> Admin
+                    <i className="fas fa-user-circle"></i> {username}
                     <div className="admin-profile-dropdown">
                         <Link to="/admin/profile" className="admin-profile-item">
                             <i className="fas fa-info-circle"></i> Xem thông tin

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateLesson from "../../components/admin/UpdateLesson";
+import UpdateLesson from "../../../components/admin/lesson/UpdateLesson";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
 
 const UpdatePronunciation = () => {

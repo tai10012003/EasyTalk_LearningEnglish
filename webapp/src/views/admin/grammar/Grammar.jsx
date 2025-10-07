@@ -1,5 +1,5 @@
 import React from "react";
-import LessonList from "@/components/admin/LessonList.jsx";
+import LessonList from "@/components/admin/lesson/LessonList.jsx";
 import { GrammarService } from "@/services/GrammarService.jsx";
 
 function Grammar() {

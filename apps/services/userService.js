@@ -15,10 +15,12 @@ class UsersService {
         this.usersCollection = this.usersDatabase.collection("users");
     }
 
-    async getUserList(page = 1, limit = 3) {
-        const skip = (page - 1) * limit; 
+    async getUserList(page = 1, limit = 3, role = "") {
+        const skip = (page - 1) * limit;
+        const filter = {};
+        if (role) filter.role = role;
         const cursor = await this.usersCollection
-            .find({}, {})
+            .find(filter)
             .skip(skip)
             .limit(limit);
 

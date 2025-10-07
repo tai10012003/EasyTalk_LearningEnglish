@@ -1,13 +1,28 @@
 import Dashboard from "@/views/admin/Dashboard";
-import Grammar from "@/views/admin/Grammar";
-import AddGrammar from "@/views/admin/AddGrammar";
-import UpdateGrammar from "@/views/admin/UpdateGrammar"
-import Pronunciation from "@/views/admin/Pronunciation";
-import AddPronunciation from "@/views/admin/AddPronunciation";
-import UpdatePronunciation from "@/views/admin/UpdatePronunciation"
-import Story from "@/views/admin/Story";
-import AddStory from "@/views/admin/AddStoryPage";
-import UpdateStory from "@/views/admin/UpdateStoryPage"
+import Grammar from "@/views/admin/grammar/Grammar";
+import AddGrammar from "@/views/admin/grammar/AddGrammar";
+import UpdateGrammar from "@/views/admin/grammar/UpdateGrammar"
+import Pronunciation from "@/views/admin/pronunciation/Pronunciation";
+import AddPronunciation from "@/views/admin/pronunciation/AddPronunciation";
+import UpdatePronunciation from "@/views/admin/pronunciation/UpdatePronunciation"
+import Story from "@/views/admin/story/Story";
+import AddStory from "@/views/admin/story/AddStoryPage";
+import UpdateStory from "@/views/admin/story/UpdateStoryPage"
+import GrammarExercise from "@/views/admin/grammarexercise/GrammarExercise";
+import AddGrammarExercise from "@/views/admin/grammarexercise/AddGrammarExercise";
+import UpdateGrammarExercise from "@/views/admin/grammarexercise/UpdateGrammarExercise";
+import VocabularyExercise from "@/views/admin/vocabularyexercise/VocabularyExercise";
+import AddVocabularyExercise from "@/views/admin/vocabularyexercise/AddVocabularyExercise";
+import UpdateVocabularyExercise from "@/views/admin/vocabularyexercise/UpdateVocabularyExercise";
+import PronunciationExercise from "@/views/admin/pronunciationexercise/PronunciationExercise";
+import AddPronunciationExercise from "@/views/admin/pronunciationexercise/AddPronunciationExercise";
+import UpdatePronunciationExercise from "@/views/admin/pronunciationexercise/UpdatePronunciationExercise";
+import DictationExercise from "@/views/admin/dictation/DictationExercise";
+import AddDictationExercise from "@/views/admin/dictation/AddDictationExercise";
+import UpdateDictationExercise from "@/views/admin/dictation/UpdateDictationExercise";
+import User from "@/views/admin/user/User";
+import AddUser from "@/views/admin/user/AddUserPage";
+import UpdateUser from "@/views/admin/user/UpdateUserPage";
 import NotFound from "@/views/admin/NotFound.jsx";
 import PrivateRoute from "@/components/user/auth/PrivateRoute.jsx";
 
@@ -89,6 +104,126 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateStory />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "grammar-exercise",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <GrammarExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "grammar-exercise/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddGrammarExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "grammar-exercise/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdateGrammarExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "vocabulary-exercise",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <VocabularyExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "vocabulary-exercise/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddVocabularyExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "vocabulary-exercise/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdateVocabularyExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "pronunciation-exercise",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <PronunciationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "pronunciation-exercise/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddPronunciationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "pronunciation-exercise/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdatePronunciationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "dictation-exercise",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <DictationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "dictation-exercise/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddDictationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "dictation-exercise/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdateDictationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "user",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <User />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "user/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddUser />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "user/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdateUser />
             </PrivateRoute>
         ),
     },

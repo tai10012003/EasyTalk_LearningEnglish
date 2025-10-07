@@ -139,10 +139,10 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
     };
 
     return (
-        <div className="admin-story-add-container">
-            <h1 className="admin-story-add-title">{title}</h1>
-            <form className="admin-story-add-form" onSubmit={handleSubmit}>
-                <div className="admin-story-add-group">
+        <div className="admin-story-update-container">
+            <h1 className="admin-story-update-title">{title}</h1>
+            <form className="admin-story-update-form" onSubmit={handleSubmit}>
+                <div className="admin-story-update-group">
                     <label>Tiêu đề:</label>
                     <input
                         type="text"
@@ -153,7 +153,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                         className="form-control"
                     />
                 </div>
-                <div className="admin-story-add-group">
+                <div className="admin-story-update-group">
                     <label>Mô tả:</label>
                     <textarea
                         name="description"
@@ -163,7 +163,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                         className="form-control"
                     ></textarea>
                 </div>
-                <div className="admin-story-add-group">
+                <div className="admin-story-update-group">
                     <label>Cấp độ:</label>
                     <select
                         name="level"
@@ -181,7 +181,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                         <option value="C2">C2</option>
                     </select>
                 </div>
-                <div className="admin-story-add-group">
+                <div className="admin-story-update-group">
                     <label>Loại câu chuyện:</label>
                     <select
                         name="category"
@@ -197,7 +197,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                         <option value="Motivation">Motivation</option>
                     </select>
                 </div>
-                <div className="admin-story-add-group admin-story-update-image">
+                <div className="admin-story-update-group admin-story-update-image">
                     <label htmlFor="admin-update-story-image">Hình ảnh:</label>
                     <input
                         type="file"
@@ -227,7 +227,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                     Xóa nội dung
                                 </button>
                             </div>
-                            <div className="admin-story-add-group">
+                            <div className="admin-story-update-group">
                                 <label>English:</label>
                                 <textarea
                                     value={c.en}
@@ -238,7 +238,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                     required
                                 ></textarea>
                             </div>
-                            <div className="admin-story-add-group">
+                            <div className="admin-story-update-group">
                                 <label>Tiếng Việt:</label>
                                 <textarea
                                     value={c.vi}
@@ -249,7 +249,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                     required
                                 ></textarea>
                             </div>
-                            <div className="admin-story-add-group">
+                            <div className="admin-story-update-group">
                                 <label>Từ vựng:</label>
                                 {c.vocabulary.map((v, vIndex) => (
                                     <div key={vIndex} className="d-flex gap-2 mb-2">
@@ -298,7 +298,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                                 Xóa Quiz
                                             </button>
                                         </div>    
-                                        <div className="admin-story-add-group">
+                                        <div className="admin-story-update-group">
                                             <label>Loại bài tập:</label>
                                             <select
                                                 value={c.quiz.type}
@@ -313,7 +313,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                         </div>
                                         {c.quiz.type && (
                                             <>
-                                                <div className="admin-story-add-group">
+                                                <div className="admin-story-update-group">
                                                     <label>Câu hỏi:</label>
                                                     <input
                                                         type="text"
@@ -326,7 +326,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                                     />
                                                 </div>
                                                 {c.quiz.type == "multiple-choice" && (
-                                                    <div className="admin-story-add-group">
+                                                    <div className="admin-story-update-group">
                                                         <label>Lựa chọn:</label>
                                                         {c.quiz.options.map((opt, oIndex) => (
                                                             <input
@@ -342,7 +342,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                                         ))}
                                                     </div>
                                                 )}
-                                                <div className="admin-story-add-group">
+                                                <div className="admin-story-update-group">
                                                     <label>Đáp án đúng:</label>
                                                     <input
                                                         type="text"
@@ -354,7 +354,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                                                         required
                                                     />
                                                 </div>
-                                                <div className="admin-story-add-group">
+                                                <div className="admin-story-update-group">
                                                     <label>Giải thích:</label>
                                                     <textarea
                                                         value={c.quiz.explanation}

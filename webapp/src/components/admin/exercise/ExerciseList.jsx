@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 
-function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
-    const [lessons, setLessons] = useState([]);
+function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
+    const [exercises, setExercises] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
@@ -10,12 +10,12 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
         setLoading(true);
         try {
             const data = await fetchData(page);
-            setLessons(data[dataKey] || []);
+            setExercises(data[dataKey] || []);
             setCurrentPage(data.currentPage);
             setTotalPages(data.totalPages);
         } catch (err) {
             console.error(err);
-            setLessons([]);
+            setExercises([]);
         } finally {
             setLoading(false);
         }
@@ -26,7 +26,7 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
     },  [currentPage]);
 
     const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa bài học này không?")) {
+        if (window.confirm("Bạn có muốn xóa luyện tập này không?")) {
             try {
                 await deleteItem(id);
                 loadData(currentPage);
@@ -42,10 +42,10 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
             pages.push(
                 <li
                     key={i}
-                    className={`admin-lesson-page-item ${i == currentPage ? "active" : ""}`}
+                    className={`admin-exercise-page-item ${i == currentPage ? "active" : ""}`}
                 >
                     <button
-                        className="admin-lesson-page-link"
+                        className="admin-exercise-page-link"
                         onClick={() => setCurrentPage(i)}
                     >
                         {i}
@@ -54,11 +54,11 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
             );
         }
         return (
-        <ul className="admin-lesson-pagination">
+        <ul className="admin-exercise-pagination">
             {currentPage > 1 && (
-                <li className="admin-lesson-page-item">
+                <li className="admin-exercise-page-item">
                     <button
-                        className="admin-lesson-page-link"
+                        className="admin-exercise-page-link"
                         onClick={() => setCurrentPage(currentPage - 1)}
                     >
                         &laquo;
@@ -67,9 +67,9 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
             )}
             {pages}
             {currentPage < totalPages && (
-                <li className="admin-lesson-page-item">
+                <li className="admin-exercise-page-item">
                     <button
-                        className="admin-lesson-page-link"
+                        className="admin-exercise-page-link"
                         onClick={() => setCurrentPage(currentPage + 1)}
                     >
                         &raquo;
@@ -81,62 +81,50 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
     };
 
     return (
-        <div className="admin-lesson-wrapper">
-            <h1 className="admin-lesson-title">{title}</h1>
-            <div className="admin-lesson-add">
-                <a href={addUrl} className="admin-lesson-add-btn">
-                + Thêm bài học
+        <div className="admin-exercise-wrapper">
+            <h1 className="admin-exercise-title">{title}</h1>
+            <div className="admin-exercise-add">
+                <a href={addUrl} className="admin-exercise-add-btn">
+                + Thêm luyện tập
                 </a>
             </div>
             {loading ? (
                 <p>Đang tải dữ liệu...</p>
             ) : (
-                <div className="admin-lesson-table-container">
-                    <table className="admin-lesson-table">
+                <div className="admin-exercise-table-container">
+                    <table className="admin-exercise-table">
                         <thead>
                             <tr>
                                 <th>#</th>
-                                <th>Hình ảnh</th>
                                 <th>Tiêu đề</th>
-                                <th>Mô tả</th>
+                                <th>Số lượng câu hỏi</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {lessons.length > 0 ? (
-                                lessons.map((lesson, index) => {
-                                    const createdAt = new Date(lesson.createdAt).toLocaleString(
+                            {exercises.length > 0 ? (
+                                exercises.map((exercise, index) => {
+                                    const createdAt = new Date(exercise.createdAt).toLocaleString(
                                         "vi-VN",
                                         { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }
                                     );
                                     return (
-                                        <tr key={lesson._id}>
+                                        <tr key={exercise._id}>
                                             <td>{(currentPage - 1) * 6 + index + 1}</td>
-                                            <td>
-                                                {lesson.images ? (
-                                                    <img
-                                                        src={lesson.images}
-                                                        alt={lesson.title}
-                                                        className="admin-lesson-image"
-                                                    />
-                                                ) : (
-                                                    "Không có hình ảnh"
-                                                )}
-                                            </td>
-                                            <td>{lesson.title}</td>
-                                            <td>{lesson.description.length > 50 ? `${lesson.description.slice(0,80)} ...` : lesson.description}</td>
+                                            <td>{exercise.title}</td>
+                                            <td>{exercise.questions ? exercise.questions.length : 0}</td>
                                             <td>{createdAt}</td>
-                                            <td className="admin-lesson-actions">
+                                            <td className="admin-exercise-actions">
                                                 <a
-                                                    href={`${updateUrl}/${lesson._id}`}
-                                                    className="admin-lesson-btn-edit"
+                                                    href={`${updateUrl}/${exercise._id}`}
+                                                    className="admin-exercise-btn-edit"
                                                 >
                                                     Sửa
                                                 </a>
                                                 <button
-                                                    className="admin-lesson-btn-delete"
-                                                    onClick={() => handleDelete(lesson._id)}
+                                                    className="admin-exercise-btn-delete"
+                                                    onClick={() => handleDelete(exercise._id)}
                                                 >
                                                     Xóa
                                                 </button>
@@ -146,7 +134,7 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={6}>Không có bài học.</td>
+                                    <td colSpan={6}>Không có bài luyện tập.</td>
                                 </tr>
                             )}
                         </tbody>
@@ -158,4 +146,4 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
     );
 }
 
-export default LessonList;
+export default ExerciseList;

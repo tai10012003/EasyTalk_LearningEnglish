@@ -22,10 +22,6 @@ export const AuthService = {
             return data;
         } catch (error) {
             console.error("Error during login:", error.message);
-            if (!hasShownAlert) {
-                hasShownAlert = true;
-                window.alert("Không thể kết nối đến server. Vui lòng kiểm tra server backend đã bật chưa.");
-            }
             throw error;
         }
     },
@@ -51,10 +47,6 @@ export const AuthService = {
             return { success: true, message: data.message || "Đăng ký thành công" };
         } catch (error) {
             console.error("Error registering:", error.message);
-            if (!hasShownAlert) {
-                hasShownAlert = true;
-                window.alert("Không thể kết nối đến server hoặc có lỗi xảy ra.");
-            }
             return { success: false, message: error.message || "Đăng ký thất bại" };
         }
     },

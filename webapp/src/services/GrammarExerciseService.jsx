@@ -44,5 +44,60 @@ export const GrammarExerciseService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async addGrammarExercise(formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/grammar-exercise/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error adding grammar:", err);
+            throw err;
+        }
+    },
+
+    async updateGrammarExercise(id, formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/grammar-exercise/update/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error updating grammar:", err);
+            throw err;
+        }
+    },
+
+    async deleteGrammarExercise(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/grammar-exercise/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error deleting grammar:", err);
+            throw err;
+        }
     }
 };

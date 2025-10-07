@@ -9,7 +9,7 @@ class PronunciationQuestion {
 class PronunciationExercise {
     _id;
     title;
-    createdAt = new Date();
+    createdAt;
     questions = [];
 
 

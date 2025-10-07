@@ -9,7 +9,7 @@ class Question {
 class GrammarExercise {
     _id;
     title;
-    createdAt = new Date();
+    createdAt;
     questions = [];
 
 

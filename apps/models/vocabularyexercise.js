@@ -9,7 +9,7 @@ class VocabularyQuestion {
 class VocabularyExercise {
     _id;
     title;
-    createdAt = new Date();
+    createdAt;
     questions = [];
 
 

@@ -28,7 +28,7 @@ router.post("/api/register", async (req, res) => {
   }
   try {
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = { username, email, password: hashedPassword, role, active: true };
+      const user = { username, email, password: hashedPassword, role, active: "active" };
       await userService.insertUser(user);
       res.status(201).json({ message: "Đăng ký thành công !!" });
   } catch (error) {
@@ -45,7 +45,7 @@ router.post("/api/login", async (req, res) => {
       const passwordIsValid = await bcrypt.compare(req.body.password, user.password);
       if (!passwordIsValid) 
         return res.status(403).json({ message: "Email đăng nhập hoặc mật khẩu không đúng !!" });
-      if (user.active === false) {
+      if (user.active == "locked") {
         return res.status(403).json({ message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!" });
       }
       const token = jwt.sign({ id: user._id, role: user.role, username: user.username }, config.jwt.secret, { expiresIn: '1h' });
@@ -75,7 +75,7 @@ router.get('/auth/google/callback', async (req, res) => {
           password: hashedPassword,
           email: email,
           role: 'user',
-          active: true
+          active: "active"
       });
     }
     const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, config.jwt.secret, { expiresIn: '1h' });

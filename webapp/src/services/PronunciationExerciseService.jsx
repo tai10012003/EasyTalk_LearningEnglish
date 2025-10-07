@@ -63,5 +63,60 @@ export const PronunciationExerciseService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async addPronunciationExercise(formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/pronunciation-exercise/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error adding pronunciation:", err);
+            throw err;
+        }
+    },
+
+    async updatePronunciationExercise(id, formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/pronunciation-exercise/update/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error updating pronunciation:", err);
+            throw err;
+        }
+    },
+
+    async deletePronunciationExercise(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/pronunciation-exercise/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error deleting pronunciation:", err);
+            throw err;
+        }
     }
 };

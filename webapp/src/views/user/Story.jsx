@@ -13,7 +13,7 @@ function Story() {
     const [selectedCategory, setSelectedCategory] = useState("");
     const [selectedLevel, setSelectedLevel] = useState("");
     const [searchKeyword, setSearchKeyword] = useState("");
-    const [unlockedStories, setUnlockedStories] = useState([]); 
+    const [unlockedStories, setUnlockedStories] = useState([]);
     const navigate = useNavigate();
     const pageLimit = 6;
 
@@ -61,7 +61,7 @@ function Story() {
                 setIsLoading(false);
             }
         };
-    fetchData();
+        fetchData();
     }, [currentPage, selectedCategory, selectedLevel, searchKeyword, navigate]);
 
     const isStoryLocked = (storyId) => {

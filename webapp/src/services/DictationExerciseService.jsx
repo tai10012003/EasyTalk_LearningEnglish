@@ -44,5 +44,60 @@ export const DictationExerciseService = {
 
     resetAlertFlag() {
         hasShownAlert = false;
+    },
+
+    async addDictationExercise(formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/dictation-exercise/add`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error adding dictation:", err);
+            throw err;
+        }
+    },
+
+    async updateDictationExercise(id, formData) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/dictation-exercise/update/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error updating dictation:", err);
+            throw err;
+        }
+    },
+
+    async deleteDictationExercise(id) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/admin/dictation-exercise/delete/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error deleting dictation:", err);
+            throw err;
+        }
     }
 };

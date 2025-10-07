@@ -1,5 +1,5 @@
 import React from "react";
-import AddStory from "../../components/admin/AddStory";
+import AddStory from "../../../components/admin/story/AddStory";
 import { StoryService } from "@/services/StoryService.jsx";
 
 const AddStoryPage = () => {

@@ -35,7 +35,8 @@ class VocabularyExerciseService {
     async insertVocabularyExercise(exerciseData) {
         const newExercise = {
             title: exerciseData.title,
-            questions: []
+            questions: [],
+            createdAt: new Date()
         };
         if (exerciseData.questions && Array.isArray(exerciseData.questions)) {
             exerciseData.questions.forEach(question => {

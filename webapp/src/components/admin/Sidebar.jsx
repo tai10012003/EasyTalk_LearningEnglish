@@ -224,10 +224,10 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
                         </li>
                         <li
                             className={`admin-nav-item ${
-                                location.pathname == "/admin/users" ? "active" : ""
+                                location.pathname == "/admin/user" ? "active" : ""
                             }`}
                         >
-                            <Link to="/admin/users">
+                            <Link to="/admin/user">
                                 <i className="fas fa-user"></i>
                                 <p>Quản lý người dùng</p>
                             </Link>
