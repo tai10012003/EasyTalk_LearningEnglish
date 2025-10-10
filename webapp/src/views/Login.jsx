@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import LoginForm from '@/components/user/auth/LoginForm.jsx';
 import Mascot from '@/components/user/auth/Mascot.jsx';
 import SocialLoginButtons from '@/components/user/auth/SocialLoginButtons.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
 
 function Login() {
-  const [message, setMessage] = useState(null);
-  
   useEffect(() => {
     document.title = "Đăng nhập - EasyTalk";
   }, []);
@@ -17,12 +17,12 @@ function Login() {
       // console.log("Token nhận được:", data.token);
       localStorage.setItem("token", data.token);
       localStorage.setItem("role", data.role);
-      setMessage({ type: "success", text: "Đăng nhập thành công !!" });
+      toast.success("Đăng nhập thành công !!");
       setTimeout(() => {
         window.location.href = data.role == "admin" ? "/admin/dashboard" : "/";
-      }, 1000);
+      }, 1500);
     } catch (error) {
-      setMessage({ type: "error", text: error.message });
+      toast.error(error.message);
     }
   };
 
@@ -36,11 +36,7 @@ function Login() {
                 <div className="auth_title text-center mt-4">
                   <h4>ĐĂNG NHẬP TÀI KHOẢN</h4>
                 </div>
-                {message && (
-                  <div className={`alert alert-${message.type} text-center mb-3`}>
-                    {message.text}
-                  </div>
-                )}
+                <ToastContainer position="top-center" autoClose={2000} theme="colored" />
                 <LoginForm onSubmit={handleLogin} />
                 <div className="auth-or-divider text-center my-4">
                   <div className="auth-divider"></div>

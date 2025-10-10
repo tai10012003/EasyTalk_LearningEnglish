@@ -44,7 +44,7 @@ class UsersService {
     async updatePassword(userId, hashedNewPassword) {
         try {
           await this.usersCollection.updateOne(
-            { _id: userId },
+            { _id: new ObjectId(userId) },
             { $set: { password: hashedNewPassword } }
           );
         } catch (error) {

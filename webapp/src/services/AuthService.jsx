@@ -51,6 +51,58 @@ export const AuthService = {
         }
     },
 
+    async changePassword(currentPassword, newPassword, confirmNewPassword) {
+        try {
+            const token = localStorage.getItem("token");
+            const res = await fetch(`${API_URL}/change-password`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`,
+                },
+                body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.message || "Lỗi khi đổi mật khẩu");
+            }
+
+            return { success: true, message: data.message || "Đổi mật khẩu thành công" };
+        } catch (error) {
+            console.error("Error changing password:", error.message);
+            return { success: false, message: error.message || "Đổi mật khẩu thất bại" };
+        }
+    },
+
+    async forgotPassword(email) {
+        const res = await fetch(`${API_URL}/forgot-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email }),
+        });
+        return await res.json();
+    },
+
+    async verifyCode(email, code) {
+        const res = await fetch(`${API_URL}/verify-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, code }),
+        });
+        return await res.json();
+    },
+
+    async resetPassword(email, newPassword) {
+        const res = await fetch(`${API_URL}/reset-password`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, newPassword }),
+        });
+        return await res.json();
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     }

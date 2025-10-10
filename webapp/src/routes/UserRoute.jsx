@@ -5,6 +5,8 @@ import Gate from "@/views/user/Gate.jsx";
 import Stage from "@/views/user/Stage.jsx";
 import Login from "@/views/Login.jsx";
 import Register from "@/views/Register.jsx";
+import ChangePassword from "@/views/user/ChangePassword.jsx";
+import ForgotPassword from "@/views/user/ForgotPassword.jsx";
 import Story from "@/views/user/Story.jsx";
 import StoryDetail from "@/views/user/StoryDetail.jsx";
 import Grammar from "@/views/user/Grammar.jsx";
@@ -212,6 +214,14 @@ const UserRoute = [
     {
         path: "/register",
         element: <Register />,
+    },
+    {
+        path: "/change-password",
+        element: <ChangePassword />,
+    },
+    {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
     },
     {
         path: "*",

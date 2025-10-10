@@ -3943,6 +3943,153 @@ p {
 }
 
 /* ===============================================
+   CHANGE PASSWORD STYLES
+   =============================================== */
+
+.change-password-container {
+  background-color: #f3f6fa;
+  padding: 50px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.change-password-box {
+  max-width: 400px;
+  width: 100%;
+  background-color: #ffffff;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  text-align: center;
+}
+
+.change-password-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.change-password-group {
+  margin-bottom: 20px;
+  text-align: left;
+}
+
+.change-password-label {
+  display: block;
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.change-password-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  font-size: 14px;
+  color: #333;
+}
+
+.change-password-btn {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #408115;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 10px;
+}
+
+.change-password-btn:hover {
+  background-color: #14742e;
+}
+
+.change-password-btn-secondary {
+  width: 100%;
+  padding: 12px;
+  font-size: 16px;
+  color: #fff;
+  background-color: #484848;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  margin-top: 15px;
+}
+
+.change-password-btn-secondary:hover {
+  background-color: #2f2f2f;
+}
+
+/* ===============================================
+   FORGOT PASSWORD STYLES
+   =============================================== */
+
+.forgot-password-wrapper {
+  background-color: #f3f6fa;
+  padding: 50px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.forgot-password-container {
+  width: 100%;
+  max-width: 400px;
+  padding: 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  text-align: center;
+}
+
+.forgot-password-title {
+  font-size: 24px;
+  color: #333;
+  margin-bottom: 20px;
+}
+
+.forgot-password-input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0 15px 0;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  outline: none;
+}
+
+.forgot-password-input:focus {
+  border-color: #0c73a6;
+}
+
+.forgot-password-btn {
+  width: 100%;
+  padding: 12px;
+  background-color: #0c73a6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.forgot-password-btn:hover {
+  background-color: #095e84;
+}
+
+.forgot-password-success {
+  font-size: 18px;
+  color: #4caf50;
+  text-align: center;
+}
+
+/* ===============================================
    FOOTER STYLES
    =============================================== */
 

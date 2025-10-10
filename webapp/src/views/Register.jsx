@@ -1,25 +1,24 @@
 import React, { useState, useEffect } from 'react';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import RegisterForm from '@/components/user/auth/RegisterForm.jsx';
 import Mascot from '@/components/user/auth/Mascot.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
 
-function Register() {
-  const [message, setMessage] = useState(null);
-  
+function Register() {  
   useEffect(() => {
     document.title = "Đăng ký - EasyTalk";
   }, []);
 
   const handleRegister = async (username, email, password, confirmPassword) => {
     const response = await AuthService.register(username, email, password, confirmPassword);
-
     if (response.success) {
-      setMessage({ type: 'success', text: response.message });
+      toast.success(response.message);
       setTimeout(() => {
         window.location.href = '/login';
-      }, 1000);
+      }, 1500);
     } else {
-      setMessage({ type: 'error', text: response.message });
+      toast.error(response.message);
     }
   };
 
@@ -33,11 +32,7 @@ function Register() {
                 <div className="auth_title text-center mt-4">
                   <h4>ĐĂNG KÝ TÀI KHOẢN</h4>
                 </div>
-                {message && (
-                  <div className={`alert alert-${message.type} text-center mb-3`}>
-                    {message.text}
-                  </div>
-                )}
+                <ToastContainer position="top-center" autoClose={2000} theme="colored" />
                 <RegisterForm onSubmit={handleRegister} />
                 <p className="auth-footer-text text-center">
                   Đã có tài khoản?{' '}

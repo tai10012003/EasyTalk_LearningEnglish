@@ -92,31 +92,29 @@ router.get("/change-password", (req, res) => {
 
 router.post("/change-password", verifyToken, async (req, res) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
-
-  if (newPassword !== confirmNewPassword) {
-    return res.status(400).json({ message: "New passwords do not match." });
+  if (!currentPassword || !newPassword || !confirmNewPassword) {
+    return res.status(400).json({ message: "Vui lòng nhập đầy đủ thông tin mật khẩu." });
   }
-
+  if (newPassword !== confirmNewPassword) {
+    return res.status(400).json({ message: "Mật khẩu mới không khớp." });
+  }
   try {
     const userId = req.user.id;
     const user = await userService.getUser(userId);
-
+    if (!user) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng." });
+    }
     const passwordIsValid = await bcrypt.compare(currentPassword, user.password);
     if (!passwordIsValid) {
-      return res.status(400).json({ message: "Current password is incorrect." });
+      return res.status(400).json({ message: "Mật khẩu hiện tại không chính xác." });
     }
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await userService.updatePassword(userId, hashedNewPassword);
-
-    res.status(200).json({ message: "Password changed successfully." });
+    res.status(200).json({ message: "Đổi mật khẩu thành công." });
   } catch (error) {
     console.error("Error changing password:", error);
-    res.status(500).json({ message: "An error occurred. Please try again." });
+    res.status(500).json({ message: "Có lỗi xảy ra khi đổi mật khẩu." });
   }
-});
-
-router.get("/forgot-password", (req, res) => {
-  res.render("users/forgotpassword");
 });
 
 router.post('/forgot-password', async (req, res) => {
@@ -153,36 +151,31 @@ router.post('/forgot-password', async (req, res) => {
   });
 });
 
-router.get("/verify-code", (req, res) => {
-  res.render("users/verifycode");
-});
-
 router.post('/verify-code', (req, res) => {
   const { email, code } = req.body;
 
   if (verificationCodes[email] && verificationCodes[email] == code) {
       delete verificationCodes[email];
-      res.json({ message: 'Code verified' });
+      res.json({ message: 'Mã xác thực chính xác!' });
   } else {
-      res.status(400).json({ message: 'Invalid verification code' });
+      res.status(400).json({ message: 'Mã xác thực không hợp lệ. Vui lòng nhập chính xác!' });
   }
-});
-
-router.get("/reset-password", (req, res) => {
-  res.render("users/resetpassword");
 });
 
 router.post('/reset-password', async (req, res) => {
   const { email, newPassword } = req.body;
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-  const user = await userService.getUserByEmail(email);
-
-  if (!user) {
+  try {
+    const user = await userService.getUserByEmail(email);
+    if (!user) {
       return res.status(404).json({ message: 'User not found' });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await userService.updatePassword(user._id, hashedPassword);
+    res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).json({ message: 'Error resetting password' });
   }
-
-  await userService.updatePassword(email, hashedPassword);
-  res.json({ message: 'Password reset successful' });
 });
 
 router.get("/profile", (req, res) => {
