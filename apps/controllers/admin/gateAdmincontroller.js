@@ -56,7 +56,7 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.post("/update/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
     const gateId = req.params.id;
     const { title, journeyId: newJourneyId } = req.body;
 
@@ -68,7 +68,7 @@ router.post("/update/:id", async (req, res) => {
         }
 
         const oldJourneyId = currentGate.journey ? currentGate.journey.toString() : null;
-        await gateService.updateGate({
+        const updateGate = await gateService.updateGate({
             _id: gateId,
             title,
             journey: new ObjectId(newJourneyId)
@@ -77,15 +77,14 @@ router.post("/update/:id", async (req, res) => {
             await journeyService.removeGateFromJourney(oldJourneyId, gateId);
             await journeyService.addGateToJourney(newJourneyId, gateId);
         }
-
-        res.status(200).json({ message: "Cổng đã được cập nhật thành công !" });
+        res.status(200).json({ message: "Cổng đã được cập nhật thành công !", gate: updateGate });
     } catch (err) {
         console.error("Error updating gate:", err);
         res.status(500).json({ error: "Failed to update Gate." });
     }
 });
 
-router.post("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
     const gateId = req.params.id;
 
     try {

@@ -15,7 +15,6 @@ class StageService {
 
     async getStageList(page = 1, limit = 10) {
         const skip = (page - 1) * limit;
-
         const stages = await this.stagesCollection.aggregate([
             {
                 $lookup: {
@@ -26,14 +25,27 @@ class StageService {
                 }
             },
             { $unwind: { path: "$gateInfo", preserveNullAndEmptyArrays: true } },
+            {
+                $lookup: {
+                    from: "journeys",
+                    localField: "gateInfo.journey",
+                    foreignField: "_id",
+                    as: "journeyInfo"
+                }
+            },
+            { $unwind: { path: "$journeyInfo", preserveNullAndEmptyArrays: true } },
+            {
+                $addFields: {
+                    "gateInfo.journeyInfo": "$journeyInfo"
+                }
+            },
+            { $project: { journeyInfo: 0 } },
             { $skip: skip },
             { $limit: limit }
         ]).toArray();
-
         const totalStages = await this.stagesCollection.countDocuments();
         return { stages, totalStages };
     }
-
     async getStageById(id) {
         return await this.stagesCollection.findOne({ _id: new ObjectId(id) });
     }

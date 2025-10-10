@@ -3627,6 +3627,29 @@ p {
   color: #444;
 }
 
+.select-colored {
+  background-color: #f9fafc;
+  border: 1px solid #d0d7de;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 15px;
+  margin-left: 15px;
+  color: #333;
+  transition: all 0.2s ease;
+}
+
+.select-colored:focus {
+  border-color: #6960cc;
+  box-shadow: 0 0 6px rgba(105, 96, 204, 0.3);
+  outline: none;
+  background-color: #fff;
+}
+
+.select-colored option {
+  background-color: #fff;
+  color: #333;
+}
+
 .close-btn {
   border: none;
   background: rgba(255, 255, 255, 0.2);

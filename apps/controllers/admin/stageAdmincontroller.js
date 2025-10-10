@@ -75,18 +75,19 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.get("/update/:id", async (req, res) => {
+router.get("/api/:id", async function (req, res) {
     try {
         const stage = await stageService.getStageById(req.params.id);
         const gateData = await gateService.getGateList();
         const gates = gateData.gates;
-        res.render("stages/updatestage", { stage, gates });
+        res.json({ stage, gates });
     } catch (err) {
-        res.status(500).send("Error retrieving stage");
+        console.error("Error fetching stage exercise:", err);
+        res.status(500).json({ message: "Server error" });
     }
 });
 
-router.post("/update/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
     const stageId = req.params.id;
     const { title, questions, gateId: newGateId } = req.body;
 

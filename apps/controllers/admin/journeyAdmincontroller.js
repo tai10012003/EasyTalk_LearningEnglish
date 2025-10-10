@@ -45,22 +45,20 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.post("/update/:id", async (req, res) => {
+router.put("/update/:id", async (req, res) => {
     const journeyId = req.params.id;
     const updateData = { title: req.body.title };
-
     try {
-        await journeyService.updateJourney({ _id: journeyId, ...updateData });
-        res.status(200).json({ message: "Hành trình đã được cập nhật thành công !" });
+        const updatedJourney = await journeyService.updateJourney({ _id: journeyId, ...updateData });
+        res.status(200).json({ message: "Hành trình đã được cập nhật thành công!", journey: updatedJourney });
     } catch (err) {
         console.error("Error updating journey:", err);
         res.status(500).json({ error: "Failed to update Journey." });
     }
 });
 
-router.post("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", async (req, res) => {
     const journeyId = req.params.id;
-
     try {
         await gateService.deleteGatesByJourney(journeyId);
         await journeyService.deleteJourney(journeyId);

@@ -1,4 +1,9 @@
 import Dashboard from "@/views/admin/Dashboard";
+import Journey from "@/views/admin/Journey";
+import Gate from "@/views/admin/Gate";
+import Stage from "@/views/admin/stage/Stage";
+import AddStage from "@/views/admin/stage/AddStagePage";
+import UpdateStage from "@/views/admin/stage/UpdateStagePage"
 import Grammar from "@/views/admin/grammar/Grammar";
 import AddGrammar from "@/views/admin/grammar/AddGrammar";
 import UpdateGrammar from "@/views/admin/grammar/UpdateGrammar"
@@ -32,6 +37,46 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <Dashboard />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "journey",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <Journey />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "gate",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <Gate />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "stage",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <Stage />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "stage/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddStage />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "stage/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdateStage />
             </PrivateRoute>
         ),
     },

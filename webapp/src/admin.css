@@ -2857,3 +2857,331 @@
   background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
   transform: translateY(-2px);
 }
+
+/* === JOURNEY LIST === */
+.admin-journey-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-journey-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-journey-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-journey-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-journey-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-journey-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-journey-table th,
+.admin-journey-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-journey-table th:last-child,
+.admin-journey-table td:last-child {
+  border-right: none;
+}
+
+.admin-journey-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-journey-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-journey-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-journey-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-journey-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-journey-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-journey-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-journey-page-item {
+  display: inline-block;
+}
+
+.admin-journey-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-journey-page-item.active .admin-journey-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-journey-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-journey-table {
+    min-width: 600px;
+  }
+  .admin-journey-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-journey-table {
+    min-width: 100%;
+  }
+  .admin-journey-title {
+    font-size: 20px;
+  }
+  .admin-journey-actions button,
+  .admin-journey-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+ /* === GATE LIST === */
+.admin-gate-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-gate-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-gate-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-gate-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-gate-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-gate-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-gate-table th,
+.admin-gate-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-gate-table th:last-child,
+.admin-gate-table td:last-child {
+  border-right: none;
+}
+
+.admin-gate-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-gate-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-gate-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-gate-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-gate-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-gate-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-gate-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-gate-page-item {
+  display: inline-block;
+}
+
+.admin-gate-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-gate-page-item.active .admin-gate-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-gate-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-gate-table {
+    min-width: 600px;
+  }
+  .admin-gate-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-gate-table {
+    min-width: 100%;
+  }
+  .admin-gate-title {
+    font-size: 20px;
+  }
+  .admin-gate-actions button,
+  .admin-gate-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
