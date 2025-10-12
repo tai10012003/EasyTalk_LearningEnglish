@@ -103,6 +103,24 @@ export const AuthService = {
         return await res.json();
     },
 
+    async resetTempPassword(userId) {
+        try {
+            const res = await fetch(`${API_URL}/admin/user/reset-temp-password/${userId}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || "Không thể đặt lại mật khẩu tạm thời!");
+            }
+            console.log("Reset temp password success:", data);
+            return data;
+        } catch (error) {
+            console.error("Error resetting temp password:", error.message);
+            return { success: false, message: error.message || "Lỗi hệ thống khi đặt lại mật khẩu tạm thời!" };
+        }
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     }

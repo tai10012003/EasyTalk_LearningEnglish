@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
+const nodemailer = require('nodemailer');
+const config = require("../../config/setting.json");
 const UserService = require("./../../services/userService");
 const userService = new UserService();
 
@@ -72,6 +74,51 @@ router.put('/update/:id', async (req, res) => {
   } catch (error) {
       console.error("Error updating user:", error);
       res.status(500).json({ success: false, message: "Error updating user", error: error.message });
+  }
+});
+
+router.post('/reset-temp-password/:userId', async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const user = await userService.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ message: "Không tìm thấy người dùng!" });
+    }
+    const tempPassword = Math.random().toString(36).slice(-8);
+    const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+    await userService.updatePassword(userId, hashedTempPassword);
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: { user: config.email.user, pass: config.email.pass },
+    });
+    const mailOptions = {
+      from: config.email.user,
+      to: user.email,
+      subject: '🔑 Mật khẩu tạm thời mới từ EasyTalk',
+      html: `
+        <p>Xin chào <strong>${user.username}</strong>,</p>
+        <p>Quản trị viên đã đặt lại mật khẩu tạm thời cho tài khoản của bạn.</p>
+        <p>Vui lòng sử dụng mật khẩu tạm thời sau để đăng nhập và đổi lại mật khẩu mới:</p>
+        <h3 style="color:#4CAF50;">${tempPassword}</h3>
+        <p>Vì lý do bảo mật, bạn nên thay đổi mật khẩu ngay sau khi đăng nhập.</p>
+        <br/>
+        <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
+      `,
+    };
+    transporter.sendMail(mailOptions, (error) => {
+      if (error) {
+        console.error("Email send error:", error);
+        return res.status(500).json({ message: "Gửi email thất bại!" });
+      }
+      res.json({
+        success: true,
+        message: "Đặt lại mật khẩu tạm thời thành công!",
+        tempPassword,
+      });
+    });
+  } catch (error) {
+    console.error("Error resetting temp password:", error);
+    res.status(500).json({ message: "Lỗi khi đặt lại mật khẩu tạm thời!" });
   }
 });
 

@@ -3853,6 +3853,10 @@ p {
   opacity: 0.9;
 }
 
+.auth-social-auth-buttons i {
+  margin-right: 5px;
+}
+
 .auth-google {
   background-color: #db4a39;
 }

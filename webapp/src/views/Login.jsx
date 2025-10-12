@@ -10,6 +10,27 @@ function Login() {
   useEffect(() => {
     document.title = "Đăng nhập - EasyTalk";
   }, []);
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    const token = query.get("token");
+    const role = query.get("role");
+    const error = query.get("error");
+    if (error) {
+      toast.error(`Đăng nhập Google thất bại: ${error}`);
+      setTimeout(() => (window.location.href = "/login"), 2000);
+      return;
+    }
+    if (token) {
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", role);
+      toast.success("Đăng nhập Google thành công!");
+      setTimeout(() => {
+        window.location.href = role == "admin" ? "/admin/dashboard" : "/";
+      }, 1500);
+    }
+  }, []);
+
   const handleLogin = async (email, password) => {
     try {
       const data = await AuthService.login(email, password);

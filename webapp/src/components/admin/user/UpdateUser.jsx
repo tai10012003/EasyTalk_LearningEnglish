@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { AuthService } from "@/services/AuthService";
 
 const UpdateUser = ({ onSubmit, title, initialData, returnUrl }) => {
     const navigate = useNavigate();
+    const [tempPassword, setTempPassword] = useState("");
     const [formData, setFormData] = useState({
         username: "",
         email:"",
@@ -22,6 +24,22 @@ const UpdateUser = ({ onSubmit, title, initialData, returnUrl }) => {
             });
         }
     }, [initialData]);
+
+    const handleResetTempPassword = async () => {
+        if (!window.confirm("Bạn có chắc muốn đặt lại mật khẩu tạm thời cho người dùng này không?")) return;
+        try {
+            const data = await AuthService.resetTempPassword(initialData._id);
+            if (data.success) {
+                setTempPassword(data.tempPassword);
+                alert("Đặt lại mật khẩu tạm thời thành công! Mật khẩu đã được gửi đến email người dùng.");
+            } else {
+                alert(data.message || "Không thể đặt lại mật khẩu tạm thời!");
+            }
+        } catch (error) {
+            console.error("Error resetting temp password:", error);
+            alert("Lỗi hệ thống khi đặt lại mật khẩu tạm thời!");
+        }
+    };
 
     const handleChange = (e) => {
         const { name, value, files } = e.target;
@@ -75,6 +93,20 @@ const UpdateUser = ({ onSubmit, title, initialData, returnUrl }) => {
                         className="form-control"
                     />
                 </div>
+                <button
+                    type="button"
+                    className="admin-user-update-btn-reset mt-3 btn btn-warning"
+                    onClick={handleResetTempPassword}
+                >
+                    🔑 Đặt lại mật khẩu tạm thời
+                </button>
+                {tempPassword && (
+                    <div className="admin-user-update-temp-password mt-3">
+                        <p>
+                            Mật khẩu tạm thời: <strong>{tempPassword}</strong>
+                        </p>
+                    </div>
+                )}
                 <div className="admin-user-update-group">
                     <label>Vai trò:</label>
                     <select

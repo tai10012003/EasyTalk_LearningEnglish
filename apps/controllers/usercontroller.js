@@ -63,26 +63,50 @@ router.get('/auth/google', (req, res) => {
 router.get('/auth/google/callback', async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send('Lỗi: Không nhận được mã xác thực');
-
   try {
     const googleUser = await getGoogleUser(code);
     const { email, name } = googleUser;
     let user = await userService.getUserByEmail(email);
     if (!user) {
-      const hashedPassword = await bcrypt.hash('google_auth_password', 10);
+      const tempPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(tempPassword, 10);
       user = await userService.insertUser({
-          username: name,
-          password: hashedPassword,
-          email: email,
-          role: 'user',
-          active: "active"
+        username: name || email.split('@')[0],
+        password: hashedPassword,
+        email,
+        role: "user",
+        active: "active",
+      });
+      user = await userService.getUserByEmail(email);
+      const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: { user: config.email.user, pass: config.email.pass },
+      });
+      const mailOptions = {
+        from: config.email.user,
+        to: email,
+        subject: '🔑 Mật khẩu tạm thời từ EasyTalk',
+        html: `
+          <p>Xin chào <strong>${name || email.split('@')[0]}</strong>,</p>
+          <p>Bạn vừa đăng ký tài khoản bằng Google trên EasyTalk.</p>
+          <p>Đây là mật khẩu tạm thời để bạn có thể đăng nhập bằng tài khoản email nếu muốn:</p>
+          <h3 style="color:#4CAF50;">${tempPassword}</h3>
+          <p>Vì lý do bảo mật, bạn nên đổi mật khẩu sau khi đăng nhập.</p>
+          <br/>
+          <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
+        `,
+      };
+      transporter.sendMail(mailOptions, (error) => {
+        if (error) console.error("Gửi email thất bại:", error);
+        else console.log(`✅ Đã gửi mật khẩu tạm thời đến ${email}`);
       });
     }
-    const token = jwt.sign({ id: user._id, role: user.role, email: user.email }, config.jwt.secret, { expiresIn: '1h' });
-    res.status(200).json({ token, message: 'Đăng nhập thành công!' });
+    const token = jwt.sign({ id: user._id, username: user.username, email: user.email, role: user.role }, config.jwt.secret, { expiresIn: '1h' });
+    const redirectUrl = `http://localhost:5173/login?token=${token}&role=${user.role}`;
+    res.redirect(redirectUrl);
   } catch (error) {
     console.error('Google login error:', error);
-    res.status(500).json({ message: 'Internal Server Error', error: error.message });
+    res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
   }
 });
 
