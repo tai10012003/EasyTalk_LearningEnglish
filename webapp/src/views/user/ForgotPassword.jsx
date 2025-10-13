@@ -9,10 +9,14 @@ import "react-toastify/dist/ReactToastify.css";
 function ForgotPassword() {
     const [step, setStep] = useState("email");
     const [email, setEmail] = useState("");
+    const [expiresAt, setExpiresAt] = useState(null);
+    const [serverTime, setServerTime] = useState(null);
     const navigate = useNavigate();
 
-    const handleEmailSubmitted = (submittedEmail) => {
+    const handleEmailSubmitted = (submittedEmail, expiresAtFromServer, serverTimeFromServer) => {
         setEmail(submittedEmail);
+        setExpiresAt(expiresAtFromServer);
+        setServerTime(serverTimeFromServer);
         setStep("verify");
     };
 
@@ -33,7 +37,7 @@ function ForgotPassword() {
                     <ForgotPasswordForm onSuccess={handleEmailSubmitted} />
                 )}
                 {step == "verify" && (
-                    <VerifyCode email={email} onVerified={handleCodeVerified} />
+                    <VerifyCode email={email} expiresAt={expiresAt} serverTime={serverTime} onVerified={handleCodeVerified}/>
                 )}
                 {step == "reset" && (
                     <ResetPassword email={email} onCompleted={handleResetCompleted} />

@@ -152,10 +152,11 @@ router.post('/forgot-password', async (req, res) => {
   }
 
   const verificationCode = Math.floor(10000 + Math.random() * 90000);
-  verificationCodes[email] = verificationCode;
+  const expiresAt = Date.now() + 60 * 1000;
+  verificationCodes[email] = { code: verificationCode, expiresAt };
   const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: config.email.user, pass: config.email.pass }
+    service: 'gmail',
+    auth: { user: config.email.user, pass: config.email.pass }
   });
 
   const mailOptions = {
@@ -169,23 +170,31 @@ router.post('/forgot-password', async (req, res) => {
       <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc <a href="pductai14@gmail.com">liên hệ với bộ phận hỗ trợ</a> nếu bạn có bất kỳ thắc mắc nào.</p>
       <p>Trân trọng,</p>
       <p>Nhóm hỗ trợ EasyTalk</p>`
-    };
-  transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          return res.status(500).json({ message: 'Failed to send email' });
-      }
-      res.json({ message: 'Verification code sent' });
+  };
+  transporter.sendMail(mailOptions, (error) => {
+    if (error) {
+      console.error(error);
+      return res.status(500).json({ message: 'Không thể gửi email xác thực!' });
+    }
+    res.json({success: true, message: 'Mã xác thực đã được gửi đến email của bạn!', expiresAt, serverTime: Date.now() });
   });
 });
 
 router.post('/verify-code', (req, res) => {
   const { email, code } = req.body;
-  if (verificationCodes[email] && verificationCodes[email] == code) {
-    delete verificationCodes[email];
-    res.json({ success: true, message: 'Mã xác thực chính xác!' });
-  } else {
-    res.status(400).json({ success: false, message: 'Mã xác thực không hợp lệ. Vui lòng nhập chính xác!' });
+  const record = verificationCodes[email];
+  if (!record) {
+    return res.status(400).json({ success: false, message: 'Mã xác thực đã hết hạn hoặc không tồn tại!' });
   }
+  if (Date.now() > record.expiresAt) {
+    delete verificationCodes[email];
+    return res.status(400).json({ success: false, message: 'Mã xác thực đã hết hạn, vui lòng gửi lại mã mới!' });
+  }
+  if (String(record.code) != String(code)) {
+    return res.status(400).json({ success: false, message: 'Mã xác thực không hợp lệ. Vui lòng nhập chính xác!' });
+  }
+  delete verificationCodes[email];
+  return res.json({ success: true, message: 'Mã xác thực chính xác!' });
 });
 
 router.post('/reset-password', async (req, res) => {

@@ -9,13 +9,13 @@ function ForgotPasswordForm({ onSuccess }) {
         e.preventDefault();
         try {
             const res = await AuthService.forgotPassword(email);
-            if (res.message?.includes("Verification code")) {
-                toast.success("Mã xác thực đã gửi đến email của bạn!");
-                onSuccess(email);
+            if (res.success) {
+                toast.success(res.message);
+                onSuccess(email, res.expiresAt, res.serverTime);
             } else {
-                toast.error(res.message || "Email không hợp lệ!");
+                toast.error(res.message);
             }
-        } catch (error) {
+        } catch {
             toast.error("Lỗi khi gửi mã xác thực!");
         }
     };
