@@ -127,7 +127,6 @@ export const FlashCardService = {
             const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}`, {
                 method: "POST",
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
                 body: formData,
@@ -151,7 +150,6 @@ export const FlashCardService = {
             const res = await fetch(`${API_URL}/flashcards/update-flashcard/${id}`, {
                 method: "PUT",
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
                 body: formData,
@@ -218,3 +216,5 @@ export const FlashCardService = {
         hasShownAlert = false;
     }
 };
+// JSON → dùng Content-Type: application/json + JSON.stringify(data)
+// FormData → không set Content-Type, fetch tự xử lý. Ví dụ: fetch sẽ tự đặt Content-Type thành multipart/form-data

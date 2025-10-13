@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const StageService = require("../services/stageService");
-const UserProgressService = require("../services/userprogressService");
+const UserprogressService = require("../services/userprogressService");
 const GateService = require("../services/gateService");
 const JourneyService = require("../services/journeyService");
 const stageService = new StageService();
 const verifyToken = require("./../util/VerifyToken");
-const userProgressService = new UserProgressService();
+const userprogressService = new UserprogressService();
 const gateService = new GateService();
 const journeyService = new JourneyService();
 
@@ -14,9 +14,9 @@ router.get("/stage/api/stage/detail/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const stageId = req.params.id;
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
-            userProgress = await userProgressService.createUserProgress(userId);
+            userProgress = await userprogressService.createUserProgress(userId);
         }
         const stage = await stageService.getStageById(stageId);
         if (!stage) {
@@ -44,10 +44,10 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
         }
         const currentJourneyId = gate.journey;
 
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const journey = await journeyService.getJourney(currentJourneyId);
-            userProgress = await userProgressService.createUserProgress(userId, journey);
+            userProgress = await userprogressService.createUserProgress(userId, journey);
         }
 
         if (!userProgress.unlockedStages.some(stage => stage.toString() == stageId)) {
@@ -77,7 +77,7 @@ router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
             }
         }
         userProgress.experiencePoints += 10;
-        await userProgressService.updateUserProgress(userProgress);
+        await userprogressService.updateUserProgress(userProgress);
 
         res.json({ message: "Chặng đã hoàn thành và tiến trình đã được cập nhật." });
     } catch (error) {

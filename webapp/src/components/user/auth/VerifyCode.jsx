@@ -9,11 +9,11 @@ function VerifyCode({ email, onVerified }) {
         e.preventDefault();
         try {
             const res = await AuthService.verifyCode(email, code);
-            if (res.message?.includes("Code verified")) {
-                toast.success("Mã xác thực chính xác!");
+            if (res.success) {
+                toast.success(res.message);
                 onVerified();
             } else {
-                toast.error(res.message || "Mã xác thực không hợp lệ. Vui lòng nhập chính xác!");
+                toast.error(res.message);
             }
         } catch {
             toast.error("Lỗi xác thực mã!");

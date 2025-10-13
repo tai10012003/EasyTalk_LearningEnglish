@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const GrammarService = require("../services/grammarService");
-const UserProgressService = require("./../services/userprogressService");
-const userProgressService = new UserProgressService();
+const UserprogressService = require("./../services/userprogressService");
+const userprogressService = new UserprogressService();
 
 router.get("/api/grammar-list", verifyToken, async function (req, res) {
   const grammarService = new GrammarService();
@@ -32,11 +32,11 @@ router.get("/api/grammar/:id", verifyToken, async function (req, res) {
     if (!grammar) {
       return res.status(404).json({ message: "Grammar not found" });
     }
-    let userProgress = await userProgressService.getUserProgressByUserId(userId);
+    let userProgress = await userprogressService.getUserProgressByUserId(userId);
     if (!userProgress) {
       const firstPage = await grammarService.getGrammarList(1, 1);
       const firstGrammar = (firstPage && firstPage.grammars && firstPage.grammars[0]) ? firstPage.grammars[0] : null;
-      userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
+      userProgress = await userprogressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
     }
     const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
     if (!isUnlocked) {
@@ -59,11 +59,11 @@ router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "Grammar not found" });
         }
 
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPage = await grammarService.getGrammarList(1, 1);
             const firstGrammar = (firstPage?.grammars?.[0]) || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar?._id || null, null);
+            userProgress = await userprogressService.createUserProgress(userId, null, null, firstGrammar?._id || null, null);
         }
         const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() === grammarId.toString());
         if (!isUnlocked) {
@@ -78,12 +78,12 @@ router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
             nextGrammar = allGrammars[idx + 1];
         }
         if (nextGrammar) {
-            userProgress = await userProgressService.unlockNextGrammar(userProgress, nextGrammar._id, 10);
+            userProgress = await userprogressService.unlockNextGrammar(userProgress, nextGrammar._id, 10);
         } else {
             userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
         }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        await userprogressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
         return res.json({
             success: true,
             message: nextGrammar 

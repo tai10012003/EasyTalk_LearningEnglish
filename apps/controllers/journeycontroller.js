@@ -1,10 +1,9 @@
-// journeycontroller.js
 const express = require("express");
 const router = express.Router();
 const JourneyService = require("../services/journeyService");
 const verifyToken = require("./../util/VerifyToken");
-const UserProgressService = require("../services/userprogressService");
-const userProgressService = new UserProgressService();
+const UserprogressService = require("../services/userprogressService");
+const userprogressService = new UserprogressService();
 const journeyService = new JourneyService();
 
 router.get('/', (req, res) => {
@@ -15,7 +14,7 @@ router.get("/api", verifyToken, async (req, res) => {
         const userId = req.user.id;
         const journeys = await journeyService.getAllJourneysWithDetails();
 
-        const userProgress = await userProgressService.getUserProgressByUserId(userId) || { unlockedGates: [], unlockedStages: [] };
+        const userProgress = await userprogressService.getUserProgressByUserId(userId) || { unlockedGates: [], unlockedStages: [] };
         const userCompletedGates = userProgress.unlockedGates.map(id => id.toString());
         const userCompletedStages = userProgress.unlockedStages.map(id => id.toString());
 
@@ -57,7 +56,7 @@ router.get("/api", verifyToken, async (req, res) => {
         const completedItems = totalCompletedGates + totalCompletedStages;
         const overallProgressPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
 
-        const leaderboard = await userProgressService.getLeaderboard(10);
+        const leaderboard = await userprogressService.getLeaderboard(10);
 
         res.json({
             journeys,
@@ -88,19 +87,19 @@ router.get("/api/gate/:id", verifyToken, async (req, res) => {
         if (!journey) {
             return res.status(404).json({ error: "Journey not found." });
         }
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
 
         if (!userProgress) {
-            userProgress = await userProgressService.createUserProgress(userId, journey);
+            userProgress = await userprogressService.createUserProgress(userId, journey);
         } else {
-            userProgress = await userProgressService.unlockJourneyInitial(userProgress, journey);
+            userProgress = await userprogressService.unlockJourneyInitial(userProgress, journey);
         }
         const unlockedGates = userProgress.unlockedGates || [];
         const unlockedStages = userProgress.unlockedStages || [];
         const completedGates = unlockedGates.length;
         const completedStages = unlockedStages.length;
 
-        const leaderboard = await userProgressService.getLeaderboard(10);
+        const leaderboard = await userprogressService.getLeaderboard(10);
         res.json({
             journey,
             userProgress,

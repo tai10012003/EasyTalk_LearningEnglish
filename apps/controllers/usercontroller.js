@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const UserService = require("../services/userService");
-const UserProgressService = require("../services/userprogressService")
+const UserprogressService = require("../services/userprogressService")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require('nodemailer');
@@ -9,7 +9,7 @@ const { getGoogleAuthURL, getGoogleUser } = require('./../util/googleAuth');
 const verifyToken = require("./../util/VerifyToken")
 const config = require("../config/setting.json");
 const userService = new UserService();
-const userProgressService = new UserProgressService();
+const userprogressService = new UserprogressService();
 let verificationCodes = {};
 
 router.get("/register", (req, res) => {
@@ -101,6 +101,9 @@ router.get('/auth/google/callback', async (req, res) => {
         else console.log(`✅ Đã gửi mật khẩu tạm thời đến ${email}`);
       });
     }
+    if (user.active == "locked") {
+      return res.status(403).json({ message: "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!" });
+    }
     const token = jwt.sign({ id: user._id, username: user.username, email: user.email, role: user.role }, config.jwt.secret, { expiresIn: '1h' });
     const redirectUrl = `http://localhost:5173/login?token=${token}&role=${user.role}`;
     res.redirect(redirectUrl);
@@ -177,12 +180,11 @@ router.post('/forgot-password', async (req, res) => {
 
 router.post('/verify-code', (req, res) => {
   const { email, code } = req.body;
-
   if (verificationCodes[email] && verificationCodes[email] == code) {
-      delete verificationCodes[email];
-      res.json({ message: 'Mã xác thực chính xác!' });
+    delete verificationCodes[email];
+    res.json({ success: true, message: 'Mã xác thực chính xác!' });
   } else {
-      res.status(400).json({ message: 'Mã xác thực không hợp lệ. Vui lòng nhập chính xác!' });
+    res.status(400).json({ success: false, message: 'Mã xác thực không hợp lệ. Vui lòng nhập chính xác!' });
   }
 });
 
@@ -211,7 +213,7 @@ router.get("/profile/data", verifyToken, async (req, res) => {
     const userId = req.user.id;
     const user = await userService.getUser(userId);
     if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng !" });
-    const userProgress = await userProgressService.getUserProgressByUserId(userId);
+    const userProgress = await userprogressService.getUserProgressByUserId(userId);
     if (!userProgress) {
       return res.status(404).json({ message: "User progress not found" });
     }

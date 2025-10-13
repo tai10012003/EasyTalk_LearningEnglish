@@ -1,8 +1,8 @@
 var express = require("express");
 var router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const FlashcardsService = require("./../services/flashcardService");
-const flashcardsService = new FlashcardsService();
+const FlashcardService = require("./../services/flashcardService");
+const flashcardService = new FlashcardService();
 const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -15,7 +15,7 @@ router.get("/api/flashcard-list", verifyToken, async (req, res) => {
   const page = parseInt(req.query.page) || 1;
 
   try {
-      const { flashcardLists, totalFlashcardLists } = await flashcardsService.getFlashcardList(page, limit);
+      const { flashcardLists, totalFlashcardLists } = await flashcardService.getFlashcardList(page, limit);
       const totalPages = Math.ceil(totalFlashcardLists / limit);
       res.json({
           flashcardLists,
@@ -31,7 +31,7 @@ router.get("/api/flashcard-list", verifyToken, async (req, res) => {
 router.post("/create", verifyToken, async (req, res) => {
   try {
     const { name, description } = req.body;
-    const newFlashcardList = await flashcardsService.insertFlashcardList({ name, description });
+    const newFlashcardList = await flashcardService.insertFlashcardList({ name, description });
     res.status(201).json({ success: true, flashcardList: newFlashcardList });
   } catch (err) {
     res.status(500).json({ success: false, message: "Lỗi khi tạo FlashcardList", error: err.message });
@@ -40,7 +40,7 @@ router.post("/create", verifyToken, async (req, res) => {
 
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
-    await flashcardsService.deleteFlashcardList(req.params.id);
+    await flashcardService.deleteFlashcardList(req.params.id);
     res.status(200).json({ success: true, message: "Flashcard list đã bị xóa" });
   } catch (err) {
     res.status(500).json({ success: false, message: "Xóa thất bại", error: err.message });
@@ -50,7 +50,7 @@ router.delete("/:id", verifyToken, async (req, res) => {
 router.put("/flashcardlist/:id", verifyToken, async (req, res) => {
   try {
     const { name, description } = req.body;
-    const updatedFlashcardList = await flashcardsService.updateFlashcardList(req.params.id, { name, description });
+    const updatedFlashcardList = await flashcardService.updateFlashcardList(req.params.id, { name, description });
 
     if (!updatedFlashcardList) {
       return res.status(404).json({ success: false, message: "Không tìm thấy danh sách" });
@@ -71,7 +71,7 @@ router.get("/api/flashcardlist/:id", verifyToken, async (req, res) => {
     const limit = parseInt(req.query.limit) || 5;
     const skip = (page - 1) * limit;
 
-    const { flashcardList, flashcards } = await flashcardsService.getFlashcardListById(req.params.id);
+    const { flashcardList, flashcards } = await flashcardService.getFlashcardListById(req.params.id);
 
     if (!flashcardList) {
       return res.status(404).json({ success: false, message: "Không tìm thấy danh sách flashcards." });
@@ -99,7 +99,7 @@ router.post('/flashcardlist/:id', verifyToken, upload.single('image'), async (re
       const { word, meaning, pos, pronunciation, exampleSentence } = req.body;
       const image = req.file ? req.file.buffer.toString('base64') : null;
 
-      const newFlashcard = await flashcardsService.insertFlashcard({
+      const newFlashcard = await flashcardService.insertFlashcard({
           word,
           meaning,
           pos,
@@ -117,7 +117,7 @@ router.post('/flashcardlist/:id', verifyToken, upload.single('image'), async (re
 
 router.delete("/delete-flashcard/:id", verifyToken, async (req, res) => {
   try {
-    await flashcardsService.deleteFlashcard(req.params.id);
+    await flashcardService.deleteFlashcard(req.params.id);
     res.status(200).json({ success: true, message: "Flashcard đã bị xóa" });
   } catch (err) {
     res.status(500).json({ success: false, message: "Xóa thất bại", error: err.message });
@@ -137,13 +137,13 @@ router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (
     if (req.file) {
       updatedData.image = req.file.buffer.toString("base64");
     } else {
-      const existingFlashcard = await flashcardsService.getFlashcardListById(req.params.id);
+      const existingFlashcard = await flashcardService.getFlashcardListById(req.params.id);
       if (existingFlashcard && existingFlashcard.image) {
         updatedData.image = existingFlashcard.image;
       }
     }
 
-    const updatedFlashcard = await flashcardsService.updateFlashcard(req.params.id, updatedData);
+    const updatedFlashcard = await flashcardService.updateFlashcard(req.params.id, updatedData);
 
     if (!updatedFlashcard) {
       return res.status(404).json({ success: false, message: "Flashcard không tồn tại" });
@@ -160,7 +160,7 @@ router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (
 
 router.get("/flashcardlist/:listId/review", verifyToken, async (req, res) => {
   try {
-    const { flashcards, flashcardList } = await flashcardsService.getFlashcardListById(req.params.listId);
+    const { flashcards, flashcardList } = await flashcardService.getFlashcardListById(req.params.listId);
 
     if (!flashcards || flashcards.length === 0) {
       return res.status(404).json({

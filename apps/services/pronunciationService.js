@@ -1,41 +1,24 @@
-const { ObjectId } = require('mongodb');
-var config = require("./../config/setting.json");
 const fs = require("fs");
 const path = require("path");
+const { PronunciationRepository } = require("./../repositories");
 
 class PronunciationsService {
-    databaseConnection = require('./../database/database');
-    pronunciations = require('./../models/pronunciation');
-
-    client;
-    pronunciationsDatabase;
-    pronunciationsCollection;
-
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
-        this.pronunciationsDatabase = this.client.db(config.mongodb.database);
-        this.pronunciationsCollection = this.pronunciationsDatabase.collection("pronunciations");
+        this.pronunciationRepository = new PronunciationRepository();
         this.imageFolder = path.join(__dirname, "../public/images/pronunciation");
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
     async getPronunciationList(page = 1, limit = 3) {
-        const skip = (page - 1) * limit; 
-        const cursor = await this.pronunciationsCollection
-            .find({}, {})
-            .skip(skip)
-            .limit(limit);
-
-        const pronunciations = await cursor.toArray(); 
-        const totalPronunciations = await this.pronunciationsCollection.countDocuments();
-
+        const skip = (page - 1) * limit;
+        const { items, total } = await this.pronunciationRepository.findAll({}, skip, limit);
         return {
-            pronunciations,     
-            totalPronunciations, 
+            pronunciations: items,
+            totalPronunciations: total
         };
     }
 
     async getPronunciation(id) {
-        return await this.pronunciationsCollection.findOne({ _id: new ObjectId(id) });
+        return await this.pronunciationRepository.findById(id);
     }
 
     async insertPronunciation(pronunciation) {
@@ -58,39 +41,34 @@ class PronunciationsService {
                 });
             });
         }
-        return await this.pronunciationsCollection.insertOne(newPronunciation);
+        return await this.pronunciationRepository.insert(newPronunciation);
     }
 
     async updatePronunciation(id, pronunciation) {
-        const objectId = new ObjectId(id);
-        const formattedQuestions = pronunciation.quizzes.map((question) => {
-            return {
-                question: question.question,
-                type: question.type,
-                correctAnswer: question.correctAnswer,
-                explanation: question.explanation || "",
-                options: question.options || [],
-            };
-        });
-        const update = {
+        const formattedQuestions = pronunciation.quizzes.map(q => ({
+            question: q.question,
+            type: q.type,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation || "",
+            options: q.options || []
+        }));
+        const updateData = {
             title: pronunciation.title.trim(),
             description: pronunciation.description.trim(),
             content: pronunciation.content.trim(),
             images: pronunciation.images.trim(),
             quizzes: formattedQuestions,
-            updatedAt: new Date(),
+            updatedAt: new Date()
         };
-        const result = await this.pronunciationsCollection.updateOne({ _id: objectId }, { $set: update });
-        return result.modifiedCount > 0;
+        return await this.pronunciationRepository.update(id, updateData);
     }
 
     async deletePronunciation(id) {
-        return await this.pronunciationsCollection.deleteOne({ "_id": new ObjectId(id) });
+        return await this.pronunciationRepository.delete(id);
     }
 
     getNextImageFilename(ext) {
-        const files = fs.readdirSync(this.imageFolder)
-            .filter(f => f.startsWith("pronunciation-"));
+        const files = fs.readdirSync(this.imageFolder).filter(f => f.startsWith("pronunciation-"));
         const numbers = files
             .map(f => parseInt(f.match(/^pronunciation-(\d+)\./)?.[1]))
             .filter(n => !isNaN(n))

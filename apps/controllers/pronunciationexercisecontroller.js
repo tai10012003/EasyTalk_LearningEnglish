@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const PronunciationExerciseService = require("../services/pronunciationexerciseService");
-const pronunciationExerciseService = new PronunciationExerciseService();
+const pronunciationexerciseService = new PronunciationExerciseService();
 const multer = require('multer');
 const axios = require('axios'); 
 const storage = multer.memoryStorage();
@@ -10,7 +10,7 @@ const FormData = require('form-data');
 
 router.get("/", async (req, res) => {
     try {
-        const { pronunciationexercises } = await pronunciationExerciseService.getPronunciationexerciseList();
+        const { pronunciationexercises } = await pronunciationexerciseService.getPronunciationexerciseList();
         res.render("pronunciationexercises/pronunciationexercise-list", { exercises: pronunciationexercises });
     } catch (err) {
         console.error("Error retrieving pronunciation exercises:", err);
@@ -22,7 +22,7 @@ router.get("/api/pronunciation-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
-        const { pronunciationexercises, totalExercises } = await pronunciationExerciseService.getPronunciationexerciseList(page, limit);
+        const { pronunciationexercises, totalExercises } = await pronunciationexerciseService.getPronunciationexerciseList(page, limit);
     
         const totalPages = Math.ceil(totalExercises / limit);
     
@@ -45,7 +45,7 @@ router.get('/detail/:id', (req, res) => {
 
 router.get("/api/pronunciation-exercises/:id", async function (req, res) {
     try {
-        const exercise = await pronunciationExerciseService.getPronunciationexerciseById(req.params.id);
+        const exercise = await pronunciationexerciseService.getPronunciationexerciseById(req.params.id);
 
         if (!exercise) {
             return res.status(404).json({ message: "Pronunciation exercise not found" });
@@ -79,7 +79,7 @@ router.post('/analyze/:id/:index', upload.single('audio'), async (req, res) => {
         );
 
         const transcription = response.data.text;
-        const exercise = await pronunciationExerciseService.getPronunciationexerciseById(exerciseId);
+        const exercise = await pronunciationexerciseService.getPronunciationexerciseById(exerciseId);
 
         if (!exercise || !exercise.questions || !exercise.questions[questionIndex]) {
             return res.status(404).json({

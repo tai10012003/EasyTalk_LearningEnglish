@@ -1,0 +1,56 @@
+const { ObjectId } = require('mongodb');
+const DatabaseConnection = require('./../database/database');
+const config = require('./../config/setting.json');
+
+class UserRepository {
+    client;
+    db;
+    collection;
+
+    constructor() {
+        this.client = DatabaseConnection.getMongoClient();
+        this.db = this.client.db(config.mongodb.database);
+        this.collection = this.db.collection("users");
+    }
+
+    async findAll(filter = {}, skip = 0, limit = 3) {
+        const cursor = await this.collection.find(filter).skip(skip).limit(limit);
+        const users = await cursor.toArray();
+        const total = await this.collection.countDocuments(filter);
+        return { users, total };
+    }
+
+    async findById(id) {
+        return await this.collection.findOne({ _id: new ObjectId(id) });
+    }
+
+    async findByEmail(email) {
+        return await this.collection.findOne({ email });
+    }
+
+    async insert(user) {
+        user.createdAt = new Date();
+        return await this.collection.insertOne(user);
+    }
+
+    async update(id, updateFields) {
+        const objectId = new ObjectId(id);
+        const result = await this.collection.updateOne({ _id: objectId }, { $set: updateFields });
+        return result.modifiedCount > 0;
+    }
+
+    async updatePassword(id, hashedPassword) {
+        const objectId = new ObjectId(id);
+        const result = await this.collection.updateOne(
+            { _id: objectId },
+            { $set: { password: hashedPassword } }
+        );
+        return result.modifiedCount > 0;
+    }
+
+    async delete(id) {
+        return await this.collection.deleteOne({ _id: new ObjectId(id) });
+    }
+}
+
+module.exports = UserRepository;

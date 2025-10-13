@@ -3,8 +3,8 @@ const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const StoryService = require("./../services/storyService");
 const storyService = new StoryService();
-const UserProgressService = require("./../services/userprogressService");
-const userProgressService = new UserProgressService();
+const UserprogressService = require("./../services/userprogressService");
+const userprogressService = new UserprogressService();
 
 router.get("/api/story-list", verifyToken, async (req, res) => {
     try {
@@ -43,11 +43,11 @@ router.get("/api/story/:id", verifyToken, async (req, res) => {
                 message: "Story not found",
             });
         }
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPage = await storyService.getStoryList(1, 1);
             const firstStory = (firstPage && firstPage.stories && firstPage.stories[0]) ? firstPage.stories[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, firstStory ? firstStory._id : null, null, null);
+            userProgress = await userprogressService.createUserProgress(userId, null, firstStory ? firstStory._id : null, null, null);
         }
         const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
         if (!isUnlocked) {
@@ -79,11 +79,11 @@ router.post("/api/story/complete/:id", verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "Story not found" });
         }
 
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPage = await storyService.getStoryList(1, 1);
             const firstStory = firstPage?.stories?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, firstStory?._id || null, null, null);
+            userProgress = await userprogressService.createUserProgress(userId, null, firstStory?._id || null, null, null);
         }
         const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() === storyId.toString());
         if (!isUnlocked) {
@@ -98,12 +98,12 @@ router.post("/api/story/complete/:id", verifyToken, async (req, res) => {
             nextStory = allStories[idx + 1];
         }
         if (nextStory) {
-            userProgress = await userProgressService.unlockNextStory(userProgress, nextStory._id, 10);
+            userProgress = await userprogressService.unlockNextStory(userProgress, nextStory._id, 10);
         } else {
             userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
         }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        await userprogressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
         return res.json({
             success: true,
             message: nextStory 

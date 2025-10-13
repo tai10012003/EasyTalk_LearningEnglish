@@ -1,16 +1,11 @@
-const { ObjectId } = require('mongodb');
-const config = require("./../config/setting.json");
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
-const databaseConnection = require('./../database/database');
+const config = require('./../config/setting.json');
+const { ReminderRepository } = require('./../repositories');
 
 class ReminderService {
     constructor() {
-        this.client = databaseConnection.getMongoClient();
-        this.reminderDatabase = this.client.db(config.mongodb.database);
-        this.reminderCollection = this.reminderDatabase.collection("reminders");
-
-        // Configure nodemailer for email sending
+        this.reminderRepository = new ReminderRepository();
         this.transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -27,66 +22,38 @@ class ReminderService {
             reminderTime,
             frequency,
             additionalInfo,
-            status: "active"
+            status: "active",
         };
-        const result = await this.reminderCollection.insertOne(reminder);
-        this.scheduleEmail(reminder);
-        return result.insertedId;
+        const insertedId = await this.reminderRepository.createReminder(reminder);
+        this.scheduleEmail({ ...reminder, _id: insertedId });
+        return insertedId;
     }
 
     async getRemindersByUserId(userId) {
-        try {
-            const reminders = await this.reminderCollection.find({ user: userId }).toArray();
-            return reminders;
-        } catch (error) {
-            console.error("Error fetching reminders:", error);
-            throw new Error("Failed to fetch reminders.");
-        }
-    }    
+        return await this.reminderRepository.findRemindersByUserId(userId);
+    }
 
     async getReminderById(reminderId) {
-        try {
-            const reminder = await this.reminderCollection.findOne({ _id: new ObjectId(reminderId) });
-            return reminder;
-        } catch (error) {
-            console.error("Error fetching reminder by ID:", error);
-            throw new Error("Failed to fetch reminder by ID.");
-        }
+        return await this.reminderRepository.findReminderById(reminderId);
     }
 
     async updateReminder(reminderId, updatedFields) {
-        try {
-            const result = await this.reminderCollection.updateOne(
-                { _id: new ObjectId(reminderId) },
-                { $set: updatedFields }
-            );
-    
-            if (result.modifiedCount > 0) {
-                const updatedReminder = await this.getReminderById(reminderId);
-                this.scheduleEmail(updatedReminder);
-            }
-    
-            return true;
-        } catch (error) {
-            console.error("Error updating reminder:", error);
-            throw new Error("Failed to update reminder.");
+        const success = await this.reminderRepository.updateReminder(reminderId, updatedFields);
+        if (success) {
+            const updatedReminder = await this.getReminderById(reminderId);
+            this.scheduleEmail(updatedReminder);
         }
-    }    
-
-    async deleteReminder(reminderId) {
-        try {
-            await this.reminderCollection.deleteOne({ _id: new ObjectId(reminderId) });
-            return true;
-        } catch (error) {
-            console.error("Error deleting reminder:", error);
-            throw new Error("Failed to delete reminder.");
-        }
+        return success;
     }
 
-    async scheduleEmail(reminder) {
+    async deleteReminder(reminderId) {
+        return await this.reminderRepository.deleteReminder(reminderId);
+    }
+
+    scheduleEmail(reminder) {
         const reminderDate = new Date(reminder.reminderTime);
         const cronExpression = `${reminderDate.getMinutes()} ${reminderDate.getHours()} ${reminderDate.getDate()} ${reminderDate.getMonth() + 1} *`;
-        
+
         cron.schedule(cronExpression, () => {
             this.sendEmail(
                 reminder.email,
@@ -112,7 +79,7 @@ class ReminderService {
                    <p>Trân trọng, </p>
                    <p>Nhóm EasyTalk</p>`
         };
-    
+
         this.transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
                 console.error('Lỗi gửi email:', error);

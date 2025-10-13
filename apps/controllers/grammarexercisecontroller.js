@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const GrammarexerciseService = require("./../services/grammarexerciseService");
-const grammarExerciseService = new GrammarexerciseService();
+const grammarexerciseService = new GrammarexerciseService();
 
 router.get("/", async (req, res) => {
     try {
-        const { grammarexercises } = await grammarExerciseService.getGrammarexerciseList();
+        const { grammarexercises } = await grammarexerciseService.getGrammarexerciseList();
         res.render("grammarexercises/grammarexercise-list", { exercises: grammarexercises });
     } catch (err) {
         res.status(500).send("Error retrieving grammar exercises: " + err.message);
@@ -15,7 +15,7 @@ router.get("/api/grammar-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
-        const { grammarexercises, totalExercises } = await grammarExerciseService.getGrammarexerciseList(page, limit);
+        const { grammarexercises, totalExercises } = await grammarexerciseService.getGrammarexerciseList(page, limit);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
           success: true,
@@ -34,7 +34,7 @@ router.get('/detail/:id', (req, res) => {
 
 router.get("/api/grammar-exercises/:id", async function (req, res) {
     try {
-        const exercise = await grammarExerciseService.getGrammarexerciseById(req.params.id);
+        const exercise = await grammarexerciseService.getGrammarexerciseById(req.params.id);
 
         if (!exercise) {
             return res.status(404).json({ message: "Grammar exercise not found." });

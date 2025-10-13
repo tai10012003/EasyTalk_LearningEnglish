@@ -1,92 +1,44 @@
-const { ObjectId } = require("mongodb");
-const config = require("./../config/setting.json");
+const { GateRepository } = require('./../repositories');
 
 class GateService {
-    databaseConnection = require('./../database/database');
-    gates = require('./../models/gate');
-    client;
-    gatesDatabase;
-    gatesCollection;
-
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
-        this.gatesDatabase = this.client.db(config.mongodb.database);
-        this.gatesCollection = this.gatesDatabase.collection("gates");
+        this.gateRepository = new GateRepository();
     }
+
     async getGateList(page = 1, limit = 10) {
-        const skip = (page - 1) * limit;
-    
-        const gates = await this.gatesCollection.aggregate([
-            {
-                $lookup: {
-                    from: "journeys",
-                    localField: "journey",
-                    foreignField: "_id",
-                    as: "journeyInfo"
-                }
-            },
-            { $unwind: { path: "$journeyInfo", preserveNullAndEmptyArrays: true } },
-            { $skip: skip },
-            { $limit: limit }
-        ]).toArray();
-    
-        const totalGates = await this.gatesCollection.countDocuments();
-    
-        return { gates, totalGates };
+        return await this.gateRepository.findGates(page, limit);
     }
 
     async getGateById(gateId) {
-        return await this.gatesCollection.findOne({ _id: new ObjectId(gateId) });
+        return await this.gateRepository.findGateById(gateId);
     }
 
     async getGatesInJourney(journeyId) {
-        return await this.gatesCollection.find({ journey: new ObjectId(journeyId) }).sort({ _id: 1 }).toArray();
+        return await this.gateRepository.findGatesByJourney(journeyId);
     }
 
     async insertGate(gate) {
-        gate.stages = [];
-        gate.createdAt = new Date();
-        return await this.gatesCollection.insertOne(gate);
+        return await this.gateRepository.insertGate(gate);
     }
 
     async updateGate(gate) {
-        const { _id, ...updateData } = gate;
-        return await this.gatesCollection.updateOne(
-            { _id: new ObjectId(_id) },
-            { $set: updateData }
-        );
+        return await this.gateRepository.updateGate(gate);
     }
 
     async deleteGate(id) {
-        return await this.gatesCollection.deleteOne({ _id: new ObjectId(id) });
+        return await this.gateRepository.deleteGate(id);
     }
 
     async deleteGatesByJourney(journeyId) {
-        return await this.gatesCollection.deleteMany({ journey: new ObjectId(journeyId) });
+        return await this.gateRepository.deleteGatesByJourney(journeyId);
     }
 
     async addStageToGate(gateId, stageId) {
-        try {
-            return await this.gatesCollection.updateOne(
-                { _id: new ObjectId(gateId) },
-                { $addToSet: { stages: new ObjectId(stageId) } }
-            );
-        } catch (error) {
-            console.error("Error in addStageToGate:", error);
-            throw error;
-        }
+        return await this.gateRepository.addStage(gateId, stageId);
     }
 
     async removeStageFromGate(gateId, stageId) {
-        try {
-            return await this.gatesCollection.updateOne(
-                { _id: new ObjectId(gateId) },
-                { $pull: { stages: new ObjectId(stageId) } }
-            );
-        } catch (error) {
-            console.error("Error in removeStageFromGate:", error);
-            throw error;
-        }
+        return await this.gateRepository.removeStage(gateId, stageId);
     }
 }
 

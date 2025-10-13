@@ -1,4 +1,4 @@
-class userprogresses {
+class UserProgress {
     _id;
     user;
     unlockedGates = [];
@@ -6,11 +6,14 @@ class userprogresses {
     unlockedStories = [];
     unlockedGrammars = [];
     unlockedPronunciations = [];
-    experiencePoints;
+    experiencePoints = 0;
     streak = 0;
     maxStreak = 0;
     studyDates = [];
-    constructor() {
+
+    constructor(init = {}) {
+        Object.assign(this, init);
     }
-};
-module.exports = userprogresses;
+}
+
+module.exports = UserProgress;

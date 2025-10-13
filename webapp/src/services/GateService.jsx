@@ -66,10 +66,6 @@ export const GateService = {
         }
     },
 
-    resetAlertFlag() {
-        hasShownAlert = false;
-    },
-
     async addGate(formData) {
         try {
             const token = localStorage.getItem("token");

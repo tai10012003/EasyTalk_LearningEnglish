@@ -1,75 +1,41 @@
-const { ObjectId } = require('mongodb');
-var config = require("./../config/setting.json");
+const { UserRepository } = require("./../repositories");
 
 class UsersService {
-    databaseConnection = require('./../database/database');
-    users = require('./../models/user');
-
-    client;
-    usersDatabase;
-    usersCollection;
-
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
-        this.usersDatabase = this.client.db(config.mongodb.database);
-        this.usersCollection = this.usersDatabase.collection("users");
+        this.userRepository = new UserRepository();
     }
 
     async getUserList(page = 1, limit = 3, role = "") {
         const skip = (page - 1) * limit;
         const filter = {};
         if (role) filter.role = role;
-        const cursor = await this.usersCollection
-            .find(filter)
-            .skip(skip)
-            .limit(limit);
-
-        const users = await cursor.toArray(); 
-        const totalUsers = await this.usersCollection.countDocuments(); 
-
-        return {
-            users,      
-            totalUsers, 
-        };
+        const { users, total } = await this.userRepository.findAll(filter, skip, limit);
+        return { users, totalUsers: total };
     }
 
     async getUser(id) {
-        return await this.usersCollection.findOne({ _id: new ObjectId(id) });
+        return await this.userRepository.findById(id);
     }
 
     async getUserByEmail(email) {
-        return await this.usersCollection.findOne({ email });
+        return await this.userRepository.findByEmail(email);
     }
 
     async updatePassword(userId, hashedNewPassword) {
-        try {
-          await this.usersCollection.updateOne(
-            { _id: new ObjectId(userId) },
-            { $set: { password: hashedNewPassword } }
-          );
-        } catch (error) {
-          console.error("Error updating password:", error);
-          throw new Error("Failed to update password.");
-        }
-    } 
-         
+        return await this.userRepository.updatePassword(userId, hashedNewPassword);
+    }
+
     async insertUser(user) {
-        user.createdAt = new Date(); 
-        return await this.usersCollection.insertOne(user);
+        return await this.userRepository.insert(user);
     }
 
     async updateUser(user) {
-            const { _id, ...updateFields } = user;
-
-            const result = await this.usersCollection.updateOne(
-                { _id: new ObjectId(_id) },
-                { $set: updateFields }
-            );
-            return result;
-    }    
+        const { _id, ...updateFields } = user;
+        return await this.userRepository.update(_id, updateFields);
+    }
 
     async deleteUser(id) {
-        return await this.usersCollection.deleteOne({ "_id": new ObjectId(id) });
+        return await this.userRepository.delete(id);
     }
 }
 

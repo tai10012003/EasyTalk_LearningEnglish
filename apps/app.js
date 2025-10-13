@@ -6,7 +6,7 @@ const session = require('express-session');
 const bcrypt = require('bcrypt');
 const flash = require('connect-flash');
 const cors = require("cors");
-const User = require("./models/user"); 
+const User = require("./entities/user"); 
 var app = express();
 
 // Cho phép tất cả domain (tạm thời)

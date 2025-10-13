@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const VocabularyExerciseService = require("./../services/vocabularyexerciseService");
-const vocabularyExerciseService = new VocabularyExerciseService();
+const VocabularyexerciseService = require("./../services/vocabularyexerciseService");
+const vocabularyexerciseService = new VocabularyexerciseService();
 
 router.get("/api/vocabulary-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 2;
-        const { vocabularyExercises, totalExercises } = await vocabularyExerciseService.getVocabularyExerciseList(page, limit);
+        const { vocabularyExercises, totalExercises } = await vocabularyexerciseService.getVocabularyExerciseList(page, limit);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
           success: true,
@@ -23,7 +23,7 @@ router.get("/api/vocabulary-exercises", async (req, res) => {
 
 router.get("/api/vocabulary-exercises/:id", async function (req, res) {
     try {
-        const exercise = await vocabularyExerciseService.getVocabularyExerciseById(req.params.id);
+        const exercise = await vocabularyexerciseService.getVocabularyExerciseById(req.params.id);
 
         if (!exercise) {
             return res.status(404).json({ message: "Vocabulary exercise not found." });

@@ -1,20 +1,10 @@
-const { ObjectId } = require('mongodb');
-var config = require("./../config/setting.json");
 const fs = require("fs");
 const path = require("path");
+const { GrammarRepository } = require("./../repositories");
 
 class GrammarsService {
-    databaseConnection = require('./../database/database');
-    grammars = require('./../models/grammar');
-
-    client;
-    grammarsDatabase;
-    grammarsCollection;
-
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
-        this.grammarsDatabase = this.client.db(config.mongodb.database);
-        this.grammarsCollection = this.grammarsDatabase.collection("grammars");
+        this.grammarRepository = new GrammarRepository();
         this.imageFolder = path.join(__dirname, "../public/images/grammar");
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
@@ -22,23 +12,13 @@ class GrammarsService {
     async getGrammarList(page = 1, limit = 5, search = "") {
         const skip = (page - 1) * limit;
         const filter = {};
-        if (search) {
-            filter.title = { $regex: search, $options: "i" };
-        }
-        const cursor = await this.grammarsCollection
-            .find(filter, {})
-            .skip(skip)
-            .limit(limit);
-        const grammars = await cursor.toArray();
-        const totalGrammars = await this.grammarsCollection.countDocuments(filter);
-        return {
-            grammars,
-            totalGrammars,
-        };
+        if (search) filter.title = { $regex: search, $options: "i" };
+        const { grammars, total } = await this.grammarRepository.findAll(filter, skip, limit);
+        return { grammars, totalGrammars: total };
     }
 
     async getGrammar(id) {
-        return await this.grammarsCollection.findOne({ _id: new ObjectId(id) });
+        return await this.grammarRepository.findById(id);
     }
 
     async insertGrammar(grammar) {
@@ -61,39 +41,34 @@ class GrammarsService {
                 });
             });
         }
-        return await this.grammarsCollection.insertOne(newGrammar);
+        return await this.grammarRepository.insert(newGrammar);
     }
 
     async updateGrammar(id, grammar) {
-        const objectId = new ObjectId(id);
-        const formattedQuestions = grammar.quizzes.map((question) => {
-            return {
-                question: question.question,
-                type: question.type,
-                correctAnswer: question.correctAnswer,
-                explanation: question.explanation || "",
-                options: question.options || [],
-            };
-        });
-        const update = {
+        const formattedQuestions = grammar.quizzes.map(q => ({
+            question: q.question,
+            type: q.type,
+            correctAnswer: q.correctAnswer,
+            explanation: q.explanation || "",
+            options: q.options || []
+        }));
+        const updateData = {
             title: grammar.title.trim(),
             description: grammar.description.trim(),
             content: grammar.content.trim(),
             images: grammar.images.trim(),
             quizzes: formattedQuestions,
-            updatedAt: new Date(),
+            updatedAt: new Date()
         };
-        const result = await this.grammarsCollection.updateOne({ _id: objectId }, { $set: update });
-        return result.modifiedCount > 0;
+        return await this.grammarRepository.update(id, updateData);
     }
 
     async deleteGrammar(id) {
-        return await this.grammarsCollection.deleteOne({ "_id": new ObjectId(id) });
+        return await this.grammarRepository.delete(id);
     }
 
     getNextImageFilename(ext) {
-        const files = fs.readdirSync(this.imageFolder)
-            .filter(f => f.startsWith("grammar-"));
+        const files = fs.readdirSync(this.imageFolder).filter(f => f.startsWith("grammar-"));
         const numbers = files
             .map(f => parseInt(f.match(/^grammar-(\d+)\./)?.[1]))
             .filter(n => !isNaN(n))

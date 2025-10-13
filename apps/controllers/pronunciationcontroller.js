@@ -2,8 +2,8 @@ const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const PronunciationService = require("../services/pronunciationService");
-const UserProgressService = require("./../services/userprogressService");
-const userProgressService = new UserProgressService();
+const UserprogressService = require("./../services/userprogressService");
+const userprogressService = new UserprogressService();
 const pronunciationService = new PronunciationService();
 
 router.get("/api/pronunciation-list", verifyToken, async (req, res) => {
@@ -26,11 +26,11 @@ router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const pronunciationId = req.params.id;
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPronunciationList = await pronunciationService.getPronunciationList(1, 1);
             const firstPronunciation = firstPronunciationList.pronunciations[0];
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
         }
 
         const isUnlocked = (userProgress.unlockedPronunciations || []).some(s => s.toString() == pronunciationId.toString());
@@ -52,11 +52,11 @@ router.post("/api/pronunciation/complete/:id", verifyToken, async (req, res) => 
     try {
         const userId = req.user.id;
         const pronunciationId = req.params.id;
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPronunciationList = await pronunciationService.getPronunciationList(1, 1);
             const firstPronunciation = firstPronunciationList.pronunciations[0];
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
         }
 
         const isUnlocked = (userProgress.unlockedPronunciations || []).some(s => s.toString() == pronunciationId.toString());
@@ -71,12 +71,12 @@ router.post("/api/pronunciation/complete/:id", verifyToken, async (req, res) => 
             nextPronunciation = allPronunciations[idx + 1];
         }
         if (nextPronunciation) {
-            userProgress = await userProgressService.unlockNextPronunciation(userProgress, nextPronunciation._id, 10);
+            userProgress = await userprogressService.unlockNextPronunciation(userProgress, nextPronunciation._id, 10);
         } else {
             userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
         }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        await userprogressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
         return res.json({
             success: true,
             message: nextPronunciation 

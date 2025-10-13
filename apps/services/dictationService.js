@@ -1,54 +1,28 @@
-const { ObjectId } = require('mongodb');
-const config = require("./../config/setting.json");
+const { DictationRepository } = require('./../repositories');
 
 class DictationService {
-    databaseConnection = require('./../database/database');
-    dictationexercises = require('./../models/dictationexercise');
-
-    client;
-    dictationDatabase;
-    dictationCollection;
-
     constructor() {
-        this.client = this.databaseConnection.getMongoClient();
-        this.dictationDatabase = this.client.db(config.mongodb.database);
-        this.dictationCollection = this.dictationDatabase.collection("dictationexercises");
+        this.dictationRepository = new DictationRepository();
     }
 
     async getDictationList(page = 1, limit = 6) {
-        const skip = (page - 1) * limit;
-        const cursor = await this.dictationCollection
-            .find({})
-            .skip(skip)
-            .limit(limit);
-
-        const dictationExercises = await cursor.toArray();
-        const totalDictationExercises = await this.dictationCollection.countDocuments();
-        return {
-            dictationExercises,
-            totalDictationExercises,
-        };
+        return await this.dictationRepository.findDictations(page, limit);
     }
 
     async getDictation(id) {
-        return await this.dictationCollection.findOne({ _id: new ObjectId(id) });
+        return await this.dictationRepository.findDictationById(id);
     }
 
-    async insertDictation(dictationexercises) {
-        dictationexercises.createdAt = new Date();
-        return await this.dictationCollection.insertOne(dictationexercises);
+    async insertDictation(dictationData) {
+        return await this.dictationRepository.insertDictation(dictationData);
     }
 
-    async updateDictation(dictationexercises) {
-        const { _id, ...updateFields } = dictationexercises;
-        return await this.dictationCollection.updateOne(
-            { _id: new ObjectId(_id) },
-            { $set: updateFields }
-        );
-    }    
+    async updateDictation(dictationData) {
+        return await this.dictationRepository.updateDictation(dictationData);
+    }
 
     async deleteDictation(id) {
-        return await this.dictationCollection.deleteOne({ "_id": new ObjectId(id) });
+        return await this.dictationRepository.deleteDictation(id);
     }
 }
 

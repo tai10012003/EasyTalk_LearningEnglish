@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Gate = require("../models/gate");
+const Gate = require("../entities/gate");
 
 router.get("/", async (req, res) => {
     try {
