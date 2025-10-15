@@ -1,9 +1,9 @@
 var express = require("express");
 var router = express.Router();
 // user route
-router.use("/home", require(__dirname + "/homecontroller"));
-router.use("/about", require(__dirname + "/aboutcontroller"));
 router.use("/journey", require(__dirname + "/journeycontroller"));
+router.use("/gate", require(__dirname + "/gatecontroller"));
+router.use("/stage", require(__dirname + "/stagecontroller"));
 router.use("/grammar", require(__dirname + "/grammarcontroller"));
 router.use("/pronunciation", require(__dirname + "/pronunciationcontroller"));
 router.use("/story", require(__dirname + "/storycontroller"));
@@ -28,28 +28,15 @@ router.use("/reminder", require(__dirname + "/remindercontroller"));
 router.use("/userprogress", require(__dirname + "/userprogresscontroller"));
 router.use("/dictation-exercise", require(__dirname + "/dictationcontroller"))
 router.use("/dictionary", require(__dirname + "/dictionarycontroller"));
-router.use("/contact", require(__dirname + "/contactcontroller"));
 // admin route
-router.use("/admin", require(__dirname + "/admin/homeAdmincontroller"));
-router.use("/admin/grammar", require(__dirname + "/admin/grammarAdmincontroller"));
 router.use("/admin/journey", require(__dirname + "/admin/journeyAdmincontroller"));
-router.use("/admin/gate",require(__dirname + "/admin/gateAdmincontroller"));
 router.use("/admin/stage", require(__dirname + "/admin/stageAdmincontroller"));
-router.use("/admin/dictation-exercise", require(__dirname + "/admin/dictationAdmincontroller"));
 router.use("/admin/story",require(__dirname + "/admin/storyAdmincontroller"));
 router.use("/admin/grammar-exercise", require(__dirname + "/admin/grammarexerciseAdmincontroller"));
 router.use("/admin/pronunciation",require(__dirname + "/admin/pronunciationAdmincontroller"));
 router.use("/admin/pronunciation-exercise",require(__dirname + "/admin/pronunciationexerciseAdmincontroller"));
 router.use("/admin/vocabulary-exercise",require(__dirname + "/admin/vocabularyexerciseAdmincontroller"));
 router.use("/admin/user", require(__dirname + "/admin/userAdmincontroller"));
-
-router.get('/admin',(req, res) => {
-    res.render('admin/dashboard');
-});
-
-router.get('/',(req, res) => {
-    res.render('home');
-});
 
 router.get("/single-blog", function (req, res) {
     res.render("single-blog.ejs");

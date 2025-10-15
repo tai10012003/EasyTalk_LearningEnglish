@@ -47,7 +47,7 @@ export const GateService = {
     async fetchGate(page = 1, limit = 6) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/gate/api/gate-list?page=${page}&limit=${limit}`, {
+            const res = await fetch(`${API_URL}/gate/api/gate-list?page=${page}&limit=${limit}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -69,7 +69,7 @@ export const GateService = {
     async addGate(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/gate/add`, {
+            const res = await fetch(`${API_URL}/gate/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -88,7 +88,7 @@ export const GateService = {
     async updateGate(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/gate/update/${id}`, {
+            const res = await fetch(`${API_URL}/gate/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -107,7 +107,7 @@ export const GateService = {
     async deleteGate(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/gate/delete/${id}`, {
+            const res = await fetch(`${API_URL}/gate/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

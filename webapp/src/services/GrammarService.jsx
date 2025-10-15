@@ -105,7 +105,7 @@ export const GrammarService = {
     async addGrammar(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/grammar/api/add`, {
+            const res = await fetch(`${API_URL}/grammar/api/add`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -123,7 +123,7 @@ export const GrammarService = {
     async updateGrammar(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/grammar/api/update/${id}`, {
+            const res = await fetch(`${API_URL}/grammar/api/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -141,7 +141,7 @@ export const GrammarService = {
     async deleteGrammar(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/grammar/api/grammar/${id}`, {
+            const res = await fetch(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

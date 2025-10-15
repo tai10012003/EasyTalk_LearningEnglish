@@ -7,7 +7,7 @@ const gateService = new GateService();
 const stageService = new StageService();
 const userprogressService = new UserprogressService();
 
-router.get("/stage/api/stage/detail/:id", verifyToken, async (req, res) => {
+router.get("/api/stage/detail/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const stageId = req.params.id;
@@ -25,7 +25,7 @@ router.get("/stage/api/stage/detail/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/stage/api/stage/complete/:id", verifyToken, async (req, res) => {
+router.post("/api/stage/complete/:id", verifyToken, async (req, res) => {
     try {
         const stageId = req.params.id;
         const userId = req.user.id;

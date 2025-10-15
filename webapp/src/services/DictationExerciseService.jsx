@@ -49,7 +49,7 @@ export const DictationExerciseService = {
     async addDictationExercise(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/dictation-exercise/add`, {
+            const res = await fetch(`${API_URL}/dictation-exercise/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export const DictationExerciseService = {
     async updateDictationExercise(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/dictation-exercise/update/${id}`, {
+            const res = await fetch(`${API_URL}/dictation-exercise/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const DictationExerciseService = {
     async deleteDictationExercise(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/dictation-exercise/delete/${id}`, {
+            const res = await fetch(`${API_URL}/dictation-exercise/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

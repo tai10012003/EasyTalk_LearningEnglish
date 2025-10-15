@@ -78,17 +78,11 @@ app.use((req, res, next) => {
 var controller = require(__dirname  + "/controllers");
 app.use(controller);
 
-var homeAdminController = require(__dirname + "/controllers/admin/homeAdmincontroller");
-app.use("/admin", homeAdminController);
-
 var journeyAdminController = require(__dirname + "/controllers/admin/journeyAdmincontroller");
 app.use("/admin/journey", journeyAdminController);
 
 var journeyController = require(__dirname + "/controllers/journeycontroller");
 app.use(journeyController);
-
-var gateAdminController = require(__dirname + "/controllers/admin/gateAdmincontroller");
-app.use("/admin/gate",  gateAdminController);
 
 var gateController = require(__dirname + "/controllers/gatecontroller");
 app.use(gateController);
@@ -104,9 +98,6 @@ app.use("/admin/story", storyAdminController);
 
 var storyController = require(__dirname + "/controllers/storycontroller");
 app.use(storyController);
-
-var grammarAdminController = require(__dirname + "/controllers/admin/grammarAdmincontroller");
-app.use("/admin/grammar", grammarAdminController);
 
 var grammarController = require(__dirname + "/controllers/grammarcontroller");
 app.use(grammarController);
@@ -134,9 +125,6 @@ app.use("/admin/vocabulary-exercise", vocabularyexerciseAdminController);
 
 var vocabularyexerciseController = require(__dirname + "/controllers/vocabularyexercisecontroller");
 app.use(vocabularyexerciseController);
-
-var dictationexerciseAdminController = require(__dirname + "/controllers/admin/dictationAdmincontroller");
-app.use("/admin/dictation-exercise", dictationexerciseAdminController);
 
 var dictationexerciseController = require(__dirname + "/controllers/dictationcontroller");
 app.use(dictationexerciseController);
