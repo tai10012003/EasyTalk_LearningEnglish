@@ -37,9 +37,7 @@ router.get("/api/chat/start", verifyToken, async (req, res) => {
             model: "gpt-3.5-turbo",
             messages: [{ role: "system", content: suggestionPrompt }],
         });
-
         const suggestion = suggestionRes.choices[0].message.content;
-
         res.json({ response: gptResponse, suggestion, step: "ask_name" });
     } catch (error) {
         console.error("OpenAI API error:", error.response ? error.response.data : error.message);
@@ -136,7 +134,6 @@ router.post("/api/chat", verifyToken, async (req, res) => {
             messages: [{ role: "system", content: suggestionPrompt }],
         });
         const suggestion = suggestionRes.choices[0].message.content;
-
         res.json({ response: gptResponse, suggestion, topic, step: nextStep });
     } catch (error) {
         console.error("OpenAI API error:", error.response ? error.response.data : error.message);

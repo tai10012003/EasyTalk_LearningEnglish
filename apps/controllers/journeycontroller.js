@@ -1,40 +1,30 @@
 const express = require("express");
 const router = express.Router();
-const JourneyService = require("../services/journeyService");
 const verifyToken = require("./../util/VerifyToken");
-const UserprogressService = require("../services/userprogressService");
+const { JourneyService, UserprogressService } = require("../services");
 const userprogressService = new UserprogressService();
 const journeyService = new JourneyService();
 
-router.get('/', (req, res) => {
-    res.render('journeys/journey-list');
-});
 router.get("/api", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const journeys = await journeyService.getAllJourneysWithDetails();
-
         const userProgress = await userprogressService.getUserProgressByUserId(userId) || { unlockedGates: [], unlockedStages: [] };
         const userCompletedGates = userProgress.unlockedGates.map(id => id.toString());
         const userCompletedStages = userProgress.unlockedStages.map(id => id.toString());
-
         journeys.forEach(journey => {
             let totalGates = 0;
             let totalStages = 0;
             let completedJourneyGates = 0;
             let completedJourneyStages = 0;
-
             if (Array.isArray(journey.gates)) {
                 journey.gates.forEach(gate => {
                     totalGates++;
-
                     if (userCompletedGates.includes(gate._id?.toString())) {
                         completedJourneyGates++;
                     }
-
                     if (Array.isArray(gate.stages)) {
                         totalStages += gate.stages.length;
-
                         gate.stages.forEach(stage => {
                             if (userCompletedStages.includes(stage._id?.toString())) {
                                 completedJourneyStages++;
@@ -43,7 +33,6 @@ router.get("/api", verifyToken, async (req, res) => {
                     }
                 });
             }
-
             const totalItems = totalGates + totalStages;
             const completedItems = completedJourneyGates + completedJourneyStages;
             journey.progressPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
@@ -55,9 +44,7 @@ router.get("/api", verifyToken, async (req, res) => {
         const totalItems = totalGates + totalStages;
         const completedItems = totalCompletedGates + totalCompletedStages;
         const overallProgressPercentage = totalItems > 0 ? (completedItems / totalItems) * 100 : 0;
-
         const leaderboard = await userprogressService.getLeaderboard(10);
-
         res.json({
             journeys,
             userProgress,
@@ -74,21 +61,15 @@ router.get("/api", verifyToken, async (req, res) => {
     }
 });
 
-router.get('/detail/:id', (req, res) => {
-    res.render('gates/gate-list');
-});
-
 router.get("/api/gate/:id", verifyToken, async (req, res) => {
     try {
         const journeyId = req.params.id;
         const userId = req.user.id;
         const journey = await journeyService.getJourneyWithDetails(journeyId);
-
         if (!journey) {
             return res.status(404).json({ error: "Journey not found." });
         }
         let userProgress = await userprogressService.getUserProgressByUserId(userId);
-
         if (!userProgress) {
             userProgress = await userprogressService.createUserProgress(userId, journey);
         } else {
@@ -98,7 +79,6 @@ router.get("/api/gate/:id", verifyToken, async (req, res) => {
         const unlockedStages = userProgress.unlockedStages || [];
         const completedGates = unlockedGates.length;
         const completedStages = unlockedStages.length;
-
         const leaderboard = await userprogressService.getLeaderboard(10);
         res.json({
             journey,

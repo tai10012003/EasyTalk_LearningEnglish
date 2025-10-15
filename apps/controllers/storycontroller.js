@@ -1,9 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const StoryService = require("./../services/storyService");
+const { StoryService, UserprogressService } = require("./../services");
 const storyService = new StoryService();
-const UserprogressService = require("./../services/userprogressService");
 const userprogressService = new UserprogressService();
 
 router.get("/api/story-list", verifyToken, async (req, res) => {
@@ -36,7 +35,6 @@ router.get("/api/story/:id", verifyToken, async (req, res) => {
         const userId = req.user.id;
         const storyId = req.params.id;
         const story = await storyService.getStory(storyId);
-
         if (!story) {
             return res.status(404).json({
                 success: false,
@@ -53,7 +51,6 @@ router.get("/api/story/:id", verifyToken, async (req, res) => {
         if (!isUnlocked) {
             return res.status(403).json({ success: false, message: "This story is locked for you. Please complete previous stories first." });
         }
-
         res.json({
             success: true,
             data: story,
@@ -73,26 +70,23 @@ router.post("/api/story/complete/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const storyId = req.params.id;
-
         const story = await storyService.getStory(storyId);
         if (!story) {
             return res.status(404).json({ success: false, message: "Story not found" });
         }
-
         let userProgress = await userprogressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             const firstPage = await storyService.getStoryList(1, 1);
             const firstStory = firstPage?.stories?.[0] || null;
             userProgress = await userprogressService.createUserProgress(userId, null, firstStory?._id || null, null, null);
         }
-        const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() === storyId.toString());
+        const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
         if (!isUnlocked) {
             return res.status(403).json({ success: false, message: "You cannot complete a locked story." });
         }
         const all = await storyService.getStoryList(1, 10000);
         const allStories = all?.stories || [];
-        
-        const idx = allStories.findIndex(s => s._id.toString() === storyId.toString());
+        const idx = allStories.findIndex(s => s._id.toString() == storyId.toString());
         let nextStory = null;
         if (idx !== -1 && idx < allStories.length - 1) {
             nextStory = allStories[idx + 1];
@@ -106,7 +100,7 @@ router.post("/api/story/complete/:id", verifyToken, async (req, res) => {
         const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
         return res.json({
             success: true,
-            message: nextStory 
+            message: nextStory
                 ? "Story completed. Next story unlocked." 
                 : "Story completed. You have finished all stories.",
             userProgress: {

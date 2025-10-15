@@ -1,6 +1,6 @@
 var express = require("express");
 var router = express.Router();
-
+// user route
 router.use("/home", require(__dirname + "/homecontroller"));
 router.use("/about", require(__dirname + "/aboutcontroller"));
 router.use("/journey", require(__dirname + "/journeycontroller"));
@@ -29,7 +29,7 @@ router.use("/userprogress", require(__dirname + "/userprogresscontroller"));
 router.use("/dictation-exercise", require(__dirname + "/dictationcontroller"))
 router.use("/dictionary", require(__dirname + "/dictionarycontroller"));
 router.use("/contact", require(__dirname + "/contactcontroller"));
-
+// admin route
 router.use("/admin", require(__dirname + "/admin/homeAdmincontroller"));
 router.use("/admin/grammar", require(__dirname + "/admin/grammarAdmincontroller"));
 router.use("/admin/journey", require(__dirname + "/admin/journeyAdmincontroller"));

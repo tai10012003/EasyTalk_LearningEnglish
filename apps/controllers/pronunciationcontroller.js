@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const PronunciationService = require("../services/pronunciationService");
-const UserprogressService = require("./../services/userprogressService");
+const { PronunciationService, UserprogressService } = require("../services");
 const userprogressService = new UserprogressService();
 const pronunciationService = new PronunciationService();
 
@@ -32,7 +31,6 @@ router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
             const firstPronunciation = firstPronunciationList.pronunciations[0];
             userProgress = await userprogressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
         }
-
         const isUnlocked = (userProgress.unlockedPronunciations || []).some(s => s.toString() == pronunciationId.toString());
         if (!isUnlocked) {
             return res.status(403).json({ success: false, message: "This pronunciation is locked. Complete previous lessons first." });
@@ -41,7 +39,6 @@ router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
         if (!pronunciation) {
             return res.status(404).json({ message: "Pronunciation not found" });
         }
-
         res.json({ pronunciation, userProgress });
     } catch (err) {
         res.status(500).json({ message: "Error fetching pronunciation details", error: err });
@@ -58,7 +55,6 @@ router.post("/api/pronunciation/complete/:id", verifyToken, async (req, res) => 
             const firstPronunciation = firstPronunciationList.pronunciations[0];
             userProgress = await userprogressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
         }
-
         const isUnlocked = (userProgress.unlockedPronunciations || []).some(s => s.toString() == pronunciationId.toString());
         if (!isUnlocked) {
             return res.status(403).json({ success: false, message: "This pronunciation is locked. Complete previous lessons first." });

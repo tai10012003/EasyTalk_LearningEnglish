@@ -1,16 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const GrammarexerciseService = require("./../services/grammarexerciseService");
+const { GrammarexerciseService } = require("./../services");
 const grammarexerciseService = new GrammarexerciseService();
 
-router.get("/", async (req, res) => {
-    try {
-        const { grammarexercises } = await grammarexerciseService.getGrammarexerciseList();
-        res.render("grammarexercises/grammarexercise-list", { exercises: grammarexercises });
-    } catch (err) {
-        res.status(500).send("Error retrieving grammar exercises: " + err.message);
-    }
-});
 router.get("/api/grammar-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
@@ -28,18 +20,13 @@ router.get("/api/grammar-exercises", async (req, res) => {
         res.status(500).json({ success: false, message: "Error fetching grammar exercises", error: error.message });
     }
 });
-router.get('/detail/:id', (req, res) => {
-    res.render('grammarexercises/grammarexercise-detail');
-});
 
 router.get("/api/grammar-exercises/:id", async function (req, res) {
     try {
         const exercise = await grammarexerciseService.getGrammarexerciseById(req.params.id);
-
         if (!exercise) {
             return res.status(404).json({ message: "Grammar exercise not found." });
         }
-
         res.json(exercise);
     } catch (err) {
         res.status(500).json({ message: "Error fetching grammar exercise details", error: err });

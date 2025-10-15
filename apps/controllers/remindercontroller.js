@@ -1,11 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const reminderService = require("../services/reminderService");
 const verifyToken = require("./../util/VerifyToken");
-
-router.get("/", (req, res) => {
-    res.render("reminders/reminder");
-});
+const { ReminderService } = require("../services");
+const reminderService = new ReminderService();
 
 router.get("/api/reminder-list", verifyToken, async (req, res) => {
     try {

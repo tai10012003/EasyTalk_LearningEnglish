@@ -19,7 +19,6 @@ router.get("/api/writing/random-topic", async (req, res) => {
       temperature: 0.8,
       max_tokens: 50,
     });
-
     const topic = response.choices[0].message.content.trim();
     res.json({ topic });
   } catch (error) {
@@ -30,11 +29,9 @@ router.get("/api/writing/random-topic", async (req, res) => {
 
 router.post("/api/analyze", async function (req, res) {
   const userText = req.body.text;
-
-  if (!userText || userText.trim() === "") {
+  if (!userText || userText.trim() == "") {
     return res.status(400).json({ error: "Vui lòng nhập bài viết của bạn." });
   }
-
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
@@ -54,11 +51,9 @@ router.post("/api/analyze", async function (req, res) {
       temperature: 0.7,
       max_tokens: 1200,
     });
-
     const aiFeedback = response.choices[0].message.content;
     const overallScoreMatch = aiFeedback.match(/Điểm tổng quan:\s*([\d\.]+|Không xác định)(\/10)?/i);
     const overallScore = overallScoreMatch ? (overallScoreMatch[1] + (overallScoreMatch[2] || "")) : "Không xác định";
-
     res.json({
       suggestions: aiFeedback,
       score: overallScore

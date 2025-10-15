@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const UserprogressService = require("./../services/userprogressService");
+const { UserprogressService } = require("./../services");
 const userprogressService = new UserprogressService();
 
 router.get("/api/userprogress/streak", verifyToken, async (req, res) => {

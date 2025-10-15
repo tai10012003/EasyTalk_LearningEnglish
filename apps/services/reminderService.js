@@ -90,4 +90,4 @@ class ReminderService {
     }
 }
 
-module.exports = new ReminderService();
+module.exports = ReminderService;
