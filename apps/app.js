@@ -9,7 +9,10 @@ app.use(cors());
 
 // Nếu muốn chỉ cho React frontend gọi API thì dùng:
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: [
+    "http://localhost:5173",
+    "http://ec2-13-217-231-191.compute-1.amazonaws.com"
+  ],
   credentials: true
 }));
 
