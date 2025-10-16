@@ -124,27 +124,25 @@ class UserService {
         const accessToken = tokenData.access_token;
         const fbUser = await getFacebookUser(accessToken);
         const { email, name, id: facebookId } = fbUser;
-        if (!email) {
-            throw new Error("Không thể lấy email từ Facebook. Vui lòng cấp quyền email khi đăng nhập.");
-        }
-        let user = await this.userRepository.findByEmail(email);
+        const userEmail = email || `facebook-${facebookId}@easytalk.com`;
+        let user = await this.userRepository.findByEmail(userEmail);
         if (!user) {
             const tempPassword = Math.random().toString(36).slice(-8);
             const hashedPassword = await bcrypt.hash(tempPassword, 10);
             await this.userRepository.insert({
-                username: name || email.split("@")[0],
+                username: name || userEmail.split("@")[0],
                 password: hashedPassword,
-                email,
+                email: userEmail,
                 role: "user",
                 active: "active",
                 facebookId,
             });
             const mailOptions = {
                 from: config.email.user,
-                to: email,
+                to: userEmail,
                 subject: "🔑 Mật khẩu tạm thời từ EasyTalk",
                 html: `
-                    <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
+                    <p>Xin chào <strong>${name || userEmail.split("@")[0]}</strong>,</p>
                     <p>Bạn vừa đăng ký tài khoản bằng Facebook trên EasyTalk.</p>
                     <p>Đây là mật khẩu tạm thời để bạn có thể đăng nhập bằng email nếu muốn:</p>
                     <h3 style="color:#4CAF50;">${tempPassword}</h3>
@@ -155,9 +153,9 @@ class UserService {
             };
             this.transporter.sendMail(mailOptions, (error) => {
                 if (error) console.error("Gửi email thất bại:", error);
-                else console.log(`✅ Đã gửi mật khẩu tạm thời đến ${email}`);
+                else console.log(`✅ Đã gửi mật khẩu tạm thời đến ${userEmail}`);
             });
-            user = await this.userRepository.findByEmail(email);
+            user = await this.userRepository.findByEmail(userEmail);
         }
         if (user.active == "locked") {
             throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ!");
