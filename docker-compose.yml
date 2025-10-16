@@ -9,8 +9,6 @@ services:
       - "3000:3000"
     env_file:
       - ./apps/.env
-    networks:
-      - app-network
 
   frontend:
     build: ./webapp
@@ -20,9 +18,3 @@ services:
       - "80:80"
     depends_on:
       - backend
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
