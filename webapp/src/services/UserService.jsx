@@ -6,7 +6,7 @@ export const UserService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.role) query += `&role=${encodeURIComponent(filters.role)}`;
-            const res = await fetch(`${API_URL}/admin/user/api/user-list${query}`, {
+            const res = await fetch(`${API_URL}/user/api/user-list${query}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export const UserService = {
 
     async getUserById(id) {
         try {
-            const res = await fetch(`${API_URL}/admin/user/api/${id}`);
+            const res = await fetch(`${API_URL}/user/api/${id}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;
@@ -49,7 +49,7 @@ export const UserService = {
     async addUser(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/user/add`, {
+            const res = await fetch(`${API_URL}/user/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export const UserService = {
     async updateUser(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/user/update/${id}`, {
+            const res = await fetch(`${API_URL}/user/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const UserService = {
     async deleteUser(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/user/delete/${id}`, {
+            const res = await fetch(`${API_URL}/user/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

@@ -111,7 +111,7 @@ export const StoryService = {
     async addStory(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/story/api/add`, {
+            const res = await fetch(`${API_URL}/story/api/add`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -129,7 +129,7 @@ export const StoryService = {
     async updateStory(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/story/api/update/${id}`, {
+            const res = await fetch(`${API_URL}/story/api/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -147,7 +147,7 @@ export const StoryService = {
     async deleteStory(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/story/api/story/${id}`, {
+            const res = await fetch(`${API_URL}/story/api/story/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

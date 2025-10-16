@@ -49,7 +49,7 @@ export const GrammarExerciseService = {
     async addGrammarExercise(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/grammar-exercise/add`, {
+            const res = await fetch(`${API_URL}/grammar-exercise/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export const GrammarExerciseService = {
     async updateGrammarExercise(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/grammar-exercise/update/${id}`, {
+            const res = await fetch(`${API_URL}/grammar-exercise/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const GrammarExerciseService = {
     async deleteGrammarExercise(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/grammar-exercise/delete/${id}`, {
+            const res = await fetch(`${API_URL}/grammar-exercise/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

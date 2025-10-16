@@ -68,7 +68,7 @@ export const PronunciationExerciseService = {
     async addPronunciationExercise(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/pronunciation-exercise/add`, {
+            const res = await fetch(`${API_URL}/pronunciation-exercise/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const PronunciationExerciseService = {
     async updatePronunciationExercise(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/pronunciation-exercise/update/${id}`, {
+            const res = await fetch(`${API_URL}/pronunciation-exercise/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -106,7 +106,7 @@ export const PronunciationExerciseService = {
     async deletePronunciationExercise(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/pronunciation-exercise/delete/${id}`, {
+            const res = await fetch(`${API_URL}/pronunciation-exercise/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

@@ -110,19 +110,6 @@ router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/api/:id", async function (req, res) {
-  try {
-    const grammar = await grammarService.getGrammar(req.params.id);
-    if (!grammar) {
-      return res.status(404).json({ message: "Grammar not found" });
-    }
-    res.json(grammar);
-  } catch (err) {
-    console.error("Error fetching grammar:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-
 router.post("/api/add", upload.single("image"), async function (req, res) {
   try {
     let quizzes = [];
@@ -147,16 +134,17 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
   }
 });
 
-router.get("/api/grammar-list", async function (req, res) {
-  const page = parseInt(req.query.page) || 1;
-  const limit = 2;
-  const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit);
-  const totalPages = Math.ceil(totalGrammars / limit);
-  res.json({
-    grammars,
-    currentPage: page,
-    totalPages,
-  });
+router.get("/api/:id", async function (req, res) {
+  try {
+    const grammar = await grammarService.getGrammar(req.params.id);
+    if (!grammar) {
+      return res.status(404).json({ message: "Grammar not found" });
+    }
+    res.json(grammar);
+  } catch (err) {
+    console.error("Error fetching grammar:", err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 router.put("/api/update/:id", upload.single("image"), async function (req, res) {

@@ -49,7 +49,7 @@ export const VocabularyExerciseService = {
     async addVocabularyExercise(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/vocabulary-exercise/add`, {
+            const res = await fetch(`${API_URL}/vocabulary-exercise/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -68,7 +68,7 @@ export const VocabularyExerciseService = {
     async updateVocabularyExercise(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/vocabulary-exercise/update/${id}`, {
+            const res = await fetch(`${API_URL}/vocabulary-exercise/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const VocabularyExerciseService = {
     async deleteVocabularyExercise(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/vocabulary-exercise/delete/${id}`, {
+            const res = await fetch(`${API_URL}/vocabulary-exercise/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

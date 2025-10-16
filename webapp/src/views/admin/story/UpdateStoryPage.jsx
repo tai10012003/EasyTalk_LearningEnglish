@@ -11,7 +11,7 @@ const UpdateStoryPage = () => {
         const fetchStory = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/story/api/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/story/api/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();

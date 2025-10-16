@@ -9,7 +9,6 @@ export const StageService = {
             if (!token) {
                 throw new Error("Không tìm thấy token trong localStorage");
             }
-
             const res = await fetch(`${API_URL}/stage/api/stage/detail/${stageId}`, {
                 method: "GET",
                 headers: {
@@ -17,11 +16,9 @@ export const StageService = {
                     "Authorization": `Bearer ${token}`,
                 },
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-
             const data = await res.json();
             hasShownAlert = false;
             console.log("Fetch stage detail success:", data);
@@ -81,7 +78,7 @@ export const StageService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/admin/stage/api/stages${query}`, {
+            const res = await fetch(`${API_URL}/stage/api/stages${query}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -108,7 +105,7 @@ export const StageService = {
     async addStage(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/stage/add`, {
+            const res = await fetch(`${API_URL}/stage/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -127,7 +124,7 @@ export const StageService = {
     async updateStage(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/stage/update/${id}`, {
+            const res = await fetch(`${API_URL}/stage/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -146,7 +143,7 @@ export const StageService = {
     async deleteStage(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/stage/delete/${id}`, {
+            const res = await fetch(`${API_URL}/stage/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

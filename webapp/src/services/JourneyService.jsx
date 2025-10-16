@@ -46,7 +46,7 @@ export const JourneyService = {
     async fetchJourneyAdmin(page = 1, limit = 6) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/journey/api/journey-list?page=${page}&limit=${limit}`, {
+            const res = await fetch(`${API_URL}/journey/api/journey-list?page=${page}&limit=${limit}`, {
                 method: "GET",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -72,7 +72,7 @@ export const JourneyService = {
     async addJourney(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/journey/add`, {
+            const res = await fetch(`${API_URL}/journey/add`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export const JourneyService = {
     async updateJourney(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/journey/update/${id}`, {
+            const res = await fetch(`${API_URL}/journey/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json",
@@ -110,7 +110,7 @@ export const JourneyService = {
     async deleteJourney(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/journey/delete/${id}`, {
+            const res = await fetch(`${API_URL}/journey/delete/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

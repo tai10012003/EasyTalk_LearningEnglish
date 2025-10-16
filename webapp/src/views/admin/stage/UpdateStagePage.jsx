@@ -11,7 +11,7 @@ const UpdateStagePage = () => {
         const fetchStage = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/stage/api/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/stage/api/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     },

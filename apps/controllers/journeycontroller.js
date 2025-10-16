@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const { JourneyService, UserprogressService } = require("../services");
-const userprogressService = new UserprogressService();
+const { JourneyService, GateService, UserprogressService } = require("../services");
 const journeyService = new JourneyService();
+const gateService = new GateService();
+const userprogressService = new UserprogressService();
 
 router.get("/api", verifyToken, async (req, res) => {
     try {
@@ -90,6 +91,63 @@ router.get("/api/gate/:id", verifyToken, async (req, res) => {
     } catch (err) {
         console.error("Error loading journey details:", err);
         res.status(500).json({ error: "An error occurred while loading journey details." });
+    }
+});
+
+router.get("/api/journey-list", async (req, res) => {
+    try {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const { journeys, totalJourneys } = await journeyService.getJourneyList(page, limit);
+        const totalPages = Math.ceil(totalJourneys / limit);
+        res.json({
+            journeys,
+            currentPage: page,
+            totalPages,
+            totalJourneys
+        });
+    } catch (err) {
+        console.error("Error retrieving journeys:", err);
+        res.status(500).json({ error: "Failed to retrieve journeys." });
+    }
+});
+
+router.post("/add", async (req, res) => {
+    const { title } = req.body;
+    try {
+        const newJourney = await journeyService.insertJourney({
+            title: title,
+            gates: [],
+            createdAt: new Date()
+        });
+        res.status(200).json({ message: "Hành trình đã được thêm thành công !", journey: newJourney });
+    } catch (err) {
+        console.error("Error adding journey:", err);
+        res.status(500).json({ error: "Failed to add Journey." });
+    }
+});
+
+router.put("/update/:id", async (req, res) => {
+    const journeyId = req.params.id;
+    const updateData = { title: req.body.title };
+    try {
+        const updatedJourney = await journeyService.updateJourney({ _id: journeyId, ...updateData });
+        res.status(200).json({ message: "Hành trình đã được cập nhật thành công!", journey: updatedJourney });
+    } catch (err) {
+        console.error("Error updating journey:", err);
+        res.status(500).json({ error: "Failed to update Journey." });
+    }
+});
+
+router.delete("/delete/:id", async (req, res) => {
+    const journeyId = req.params.id;
+    try {
+        await gateService.deleteGatesByJourney(journeyId);
+        await journeyService.deleteJourney(journeyId);
+        res.status(200).json({ message: "Hành trình và các cổng liên quan đã xóa thành công !" });
+    } catch (err) {
+        console.error("Error deleting journey:", err);
+        res.status(500).json({ error: "Failed to delete Journey and related Gates." });
     }
 });
 

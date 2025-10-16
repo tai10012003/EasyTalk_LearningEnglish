@@ -105,7 +105,7 @@ export const PronunciationService = {
     async addPronunciation(formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/pronunciation/api/add`, {
+            const res = await fetch(`${API_URL}/pronunciation/api/add`, {
                 method: "POST",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -123,7 +123,7 @@ export const PronunciationService = {
     async updatePronunciation(id, formData) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/pronunciation/api/update/${id}`, {
+            const res = await fetch(`${API_URL}/pronunciation/api/update/${id}`, {
                 method: "PUT",
                 headers: {
                     "Authorization": `Bearer ${token}`,
@@ -141,7 +141,7 @@ export const PronunciationService = {
     async deletePronunciation(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/admin/pronunciation/api/pronunciation/${id}`, {
+            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${token}`,

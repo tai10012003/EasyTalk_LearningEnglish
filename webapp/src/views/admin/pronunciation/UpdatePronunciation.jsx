@@ -11,7 +11,7 @@ const UpdatePronunciation = () => {
         const fetchPronunciation = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/pronunciation/api/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/pronunciation/api/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();

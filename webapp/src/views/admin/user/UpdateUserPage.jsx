@@ -11,7 +11,7 @@ const UpdateUserPage = () => {
         const fetchUser = async () => {
             try {
                 const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/admin/user/api/${id}`, {
+                const res = await fetch(`${import.meta.env.VITE_API_URL}/user/api/${id}`, {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 const data = await res.json();
