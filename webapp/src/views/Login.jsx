@@ -16,15 +16,18 @@ function Login() {
     const token = query.get("token");
     const role = query.get("role");
     const error = query.get("error");
+    const provider = query.get("provider");
     if (error) {
-      toast.error(`Đăng nhập Google thất bại: ${error}`);
+      const providerName = provider == "facebook" ? "Facebook" : "Google";
+      toast.error(`Đăng nhập ${providerName} thất bại: ${error}`);
       setTimeout(() => (window.location.href = "/login"), 2000);
       return;
     }
     if (token) {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
-      toast.success("Đăng nhập Google thành công!");
+      const providerName = provider == "facebook" ? "Facebook" : "Google";
+      toast.success(`Đăng nhập ${providerName} thành công!`);
       setTimeout(() => {
         window.location.href = role == "admin" ? "/admin/dashboard" : "/";
       }, 1500);

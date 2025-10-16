@@ -5,17 +5,22 @@ function SocialLoginButtons() {
   const handleGoogleLogin = () => {
     window.location.href = `${API_URL}/user/auth/google`;
   };
+  const handleFacebookLogin = () => {
+    window.location.href = `${API_URL}/user/auth/facebook`;
+  };
   return (
     <div className="auth-social-auth-buttons">
       <a
         className="auth-google"
         onClick={handleGoogleLogin}
+        style={{ cursor: "pointer" }}
       >
         <i className="fab fa-google me-2"></i> Đăng nhập với Google
       </a>
       <a
-        href="#"
         className="auth-facebook"
+        onClick={handleFacebookLogin}
+        style={{ cursor: "pointer" }}
       >
         <i className="fab fa-facebook me-2"></i> Đăng nhập Facebook
       </a>

@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
 const config = require("../config/setting.json");
 const { getGoogleUser } = require("../util/googleAuth");
+const { getFacebookAccessToken, getFacebookUser } = require("../util/facebookAuth");
 const { UserRepository } = require("./../repositories");
 
 class UserService {
@@ -92,13 +93,13 @@ class UserService {
                 to: email,
                 subject: "🔑 Mật khẩu tạm thời từ EasyTalk",
                 html: `
-                <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
-                <p>Bạn vừa đăng ký tài khoản bằng Google trên EasyTalk.</p>
-                <p>Đây là mật khẩu tạm thời để bạn có thể đăng nhập bằng tài khoản email nếu muốn:</p>
-                <h3 style="color:#4CAF50;">${tempPassword}</h3>
-                <p>Vì lý do bảo mật, bạn nên đổi mật khẩu sau khi đăng nhập.</p>
-                <br/>
-                <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
+                    <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
+                    <p>Bạn vừa đăng ký tài khoản bằng Google trên EasyTalk.</p>
+                    <p>Đây là mật khẩu tạm thời để bạn có thể đăng nhập bằng email nếu muốn:</p>
+                    <h3 style="color:#4CAF50;">${tempPassword}</h3>
+                    <p>Vì lý do bảo mật, bạn nên đổi mật khẩu sau khi đăng nhập.</p>
+                    <br/>
+                    <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
                 `,
             };
             this.transporter.sendMail(mailOptions, (error) => {
@@ -108,7 +109,58 @@ class UserService {
             user = await this.userRepository.findByEmail(email);
         }
         if (user.active == "locked") {
-            throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!");
+            throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ!");
+        }
+        const token = jwt.sign(
+            { id: user._id, username: user.username, email: user.email, role: user.role },
+            config.jwt.secret,
+            { expiresIn: "1h" }
+        );
+        return { token, role: user.role };
+    }
+
+    async loginWithFacebook(code) {
+        const tokenData = await getFacebookAccessToken(code);
+        const accessToken = tokenData.access_token;
+        const fbUser = await getFacebookUser(accessToken);
+        const { email, name, id: facebookId } = fbUser;
+        if (!email) {
+            throw new Error("Không thể lấy email từ Facebook. Vui lòng cấp quyền email khi đăng nhập.");
+        }
+        let user = await this.userRepository.findByEmail(email);
+        if (!user) {
+            const tempPassword = Math.random().toString(36).slice(-8);
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+            await this.userRepository.insert({
+                username: name || email.split("@")[0],
+                password: hashedPassword,
+                email,
+                role: "user",
+                active: "active",
+                facebookId,
+            });
+            const mailOptions = {
+                from: config.email.user,
+                to: email,
+                subject: "🔑 Mật khẩu tạm thời từ EasyTalk",
+                html: `
+                    <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
+                    <p>Bạn vừa đăng ký tài khoản bằng Facebook trên EasyTalk.</p>
+                    <p>Đây là mật khẩu tạm thời để bạn có thể đăng nhập bằng email nếu muốn:</p>
+                    <h3 style="color:#4CAF50;">${tempPassword}</h3>
+                    <p>Vì lý do bảo mật, bạn nên đổi mật khẩu sau khi đăng nhập.</p>
+                    <br/>
+                    <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
+                `,
+            };
+            this.transporter.sendMail(mailOptions, (error) => {
+                if (error) console.error("Gửi email thất bại:", error);
+                else console.log(`✅ Đã gửi mật khẩu tạm thời đến ${email}`);
+            });
+            user = await this.userRepository.findByEmail(email);
+        }
+        if (user.active == "locked") {
+            throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ!");
         }
         const token = jwt.sign(
             { id: user._id, username: user.username, email: user.email, role: user.role },
