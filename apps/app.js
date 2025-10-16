@@ -5,7 +5,7 @@ var app = express();
 require('dotenv').config();
 
 // Cho phép tất cả domain (tạm thời)
-// app.use(cors());
+app.use(cors());
 
 // Nếu muốn chỉ cho React frontend gọi API thì dùng:
 app.use(cors({
