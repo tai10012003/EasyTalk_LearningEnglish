@@ -37,7 +37,7 @@ export const StoryService = {
     async getStoryById(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/story/${id}`, {
+            const res = await fetch(`${API_URL}/story/api/story/${id}`, {
                 method: "GET",
                 headers: {
                     "Content-Type": "application/json",
@@ -64,7 +64,7 @@ export const StoryService = {
     async getStoryDetail(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/story/${id}`, {
+            const res = await fetch(`${API_URL}/story/api/story/${id}`, {
                 method: "GET",
                 headers: {
                 "Content-Type": "application/json",
@@ -87,7 +87,7 @@ export const StoryService = {
     async completeStory(storyId) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/story/complete/${storyId}`, {
+            const res = await fetch(`${API_URL}/story/api/story/complete/${storyId}`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",

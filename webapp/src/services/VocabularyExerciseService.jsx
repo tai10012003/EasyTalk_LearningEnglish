@@ -32,7 +32,7 @@ export const VocabularyExerciseService = {
 
     async getVocabularyExerciseById(id) {
         try {
-            const res = await fetch(`${API_URL}/api/vocabulary-exercises/${id}`);
+            const res = await fetch(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${id}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

@@ -35,7 +35,7 @@ export const GrammarService = {
     async getGrammarById(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/grammar/${id}`, {
+            const res = await fetch(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export const GrammarService = {
     async getGrammarDetail(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/grammar/${id}`, {
+            const res = await fetch(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "GET",
                 headers: {
                 "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export const GrammarService = {
     async completeGrammar(grammarId) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/grammar/complete/${grammarId}`, {
+            const res = await fetch(`${API_URL}/grammar/api/grammar/complete/${grammarId}`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",

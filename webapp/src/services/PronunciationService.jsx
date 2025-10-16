@@ -35,7 +35,7 @@ export const PronunciationService = {
     async getPronunciationById(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/pronunciation/${id}`, {
+            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
                 method: "GET",
                 headers: {
                     'Content-Type': 'application/json',
@@ -58,7 +58,7 @@ export const PronunciationService = {
     async getPronunciationDetail(id) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/pronunciation/${id}`, {
+            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
                 method: "GET",
                 headers: {
                 "Content-Type": "application/json",
@@ -81,7 +81,7 @@ export const PronunciationService = {
     async completePronunciation(pronunciationId) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/api/pronunciation/complete/${pronunciationId}`, {
+            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",

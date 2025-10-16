@@ -47,7 +47,7 @@ export const PronunciationExerciseService = {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.wav');
 
-            const res = await fetch(`${API_URL}/analyze/${exerciseId}/${questionIndex}`, {
+            const res = await fetch(`${API_URL}/pronunciation-exercise/analyze/${exerciseId}/${questionIndex}`, {
                 method: 'POST',
                 body: formData,
             });
