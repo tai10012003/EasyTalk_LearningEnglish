@@ -6,21 +6,24 @@ const PrivateRoute = ({ children, roles = [] }) => {
     const token = localStorage.getItem("token");
     const role = localStorage.getItem("role");
     const [redirectTo, setRedirectTo] = useState(null);
+    const [alertShown, setAlertShown] = useState(false);
 
     useEffect(() => {
-        if (!token) {
+        if (!token && !alertShown) {
+            setAlertShown(true);
             Swal.fire({
-                icon: 'warning',
-                title: 'Cảnh báo',
-                text: 'Bạn cần đăng nhập để truy cập trang này!',
-                confirmButtonText: 'Đồng ý',
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Bạn cần đăng nhập để truy cập trang này!",
+                confirmButtonText: "Đồng ý",
             }).then(() => {
                 setRedirectTo("/login");
             });
-        } else if (roles.length > 0 && !roles.includes(role)) {
+        }
+        else if (token && roles.length > 0 && !roles.includes(role)) {
             setRedirectTo("/");
         }
-    }, [token, role, roles]);
+    }, [token, role, roles, alertShown]);
     if (!token || (roles.length > 0 && !roles.includes(role))) {
         return redirectTo ? <Navigate to={redirectTo} replace /> : null;
     }
