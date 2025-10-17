@@ -37,4 +37,5 @@ router.get("/single-blog", function (req, res) {
 router.get("/single-blog-1", function (req, res) {
     res.render("single-blog-1.ejs");
 });
+
 module.exports = router;
