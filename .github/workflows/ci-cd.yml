@@ -72,7 +72,7 @@ jobs:
       - name: Build & push frontend Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./webapp
+          context: .
           file: ./webapp/Dockerfile
           push: true
           tags: |
