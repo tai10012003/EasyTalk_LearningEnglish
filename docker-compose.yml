@@ -11,13 +11,12 @@ services:
       - ./apps/.env
 
   frontend:
-    build: ./webapp
+    build:
+      context: .
+      dockerfile: ./webapp/Dockerfile
     image: taidepzai/frontend_learningenglish:latest
     container_name: frontend
     ports:
       - "80:80"
     depends_on:
       - backend
-    volumes:
-      - ./apps/public:/usr/share/nginx/html/static
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
