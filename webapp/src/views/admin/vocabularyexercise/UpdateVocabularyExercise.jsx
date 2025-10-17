@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateExercise from "../../../components/admin/exercise/UpdateExercise";
 import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateVocabularyExercise = () => {
     const { id } = useParams();
@@ -22,15 +23,24 @@ const UpdateVocabularyExercise = () => {
         };
         fetchVocabularyExercise();
     },  [id]);
-
+    
     const handleSubmit = async (formData, id) => {
         try {
-            await VocabularyExerciseService.updateVocabularyExercise(id, formData);
-            alert("Cập nhật bài luyện tập từ vựng thành công!");
+            const res = await VocabularyExerciseService.updateVocabularyExercise(id, formData);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Cập nhật bài luyện tập từ vựng thành công!',
+            });
             window.location.href = "/admin/vocabulary-exercise";
+            return res;
         } catch (err) {
-            console.error("Error updating vocabulary exercise:", err);
-            alert("Có lỗi khi cập nhật!");
+            console.error("Error adding pronunciation:", err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi cập nhật bài luyện tập từ vựng!',
+            });
         }
     };
 

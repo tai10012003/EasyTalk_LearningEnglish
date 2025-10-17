@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AddGate from "@/components/admin/gate/AddGate.jsx";
 import UpdateGate from "@/components/admin/gate/UpdateGate.jsx";
+import Swal from "sweetalert2";
 
 function GateList({ fetchData, deleteItem, title, dataKey }) {
     const [gates, setGates] = useState([]);
@@ -30,15 +31,25 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
         loadData(currentPage);
     }, [currentPage]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa cổng học tập này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
+    const handleDelete = (id, title) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa cổng học tập "${title}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa cổng "${title}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa cổng "${title}" thất bại!`, 'error');
+                }
             }
-        }
+        });
     };
 
     const renderPagination = () => {
@@ -87,7 +98,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
             <h1 className="admin-gate-title">{title}</h1>
             <div className="admin-exercise-add">
                 <a onClick={() => setIsCreateModalOpen(true)} className="admin-exercise-add-btn">
-                + Thêm cổng
+                    + Thêm cổng
                 </a>
             </div>
             {loading ? (
@@ -137,7 +148,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
                                                 </a>
                                                 <button
                                                     className="admin-gate-btn-delete"
-                                                    onClick={() => handleDelete(gate._id)}
+                                                    onClick={() => handleDelete(gate._id, gate.title)}
                                                 >
                                                     Xóa
                                                 </button>
@@ -147,7 +158,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={7}>Không có cổng nào!</td>
+                                    <td colSpan={6}>Không có cổng nào!</td>
                                 </tr>
                             )}
                         </tbody>

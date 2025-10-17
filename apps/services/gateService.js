@@ -5,7 +5,7 @@ class GateService {
         this.gateRepository = new GateRepository();
     }
 
-    async getGateList(page = 1, limit = 10) {
+    async getGateList(page = 1, limit = 12) {
         return await this.gateRepository.findGates(page, limit);
     }
 

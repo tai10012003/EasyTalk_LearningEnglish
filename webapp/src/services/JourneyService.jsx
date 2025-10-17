@@ -43,7 +43,7 @@ export const JourneyService = {
         }
     },
 
-    async fetchJourneyAdmin(page = 1, limit = 6) {
+    async fetchJourneyAdmin(page = 1, limit = 12) {
         try {
             const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/journey/api/journey-list?page=${page}&limit=${limit}`, {

@@ -4,7 +4,7 @@ import { GateService } from "@/services/GateService.jsx";
 
 function Gate() {
     const fetchGate = async (page = 1) => {
-        const limit = 6;
+        const limit = 12;
         const res = await GateService.fetchGate(page, limit);
         return {
             gates: res.gates || [],

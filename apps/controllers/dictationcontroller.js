@@ -5,7 +5,7 @@ const dictationService = new DictationService();
 
 router.get("/api/dictation-exercises", async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 6;
+    const limit = parseInt(req.query.limit) || 12;
     try {
         const { dictationExercises, totalDictationExercises } = await dictationService.getDictationList(page, limit);
         const totalPages = Math.ceil(totalDictationExercises / limit);

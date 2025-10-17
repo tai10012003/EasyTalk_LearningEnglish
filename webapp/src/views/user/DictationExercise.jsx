@@ -10,7 +10,7 @@ function DictationExercise() {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
 
-    const pageLimit = 6;
+    const pageLimit = 12;
 
     useEffect(() => {
         document.title = "Bài nghe chép chính tả - EasyTalk";

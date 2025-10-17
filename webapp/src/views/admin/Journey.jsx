@@ -4,7 +4,7 @@ import { JourneyService } from "@/services/JourneyService.jsx";
 
 function Journey() {
     const fetchJourney = async (page = 1) => {
-        const limit = 6;
+        const limit = 12;
         const res = await JourneyService.fetchJourneyAdmin(page, limit);
         return {
             journeys: res.journeys || [],

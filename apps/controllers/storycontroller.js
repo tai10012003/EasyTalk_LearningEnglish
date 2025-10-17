@@ -24,7 +24,7 @@ const upload = multer({ storage });
 router.get("/api/story-list", verifyToken, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 6;
+        const limit = parseInt(req.query.limit) || 12;
         const category = req.query.category;
         const level = req.query.level;
         const search = req.query.search;

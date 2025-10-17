@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { JourneyService } from "@/services/JourneyService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateJourney = ({ isOpen, onClose, onUpdated, journey }) => {
     const [title, setTitle] = useState("");
@@ -14,7 +15,11 @@ const UpdateJourney = ({ isOpen, onClose, onUpdated, journey }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!title.trim()) {
-            alert("Vui lòng nhập tiêu đề!");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý!',
+                text: 'Vui lòng nhập tiêu đề!',
+            });
             return;
         }
         setLoading(true);
@@ -22,14 +27,26 @@ const UpdateJourney = ({ isOpen, onClose, onUpdated, journey }) => {
             const payload = { title };
             const data = await JourneyService.updateJourney(journey._id, payload);
             if (data.journey) {
-                alert("✅ Hành trình học tập đã được cập nhật thành công!");
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: 'Hành trình học tập đã được cập nhật thành công!',
+                });
                 onUpdated();
                 onClose();
             } else {
-                alert("❌ Có lỗi xảy ra: " + (data.message || "Không xác định"));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thất bại!',
+                    text: 'Có lỗi xảy ra: ' + (data.message || "Không xác định"),
+                });
             }
         } catch (error) {
-            alert("❌ Lỗi khi cập nhật hành trình: " + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Lỗi khi cập nhật hành trình: ' + error.message,
+            });
         }
         setLoading(false);
     };

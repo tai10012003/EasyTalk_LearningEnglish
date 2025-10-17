@@ -74,7 +74,7 @@ export const StageService = {
         hasShownAlert = false;
     },
 
-    async fetchStage(page = 1, limit = 6, filters = {}) {
+    async fetchStage(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;

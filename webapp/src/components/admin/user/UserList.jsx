@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
     const [users, setUsers] = useState([]);
@@ -6,6 +7,9 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [modalUser, setModalUser] = useState(null);
+    const [confirmEmail, setConfirmEmail] = useState("");
 
     const loadData = async (page = 1) => {
         setLoading(true);
@@ -26,14 +30,37 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
         loadData(currentPage);
     }, [currentPage, selectedRole]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa người dùng này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
-            }
+    const handleDeleteClick = (user) => {
+        setModalUser(user);
+        setConfirmEmail("");
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!modalUser) return;
+        if (confirmEmail !== modalUser.email) {
+            Swal.fire({
+                icon: "error",
+                title: "Email không đúng",
+                text: "Email nhập không đúng, không thể xóa người dùng!",
+            });
+            return;
+        }
+        try {
+            await deleteItem(modalUser._id);
+            Swal.fire({
+                icon: "success",
+                title: "Xóa thành công",
+                text: `Người dùng ${modalUser.username} đã được xóa!`,
+            });
+            setIsModalOpen(false);
+            loadData(currentPage);
+        } catch (err) {
+            Swal.fire({
+                icon: "error",
+                title: "Xóa thất bại",
+                text: "Có lỗi xảy ra, không thể xóa người dùng!",
+            });
         }
     };
 
@@ -164,7 +191,7 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
                                                 </a>
                                                 <button
                                                     className="admin-user-btn-delete"
-                                                    onClick={() => handleDelete(user._id)}
+                                                    onClick={() => handleDeleteClick(user)}
                                                 >
                                                     Xóa
                                                 </button>
@@ -180,6 +207,41 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
                         </tbody>
                     </table>
                     {renderPagination()}
+                </div>
+            )}
+            {isModalOpen && modalUser && (
+                <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
+                    <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
+                        <div className="custom-modal-header">
+                            <h5>Xác nhận xóa người dùng</h5>
+                            <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+                                &times;
+                            </button>
+                        </div>
+                        <div className="custom-modal-body">
+                            <p>
+                                Vui lòng nhập email <strong>{modalUser.email}</strong> của người dùng <strong>({modalUser.username})</strong> để xác nhận xóa:
+                            </p>
+                            <input
+                                type="email"
+                                className="form-control"
+                                placeholder="Nhập email của người dùng"
+                                value={confirmEmail}
+                                onChange={(e) => setConfirmEmail(e.target.value)}
+                            />
+                        </div>
+                        <div
+                            className="custom-modal-footer"
+                            style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}
+                        >
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>
+                                Hủy
+                            </button>
+                            <button className="footer-btn" onClick={handleConfirmDelete}>
+                                Xóa người dùng
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

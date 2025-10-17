@@ -5,7 +5,7 @@ class FlashcardService {
         this.flashcardRepository = new FlashcardRepository();
     }
 
-    async getFlashcardList(page = 1, limit = 5) {
+    async getFlashcardList(page = 1, limit = 12) {
         const { flashcardLists, totalFlashcardLists } = await this.flashcardRepository.findFlashcardLists(page, limit);
         return {
             flashcardLists,
@@ -14,7 +14,7 @@ class FlashcardService {
         };
     }
 
-    async getFlashcardListById(id, page = 1, limit = 5) {
+    async getFlashcardListById(id, page = 1, limit = 12) {
         const { flashcardList, flashcards } = await this.flashcardRepository.findFlashcardListById(id);
         if (!flashcardList) {
             throw new Error("Không tìm thấy danh sách flashcards.");

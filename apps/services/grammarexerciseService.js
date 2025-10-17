@@ -5,7 +5,7 @@ class GrammarexerciseService {
         this.grammarexerciseRepository = new GrammarexerciseRepository();
     }
 
-    async getGrammarexerciseList(page = 1, limit = 2) {
+    async getGrammarexerciseList(page = 1, limit = 12) {
         return await this.grammarexerciseRepository.findGrammarExercises(page, limit);
     }
 

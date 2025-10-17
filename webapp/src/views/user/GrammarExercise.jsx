@@ -9,7 +9,7 @@ function GrammarExercise() {
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
-    const pageLimit = 6;
+    const pageLimit = 12;
 
     useEffect(() => {
         document.title = "Bài luyện tập ngữ pháp - EasyTalk";

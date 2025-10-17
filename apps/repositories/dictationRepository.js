@@ -13,7 +13,7 @@ class DictationRepository {
         this.dictationCollection = this.db.collection("dictationexercises");
     }
 
-    async findDictations(page = 1, limit = 6) {
+    async findDictations(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const cursor = await this.dictationCollection.find({}).skip(skip).limit(limit);
         const dictationExercises = await cursor.toArray();

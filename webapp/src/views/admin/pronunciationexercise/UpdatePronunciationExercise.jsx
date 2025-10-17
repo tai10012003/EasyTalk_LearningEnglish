@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateExercise from "../../../components/admin/exercise/UpdateExercise";
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
+import Swal from "sweetalert2";
 
 const UpdatePronunciationExercise = () => {
     const { id } = useParams();
@@ -25,12 +26,21 @@ const UpdatePronunciationExercise = () => {
 
     const handleSubmit = async (formData, id) => {
         try {
-            await PronunciationExerciseService.updatePronunciationExercise(id, formData);
-            alert("Cập nhật bài luyện tập phát âm thành công!");
+            const res = await PronunciationExerciseService.updatePronunciationExercise(id, formData);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Bài luyện tập phát âm đã được cập nhật thành công!',
+            });
             window.location.href = "/admin/pronunciation-exercise";
+            return res;
         } catch (err) {
-            console.error("Error updating pronunciation exercise:", err);
-            alert("Có lỗi khi cập nhật!");
+            console.error("Error adding pronunciation:", err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi cập nhật bài luyện tập phát âm!',
+            });
         }
     };
 

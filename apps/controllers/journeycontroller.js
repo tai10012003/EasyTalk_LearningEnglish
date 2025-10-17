@@ -97,7 +97,7 @@ router.get("/api/gate/:id", verifyToken, async (req, res) => {
 router.get("/api/journey-list", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 12;
         const { journeys, totalJourneys } = await journeyService.getJourneyList(page, limit);
         const totalPages = Math.ceil(totalJourneys / limit);
         res.json({

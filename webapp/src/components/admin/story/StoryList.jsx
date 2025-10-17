@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
     const [stories, setStories] = useState([]);
@@ -16,6 +17,7 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
         } catch (err) {
             console.error(err);
             setStories([]);
+            Swal.fire('Thất bại!', 'Tải dữ liệu thất bại!', 'error');
         } finally {
             setLoading(false);
         }
@@ -25,15 +27,25 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
         loadData(currentPage);
     }, [currentPage]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa câu chuyện này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
+    const handleDelete = async (id, title) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa câu chuyện "${title}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa câu chuyện "${title}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa câu chuyện "${title}" thất bại!`, 'error');
+                }
             }
-        }
+        });
     };
 
     const renderPagination = () => {
@@ -135,7 +147,7 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                             </a>
                                             <button
                                                 className="admin-story-btn-delete"
-                                                onClick={() => handleDelete(story._id)}
+                                                onClick={() => handleDelete(story._id, story.title)}
                                             >
                                                 Xóa
                                             </button>

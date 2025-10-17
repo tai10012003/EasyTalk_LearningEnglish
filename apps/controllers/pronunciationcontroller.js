@@ -23,7 +23,7 @@ const upload = multer({ storage: storage });
 
 router.get("/api/pronunciation-list", verifyToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
-    const limit = 3;  
+    const limit = 12;  
     try {
         const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit);
         const totalPages = Math.ceil(totalPronunciations / limit);

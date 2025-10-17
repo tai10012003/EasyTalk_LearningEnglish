@@ -5,7 +5,7 @@ class PronunciationexerciseService {
         this.pronunciationexerciseRepository = new PronunciationexerciseRepository();
     }
 
-    async getPronunciationexerciseList(page = 1, limit = 5) {
+    async getPronunciationexerciseList(page = 1, limit = 12) {
         return await this.pronunciationexerciseRepository.findPronunciationExercises(page, limit);
     }
 

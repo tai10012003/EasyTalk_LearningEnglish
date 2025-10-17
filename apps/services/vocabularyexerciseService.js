@@ -5,7 +5,7 @@ class VocabularyexerciseService {
         this.vocabularyexerciseRepository = new VocabularyexerciseRepository();
     }
 
-    async getVocabularyExerciseList(page = 1, limit = 2) {
+    async getVocabularyExerciseList(page = 1, limit = 12) {
         return await this.vocabularyexerciseRepository.findVocabularyExercises(page, limit);
     }
 

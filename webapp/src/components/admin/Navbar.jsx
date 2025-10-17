@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import Swal from 'sweetalert2';
 
 const parseJwt = (token) => {
     try {
@@ -33,17 +34,34 @@ function Navbar() {
     ];
 
     const handleLogout = () => {
-        if (window.confirm('Bạn có muốn đăng xuất tài khoản không?')) {
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-        }
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: "Bạn có muốn đăng xuất tài khoản không?",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Đăng xuất',
+            cancelButtonText: 'Hủy',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.removeItem("token");
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Đã đăng xuất!',
+                    text: 'Bạn đã đăng xuất thành công.',
+                    timer: 1500,
+                    showConfirmButton: false
+                }).then(() => {
+                    window.location.href = "/login";
+                });
+            }
+        });
     };
 
     return (
         <nav className="admin-navbar">
             <div className="admin-navbar-left">
                 <marquee behavior="scroll" direction="right">
-                Chào mừng đến với trang quản trị viên EasyTalk!
+                    Chào mừng đến với trang quản trị viên EasyTalk!
                 </marquee>
             </div>
             <div className="admin-navbar-right">

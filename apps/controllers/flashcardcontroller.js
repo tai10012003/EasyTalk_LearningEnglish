@@ -14,7 +14,7 @@ const upload = multer({
 router.get("/api/flashcard-list", verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 12;
     const data = await flashcardService.getFlashcardList(page, limit);
     res.json({ success: true, ...data });
   } catch (err) {
@@ -52,7 +52,7 @@ router.put("/flashcardlist/:id", verifyToken, async (req, res) => {
 router.get("/api/flashcardlist/:id", verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 12;
     const result = await flashcardService.getFlashcardListById(req.params.id, page, limit);
     res.json({ success: true, ...result });
   } catch (err) {

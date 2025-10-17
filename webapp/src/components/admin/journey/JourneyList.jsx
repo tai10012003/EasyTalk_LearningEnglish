@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import AddJourney from "@/components/admin/journey/AddJourney.jsx";
 import UpdateJourney from "@/components/admin/journey/UpdateJourney.jsx";
+import Swal from "sweetalert2";
 
 function JourneyList({ fetchData, deleteItem, title, dataKey }) {
     const [journeys, setJourneys] = useState([]);
@@ -30,15 +31,25 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
         loadData(currentPage);
     }, [currentPage]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa hành trình học tập này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
+    const handleDelete = (id, title) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa hành trình "${title}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa hành trình "${title}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa hành trình "${title}" thất bại!`, 'error');
+                }
             }
-        }
+        });
     };
 
     const renderPagination = () => {
@@ -87,7 +98,7 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
             <h1 className="admin-journey-title">{title}</h1>
             <div className="admin-exercise-add">
                 <a onClick={() => setIsCreateModalOpen(true)} className="admin-exercise-add-btn">
-                + Thêm hành trình
+                    + Thêm hành trình
                 </a>
             </div>
             {loading ? (
@@ -135,7 +146,7 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
                                                 </a>
                                                 <button
                                                     className="admin-journey-btn-delete"
-                                                    onClick={() => handleDelete(journey._id)}
+                                                    onClick={() => handleDelete(journey._id, journey.title)}
                                                 >
                                                     Xóa
                                                 </button>
@@ -145,7 +156,7 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={7}>Không có hành trình nào!</td>
+                                    <td colSpan={5}>Không có hành trình nào!</td>
                                 </tr>
                             )}
                         </tbody>

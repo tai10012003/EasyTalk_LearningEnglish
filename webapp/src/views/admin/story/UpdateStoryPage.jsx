@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateStory from "../../../components/admin/story/UpdateStory";
 import { StoryService } from "@/services/StoryService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateStoryPage = () => {
     const { id } = useParams();
@@ -25,12 +26,21 @@ const UpdateStoryPage = () => {
 
     const handleSubmit = async (formData, id) => {
         try {
-            await StoryService.updateStory(id, formData);
-            alert("Cập nhật bài học câu chuyện thành công!");
+            const res = await StoryService.updateStory(id, formData);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Cập nhật bài học câu chuyện thành công!',
+            });
             window.location.href = "/admin/story";
+            return res;
         } catch (err) {
-            console.error("Error updating story:", err);
-            alert("Có lỗi khi cập nhật!");
+            console.error("Error adding pronunciation:", err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi cập nhật bài học câu chuyện!',
+            });
         }
     };
 

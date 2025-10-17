@@ -13,7 +13,7 @@ function Pronunciation() {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [unlockedPronunciations, setUnlockedPronunciations] = useState([]); 
     const navigate = useNavigate();
-    const pageLimit = 6;
+    const pageLimit = 12;
 
     useEffect(() => {
         document.title = "Bài học phát âm - EasyTalk";
@@ -26,7 +26,7 @@ function Pronunciation() {
                 });
                 const all = allResp.pronunciations || [];
                 setAllPronunciations(all);
-                const data = await PronunciationService.fetchPronunciations(currentPage, 6, {
+                const data = await PronunciationService.fetchPronunciations(currentPage, pageLimit, {
                     search: searchKeyword,
                 });
                 setPronunciations(data.pronunciations  || []);
@@ -55,7 +55,7 @@ function Pronunciation() {
             }
         };
         fetchData();
-    }, [currentPage, searchKeyword]);
+    }, [currentPage, searchKeyword, navigate]);
 
     const isPronunciationLocked = (pronunciationId) => {
         return !unlockedPronunciations.includes(pronunciationId.toString());

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
+import Swal from 'sweetalert2';
 import { UserProgressService } from '@/services/UserProgressService.jsx';
 import logo from '@/assets/images/logo.png';
 
@@ -76,12 +77,29 @@ function Menu() {
   }, []);
 
   const handleLogout = () => {
-    if (window.confirm('Bạn có muốn đăng xuất tài khoản không?')) {
-      localStorage.removeItem("token");
-      setIsLoggedIn(false);
-      setUsername('User');
-      window.location.href = "/";
-    }
+    Swal.fire({
+      title: 'Bạn có chắc?',
+      text: "Bạn có muốn đăng xuất tài khoản không?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Đăng xuất',
+      cancelButtonText: 'Hủy',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("token");
+        setIsLoggedIn(false);
+        setUsername('User');
+        Swal.fire({
+          icon: 'success',
+          title: 'Đã đăng xuất!',
+          text: 'Bạn đã đăng xuất thành công.',
+          timer: 1500,
+          showConfirmButton: false,
+        }).then(() => {
+          window.location.href = "/";
+        });
+      }
+    });
   };
 
   const toggleMenu = () => {

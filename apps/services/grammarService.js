@@ -9,7 +9,7 @@ class GrammarsService {
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
 
-    async getGrammarList(page = 1, limit = 5, search = "") {
+    async getGrammarList(page = 1, limit = 12, search = "") {
         const skip = (page - 1) * limit;
         const filter = {};
         if (search) filter.title = { $regex: search, $options: "i" };

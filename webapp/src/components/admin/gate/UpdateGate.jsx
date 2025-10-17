@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GateService } from "@/services/GateService.jsx";
 import { JourneyService } from "@/services/JourneyService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateGate = ({ isOpen, onClose, onUpdated, gate }) => {
     const [title, setTitle] = useState("");
@@ -26,31 +27,46 @@ const UpdateGate = ({ isOpen, onClose, onUpdated, gate }) => {
         if (gate) {
             setTitle(gate.title);
             setJourneyId(gate.journey);
-            console.log("Journey hiện tại của gate:", gate.journey);
         }
     }, [gate, journeys]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!title.trim()) {
-            alert("Vui lòng nhập tiêu đề!");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý!',
+                text: 'Vui lòng nhập tiêu đề!',
+            });
             return;
         }
         setLoading(true);
         try {
-            const payload = { title, journeyId: journeyId };
+            const payload = { title, journeyId };
             const data = await GateService.updateGate(gate._id, payload);
             if (data.gate) {
-                alert("✅ Cập nhật cổng học tập thành công!");
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: 'Cập nhật cổng học tập thành công!',
+                });
                 setTitle("");
                 setJourneyId("");
                 onUpdated();
                 onClose();
             } else {
-                alert("❌ Có lỗi xảy ra: " + (data.message || "Không xác định"));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thất bại!',
+                    text: 'Có lỗi xảy ra: ' + (data.message || "Không xác định"),
+                });
             }
         } catch (error) {
-            alert("❌ Lỗi khi cập nhật cổng học tập: " + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Lỗi khi cập nhật cổng học tập: ' + error.message,
+            });
         }
         setLoading(false);
     };
@@ -62,9 +78,7 @@ const UpdateGate = ({ isOpen, onClose, onUpdated, gate }) => {
             <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="custom-modal-header">
                     <h5>CẬP NHẬT CỔNG HỌC TẬP</h5>
-                    <button className="close-btn" onClick={onClose}>
-                        ×
-                    </button>
+                    <button className="close-btn" onClick={onClose}>×</button>
                 </div>
 
                 <form onSubmit={handleSubmit}>

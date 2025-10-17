@@ -13,7 +13,7 @@ class PronunciationexerciseRepository {
         this.pronunciationExercisesCollection = this.db.collection("pronunciationexercises");
     }
 
-    async findPronunciationExercises(page = 1, limit = 5) {
+    async findPronunciationExercises(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const cursor = await this.pronunciationExercisesCollection.find({}).skip(skip).limit(limit);
         const pronunciationexercises = await cursor.toArray();

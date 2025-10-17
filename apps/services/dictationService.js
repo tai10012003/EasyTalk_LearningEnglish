@@ -5,7 +5,7 @@ class DictationService {
         this.dictationRepository = new DictationRepository();
     }
 
-    async getDictationList(page = 1, limit = 6) {
+    async getDictationList(page = 1, limit = 12) {
         return await this.dictationRepository.findDictations(page, limit);
     }
 

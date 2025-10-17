@@ -8,7 +8,7 @@ class PronunciationsService {
         this.imageFolder = path.join(__dirname, "../public/images/pronunciation");
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
-    async getPronunciationList(page = 1, limit = 3) {
+    async getPronunciationList(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const { items, total } = await this.pronunciationRepository.findAll({}, skip, limit);
         return {

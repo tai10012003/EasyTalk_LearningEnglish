@@ -15,7 +15,7 @@ function Story() {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [unlockedStories, setUnlockedStories] = useState([]);
     const navigate = useNavigate();
-    const pageLimit = 6;
+    const pageLimit = 12;
 
     useEffect(() => {
         document.title = "Bài học câu chuyện - EasyTalk";

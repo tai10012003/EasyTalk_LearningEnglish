@@ -16,7 +16,7 @@ class UserService {
         });
     }
 
-    async getUserList(page = 1, limit = 3, role = "") {
+    async getUserList(page = 1, limit = 12, role = "") {
         const skip = (page - 1) * limit;
         const filter = {};
         if (role) filter.role = role;

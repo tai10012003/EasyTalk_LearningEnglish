@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateExercise from "../../../components/admin/exercise/UpdateExercise";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateGrammarExercise = () => {
     const { id } = useParams();
@@ -26,11 +27,19 @@ const UpdateGrammarExercise = () => {
     const handleSubmit = async (formData, id) => {
         try {
             await GrammarExerciseService.updateGrammarExercise(id, formData);
-            alert("Cập nhật bài luyện tập ngữ pháp thành công!");
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Bài luyện tập ngữ pháp đã được cập nhật thành công!',
+            });
             window.location.href = "/admin/grammar-exercise";
         } catch (err) {
             console.error("Error updating grammar exercise:", err);
-            alert("Có lỗi khi cập nhật!");
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi cập nhật bài luyện tập ngữ pháp!',
+            });
         }
     };
 

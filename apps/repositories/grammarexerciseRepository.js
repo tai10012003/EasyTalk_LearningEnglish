@@ -13,7 +13,7 @@ class GrammarexerciseRepository {
         this.grammarExercisesCollection = this.db.collection("grammarexercises");
     }
 
-    async findGrammarExercises(page = 1, limit = 2) {
+    async findGrammarExercises(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const cursor = await this.grammarExercisesCollection.find({}).skip(skip).limit(limit);
         const grammarexercises = await cursor.toArray();

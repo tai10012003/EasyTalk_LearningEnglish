@@ -81,7 +81,7 @@ router.post("/api/stage/complete/:id", verifyToken, async (req, res) => {
 router.get("/api/stages", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 12;
 
         const { stages, totalStages } = await stageService.getStageList(page, limit);
         const totalPages = Math.ceil(totalStages / limit);

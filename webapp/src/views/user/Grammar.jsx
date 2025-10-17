@@ -13,7 +13,7 @@ function Grammar() {
     const [searchKeyword, setSearchKeyword] = useState("");
     const [unlockedGrammars, setUnlockedGrammars] = useState([]); 
     const navigate = useNavigate();
-    const pageLimit = 6;
+    const pageLimit = 12;
 
     useEffect(() => {
         document.title = "Bài học ngữ pháp - EasyTalk";
@@ -55,7 +55,7 @@ function Grammar() {
             }
         };
         fetchData();
-    }, [currentPage, searchKeyword]);
+    }, [currentPage, searchKeyword, navigate]);
 
     const isGrammarLocked = (grammarId) => {
         return !unlockedGrammars.includes(grammarId.toString());

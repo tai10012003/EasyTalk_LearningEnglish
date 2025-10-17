@@ -13,7 +13,7 @@ class VocabularyexerciseRepository {
         this.vocabularyExercisesCollection = this.db.collection("vocabularyexercises");
     }
 
-    async findVocabularyExercises(page = 1, limit = 2) {
+    async findVocabularyExercises(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const cursor = await this.vocabularyExercisesCollection.find({}).skip(skip).limit(limit);
         const vocabularyExercises = await cursor.toArray();

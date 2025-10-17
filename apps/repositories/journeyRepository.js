@@ -13,7 +13,7 @@ class JourneyRepository {
         this.journeysCollection = this.db.collection("journeys");
     }
 
-    async findJourneys(page = 1, limit = 10) {
+    async findJourneys(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const cursor = await this.journeysCollection.find({}).skip(skip).limit(limit);
         const journeys = await cursor.toArray();

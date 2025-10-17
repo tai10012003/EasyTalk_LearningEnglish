@@ -3,7 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
 
 export const FlashCardService = {
-    async fetchFlashcardLists(page = 1, limit = 6) {
+    async fetchFlashcardLists(page = 1, limit = 12) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             const token = localStorage.getItem("token");
@@ -98,7 +98,7 @@ export const FlashCardService = {
         }
     },
 
-    async fetchFlashcards(listId, page = 1, limit = 5) {
+    async fetchFlashcards(listId, page = 1, limit = 12) {
         try {
             const token = localStorage.getItem("token");
             const res = await fetch(`${API_URL}/flashcards/api/flashcardlist/${listId}?page=${page}&limit=${limit}`, {

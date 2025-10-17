@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
     const [dictations, setDictations] = useState([]);
@@ -16,6 +17,7 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
         } catch (err) {
             console.error(err);
             setDictations([]);
+            Swal.fire('Thất bại!', 'Tải dữ liệu thất bại!', 'error');
         } finally {
             setLoading(false);
         }
@@ -23,17 +25,27 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
 
     useEffect(() => {
         loadData(currentPage);
-    },  [currentPage]);
+    }, [currentPage]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa luyện tập này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
+    const handleDelete = async (id, title) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa luyện tập "${title}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa luyện tập "${title}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa luyện tập "${title}" thất bại!`, 'error');
+                }
             }
-        }
+        });
     };
 
     const renderPagination = () => {
@@ -54,29 +66,29 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
             );
         }
         return (
-        <ul className="admin-exercise-pagination">
-            {currentPage > 1 && (
-                <li className="admin-exercise-page-item">
-                    <button
-                        className="admin-exercise-page-link"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                        &laquo;
-                    </button>
-                </li>
-            )}
-            {pages}
-            {currentPage < totalPages && (
-                <li className="admin-exercise-page-item">
-                    <button
-                        className="admin-exercise-page-link"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                        &raquo;
-                    </button>
-                </li>
-            )}
-        </ul>
+            <ul className="admin-exercise-pagination">
+                {currentPage > 1 && (
+                    <li className="admin-exercise-page-item">
+                        <button
+                            className="admin-exercise-page-link"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                        >
+                            &laquo;
+                        </button>
+                    </li>
+                )}
+                {pages}
+                {currentPage < totalPages && (
+                    <li className="admin-exercise-page-item">
+                        <button
+                            className="admin-exercise-page-link"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                        >
+                            &raquo;
+                        </button>
+                    </li>
+                )}
+            </ul>
         );
     };
 
@@ -85,7 +97,7 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
             <h1 className="admin-exercise-title">{title}</h1>
             <div className="admin-exercise-add">
                 <a href={addUrl} className="admin-exercise-add-btn">
-                + Thêm luyện tập
+                    + Thêm luyện tập
                 </a>
             </div>
             {loading ? (
@@ -126,7 +138,7 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                                                 </a>
                                                 <button
                                                     className="admin-exercise-btn-delete"
-                                                    onClick={() => handleDelete(dictation._id)}
+                                                    onClick={() => handleDelete(dictation._id, dictation.title)}
                                                 >
                                                     Xóa
                                                 </button>

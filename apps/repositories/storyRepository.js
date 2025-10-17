@@ -13,7 +13,7 @@ class StoryRepository {
         this.collection = this.db.collection("stories");
     }
 
-    async findAll(filter = {}, skip = 0, limit = 6) {
+    async findAll(filter = {}, skip = 0, limit = 12) {
         const cursor = await this.collection.find(filter).skip(skip).limit(limit);
         const stories = await cursor.toArray();
         const total = await this.collection.countDocuments(filter);

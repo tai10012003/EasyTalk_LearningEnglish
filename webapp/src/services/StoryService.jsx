@@ -2,7 +2,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 let hasShownAlert = false;
 export const StoryService = {
-  async fetchStories(page = 1, limit = 6, filters = {}) {
+  async fetchStories(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;

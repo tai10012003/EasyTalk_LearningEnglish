@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
     const [exercises, setExercises] = useState([]);
@@ -16,6 +17,7 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
         } catch (err) {
             console.error(err);
             setExercises([]);
+            Swal.fire('Thất bại!', 'Tải dữ liệu thất bại!', 'error');
         } finally {
             setLoading(false);
         }
@@ -23,17 +25,27 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
 
     useEffect(() => {
         loadData(currentPage);
-    },  [currentPage]);
+    }, [currentPage]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa luyện tập này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
+    const handleDelete = async (id, title) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa luyện tập "${title}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa luyện tập "${title}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa luyện tập "${title}" thất bại!`, 'error');
+                }
             }
-        }
+        });
     };
 
     const renderPagination = () => {
@@ -54,29 +66,29 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
             );
         }
         return (
-        <ul className="admin-exercise-pagination">
-            {currentPage > 1 && (
-                <li className="admin-exercise-page-item">
-                    <button
-                        className="admin-exercise-page-link"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                        &laquo;
-                    </button>
-                </li>
-            )}
-            {pages}
-            {currentPage < totalPages && (
-                <li className="admin-exercise-page-item">
-                    <button
-                        className="admin-exercise-page-link"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                        &raquo;
-                    </button>
-                </li>
-            )}
-        </ul>
+            <ul className="admin-exercise-pagination">
+                {currentPage > 1 && (
+                    <li className="admin-exercise-page-item">
+                        <button
+                            className="admin-exercise-page-link"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                        >
+                            &laquo;
+                        </button>
+                    </li>
+                )}
+                {pages}
+                {currentPage < totalPages && (
+                    <li className="admin-exercise-page-item">
+                        <button
+                            className="admin-exercise-page-link"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                        >
+                            &raquo;
+                        </button>
+                    </li>
+                )}
+            </ul>
         );
     };
 
@@ -85,7 +97,7 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
             <h1 className="admin-exercise-title">{title}</h1>
             <div className="admin-exercise-add">
                 <a href={addUrl} className="admin-exercise-add-btn">
-                + Thêm luyện tập
+                    + Thêm luyện tập
                 </a>
             </div>
             {loading ? (
@@ -107,7 +119,13 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
                                 exercises.map((exercise, index) => {
                                     const createdAt = new Date(exercise.createdAt).toLocaleString(
                                         "vi-VN",
-                                        { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }
+                                        {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        }
                                     );
                                     return (
                                         <tr key={exercise._id}>
@@ -124,7 +142,7 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
                                                 </a>
                                                 <button
                                                     className="admin-exercise-btn-delete"
-                                                    onClick={() => handleDelete(exercise._id)}
+                                                    onClick={() => handleDelete(exercise._id, exercise.title)}
                                                 >
                                                     Xóa
                                                 </button>

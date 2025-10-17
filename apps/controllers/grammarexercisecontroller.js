@@ -6,7 +6,7 @@ const grammarexerciseService = new GrammarexerciseService();
 router.get("/api/grammar-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 5;
+        const limit = parseInt(req.query.limit) || 12;
         const { grammarexercises, totalExercises } = await grammarexerciseService.getGrammarexerciseList(page, limit);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({

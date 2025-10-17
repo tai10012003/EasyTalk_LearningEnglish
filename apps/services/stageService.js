@@ -5,7 +5,7 @@ class StageService {
         this.stageRepository = new StageRepository();
     }
 
-    async getStageList(page = 1, limit = 10) {
+    async getStageList(page = 1, limit = 12) {
         return await this.stageRepository.findStages(page, limit);
     }
 

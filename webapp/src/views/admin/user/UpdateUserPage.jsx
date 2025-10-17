@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateUser from "../../../components/admin/user/UpdateUser";
 import { UserService } from "@/services/UserService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateUserPage = () => {
     const { id } = useParams();
@@ -26,11 +27,19 @@ const UpdateUserPage = () => {
     const handleSubmit = async (formData, id) => {
         try {
             await UserService.updateUser(id, formData);
-            alert("Cập nhật thông tin người dùng thành công!");
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Cập nhật thông tin người dùng thành công!',
+            });
             window.location.href = "/admin/user";
         } catch (err) {
             console.error("Error updating user:", err);
-            alert("Có lỗi khi cập nhật!");
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi khi cập nhật thông tin người dùng!',
+            });
         }
     };
 

@@ -9,7 +9,7 @@ class StoryService {
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
 
-    async getStoryList(page = 1, limit = 6, category = "", level = "", search = "") {
+    async getStoryList(page = 1, limit = 12, category = "", level = "", search = "") {
         const skip = (page - 1) * limit;
         const filter = {};
         if (category) filter.category = category;

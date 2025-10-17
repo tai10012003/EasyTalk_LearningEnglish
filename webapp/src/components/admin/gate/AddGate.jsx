@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { GateService } from "@/services/GateService.jsx";
 import { JourneyService } from "@/services/JourneyService.jsx";
+import Swal from "sweetalert2";
 
 const AddGate = ({ isOpen, onClose, onCreated }) => {
     const [title, setTitle] = useState("");
@@ -18,24 +19,50 @@ const AddGate = ({ isOpen, onClose, onCreated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!title.trim()) return alert("Vui lòng nhập tiêu đề!");
-        if (!journeyId) return alert("Vui lòng chọn hành trình!");
+        if (!title.trim()) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý!',
+                text: 'Vui lòng nhập tiêu đề!',
+            });
+            return;
+        }
+        if (!journeyId) {
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý!',
+                text: 'Vui lòng chọn hành trình!',
+            });
+            return;
+        }
 
         setLoading(true);
         try {
             const payload = { title, journeyId };
             const data = await GateService.addGate(payload);
             if (data.gate) {
-                alert("✅ Tạo cổng học tập thành công!");
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: 'Tạo cổng học tập thành công!',
+                });
                 setTitle("");
                 setJourneyId("");
                 onCreated();
                 onClose();
             } else {
-                alert("❌ Có lỗi xảy ra: " + (data.message || "Không xác định"));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thất bại!',
+                    text: 'Có lỗi xảy ra: ' + (data.message || "Không xác định"),
+                });
             }
         } catch (error) {
-            alert("❌ Lỗi khi tạo cổng học tập: " + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Lỗi khi tạo cổng học tập: ' + error.message,
+            });
         }
         setLoading(false);
     };

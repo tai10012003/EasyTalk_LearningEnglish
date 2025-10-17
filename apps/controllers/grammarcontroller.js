@@ -23,7 +23,7 @@ const upload = multer({ storage: storage });
 
 router.get("/api/grammar-list", verifyToken, async function (req, res) {
   const page = parseInt(req.query.page) || 1;
-  const limit = 3;
+  const limit = 12;
   try {
     const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit);
     const totalPages = Math.ceil(totalGrammars / limit);

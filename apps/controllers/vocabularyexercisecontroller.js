@@ -6,7 +6,7 @@ const vocabularyexerciseService = new VocabularyexerciseService();
 router.get("/api/vocabulary-exercises", async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 2;
+        const limit = parseInt(req.query.limit) || 12;
         const { vocabularyExercises, totalExercises } = await vocabularyexerciseService.getVocabularyExerciseList(page, limit);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({

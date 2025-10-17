@@ -13,7 +13,7 @@ class StageRepository {
         this.stagesCollection = this.db.collection("stages");
     }
 
-    async findStages(page = 1, limit = 10) {
+    async findStages(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
 
         const stages = await this.stagesCollection.aggregate([

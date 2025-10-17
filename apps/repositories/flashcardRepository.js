@@ -15,7 +15,7 @@ class FlashcardRepository {
         this.flashcardListsCollection = this.db.collection("flashcardlists");
     }
 
-    async findFlashcardLists(page = 1, limit = 5) {
+    async findFlashcardLists(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
         const cursor = await this.flashcardListsCollection.find({}).skip(skip).limit(limit);
         const flashcardLists = await cursor.toArray();

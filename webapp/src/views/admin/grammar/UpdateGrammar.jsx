@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateLesson from "../../../components/admin/lesson/UpdateLesson";
 import { GrammarService } from "@/services/GrammarService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateGrammar = () => {
     const { id } = useParams();
@@ -25,12 +26,21 @@ const UpdateGrammar = () => {
 
     const handleSubmit = async (formData, id) => {
         try {
-            await GrammarService.updateGrammar(id, formData);
-            alert("Cập nhật bài học ngữ pháp thành công!");
+            const res = await GrammarService.updateGrammar(id, formData);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Bài học ngữ pháp đã được cập nhật thành công!',
+            });
             window.location.href = "/admin/grammar";
+            return res;
         } catch (err) {
             console.error("Error updating grammar:", err);
-            alert("Có lỗi khi cập nhật!");
+            Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi cập nhật bài học ngữ pháp!',
+            });
         }
     };
 

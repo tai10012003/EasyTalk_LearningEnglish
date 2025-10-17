@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 
 function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
     const [stages, setStages] = useState([]);
@@ -23,17 +24,27 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
 
     useEffect(() => {
         loadData(currentPage);
-    },  [currentPage]);
+    }, [currentPage]);
 
-    const handleDelete = async (id) => {
-        if (window.confirm("Bạn có muốn xóa luyện tập này không?")) {
-            try {
-                await deleteItem(id);
-                loadData(currentPage);
-            } catch (err) {
-                alert("Xóa thất bại!");
+    const handleDelete = (id, title) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa chặng "${title}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa chặng "${title}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa chặng "${title}" thất bại!`, 'error');
+                }
             }
-        }
+        });
     };
 
     const renderPagination = () => {
@@ -54,29 +65,29 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
             );
         }
         return (
-        <ul className="admin-exercise-pagination">
-            {currentPage > 1 && (
-                <li className="admin-exercise-page-item">
-                    <button
-                        className="admin-exercise-page-link"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                        &laquo;
-                    </button>
-                </li>
-            )}
-            {pages}
-            {currentPage < totalPages && (
-                <li className="admin-exercise-page-item">
-                    <button
-                        className="admin-exercise-page-link"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                        &raquo;
-                    </button>
-                </li>
-            )}
-        </ul>
+            <ul className="admin-exercise-pagination">
+                {currentPage > 1 && (
+                    <li className="admin-exercise-page-item">
+                        <button
+                            className="admin-exercise-page-link"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                        >
+                            &laquo;
+                        </button>
+                    </li>
+                )}
+                {pages}
+                {currentPage < totalPages && (
+                    <li className="admin-exercise-page-item">
+                        <button
+                            className="admin-exercise-page-link"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                        >
+                            &raquo;
+                        </button>
+                    </li>
+                )}
+            </ul>
         );
     };
 
@@ -85,7 +96,7 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
             <h1 className="admin-exercise-title">{title}</h1>
             <div className="admin-exercise-add">
                 <a href={addUrl} className="admin-exercise-add-btn">
-                + Thêm chặng
+                    + Thêm chặng
                 </a>
             </div>
             {loading ? (
@@ -126,7 +137,7 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                                 </a>
                                                 <button
                                                     className="admin-exercise-btn-delete"
-                                                    onClick={() => handleDelete(stage._id)}
+                                                    onClick={() => handleDelete(stage._id, stage.title)}
                                                 >
                                                     Xóa
                                                 </button>

@@ -1,17 +1,26 @@
 import React from "react";
 import AddExercise from "../../../components/admin/exercise/AddExercise";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
+import Swal from "sweetalert2";
 
 const AddGrammarExercise = () => {
     const handleSubmit = async (data) => {
         try {
             const res = await GrammarExerciseService.addGrammarExercise(data);
-            alert("Bài luyện tập ngữ pháp đã được thêm thành công!");
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Bài luyện tập ngữ pháp đã được thêm thành công!',
+            });
             window.location.href = "/admin/grammar-exercise";
             return res;
         } catch (err) {
             console.error("Error adding grammar:", err);
-            alert("Có lỗi xảy ra khi thêm bài luyện tập ngữ pháp!");
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi thêm bài luyện tập ngữ pháp!',
+            });
         }
     };
     

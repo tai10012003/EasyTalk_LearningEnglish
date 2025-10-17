@@ -13,7 +13,7 @@ class GateRepository {
         this.gatesCollection = this.db.collection("gates");
     }
 
-    async findGates(page = 1, limit = 10) {
+    async findGates(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
 
         const gates = await this.gatesCollection.aggregate([

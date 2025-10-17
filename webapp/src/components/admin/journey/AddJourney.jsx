@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { JourneyService } from "@/services/JourneyService.jsx";
+import Swal from "sweetalert2";
 
 const AddJourney = ({ isOpen, onClose, onCreated }) => {
     const [title, setTitle] = useState("");
@@ -8,7 +9,11 @@ const AddJourney = ({ isOpen, onClose, onCreated }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!title.trim()) {
-            alert("Vui lòng nhập tiêu đề!");
+            Swal.fire({
+                icon: 'warning',
+                title: 'Chú ý!',
+                text: 'Vui lòng nhập tiêu đề!',
+            });
             return;
         }
         setLoading(true);
@@ -16,15 +21,27 @@ const AddJourney = ({ isOpen, onClose, onCreated }) => {
             const payload = { title };
             const data = await JourneyService.addJourney(payload);
             if (data.journey) {
-                alert("✅ Tạo hành trình học tập thành công!");
+                await Swal.fire({
+                    icon: 'success',
+                    title: 'Thành công!',
+                    text: 'Tạo hành trình học tập thành công!',
+                });
                 setTitle("");
                 onCreated();
                 onClose();
             } else {
-                alert("❌ Có lỗi xảy ra: " + (data.message || "Không xác định"));
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Thất bại!',
+                    text: 'Có lỗi xảy ra: ' + (data.message || "Không xác định"),
+                });
             }
         } catch (error) {
-            alert("❌ Lỗi khi tạo hành trình học tập: " + error.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Lỗi khi tạo hành trình học tập: ' + error.message,
+            });
         }
         setLoading(false);
     };
@@ -57,9 +74,9 @@ const AddJourney = ({ isOpen, onClose, onCreated }) => {
                     <div
                         className="custom-modal-footer"
                         style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
                         }}
                     >
                         <button type="button" className="footer-btn" onClick={onClose} disabled={loading}>

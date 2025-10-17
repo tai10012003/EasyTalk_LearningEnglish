@@ -217,7 +217,11 @@ const UserRoute = [
     },
     {
         path: "/change-password",
-        element: <ChangePassword />,
+        element: (
+        <PrivateRoute>
+            <ChangePassword />
+        </PrivateRoute>
+        ),
     },
     {
         path: "/forgot-password",

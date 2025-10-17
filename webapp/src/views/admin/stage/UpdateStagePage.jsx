@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateStage from "../../../components/admin/stage/UpdateStage";
 import { StageService } from "@/services/StageService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateStagePage = () => {
     const { id } = useParams();
@@ -27,12 +28,21 @@ const UpdateStagePage = () => {
 
     const handleSubmit = async (formData, id) => {
         try {
-            await StageService.updateStage(id, formData);
-            alert("Cập nhật chặng học tập thành công!");
+            const res = await StageService.updateStage(id, formData);
+            await Swal.fire({
+                icon: 'success',
+                title: 'Thành công!',
+                text: 'Cập nhật chặng học tập thành công!',
+            });
             window.location.href = "/admin/stage";
+            return res;
         } catch (err) {
-            console.error("Error updating stage:", err);
-            alert("Có lỗi khi cập nhật!");
+            console.error("Error adding pronunciation:", err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Thất bại!',
+                text: 'Có lỗi xảy ra khi cập nhật chặng học tập!',
+            });
         }
     };
 

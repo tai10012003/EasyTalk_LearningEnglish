@@ -13,7 +13,7 @@ class GrammarRepository {
         this.collection = this.db.collection("grammars");
     }
 
-    async findAll(filter = {}, skip = 0, limit = 5) {
+    async findAll(filter = {}, skip = 0, limit = 12) {
         const cursor = await this.collection.find(filter).skip(skip).limit(limit);
         const grammars = await cursor.toArray();
         const total = await this.collection.countDocuments(filter);
