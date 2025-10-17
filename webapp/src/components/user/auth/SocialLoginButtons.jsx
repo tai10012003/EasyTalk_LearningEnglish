@@ -3,10 +3,10 @@ const API_URL = import.meta.env.VITE_API_URL;
 
 function SocialLoginButtons() {
   const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/user/auth/google`;
+    window.location.href = `${API_URL}/auth/google`;
   };
   const handleFacebookLogin = () => {
-    window.location.href = `${API_URL}/user/auth/facebook`;
+    window.location.href = `${API_URL}/auth/facebook`;
   };
   return (
     <div className="auth-social-auth-buttons">

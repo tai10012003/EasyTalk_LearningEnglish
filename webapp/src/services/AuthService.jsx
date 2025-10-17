@@ -4,7 +4,7 @@ let hasShownAlert = false;
 export const AuthService = {
     async login(email, password) {
         try {
-            const res = await fetch(`${API_URL}/user/login`, {
+            const res = await fetch(`${API_URL}/api/login`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -28,7 +28,7 @@ export const AuthService = {
 
     async register(username, email, password, confirmPassword) {
         try {
-            const res = await fetch(`${API_URL}/user/register`, {
+            const res = await fetch(`${API_URL}/api/register`, {
                 method: "POST",
                 headers: {
                 "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export const AuthService = {
     async changePassword(currentPassword, newPassword, confirmNewPassword) {
         try {
             const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/user/change-password`, {
+            const res = await fetch(`${API_URL}/change-password`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -77,7 +77,7 @@ export const AuthService = {
     },
 
     async forgotPassword(email) {
-        const res = await fetch(`${API_URL}/user/forgot-password`, {
+        const res = await fetch(`${API_URL}/forgot-password`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
@@ -86,7 +86,7 @@ export const AuthService = {
     },
 
     async verifyCode(email, code) {
-        const res = await fetch(`${API_URL}/user/verify-code`, {
+        const res = await fetch(`${API_URL}/verify-code`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, code }),
@@ -95,7 +95,7 @@ export const AuthService = {
     },
 
     async resetPassword(email, newPassword) {
-        const res = await fetch(`${API_URL}/user/reset-password`, {
+        const res = await fetch(`${API_URL}/reset-password`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, newPassword }),

@@ -10,7 +10,7 @@ const { UserService, UserprogressService } = require("../services");
 const userService = new UserService();
 const userprogressService = new UserprogressService();
 
-router.post("/register", async (req, res) => {
+router.post("/api/register", async (req, res) => {
   try {
     const { username, email, password, confirmPassword, role } = req.body;
     const result = await userService.register(username, email, password, confirmPassword, role);
@@ -20,7 +20,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/api/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const result = await userService.login(email, password);
@@ -134,7 +134,7 @@ router.post("/profile/update", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/api/user-list", async function (req, res) {
+router.get("/user/api/user-list", async function (req, res) {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = 3;
@@ -152,7 +152,7 @@ router.get("/api/user-list", async function (req, res) {
   }
 });
 
-router.post('/add', async (req, res) => {
+router.post('/user/add', async (req, res) => {
   try {
     const { username, email, password, role, active } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -171,7 +171,7 @@ router.post('/add', async (req, res) => {
   }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/user/api/:id", async function (req, res) {
   try {
     const id = req.params.id;
     const user = await userService.getUser(id);
@@ -185,7 +185,7 @@ router.get("/api/:id", async function (req, res) {
   }
 });
 
-router.put('/update/:id', async (req, res) => {
+router.put('/user/update/:id', async (req, res) => {
   try {
     const { username, email, role, active } = req.body;
     const updatedUser = {
@@ -205,7 +205,7 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
-router.post('/reset-temp-password/:userId', async (req, res) => {
+router.post('/user/reset-temp-password/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
     const user = await userService.getUser(userId);
@@ -250,7 +250,7 @@ router.post('/reset-temp-password/:userId', async (req, res) => {
   }
 });
 
-router.delete("/delete/:id", async function (req, res) {
+router.delete("/user/delete/:id", async function (req, res) {
   try {
     const result = await userService.deleteUser(req.params.id);
     if (result.deletedCount == 0) {
