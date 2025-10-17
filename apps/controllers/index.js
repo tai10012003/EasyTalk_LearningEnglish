@@ -11,16 +11,7 @@ router.use("/grammar-exercise",  require(__dirname + "/grammarexercisecontroller
 router.use("/pronunciation-exercise", require(__dirname + "/pronunciationexercisecontroller"));
 router.use("/vocabulary-exercise", require(__dirname + "/vocabularyexercisecontroller"));
 router.use("/blog", require(__dirname + "/blogcontroller"));
-router.use("/login", require(__dirname + "/usercontroller"));
-router.use("/auth/google", require(__dirname + "/usercontroller"));
-router.use("/auth/facebook", require(__dirname + "/usercontroller"));
-router.use("/register", require(__dirname + "/usercontroller"));
-router.use("/change-password", require(__dirname + "/usercontroller"));
-router.use("/forgot-password", require(__dirname + "/usercontroller"));
-router.use("/verify-code", require(__dirname + "/usercontroller"));
-router.use("/reset-password", require(__dirname + "/usercontroller"));
-router.use("/profile", require(__dirname + "/usercontroller")); 
-router.use("/profile/update", require(__dirname + "/usercontroller"));
+router.use("/user", require(__dirname + "/usercontroller"));
 router.use("/flashcards", require(__dirname + "/flashcardcontroller"));
 router.use("/chat", require(__dirname + "/chatcontroller"));
 router.use("/communicate", require(__dirname + "/communicatecontroller"));
@@ -37,5 +28,4 @@ router.get("/single-blog", function (req, res) {
 router.get("/single-blog-1", function (req, res) {
     res.render("single-blog-1.ejs");
 });
-
 module.exports = router;
