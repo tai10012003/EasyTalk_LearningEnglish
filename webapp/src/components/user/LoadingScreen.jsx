@@ -1,14 +1,14 @@
 import React from "react";
-import logo from "@/assets/images/logo.png";
 
-function LoadingScreen() {
+const LoadingScreen = () => {
   return (
-    <div className="loading-screen">
-      <img src={logo} alt="Logo" className="loading-logo" />
-      <div className="spinner"></div>
-      <h2>Đang tải...</h2>
+    <div className="global-spinner-overlay">
+      <div className="global-spinner-content">
+        <div className="global-spinner-loader"></div>
+        <p className="global-spinner-text">Loading....</p>
+      </div>
     </div>
   );
-}
+};
 
 export default LoadingScreen;

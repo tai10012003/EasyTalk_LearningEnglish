@@ -1,6 +1,6 @@
-
 import React, { useState } from "react";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
   const [name, setName] = useState(flashcardList.name || "");
@@ -10,21 +10,21 @@ const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !description.trim()) {
-      alert("Vui lòng nhập đầy đủ thông tin!");
+      Swal.fire("⚠️ Thiếu thông tin", "Vui lòng nhập đầy đủ thông tin!", "warning");
       return;
     }
     setLoading(true);
     try {
       const data = await FlashCardService.updateFlashcardList(flashcardList._id, name, description);
       if (data.success) {
-        alert("✅ Cập nhật danh sách flashcard thành công!");
+        await Swal.fire("✅ Thành công", "Cập nhật danh sách flashcard thành công!", "success");
         onUpdated();
         onClose();
       } else {
-        alert("❌ Có lỗi xảy ra: " + data.message);
+        Swal.fire("❌ Lỗi", data.message || "Có lỗi xảy ra.", "error");
       }
     } catch (error) {
-      alert("❌ Lỗi khi cập nhật flashcard list: " + error.message);
+      Swal.fire("❌ Lỗi", "Lỗi khi cập nhật flashcard list: " + error.message, "error");
     }
     setLoading(false);
   };

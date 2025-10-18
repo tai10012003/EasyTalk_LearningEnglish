@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import Swal from "sweetalert2";
 
 const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
   const [word, setWord] = useState(flashcard.word || "");
@@ -13,7 +14,7 @@ const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!word.trim() || !meaning.trim() || !exampleSentence.trim()) {
-      alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
+      Swal.fire("⚠️ Thiếu thông tin", "Vui lòng nhập đầy đủ thông tin bắt buộc!", "warning");
       return;
     }
     setLoading(true);
@@ -24,21 +25,18 @@ const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
       formData.append("pos", pos);
       formData.append("pronunciation", pronunciation);
       formData.append("exampleSentence", exampleSentence);
-      if (image) {
-        formData.append("image", image);
-      }
+      if (image) formData.append("image", image);
 
       const data = await FlashCardService.updateFlashcard(flashcard._id, formData);
-
       if (data.success) {
-        alert("✅ Cập nhật flashcard thành công!");
+        await Swal.fire("✅ Thành công", "Cập nhật flashcard thành công!", "success");
         onUpdated();
         onClose();
       } else {
-        alert("❌ Có lỗi xảy ra: " + data.message);
+        Swal.fire("❌ Lỗi", data.message || "Có lỗi xảy ra.", "error");
       }
     } catch (error) {
-      alert("❌ Lỗi khi cập nhật flashcard: " + error.message);
+      Swal.fire("❌ Lỗi", "Lỗi khi cập nhật flashcard: " + error.message, "error");
     }
     setLoading(false);
   };

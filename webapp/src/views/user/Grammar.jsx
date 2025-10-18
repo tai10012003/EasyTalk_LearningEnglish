@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarCard from "@/components/user/grammar/GrammarCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { GrammarService } from "@/services/GrammarService.jsx";
@@ -133,11 +134,7 @@ function Grammar() {
                 </div>
                 <div className="container">
                     <div className="lesson-list">
-                    {isLoading ? (
-                        <div className="spinner-container">
-                            <div className="spinner-loader"></div>
-                        </div>
-                    ) : grammars.length > 0 ? (
+                    { grammars.length > 0 ? (
                             <div className="container">
                                 <div className="row">
                                     {grammars.map((grammar) => (
@@ -192,6 +189,7 @@ function Grammar() {
                     </div>
                 </div>
             )}
+            {isLoading && <LoadingScreen />}
         </>
     );
 }

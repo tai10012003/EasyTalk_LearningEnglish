@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarSentence from "@/components/user/grammar/GrammarSentence.jsx";
 import GrammarQuiz from "@/components/user/grammar/GrammarQuiz.jsx";
 import GrammarComplete from "@/components/user/grammar/GrammarComplete.jsx";
@@ -8,6 +9,7 @@ import { GrammarService } from "@/services/GrammarService.jsx";
 function GrammarDetail() {
     const { id } = useParams();
     const [grammar, setGrammar] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [displayContent, setDisplayContent] = useState("");
     const [showQuiz, setShowQuiz] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
@@ -17,19 +19,30 @@ function GrammarDetail() {
 
     useEffect(() => {
         document.title = "Chi tiết bài học ngữ pháp - EasyTalk";
-        GrammarService.getGrammarById(id).then((res) => {
-            if (res && res.grammar && res.grammar.content) {
-                setGrammar(res.grammar);
-                setTimeout(() => {
-                    setDisplayContent(res.grammar.content);
+        const fetchGrammarDetail = async () => {
+            setIsLoading(true);
+            try {
+                const res = await GrammarService.getGrammarById(id);
+                if (res && res.grammar && res.grammar.content) {
+                    setGrammar(res.grammar);
                     setTimeout(() => {
-                        if (contentRef.current) {
-                            contentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
-                        }
-                    }, 50);
-                }, 2000);
+                        setDisplayContent(res.grammar.content);
+                        setTimeout(() => {
+                            if (contentRef.current) {
+                                contentRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+                            }
+                        }, 50);
+                    }, 2000);
+                } else {
+                    console.warn("Không tìm thấy grammar hoặc dữ liệu trống.");
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải grammar:", error);
+            } finally {
+                setIsLoading(false);
             }
-        });
+        };
+        fetchGrammarDetail();
     }, [id]);
 
     const handleStepChange = (step, total) => {
@@ -37,8 +50,9 @@ function GrammarDetail() {
         setTotalSteps(total);
     };
     const progressPercent = Math.round((currentStep / totalSteps) * 100);
-
-    if (!grammar) return <p className="no-grammar">Đang tải...</p>;
+    
+    if (isLoading) { return <LoadingScreen />; }
+    if (!grammar) return <p className="no-grammar">Đang tải bài học ngữ pháp ...</p>;
 
     return (
         <div className="lesson-detail-container container">

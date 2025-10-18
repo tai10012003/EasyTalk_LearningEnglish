@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarExerciseCard from "@/components/user/grammarexercise/GrammarExerciseCard.jsx";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 
@@ -105,11 +106,7 @@ function GrammarExercise() {
                 </div>
                 <div className="container">
                     <div className="lesson-list">
-                        {isLoading ? (
-                            <div className="spinner-container">
-                                <div className="spinner-loader"></div>
-                            </div>
-                        ) : exercises.length > 0 ? (
+                        { exercises.length > 0 ? (
                             <div className="container">
                                 <div className="row">
                                     {exercises.map((exercise) => (
@@ -183,6 +180,7 @@ function GrammarExercise() {
                     </div>
                 </div>
             )}
+            {isLoading && <LoadingScreen />}
         </>
     );
 }

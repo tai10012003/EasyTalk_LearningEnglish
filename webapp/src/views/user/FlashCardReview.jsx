@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import FlashCardReviewCard from "@/components/user/flashcard/FlashCardReviewCard.jsx";
+import Swal from "sweetalert2";
 
 const FlashCardReview = () => {
     const { id } = useParams();
@@ -10,12 +12,12 @@ const FlashCardReview = () => {
     const [listName, setListName] = useState(""); 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mode, setMode] = useState("flip");
-    const [loading, setLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         document.title = "Ôn tập flashcard - EasyTalk";
         const load = async () => {
-            setLoading(true);
+            setIsLoading(true);
             try {
                 const data = await FlashCardService.fetchReview(id);
                 setFlashcards(data.flashcards);
@@ -23,10 +25,14 @@ const FlashCardReview = () => {
                 setCurrentIndex(0);
                 randomMode();
             } catch (err) {
-                alert("Lỗi tải flashcard: " + err.message);
-                navigate("/flashcards");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi tải flashcard",
+                    text: err.message,
+                    confirmButtonText: "Quay lại",
+                }).then(() => navigate("/flashcards"));
             }
-            setLoading(false);
+            setIsLoading(false);
         };
         load();
     }, [id]);
@@ -34,7 +40,7 @@ const FlashCardReview = () => {
     const randomMode = () => {
         let modes = ["flip", "choice", "fill"];
         if (flashcards.length < 4) {
-            modes = modes.filter(m => m != "choice");
+            modes = modes.filter(m => m !== "choice");
         }
         setMode(modes[Math.floor(Math.random() * modes.length)]);
     };
@@ -46,35 +52,77 @@ const FlashCardReview = () => {
         randomMode();
     };
 
-    const handleRemove = () => {
-        if (window.confirm("Bạn đã nhớ từ này rồi chứ? Hệ thống sẽ tự động xóa từ vựng đã ghi nhớ khỏi danh sách luyện tập !")) {
+    const handleRemove = async () => {
+        const result = await Swal.fire({
+            title: "Xác nhận xóa từ vựng",
+            text: "Bạn đã nhớ từ này rồi chứ? Hệ thống sẽ tự động xóa từ vựng đã ghi nhớ khỏi danh sách luyện tập!",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Đúng vậy",
+            cancelButtonText: "Hủy",
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+        });
+
+        if (result.isConfirmed) {
             const updated = flashcards.filter((_, idx) => idx !== currentIndex);
             setFlashcards(updated);
             if (updated.length == 0) {
-                alert("🎉 Bạn đã hoàn thành luyện tập!");
-                navigate(`/flashcards/flashcardlist/${id}`);
+                Swal.fire({
+                    icon: "success",
+                    title: "🎉 Hoàn thành!",
+                    text: "Bạn đã hoàn thành luyện tập!",
+                    confirmButtonText: "OK",
+                }).then(() => navigate(`/flashcards/flashcardlist/${id}`));
             } else {
                 setCurrentIndex(0);
                 randomMode();
+                Swal.fire({
+                    icon: "success",
+                    title: "Đã xóa từ vựng",
+                    text: "Từ vựng đã được loại khỏi danh sách ôn tập.",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
             }
         }
     };
 
     const handleCheckAnswer = (answer, correct) => {
         if (answer.toLowerCase() == correct.toLowerCase()) {
-            alert("✅ Chính xác!");
+            Swal.fire({
+                icon: "success",
+                title: "Chính xác!",
+                timer: 1200,
+                showConfirmButton: false,
+            });
         } else {
-            alert("❌ Sai. Đáp án đúng là: " + correct);
+            Swal.fire({
+                icon: "error",
+                title: "Sai rồi!",
+                text: `Đáp án đúng là: ${correct}`,
+            });
         }
     };
 
-    const handleStop = () => {
-        if (window.confirm("Bạn có chắc chắn muốn dừng học không?")) {
-           navigate(`/flashcards/flashcardlist/${id}`);
+    const handleStop = async () => {
+        const result = await Swal.fire({
+            title: "Dừng học?",
+            text: "Bạn có chắc chắn muốn dừng học không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Có, dừng lại",
+            cancelButtonText: "Tiếp tục học",
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+        });
+
+        if (result.isConfirmed) {
+            navigate(`/flashcards/flashcardlist/${id}`);
         }
     };
 
-    if (loading) return <div className="loading">Đang tải...</div>;
+    if (isLoading) return <LoadingScreen />;
     if (flashcards.length == 0) return <p>Không có flashcards nào.</p>;
 
     return (

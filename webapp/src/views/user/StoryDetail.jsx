@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useParams } from "react-router-dom";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StorySentence from "@/components/user/story/StorySentence.jsx";
 import StoryQuiz from "@/components/user/story/StoryQuiz.jsx";
 import StoryComplete from "@/components/user/story/StoryComplete.jsx";
@@ -9,6 +10,7 @@ import { StoryService } from "@/services/StoryService.jsx";
 function StoryDetail() {
     const { id } = useParams();
     const [story, setStory] = useState(null);
+    const [isLoading, setIsLoading] = useState(false);
     const [displayedItems, setDisplayedItems] = useState([]);
     const [showQuizOnly, setShowQuizOnly] = useState(false);
     const [quizResults, setQuizResults] = useState([]);
@@ -18,17 +20,26 @@ function StoryDetail() {
 
     useEffect(() => {
         document.title = "Chi tiết bài học câu chuyện - EasyTalk";
-        StoryService.getStoryById(id).then((res) => {
-            setStory(res);
-            setTimeout(() => {
-                setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
-                const quizCount = res.content.filter(c => c.quiz).length;
-                const total = res.content.length + quizCount + 1 + 1;
-                setCurrentStep(1); 
-                setTotalSteps(total);
-            }, 2000);
-        });
-    },  [id]);
+        const fetchStoryDetail = async () => {
+            setIsLoading(true);
+            try {
+                const res = await StoryService.getStoryById(id);
+                setStory(res);
+                setTimeout(() => {
+                    setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
+                    const quizCount = res.content.filter(c => c.quiz).length;
+                    const total = res.content.length + quizCount + 1 + 1;
+                    setCurrentStep(1);
+                    setTotalSteps(total);
+                }, 2000);
+            } catch (error) {
+                console.error("Error fetching story:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchStoryDetail();
+    }, [id]);
 
     const getRandomWords = (arr, count) => {
         const shuffled = [...arr].sort(() => 0.5 - Math.random());
@@ -105,7 +116,8 @@ function StoryDetail() {
         setCurrentStep(step);
     };
 
-    if (!story) return <p className="no-stories">Đang tải...</p>;
+    if (isLoading) { return <LoadingScreen />; }
+    if (!story) return <p className="no-stories">Đang tải bài học câu chuyện ...</p>;
 
     return (
         <div className="story-detail-container container">

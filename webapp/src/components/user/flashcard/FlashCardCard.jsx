@@ -1,23 +1,31 @@
 import React, { useState } from "react";
 import UpdateFlashCard from "@/components/user/flashcard/UpdateFlashCard.jsx";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import Swal from "sweetalert2";
 
 const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa flashcard này không?")) {
-      try {
-        const data = await FlashCardService.deleteFlashcard(flashcard._id);
-        if (data.success) {
-          alert("Flashcard đã bị xóa thành công!");
-          onDelete();
-        } else {
-          alert("Xóa thất bại: " + data.message);
-        }
-      } catch (error) {
-        alert("Lỗi khi xóa flashcard: " + error.message);
+    const confirm = await Swal.fire({
+      title: "Xác nhận xóa?",
+      text: "Bạn có chắc chắn muốn xóa flashcard này không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+    });
+    if (!confirm.isConfirmed) return;
+    try {
+      const data = await FlashCardService.deleteFlashcard(flashcard._id);
+      if (data.success) {
+        await Swal.fire("🗑️ Đã xóa", "Flashcard đã bị xóa thành công!", "success");
+        onDelete();
+      } else {
+        Swal.fire("❌ Lỗi", data.message || "Xóa thất bại!", "error");
       }
+    } catch (error) {
+      Swal.fire("❌ Lỗi", "Lỗi khi xóa flashcard: " + error.message, "error");
     }
   };
 
@@ -28,7 +36,7 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
       utterance.rate = 1;
       speechSynthesis.speak(utterance);
     } else {
-      alert("Trình duyệt của bạn không hỗ trợ tính năng phát âm!");
+      Swal.fire("⚠️ Không hỗ trợ", "Trình duyệt của bạn không hỗ trợ phát âm!", "warning");
     }
   };
 

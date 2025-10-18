@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import { FlashCardService } from "../../services/FlashCardService";
 import FlashCardCard from "@/components/user/flashcard/FlashCardCard.jsx";
 import CreateFlashCard from "@/components/user/flashcard/CreateFlashCard.jsx";
@@ -14,13 +16,12 @@ const FlashCard = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [totalFlashcards, setTotalFlashcards] = useState(0);
   const [limit] = useState(5);
-
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchData = useCallback(async () => {
-    setLoading(true);
+    setIsLoading(true);
     try {
       const data = await FlashCardService.fetchFlashcards(id, currentPage, limit);
       setFlashcardList(data.flashcardList);
@@ -29,9 +30,14 @@ const FlashCard = () => {
       setTotalFlashcards(data.totalFlashcards || 0);
     } catch (error) {
       console.error("Error fetching flashcard list:", error);
-      alert("Lỗi khi tải danh sách flashcard: " + error.message);
+      Swal.fire({
+        icon: "error",
+        title: "Lỗi tải dữ liệu",
+        text: "Không thể tải danh sách flashcard: " + error.message,
+        confirmButtonText: "OK",
+      });
     }
-    setLoading(false);
+    setIsLoading(false);
   }, [id, currentPage, limit]);
 
   useEffect(() => {
@@ -40,17 +46,42 @@ const FlashCard = () => {
   }, [fetchData]);
 
   const handleDeleteList = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa danh sách từ này không?")) {
+    const result = await Swal.fire({
+      title: "Xác nhận xóa?",
+      text: "Bạn có chắc chắn muốn xóa danh sách từ này không?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Xóa",
+      cancelButtonText: "Hủy",
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+    });
+    if (result.isConfirmed) {
       try {
         const data = await FlashCardService.deleteFlashcardList(id);
         if (data.success) {
-          alert("Danh sách từ đã bị xóa");
+          await Swal.fire({
+            icon: "success",
+            title: "Đã xóa!",
+            text: "Danh sách từ đã bị xóa thành công.",
+            confirmButtonText: "OK",
+          });
           navigate("/flashcards");
         } else {
-          alert("Xóa thất bại: " + data.message);
+          Swal.fire({
+            icon: "error",
+            title: "Thất bại",
+            text: "Không thể xóa: " + (data.message || "Lỗi không xác định."),
+            confirmButtonText: "OK",
+          });
         }
       } catch (error) {
-        alert("Lỗi khi xóa danh sách: " + error.message);
+        Swal.fire({
+          icon: "error",
+          title: "Lỗi khi xóa",
+          text: "Lỗi khi xóa danh sách: " + error.message,
+          confirmButtonText: "OK",
+        });
       }
     }
   };
@@ -96,7 +127,7 @@ const FlashCard = () => {
     return pages;
   };
 
-  if (loading) return <div>Loading...</div>;
+  if (isLoading) return <LoadingScreen />;
   if (!flashcardList) return <div>Không tìm thấy danh sách flashcards.</div>;
 
   return (
@@ -124,12 +155,18 @@ const FlashCard = () => {
           click vào nút chỉnh sửa để thay đổi ngôn ngữ. Audio mặc định là
           tiếng Anh-Anh và Anh-Mỹ. Các ngôn ngữ khác chỉ hỗ trợ trên máy tính.
         </div>
-        <a
-          className="btn_1 btn-lg btn-block flashcard-detail-review"
-          href={`/flashcards/flashcardlist/${flashcardList._id}/review`}
-        >
-          <i className="fas fa-dumbbell"></i>Luyện tập flashcards
-        </a>
+        {flashcards.length >= 3 ? (
+          <a
+            className="btn_1 btn-lg btn-block flashcard-detail-review"
+            href={`/flashcards/flashcardlist/${flashcardList._id}/review`}
+          >
+            <i className="fas fa-dumbbell"></i>Luyện tập flashcards
+          </a>
+        ) : (
+          <div className="alert alert-error text-center mt-3">
+            Cần ít nhất <strong>3 từ vựng</strong> trong danh sách để bắt đầu luyện tập!
+          </div>
+        )}
         <div className="flashcard-detail-list">
           <div className="section_tittle">
             <h4>DANH SÁCH TỪ VỰNG</h4>

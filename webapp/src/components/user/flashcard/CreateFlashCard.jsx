@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import Swal from "sweetalert2";
 
 const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
   const [word, setWord] = useState("");
@@ -11,12 +12,12 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!word.trim() || !meaning.trim() || !exampleSentence.trim()) {
-    alert("Vui lòng nhập đầy đủ thông tin bắt buộc!");
-    return;
-  }
-  setLoading(true);
+    e.preventDefault();
+    if (!word.trim() || !meaning.trim() || !exampleSentence.trim()) {
+      Swal.fire("⚠️ Thiếu thông tin", "Vui lòng nhập đầy đủ thông tin bắt buộc!", "warning");
+      return;
+    }
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("word", word);
@@ -24,12 +25,10 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
       formData.append("pos", pos);
       formData.append("pronunciation", pronunciation);
       formData.append("exampleSentence", exampleSentence);
-      if (image) {
-        formData.append("image", image);
-      }
+      if (image) formData.append("image", image);
       const data = await FlashCardService.createFlashcard(listId, formData);
       if (data.success) {
-        alert("✅ Tạo flashcard thành công!");
+        await Swal.fire("🎉 Thành công", "Tạo flashcard thành công!", "success");
         setWord("");
         setMeaning("");
         setPos("");
@@ -39,10 +38,10 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
         onCreated();
         onClose();
       } else {
-        alert("❌ Có lỗi xảy ra: " + data.message);
+        Swal.fire("❌ Lỗi", data.message || "Có lỗi xảy ra.", "error");
       }
     } catch (error) {
-      alert("❌ Lỗi khi tạo flashcard: " + error.message);
+      Swal.fire("❌ Lỗi", "Lỗi khi tạo flashcard: " + error.message, "error");
     }
     setLoading(false);
   };

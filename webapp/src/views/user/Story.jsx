@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StoryCard from "@/components/user/story/StoryCard.jsx";
 import { StoryService } from "@/services/StoryService.jsx";
 
@@ -110,129 +111,126 @@ function Story() {
         return pages;
     };
 
-  return (
-    <>
-        <div className="lesson-container">
-            <div className="hero-mini">
-                <h3 className="hero-title">DANH SÁCH CÁC CÂU CHUYỆN HAY
-                    <i
-                        className="fas fa-question-circle help-icon"
-                        style={{ cursor: "pointer" }}
-                        onClick={() => setIsModalOpen(true)}
-                    ></i></h3>
-                <div className="search-bar">
-                    <input
-                        type="text"
-                        className="search-input"
-                        placeholder="Tìm kiếm câu chuyện..."
-                        value={searchKeyword}
-                        onChange={(e) => setSearchKeyword(e.target.value)}
-                    />
-                    <button
-                        className="search-button"
-                        onClick={() => {
-                        setCurrentPage(1);
-                    }}
-                    >
-                    <i className="fas fa-search me-2"></i>
-                    </button>
-                </div>
-            </div>
-            <div className="container">
-                <div className="filter-bar d-flex justify-content-center my-3">
-                    <select
-                        className="form-select mx-2"
-                        value={selectedCategory}
-                        onChange={(e) => {
+    return (
+        <>
+            <div className="lesson-container">
+                <div className="hero-mini">
+                    <h3 className="hero-title">DANH SÁCH CÁC CÂU CHUYỆN HAY
+                        <i
+                            className="fas fa-question-circle help-icon"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => setIsModalOpen(true)}
+                        ></i></h3>
+                    <div className="search-bar">
+                        <input
+                            type="text"
+                            className="search-input"
+                            placeholder="Tìm kiếm câu chuyện..."
+                            value={searchKeyword}
+                            onChange={(e) => setSearchKeyword(e.target.value)}
+                        />
+                        <button
+                            className="search-button"
+                            onClick={() => {
                             setCurrentPage(1);
-                            setSelectedCategory(e.target.value);
                         }}
-                    >
-                        <option value="">-- Chọn Category --</option>
-                        <option value="Daily Life">Daily Life</option>
-                        <option value="Travel">Travel</option>
-                        <option value="Adventure">Adventure</option>
-                        <option value="Motivation">Motivation</option>
-                    </select>
-                    <select
-                        className="form-select mx-2"
-                        value={selectedLevel}
-                        onChange={(e) => {
-                            setCurrentPage(1);
-                            setSelectedLevel(e.target.value);
-                        }}
-                    >
-                        <option value="">-- Chọn Level --</option>
-                        <option value="A1">A1</option>
-                        <option value="A2">A2</option>
-                        <option value="B1">B1</option>
-                        <option value="B2">B2</option>
-                    </select>
-                </div>
-            </div>
-            <div className="container">
-                <div className="lesson-list">
-                    {isLoading ? (
-                    <div className="spinner-container">
-                        <div className="spinner-loader"></div>
-                    </div>
-                    ) : stories.length > 0 ? (
-                    <div className="container">
-                        <div className="row">
-                            {stories.map((story) => (
-                                <StoryCard key={story._id} story={story} isLocked={isStoryLocked(story._id)} />
-                            ))}
-                        </div>
-                    </div>
-                    ) : (
-                        <p className="text-center no-stories">Không có câu chuyện nào.</p>
-                    )}
-                </div>
-                <nav aria-label="Page navigation">
-                    <ul className="pagination justify-content-center" id="pagination-controls">
-                        {renderPagination()}
-                    </ul>
-                </nav>
-            </div>    
-        </div>
-        {isModalOpen && (
-            <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
-                <div
-                    className="custom-modal"
-                    onClick={(e) => e.stopPropagation()}
-                >
-                    <div className="custom-modal-header">
-                        <h5>Hướng Dẫn Đọc Câu Chuyện</h5>
-                        <button className="close-btn" onClick={() => setIsModalOpen(false)}>
-                            &times;
+                        >
+                        <i className="fas fa-search me-2"></i>
                         </button>
                     </div>
-                    <div className="custom-modal-body">
-                        <p>Câu chuyện được chia thành nhiều đoạn nhỏ, hiển thị từng đoạn để bạn dễ dàng đọc và hiểu.</p>
-                        <p>
-                            <strong>Các chức năng:</strong>
-                        </p>
-                        <ul>
-                            <li><strong>Tiếp theo:</strong> Nhấn nút <strong>Tiếp theo</strong> để chuyển sang đoạn tiếp theo.</li>
-                            <li><strong>Quay lại:</strong> Nhấn nút <strong>Quay lại</strong> để đọc lại đoạn trước đó.</li>
-                            <li><strong>Dịch nghĩa:</strong> Xem bản dịch tiếng Việt của đoạn hiện tại.</li>
-                            <li><strong>Nghe:</strong> Hệ thống đọc to đoạn hiện tại bằng tiếng Anh.</li>
-                        </ul>
-                        <p><strong>Lưu ý:</strong></p>
-                        <ul>
-                            <li>Đọc kỹ từng đoạn và tận dụng các chức năng.</li>
-                            <li>Sau khi hoàn thành, sẽ hiển thị thông báo "Bạn đã hoàn thành câu chuyện".</li>
-                        </ul>
-                        <p>🎉 Chúc bạn học vui vẻ!</p>
-                    </div>
-                    <div className="custom-modal-footer">
-                        <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                </div>
+                <div className="container">
+                    <div className="filter-bar d-flex justify-content-center my-3">
+                        <select
+                            className="form-select mx-2"
+                            value={selectedCategory}
+                            onChange={(e) => {
+                                setCurrentPage(1);
+                                setSelectedCategory(e.target.value);
+                            }}
+                        >
+                            <option value="">-- Chọn Category --</option>
+                            <option value="Daily Life">Daily Life</option>
+                            <option value="Travel">Travel</option>
+                            <option value="Adventure">Adventure</option>
+                            <option value="Motivation">Motivation</option>
+                        </select>
+                        <select
+                            className="form-select mx-2"
+                            value={selectedLevel}
+                            onChange={(e) => {
+                                setCurrentPage(1);
+                                setSelectedLevel(e.target.value);
+                            }}
+                        >
+                            <option value="">-- Chọn Level --</option>
+                            <option value="A1">A1</option>
+                            <option value="A2">A2</option>
+                            <option value="B1">B1</option>
+                            <option value="B2">B2</option>
+                        </select>
                     </div>
                 </div>
+                <div className="container">
+                    <div className="lesson-list">
+                        { stories.length > 0 ? (
+                        <div className="container">
+                            <div className="row">
+                                {stories.map((story) => (
+                                    <StoryCard key={story._id} story={story} isLocked={isStoryLocked(story._id)} />
+                                ))}
+                            </div>
+                        </div>
+                        ) : (
+                            <p className="text-center no-stories">Không có câu chuyện nào.</p>
+                        )}
+                    </div>
+                    <nav aria-label="Page navigation">
+                        <ul className="pagination justify-content-center" id="pagination-controls">
+                            {renderPagination()}
+                        </ul>
+                    </nav>
+                </div>    
             </div>
-        )}
-    </>
-  );
+            {isModalOpen && (
+                <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
+                    <div
+                        className="custom-modal"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="custom-modal-header">
+                            <h5>Hướng Dẫn Đọc Câu Chuyện</h5>
+                            <button className="close-btn" onClick={() => setIsModalOpen(false)}>
+                                &times;
+                            </button>
+                        </div>
+                        <div className="custom-modal-body">
+                            <p>Câu chuyện được chia thành nhiều đoạn nhỏ, hiển thị từng đoạn để bạn dễ dàng đọc và hiểu.</p>
+                            <p>
+                                <strong>Các chức năng:</strong>
+                            </p>
+                            <ul>
+                                <li><strong>Tiếp theo:</strong> Nhấn nút <strong>Tiếp theo</strong> để chuyển sang đoạn tiếp theo.</li>
+                                <li><strong>Quay lại:</strong> Nhấn nút <strong>Quay lại</strong> để đọc lại đoạn trước đó.</li>
+                                <li><strong>Dịch nghĩa:</strong> Xem bản dịch tiếng Việt của đoạn hiện tại.</li>
+                                <li><strong>Nghe:</strong> Hệ thống đọc to đoạn hiện tại bằng tiếng Anh.</li>
+                            </ul>
+                            <p><strong>Lưu ý:</strong></p>
+                            <ul>
+                                <li>Đọc kỹ từng đoạn và tận dụng các chức năng.</li>
+                                <li>Sau khi hoàn thành, sẽ hiển thị thông báo "Bạn đã hoàn thành câu chuyện".</li>
+                            </ul>
+                            <p>🎉 Chúc bạn học vui vẻ!</p>
+                        </div>
+                        <div className="custom-modal-footer">
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                        </div>
+                    </div>
+                </div>
+            )}
+            {isLoading && <LoadingScreen />}
+        </>
+    );
 }
 
 export default Story;

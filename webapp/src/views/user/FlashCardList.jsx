@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import FlashCardListCard from "@/components/user/flashcardList/FlashCardListCard.jsx";
 import CreateFlashCardList from "@/components/user/flashcardList/CreateFlashCardList.jsx";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
@@ -105,11 +106,7 @@ const FlashCardList = () => {
                     >
                         <i className="fas fa-plus mr-2"></i>Tạo mới
                     </button>
-                    {isLoading ? (
-                        <div className="spinner-container">
-                            <div className="spinner-loader"></div>
-                        </div>
-                    ) : flashcards.length > 0 ? (
+                    { flashcards.length > 0 ? (
                         <div className="container">
                             <div className="row">
                                 {flashcards.map((flashcardLists) => (
@@ -130,6 +127,7 @@ const FlashCardList = () => {
                     </ul>
                 </nav>
             </div>
+            {isLoading && <LoadingScreen />}
         </div>
     );
 };

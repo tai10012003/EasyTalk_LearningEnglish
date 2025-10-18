@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import PronunciationCard from "@/components/user/pronunciation/PronunciationCard.jsx";
 import { useNavigate } from "react-router-dom";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
@@ -133,11 +134,7 @@ function Pronunciation() {
                 </div>
                 <div className="container">
                     <div className="lesson-list">
-                    {isLoading ? (
-                        <div className="spinner-container">
-                            <div className="spinner-loader"></div>
-                        </div>
-                    ) : pronunciations.length > 0 ? (
+                        { pronunciations.length > 0 ? (
                             <div className="container">
                                 <div className="row">
                                     {pronunciations.map((pronunciation) => (
@@ -192,6 +189,7 @@ function Pronunciation() {
                     </div>
                 </div>
             )}
+            {isLoading && <LoadingScreen />}
         </>
     );
 }

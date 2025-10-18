@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
+import Swal from "sweetalert2";
 
 const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
     const [flipped, setFlipped] = useState(false);
@@ -33,7 +34,12 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
     const handleCheckFill = () => {
         const answer = userAnswer.trim();
         if (!answer) {
-            alert("Vui lòng nhập từ trước khi kiểm tra!");
+            Swal.fire({
+                icon: "warning",
+                title: "Thiếu câu trả lời!",
+                text: "Vui lòng nhập từ trước khi kiểm tra.",
+                confirmButtonText: "OK",
+            });
             return;
         }
         if (answer.toLowerCase() == card.word.toLowerCase()) {
@@ -102,10 +108,8 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
             </div>
         );
     }
-
     if (mode == "choice" && mcQuestion) {
         const { question, choices, correctAnswer } = mcQuestion;
-
         return (
             <div className="flashcard-review-mc">
                 <p>
@@ -136,7 +140,6 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
             </div>
         );
     }
-
     if (mode == "fill") {
         return (
             <div className="flashcard-review-fill">
