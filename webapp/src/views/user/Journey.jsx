@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import AchievementPanel from "@/components/user/AchievementPanel.jsx";
 import JourneyCard from "@/components/user/journey/JourneyCard.jsx";
 import LeaderboardPanel from "@/components/user/LeaderboardPanel.jsx";
@@ -12,6 +13,7 @@ function Journey() {
         completedStages: 0,
     });
     const [leaderboard, setLeaderboard] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
     const dailyTasks = [
         "Hoàn thành 1 chặng",
         "Học từ vựng mới: 5 từ",
@@ -20,18 +22,25 @@ function Journey() {
 
     useEffect(() => {
         document.title = "Hành Trình - EasyTalk";
-        async function loadJourney() {
-            const data = await JourneyService.fetchJourney();
-            if (data) {
-                setJourneys(data.journeys || []);
-                setAchievements({
-                    experiencePoints: data.userProgress?.experiencePoints || 0,
-                    completedGates: data.completedGates || 0,
-                    completedStages: data.completedStages || 0,
-                });
-                setLeaderboard(data.leaderboard || []);
+        const loadJourney = async () => {
+            setIsLoading(true);
+            try {
+                const data = await JourneyService.fetchJourney();
+                if (data) {
+                    setJourneys(data.journeys || []);
+                    setAchievements({
+                        experiencePoints: data.userProgress?.experiencePoints || 0,
+                        completedGates: data.completedGates || 0,
+                        completedStages: data.completedStages || 0,
+                    });
+                    setLeaderboard(data.leaderboard || []);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải hành trình:", error);
+            } finally {
+                setIsLoading(false);
             }
-        }
+        };
         loadJourney();
     }, []);
 
@@ -67,6 +76,7 @@ function Journey() {
                     </div>
                 </div>
             </div>
+            {isLoading && <LoadingScreen />}
         </section>
     );
 }

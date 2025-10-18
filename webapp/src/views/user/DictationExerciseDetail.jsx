@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import DictationControls from "@/components/user/dictationexercise/DictationControls.jsx";
 import DictationComplete from "@/components/user/dictationexercise/DictationComplete.jsx";
 import DictationFullScript from "@/components/user/dictationexercise/DictationFullScript.jsx";
@@ -20,28 +21,30 @@ function DictationExerciseDetail() {
     const [showNext, setShowNext] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [showScript, setShowScript] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         document.title = "Chi tiết bài nghe chép chính tả - EasyTalk";
         async function fetchDictation() {
-        try {
-            const data = await DictationExerciseService.getDictationExerciseById(id);
-            if (data.success) {
-            setTitle(data.data.title);
-
-            const sentencesArr = data.data.content
-                .split(". ")
-                .map((s) => s.trim())
-                .filter((s) => s.length > 0)
-                .map((s) => (s.endsWith(".") ? s : s + "."));
-
-            setSentences(sentencesArr);
-            setFullScript(sentencesArr.join("<br>"));
-            setCurrentIndex(0);
+            setIsLoading(true);
+            try {
+                const data = await DictationExerciseService.getDictationExerciseById(id);
+                if (data.success) {
+                    setTitle(data.data.title);
+                    const sentencesArr = data.data.content
+                        .split(". ")
+                        .map((s) => s.trim())
+                        .filter((s) => s.length > 0)
+                        .map((s) => (s.endsWith(".") ? s : s + "."));
+                    setSentences(sentencesArr);
+                    setFullScript(sentencesArr.join("<br>"));
+                    setCurrentIndex(0);
+                }
+            } catch (err) {
+                console.error("Error fetching dictation:", err);
+            } finally {
+                setIsLoading(false);
             }
-        } catch (err) {
-            console.error("Error fetching dictation:", err);
-        }
         }
         fetchDictation();
     }, [id]);
@@ -50,7 +53,7 @@ function DictationExerciseDetail() {
 
     useEffect(() => {
         if (sentences.length > 0) {
-        playSentence(3, sentences[currentIndex]);
+            playSentence(3, sentences[currentIndex]);
         }
     }, [currentIndex, sentences, playSpeed]);
 
@@ -143,6 +146,8 @@ function DictationExerciseDetail() {
 
     const retryExercise = () => window.location.reload();
     const goBackToList = () => navigate("/dictation-exercise");
+
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <div className="container dictation-container">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { WritingAIService } from "@/services/WritingAIService.jsx";
+import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import WritingAIInput from "@/components/user/writingAI/WritingAIInput.jsx";
 import WritingAIResult from "@/components/user/writingAI/WritingAIResult.jsx";
 
@@ -9,6 +10,7 @@ function WritingAI() {
     const [analysisResult, setAnalysisResult] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         document.title = "Luyện viết với AI - EasyTalk";
@@ -16,12 +18,15 @@ function WritingAI() {
     }, []);
 
     const fetchTopic = async () => {
+        setIsLoading(true);
         try {
             const generatedTopic = await WritingAIService.getRandomTopic();
             setTopic(generatedTopic);
         } catch (err) {
             console.error("Error fetching topic:", err);
             setTopic("Không thể lấy đề bài. Vui lòng thử lại.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
@@ -48,6 +53,8 @@ function WritingAI() {
         setAnalysisResult(null);
         fetchTopic();
     };
+
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import AchievementPanel from "@/components/user/AchievementPanel.jsx";
 import GateCard from "@/components/user/gate/GateCard.jsx";
 import LeaderboardPanel from "@/components/user/LeaderboardPanel.jsx";
@@ -9,15 +10,17 @@ const Gate = () => {
     const [achievements, setAchievements] = useState({});
     const [leaderboard, setLeaderboard] = useState([]);
     const [dailyTasks, setDailyTasks] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         document.title = "Cổng hành trình - EasyTalk";
         const fetchJourneyData = async () => {
+            setIsLoading(true);
             try {
                 const journeyId = window.location.pathname.split("/").pop();
                 const data = await GateService.getGate(journeyId);
                 if (!data || !data.journey) {
-                    console.error("Không tìm thấy journey với id", journeyId);
+                    console.error("Không tìm thấy journey với id:", journeyId);
                     return;
                 }
                 const formattedGates = data.journey.gates.map((gate) => ({
@@ -32,9 +35,9 @@ const Gate = () => {
 
                 setGates(formattedGates);
                 setAchievements({
-                experiencePoints: data.userProgress.experiencePoints,
-                completedGates: data.completedGates,
-                completedStages: data.completedStages,
+                    experiencePoints: data.userProgress.experiencePoints,
+                    completedGates: data.completedGates,
+                    completedStages: data.completedStages,
                 });
                 setLeaderboard(data.leaderboard);
                 setDailyTasks([
@@ -44,6 +47,8 @@ const Gate = () => {
                 ]);
             } catch (error) {
                 console.error("Lỗi khi fetch journey data:", error);
+            } finally {
+                setTimeout(() => setIsLoading(false), 1000); // Tạo cảm giác mượt hơn
             }
         };
         fetchJourneyData();
@@ -64,12 +69,12 @@ const Gate = () => {
                             <GateCard key={gate._id} gate={gate} />
                         ))}
                     </div>
-
                     <div className="col-sm-6 col-lg-3 col-xl-3">
                         <LeaderboardPanel leaderboard={leaderboard} />
                     </div>
                 </div>
             </div>
+            {isLoading && <LoadingScreen />}
         </div>
     );
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { StageService } from "@/services/StageService.jsx";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StageCarousel from "@/components/user/stage/StageCarousel.jsx";
 import StageResultScreen from "@/components/user/stage/StageResultScreen.jsx";
 import StageHistory from "@/components/user/stage/StageHistory.jsx";
@@ -15,13 +16,13 @@ const Stage = () => {
     const [showResult, setShowResult] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
     const [stageTitle, setStageTitle] = useState("");
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         document.title = "Chặng hành trình - EasyTalk";
         const fetchStageData = async () => {
             try {
-                setLoading(true);
+                setIsLoading(true);
                 const data = await StageService.getStage(id);
 
                 if (data && data.stage && data.stage.questions && data.stage.questions.length > 0) {
@@ -42,7 +43,7 @@ const Stage = () => {
             } catch (error) {
                 console.error('Error fetching stage:', error);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
 
@@ -113,15 +114,7 @@ const Stage = () => {
         }
     }, []);
 
-    if (loading) {
-        return (
-            <div className="exercise-container">
-                <div className="exercise-loading">
-                    <p>Đang tải chặng...</p>
-                </div>
-            </div>
-        );
-    }
+    if (isLoading) { return <LoadingScreen />; }
 
     if (questions.length == 0) {
         return (

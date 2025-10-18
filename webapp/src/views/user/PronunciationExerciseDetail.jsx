@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import PronunciationExerciseSidebar from "@/components/user/pronunciationexercise/PronunciationExerciseSidebar.jsx";
 import PronunciationExerciseCarousel from "@/components/user/pronunciationexercise/PronunciationExerciseCarousel.jsx";
 import PronunciationExerciseResultScreen from "@/components/user/pronunciationexercise/PronunciationExerciseResultScreen.jsx";
@@ -19,16 +20,15 @@ const PronunciationExerciseDetail = () => {
     const [showResult, setShowResult] = useState(false);
     const [exerciseTitle, setExerciseTitle] = useState("");
     const [timer, setTimer] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
 
     useEffect(() => {
         document.title = "Chi tiết luyện tập phát âm - EasyTalk";
         const fetchExerciseData = async () => {
             try {
-                setLoading(true);
+                setIsLoading(true);
                 const data = await PronunciationExerciseService.getPronunciationExerciseById(id);
-                
                 if (data && data.questions && data.questions.length > 0) {
                     setQuestions(data.questions);
                     setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
@@ -47,10 +47,9 @@ const PronunciationExerciseDetail = () => {
             } catch (error) {
                 console.error('Error fetching exercise:', error);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
-
         if (id) {
             fetchExerciseData();
         }
@@ -68,9 +67,7 @@ const PronunciationExerciseDetail = () => {
                     return prev - 1;
                 });
             }, 1000);
-
             setTimer(timerInterval);
-
             return () => {
                 if (timerInterval) {
                     clearInterval(timerInterval);
@@ -96,7 +93,6 @@ const PronunciationExerciseDetail = () => {
             };
             return newResults;
         });
-
         if (isCorrect) {
             setCorrectAnswers(prev => prev + 1);
         }
@@ -130,7 +126,6 @@ const PronunciationExerciseDetail = () => {
         setShowHistory(false);
         setShowResult(false);
         setHasStarted(false);
-
         const resetResults = questions.map(question => ({
             question: question.question,
             userAnswer: "Chưa trả lời",
@@ -152,17 +147,9 @@ const PronunciationExerciseDetail = () => {
         }
     }, []);
 
-    if (loading) {
-        return (
-            <div className="exercise-container">
-                <div className="exercise-loading">
-                    <p>Đang tải bài tập...</p>
-                </div>
-            </div>
-        );
-    }
+    if (isLoading) { return <LoadingScreen />; }
 
-    if (questions.length === 0) {
+    if (questions.length == 0) {
         return (
             <div className="exercise-container">
                 <div className="exercise-no-questions">

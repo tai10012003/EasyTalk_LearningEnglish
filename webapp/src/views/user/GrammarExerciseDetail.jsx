@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
+import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarExerciseSidebar from "@/components/user/grammarexercise/GrammarExerciseSidebar.jsx";
 import GrammarExerciseCarousel from "@/components/user/grammarexercise/GrammarExerciseCarousel.jsx";
 import GrammarExerciseResultScreen from "@/components/user/grammarexercise/GrammarExerciseResultScreen.jsx";
@@ -19,16 +20,15 @@ const GrammarExerciseDetail = () => {
     const [showResult, setShowResult] = useState(false);
     const [exerciseTitle, setExerciseTitle] = useState("");
     const [timer, setTimer] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
 
     useEffect(() => {
         document.title = "Chi tiết luyện tập ngữ pháp - EasyTalk";
         const fetchExerciseData = async () => {
             try {
-                setLoading(true);
+                setIsLoading(true);
                 const data = await GrammarExerciseService.getGrammarExerciseById(id);
-                
                 if (data && data.questions && data.questions.length > 0) {
                     setQuestions(data.questions);
                     setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
@@ -47,10 +47,9 @@ const GrammarExerciseDetail = () => {
             } catch (error) {
                 console.error('Error fetching exercise:', error);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         };
-
         if (id) {
             fetchExerciseData();
         }
@@ -68,9 +67,7 @@ const GrammarExerciseDetail = () => {
                     return prev - 1;
                 });
             }, 1000);
-
             setTimer(timerInterval);
-
             return () => {
                 if (timerInterval) {
                     clearInterval(timerInterval);
@@ -95,7 +92,6 @@ const GrammarExerciseDetail = () => {
             };
             return newResults;
         });
-
         if (isCorrect) {
             setCorrectAnswers(prev => prev + 1);
         }
@@ -129,7 +125,6 @@ const GrammarExerciseDetail = () => {
         setShowHistory(false);
         setShowResult(false);
         setHasStarted(false);
-
         const resetResults = questions.map(question => ({
             question: question.question,
             userAnswer: "Chưa trả lời",
@@ -151,17 +146,9 @@ const GrammarExerciseDetail = () => {
         }
     }, []);
 
-    if (loading) {
-        return (
-            <div className="exercise-container">
-                <div className="exercise-loading">
-                    <p>Đang tải bài tập...</p>
-                </div>
-            </div>
-        );
-    }
+    if (isLoading) { return <LoadingScreen />; }
 
-    if (questions.length === 0) {
+    if (questions.length == 0) {
         return (
             <div className="exercise-container">
                 <div className="exercise-no-questions">
