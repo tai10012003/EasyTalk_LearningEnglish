@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import ChatAIMessage from "@/components/user/chatAI/ChatAIMessage.jsx";
 import ChatAIInput from "@/components/user/chatAI/ChatAIInput.jsx";
 import { ChatAIService } from "@/services/ChatAIService.jsx";
@@ -12,6 +13,7 @@ function ChatAI() {
     const [lastBotText, setLastBotText] = useState("");
     const [speakingWordIndex, setSpeakingWordIndex] = useState(null);
     const [isFirstMessage, setIsFirstMessage] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         document.title = "Giao tiếp với AI - EasyTalk";
@@ -25,6 +27,8 @@ function ChatAI() {
                 setIsFirstMessage(false);
             } catch (err) {
                 console.error("Error starting conversation:", err);
+            } finally {
+                setIsLoading(false);
             }
         };
         startConversation();
@@ -88,7 +92,7 @@ function ChatAI() {
 
             setMessages((prev) => [
                 ...prev,
-                { sender: "bot", text: data.response || "...", suggestion: data.suggestion }
+                { sender: "bot", text: data.response || "...", suggestion: data.suggestion },
             ]);
             setLastBotText(data.response || "...");
         } catch (error) {
@@ -100,6 +104,8 @@ function ChatAI() {
             setIsSending(false);
         }
     };
+
+    if (isLoading) return <LoadingScreen />;
 
     return (
         <>
