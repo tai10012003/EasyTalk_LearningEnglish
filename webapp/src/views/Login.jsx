@@ -14,6 +14,7 @@ function Login() {
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
     const token = query.get("token");
+    const refreshToken = query.get("refreshToken");
     const role = query.get("role");
     const error = query.get("error");
     const provider = query.get("provider");
@@ -26,6 +27,10 @@ function Login() {
     if (token) {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
+      if (refreshToken) {
+        localStorage.setItem("refreshToken", refreshToken);
+      }
+      AuthService.startTokenRefreshTimer();
       const providerName = provider == "facebook" ? "Facebook" : "Google";
       toast.success(`Đăng nhập ${providerName} thành công!`);
       setTimeout(() => {
@@ -37,10 +42,6 @@ function Login() {
   const handleLogin = async (email, password) => {
     try {
       const data = await AuthService.login(email, password);
-      // console.log("Login response:", data);
-      // console.log("Token nhận được:", data.token);
-      localStorage.setItem("token", data.token);
-      localStorage.setItem("role", data.role);
       toast.success("Đăng nhập thành công !!");
       setTimeout(() => {
         window.location.href = data.role == "admin" ? "/admin/dashboard" : "/";

@@ -1,20 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL;
-
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
 
 export const GateService = {
     async getGate(gateId) {
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                throw new Error("Không tìm thấy token trong localStorage");
-            }
-            const res = await fetch(`${API_URL}/journey/api/gate/${gateId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api/gate/${gateId}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                }
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
@@ -46,13 +38,8 @@ export const GateService = {
 
     async fetchGate(page = 1, limit = 12) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/gate/api/gate-list?page=${page}&limit=${limit}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/gate/api/gate-list?page=${page}&limit=${limit}`, {
                 method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                    "Content-Type": "application/json",
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();
@@ -68,13 +55,8 @@ export const GateService = {
 
     async addGate(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/gate/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/gate/add`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
                 body: JSON.stringify(formData)
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -87,13 +69,8 @@ export const GateService = {
 
     async updateGate(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/gate/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/gate/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
                 body: JSON.stringify(formData)
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -106,12 +83,8 @@ export const GateService = {
 
     async deleteGate(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/gate/delete/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/gate/delete/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

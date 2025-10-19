@@ -1,16 +1,14 @@
 const API_URL = import.meta.env.VITE_API_URL;
-
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
+
 export const DictationExerciseService = {
     async fetchDictationExercise(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/dictation-exercise/api/dictation-exercises${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
 
             if (!res.ok) {
@@ -48,13 +46,8 @@ export const DictationExerciseService = {
 
     async addDictationExercise(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/dictation-exercise/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/add`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -67,13 +60,8 @@ export const DictationExerciseService = {
 
     async updateDictationExercise(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/dictation-exercise/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -86,12 +74,8 @@ export const DictationExerciseService = {
 
     async deleteDictationExercise(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/dictation-exercise/delete/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/delete/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

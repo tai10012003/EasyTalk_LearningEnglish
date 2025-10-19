@@ -1,6 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
-
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
+
 export const VocabularyExerciseService = {
     async fetchVocabularyExercise(page = 1, limit = 12, filters = {}) {
         try {
@@ -12,7 +13,6 @@ export const VocabularyExerciseService = {
                     'Content-Type': 'application/json',
                 },
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
@@ -48,13 +48,8 @@ export const VocabularyExerciseService = {
 
     async addVocabularyExercise(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/vocabulary-exercise/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/add`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -67,13 +62,8 @@ export const VocabularyExerciseService = {
 
     async updateVocabularyExercise(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/vocabulary-exercise/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -86,12 +76,8 @@ export const VocabularyExerciseService = {
 
     async deleteVocabularyExercise(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/vocabulary-exercise/delete/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/delete/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

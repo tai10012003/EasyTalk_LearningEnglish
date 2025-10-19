@@ -51,7 +51,7 @@ function GrammarExercise() {
         for (let i = 1; i <= totalPages; i++) {
             pages.push(
                 <li
-                    className={`page-item ${i === currentPage ? "active" : ""}`}
+                    className={`page-item ${i == currentPage ? "active" : ""}`}
                     key={i}
                 >
                     <button className="page-link" onClick={() => setCurrentPage(i)}>

@@ -1,3 +1,4 @@
+import { AuthService } from './AuthService.jsx';
 const API_URL = import.meta.env.VITE_API_URL;
 
 let hasShownAlert = false;
@@ -6,13 +7,8 @@ export const GrammarService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/grammar-list${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar-list${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
             });
 
             if (!res.ok) {
@@ -34,13 +30,8 @@ export const GrammarService = {
 
     async getGrammarById(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/grammar/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "GET",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
@@ -51,19 +42,10 @@ export const GrammarService = {
         }
     },
 
-    resetAlertFlag() {
-        hasShownAlert = false;
-    },
-
     async getGrammarDetail(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/grammar/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "GET",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token || ""}`,
-                },
             });
 
             if (!res.ok) {
@@ -80,13 +62,8 @@ export const GrammarService = {
 
     async completeGrammar(grammarId) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/grammar/complete/${grammarId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/complete/${grammarId}`, {
                 method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token || ""}`,
-                },
             });
 
             if (!res.ok) {
@@ -94,7 +71,6 @@ export const GrammarService = {
                 err.status = res.status;
                 throw err;
             }
-
             const data = await res.json();
             return data;
         } catch (error) {
@@ -140,12 +116,8 @@ export const GrammarService = {
 
     async deleteGrammar(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/grammar/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();
@@ -153,5 +125,9 @@ export const GrammarService = {
             console.error("Error deleting grammar:", err);
             throw err;
         }
+    },
+
+    resetAlertFlag() {
+        hasShownAlert = false;
     }
 };

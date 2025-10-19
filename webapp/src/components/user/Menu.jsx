@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { UserProgressService } from '@/services/UserProgressService.jsx';
+import { AuthService } from '@/services/AuthService.jsx';
 import logo from '@/assets/images/logo.png';
 
 const parseJwt = (token) => {
@@ -10,6 +11,11 @@ const parseJwt = (token) => {
   } catch (e) {
     return null;
   }
+};
+const isTokenExpired = (token) => {
+  const decoded = parseJwt(token);
+  if (!decoded || !decoded.exp) return true;
+  return decoded.exp * 1000 < Date.now();
 };
 
 function Menu() {
@@ -44,29 +50,49 @@ function Menu() {
   const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      const decoded = parseJwt(token);
-      if (decoded && decoded.username) {
-        setIsLoggedIn(true);
-        setUsername(decoded.username);
-        UserProgressService.getUserStreak()
-          .then((data) => {
-            setStreakData({
-              streak: data.streak || 0,
-            });
-          })
-          .catch((err) => console.error("Error fetching streak:", err));
-        UserProgressService.getUserExperiencePoints()
-          .then((data) => {
-            setLeaderData({
-              experiencePoints: data.experiencePoints || 0,
-            });
-          })
-          .catch((err) => console.error("Error fetching experience points:", err));
+    const checkAndRefreshToken = async () => {
+      const token = localStorage.getItem("token");
+      const refreshToken = localStorage.getItem("refreshToken");
+      if (token && refreshToken) {
+        if (isTokenExpired(token)) {
+          try {
+            await AuthService.refreshToken();
+            console.log("✅ Token đã được refresh khi load menu");
+          } catch (error) {
+            console.error("❌ Không thể refresh token:", error);
+            handleLogoutSilent();
+            return;
+          }
+        }
+        const currentToken = localStorage.getItem("token");
+        const decoded = parseJwt(currentToken);
+        if (decoded && decoded.username) {
+          setIsLoggedIn(true);
+          setUsername(decoded.username);
+          AuthService.startTokenRefreshTimer();
+          fetchUserData();
+        }
       }
-    }
+    };
+
+    checkAndRefreshToken();
   }, []);
+  const fetchUserData = () => {
+    UserProgressService.getUserStreak()
+      .then((data) => {
+        setStreakData({
+          streak: data.streak || 0,
+        });
+      })
+      .catch((err) => console.error("Error fetching streak:", err));
+    UserProgressService.getUserExperiencePoints()
+      .then((data) => {
+        setLeaderData({
+          experiencePoints: data.experiencePoints || 0,
+        });
+      })
+      .catch((err) => console.error("Error fetching experience points:", err));
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,9 +112,6 @@ function Menu() {
       cancelButtonText: 'Hủy',
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem("token");
-        setIsLoggedIn(false);
-        setUsername('User');
         Swal.fire({
           icon: 'success',
           title: 'Đã đăng xuất!',
@@ -96,10 +119,13 @@ function Menu() {
           timer: 1500,
           showConfirmButton: false,
         }).then(() => {
-          window.location.href = "/";
+          AuthService.logout();
         });
       }
     });
+  };
+  const handleLogoutSilent = async () => {
+    await AuthService.logout();
   };
 
   const toggleMenu = () => {
@@ -396,7 +422,8 @@ function Menu() {
                           <a
                             className="dropdown-item"
                             href="#"
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault();
                               handleLogout();
                               handleLinkClick();
                             }}

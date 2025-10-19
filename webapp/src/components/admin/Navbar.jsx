@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { AuthService } from '@/services/AuthService.jsx';
 import Swal from 'sweetalert2';
 
 const parseJwt = (token) => {
@@ -10,22 +11,44 @@ const parseJwt = (token) => {
     }
 };
 
+const isTokenExpired = (token) => {
+  const decoded = parseJwt(token);
+  if (!decoded || !decoded.exp) return true;
+  return decoded.exp * 1000 < Date.now();
+};
+
 function Navbar() {
     const [username, setUsername] = useState("Admin");
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (token) {
-            const decoded = parseJwt(token);
-            if (decoded && decoded.username) {
-                setUsername(decoded.username);
-            } else if (decoded && decoded.name) {
-                setUsername(decoded.name);
-            } else if (decoded && decoded.email) {
-                setUsername(decoded.email);
+        const checkAndRefreshToken = async () => {
+          const token = localStorage.getItem("token");
+          const refreshToken = localStorage.getItem("refreshToken");
+          if (token && refreshToken) {
+            if (isTokenExpired(token)) {
+              try {
+                await AuthService.refreshToken();
+                console.log("✅ Token đã được refresh khi load menu");
+              } catch (error) {
+                console.error("❌ Không thể refresh token:", error);
+                handleLogoutSilent();
+                return;
+              }
             }
-        }
+            const currentToken = localStorage.getItem("token");
+            const decoded = parseJwt(currentToken);
+            if (decoded && decoded.username) {
+              setUsername(decoded.username);
+              AuthService.startTokenRefreshTimer();
+            }
+          }
+        };
+        checkAndRefreshToken();
     }, []);
-    
+
+    const handleLogoutSilent = async () => {
+        await AuthService.logout();
+    };
+
     const notifications = [
         "Người dùng mới đăng ký",
         "Bài học mới được thêm",
@@ -43,7 +66,6 @@ function Navbar() {
             cancelButtonText: 'Hủy',
         }).then((result) => {
             if (result.isConfirmed) {
-                localStorage.removeItem("token");
                 Swal.fire({
                     icon: 'success',
                     title: 'Đã đăng xuất!',
@@ -51,7 +73,7 @@ function Navbar() {
                     timer: 1500,
                     showConfirmButton: false
                 }).then(() => {
-                    window.location.href = "/login";
+                   AuthService.logout();
                 });
             }
         });

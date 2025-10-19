@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateDictation from "../../../components/admin/dictation/UpdateDictation";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const UpdateDictationExercise = () => {
@@ -11,9 +12,8 @@ const UpdateDictationExercise = () => {
     useEffect(() => {
         const fetchDictationExercise = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/dictation-exercise/api/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/dictation-exercise/api/${id}`, {
+                    method: "GET",
                 });
                 const data = await res.json();
                 setDictationExercise(data);

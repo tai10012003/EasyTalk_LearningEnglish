@@ -19,7 +19,7 @@ class VocabularyExercise {
         newQuestion.type = type;
         newQuestion.correctAnswer = correctAnswer;
         newQuestion.explanation = explanation;
-        newQuestion.options = type === 'multiple-choice' ? options : [];
+        newQuestion.options = type == 'multiple-choice' ? options : [];
         this.questions.push(newQuestion);
     }
     constructor() {

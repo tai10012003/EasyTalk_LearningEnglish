@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateStage from "../../../components/admin/stage/UpdateStage";
 import { StageService } from "@/services/StageService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const UpdateStagePage = () => {
@@ -11,11 +12,8 @@ const UpdateStagePage = () => {
     useEffect(() => {
         const fetchStage = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/stage/api/${id}`, {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    },
+                const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/stage/api/${id}`, {
+                    method: "GET",
                 });
                 const data = await res.json();
                 setStage(data.stage);

@@ -1,20 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL;
-
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
 
 export const StageService = {
     async getStage(stageId) {
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                throw new Error("Không tìm thấy token trong localStorage");
-            }
-            const res = await fetch(`${API_URL}/stage/api/stage/detail/${stageId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stage/detail/${stageId}`, {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
@@ -47,16 +39,8 @@ export const StageService = {
 
     async completeStage(stageId) {
         try {
-            const token = localStorage.getItem("token");
-            if (!token) {
-                throw new Error("Không tìm thấy token trong localStorage");
-            }
-            const res = await fetch(`${API_URL}/stage/api/stage/complete/${stageId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stage/complete/${stageId}`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
@@ -104,13 +88,8 @@ export const StageService = {
 
     async addStage(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/stage/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/add`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -123,13 +102,8 @@ export const StageService = {
 
     async updateStage(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/stage/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -142,12 +116,8 @@ export const StageService = {
 
     async deleteStage(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/stage/delete/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/delete/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

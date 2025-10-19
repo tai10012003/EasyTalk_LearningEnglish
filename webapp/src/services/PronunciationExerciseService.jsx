@@ -1,6 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
-
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
+
 export const PronunciationExerciseService = {
     async fetchPronunciationExercise(page = 1, limit = 12, filters = {}) {
         try {
@@ -67,13 +68,8 @@ export const PronunciationExerciseService = {
 
     async addPronunciationExercise(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation-exercise/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/add`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -86,13 +82,8 @@ export const PronunciationExerciseService = {
 
     async updatePronunciationExercise(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation-exercise/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -105,12 +96,8 @@ export const PronunciationExerciseService = {
 
     async deletePronunciationExercise(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation-exercise/delete/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/delete/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateLesson from "../../../components/admin/lesson/UpdateLesson";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const UpdatePronunciation = () => {
@@ -11,9 +12,8 @@ const UpdatePronunciation = () => {
     useEffect(() => {
         const fetchPronunciation = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/pronunciation/api/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/pronunciation/api/${id}`, {
+                    method: "GET",
                 });
                 const data = await res.json();
                 setPronunciation(data);

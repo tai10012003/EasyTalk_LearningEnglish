@@ -1,16 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL;
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
 
 export const WritingAIService = {
     async getRandomTopic() {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/writing/api/writing/random-topic`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/writing/api/writing/random-topic`, {
                 method: "GET",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) {
                 const errorData = await res.json();
@@ -34,13 +30,8 @@ export const WritingAIService = {
             if (!userText || userText.trim() == "") {
                 throw new Error("Vui lòng nhập bài viết của bạn.");
             }
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/writing/api/analyze`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/writing/api/analyze`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify({ text: userText }),
             });
             if (!res.ok) {

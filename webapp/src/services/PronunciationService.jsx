@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
+import { AuthService } from './AuthService.jsx';
 
 let hasShownAlert = false;
 export const PronunciationService = {
@@ -6,13 +7,8 @@ export const PronunciationService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation-list${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation-list${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
             });
 
             if (!res.ok) {
@@ -34,13 +30,8 @@ export const PronunciationService = {
 
     async getPronunciationById(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
                 method: "GET",
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
@@ -57,15 +48,9 @@ export const PronunciationService = {
 
     async getPronunciationDetail(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
                 method: "GET",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token || ""}`,
-                },
             });
-
             if (!res.ok) {
                 const err = new Error(`HTTP error! Status: ${res.status}`);
                 err.status = res.status;
@@ -80,15 +65,9 @@ export const PronunciationService = {
 
     async completePronunciation(pronunciationId) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
                 method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token || ""}`,
-                },
             });
-
             if (!res.ok) {
                 const err = new Error(`HTTP error! Status: ${res.status}`);
                 err.status = res.status;
@@ -140,12 +119,8 @@ export const PronunciationService = {
 
     async deletePronunciation(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

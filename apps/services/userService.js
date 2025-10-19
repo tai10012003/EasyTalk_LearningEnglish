@@ -10,6 +10,7 @@ class UserService {
     constructor() {
         this.userRepository = new UserRepository();
         this.verificationCodes = {};
+        this.refreshTokens = new Map();
         this.transporter = nodemailer.createTransport({
             service: "gmail",
             auth: { user: config.email.user, pass: config.email.pass },
@@ -57,6 +58,14 @@ class UserService {
         return { message: "Đăng ký thành công !!" };
     }
 
+    generateAccessToken(user) {
+        return jwt.sign({ id: user._id, role: user.role, username: user.username }, config.jwt.secret, { expiresIn: "15m" });
+    }
+
+    generateRefreshToken(user) {
+        return jwt.sign({  id: user._id, type: "refresh" }, config.jwt.secret, { expiresIn: "7d" });
+    }
+
     async login(email, password) {
         const user = await this.userRepository.findByEmail(email);
         if (!user)
@@ -66,12 +75,10 @@ class UserService {
             throw new Error("Email đăng nhập hoặc mật khẩu không đúng !!");
         if (user.active == "locked")
             throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!");
-        const token = jwt.sign(
-            { id: user._id, role: user.role, username: user.username },
-            config.jwt.secret,
-            { expiresIn: "1h" }
-        );
-        return { token, role: user.role };
+        const accessToken = this.generateAccessToken(user);
+        const refreshToken = this.generateRefreshToken(user);
+        this.refreshTokens.set(refreshToken, user._id.toString());
+        return { token: accessToken, refreshToken: refreshToken, role: user.role };
     }
 
     async loginWithGoogle(code) {
@@ -111,12 +118,10 @@ class UserService {
         if (user.active == "locked") {
             throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ!");
         }
-        const token = jwt.sign(
-            { id: user._id, username: user.username, email: user.email, role: user.role },
-            config.jwt.secret,
-            { expiresIn: "1h" }
-        );
-        return { token, role: user.role };
+        const accessToken = this.generateAccessToken(user);
+        const refreshToken = this.generateRefreshToken(user);
+        this.refreshTokens.set(refreshToken, user._id.toString());
+        return { token: accessToken, refreshToken: refreshToken, role: user.role };
     }
 
     async loginWithFacebook(code) {
@@ -160,12 +165,45 @@ class UserService {
         if (user.active == "locked") {
             throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ!");
         }
-        const token = jwt.sign(
-            { id: user._id, username: user.username, email: user.email, role: user.role },
-            config.jwt.secret,
-            { expiresIn: "1h" }
-        );
-        return { token, role: user.role };
+        const newAccessToken = this.generateAccessToken(user);
+        const newRefreshToken = this.generateRefreshToken(user);
+        this.refreshTokens.set(newRefreshToken, user._id.toString());
+        return { token: newAccessToken, refreshToken: newRefreshToken, role: user.role };
+    }
+
+    async refreshAccessToken(refreshToken) {
+        if (!refreshToken) {
+            throw new Error("Refresh token không tồn tại");
+        }
+        if (!this.refreshTokens.has(refreshToken)) {
+            throw new Error("Refresh token không hợp lệ");
+        }
+        try {
+            const decoded = jwt.verify(refreshToken, config.jwt.secret);
+            if (decoded.type !== "refresh") {
+                throw new Error("Token không phải refresh token");
+            }
+            const user = await this.userRepository.findById(decoded.id);
+            if (!user) throw new Error("User không tồn tại");
+            if (user.active == "locked") {
+                throw new Error("Tài khoản đã bị khóa");
+            }
+            const newAccessToken = this.generateAccessToken(user);
+            return { 
+                token: newAccessToken,
+                role: user.role 
+            };
+        } catch (error) {
+        this.refreshTokens.delete(refreshToken);
+            throw new Error("Refresh token hết hạn hoặc không hợp lệ");
+        }
+    }
+
+    async logout(refreshToken) {
+        if (refreshToken) {
+            this.refreshTokens.delete(refreshToken);
+        }
+        return { message: "Đăng xuất thành công" };
     }
 
     async changePassword(userId, currentPassword, newPassword, confirmNewPassword) {

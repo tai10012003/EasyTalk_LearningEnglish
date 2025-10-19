@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateStory from "../../../components/admin/story/UpdateStory";
 import { StoryService } from "@/services/StoryService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const UpdateStoryPage = () => {
@@ -11,9 +12,8 @@ const UpdateStoryPage = () => {
     useEffect(() => {
         const fetchStory = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/story/api/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/story/api/${id}`, {
+                    method: "GET",
                 });
                 const data = await res.json();
                 setStory(data);

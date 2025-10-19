@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
+import { AuthService } from './AuthService.jsx';
 
 let hasShownAlert = false;
 export const UserService = {
@@ -48,13 +49,8 @@ export const UserService = {
 
     async addUser(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/user/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/user/add`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -67,13 +63,8 @@ export const UserService = {
 
     async updateUser(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/user/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/user/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -86,12 +77,8 @@ export const UserService = {
 
     async deleteUser(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/user/delete/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/user/delete/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

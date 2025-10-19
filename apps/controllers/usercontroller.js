@@ -38,8 +38,8 @@ router.get("/auth/google/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực");
   try {
-    const { token, role } = await userService.loginWithGoogle(code);
-    const redirectUrl = `http://localhost:5173/login?token=${token}&role=${role}&provider=google`;
+    const { token, refreshToken, role } = await userService.loginWithGoogle(code);
+    const redirectUrl = `http://localhost:5173/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=google`;
     res.redirect(redirectUrl);
   } catch (error) {
     res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
@@ -54,12 +54,32 @@ router.get("/auth/facebook/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực từ Facebook");
   try {
-    const { token, role } = await userService.loginWithFacebook(code);
-    const redirectUrl = `http://localhost:5173/login?token=${token}&role=${role}&provider=facebook`;
+    const { token, refreshToken, role } = await userService.loginWithFacebook(code);
+    const redirectUrl = `http://localhost:5173/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=facebook`;
     res.redirect(redirectUrl);
   } catch (error) {
     console.error("Facebook login error:", error);
     res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
+  }
+});
+
+router.post("/refresh-token", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    const result = await userService.refreshAccessToken(refreshToken);
+    res.json(result);
+  } catch (error) {
+    res.status(401).json({ message: error.message });
+  }
+});
+
+router.post("/logout", async (req, res) => {
+  try {
+    const { refreshToken } = req.body;
+    const result = await userService.logout(refreshToken);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 });
 

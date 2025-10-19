@@ -18,7 +18,7 @@ const GrammarExerciseHistory = ({ show, onClose, questionResults }) => {
                 
                 <div className="custom-modal-body">
                     <div id="exercise-historyContent">
-                        {questionResults.length === 0 ? (
+                        {questionResults.length == 0 ? (
                             <p>Không có dữ liệu lịch sử.</p>
                         ) : (
                             questionResults.map((result, index) => (

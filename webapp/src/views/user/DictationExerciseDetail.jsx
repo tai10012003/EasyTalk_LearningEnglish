@@ -85,7 +85,7 @@ function DictationExerciseDetail() {
         let matchIndex = 0;
         let correctSoFar = "";
         while (matchIndex < userWords.length && matchIndex < correctWords.length) {
-            if (userWords[matchIndex] === correctWords[matchIndex]) {
+            if (userWords[matchIndex] == correctWords[matchIndex]) {
                 correctSoFar += correctWords[matchIndex] + " ";
             } else {
                 break;
@@ -100,7 +100,7 @@ function DictationExerciseDetail() {
             maskedSentence += "*** ";
         }
         setCurrentSentenceDisplay(maskedSentence.trim());
-        if (userWords.join(" ") === correctSentence) {
+        if (userWords.join(" ") == correctSentence) {
             setResult(
                 <p style={{ color: "green" }}>
                     Câu chính xác: {sentences[currentIndex]}

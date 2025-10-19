@@ -1,4 +1,5 @@
 const API_URL = import.meta.env.VITE_API_URL;
+import { AuthService } from './AuthService.jsx';
 
 let hasShownAlert = false;
 export const StoryService = {
@@ -8,15 +9,9 @@ export const StoryService = {
             if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;
             if (filters.level) query += `&level=${encodeURIComponent(filters.level)}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/story-list${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story-list${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
@@ -36,15 +31,9 @@ export const StoryService = {
 
     async getStoryById(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/story/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
                 method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                    'Authorization': `Bearer ${token}`,
-                },
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
@@ -63,15 +52,9 @@ export const StoryService = {
 
     async getStoryDetail(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/story/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
                 method: "GET",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token || ""}`,
-                },
             });
-
             if (!res.ok) {
                 const err = new Error(`HTTP error! Status: ${res.status}`);
                 err.status = res.status;
@@ -86,21 +69,14 @@ export const StoryService = {
 
     async completeStory(storyId) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/story/complete/${storyId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/complete/${storyId}`, {
                 method: "POST",
-                headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token || ""}`,
-                },
             });
-
             if (!res.ok) {
                 const err = new Error(`HTTP error! Status: ${res.status}`);
                 err.status = res.status;
                 throw err;
             }
-
             const data = await res.json();
             return data;
         } catch (error) {
@@ -146,12 +122,8 @@ export const StoryService = {
 
     async deleteStory(id) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/story/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             return await res.json();

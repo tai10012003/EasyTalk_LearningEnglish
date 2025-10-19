@@ -1,16 +1,12 @@
 const API_URL = import.meta.env.VITE_API_URL;
+import { AuthService } from './AuthService.jsx';
 let hasShownAlert = false;
 
 export const ChatAIService = {
     async sendMessage(message, topic = null, step = null) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/chat/api/chat`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/chat/api/chat`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    'Authorization': `Bearer ${token}`,
-                },
                 body: JSON.stringify({ message, sessionTopic: topic, step }),
             });
             if (!res.ok) {
@@ -32,13 +28,8 @@ export const ChatAIService = {
     },
 
     async startConversation() {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${API_URL}/chat/api/chat/start`, {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/chat/api/chat/start`, {
             method: "GET",
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`,
-            },
         });
         if (!res.ok) throw new Error("Failed to start conversation");
         return await res.json();

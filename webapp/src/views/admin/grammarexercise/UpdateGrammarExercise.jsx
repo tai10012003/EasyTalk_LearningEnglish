@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import UpdateExercise from "../../../components/admin/exercise/UpdateExercise";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const UpdateGrammarExercise = () => {
@@ -11,9 +12,8 @@ const UpdateGrammarExercise = () => {
     useEffect(() => {
         const fetchGrammarExercise = async () => {
             try {
-                const token = localStorage.getItem("token");
-                const res = await fetch(`${import.meta.env.VITE_API_URL}/grammar-exercise/api/${id}`, {
-                    headers: { Authorization: `Bearer ${token}` },
+                const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/grammar-exercise/api/${id}`, {
+                    method: "GET",
                 });
                 const data = await res.json();
                 setGrammarExercise(data);

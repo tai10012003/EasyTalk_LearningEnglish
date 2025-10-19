@@ -4,7 +4,7 @@ class GrammarQuestion {
         this.type = type;
         this.correctAnswer = correctAnswer;
         this.explanation = explanation;
-        this.options = type === "multiple-choice" ? options : [];
+        this.options = type == "multiple-choice" ? options : [];
     }
 }
 
