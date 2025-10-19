@@ -134,6 +134,7 @@ export const AuthService = {
 
     async logout() {
         const refreshToken = localStorage.getItem("refreshToken");
+        const role = localStorage.getItem("role");
         try {
             if (refreshToken) {
                 await fetch(`${API_URL}/user/logout`, {
@@ -151,7 +152,11 @@ export const AuthService = {
             if (this.refreshTimer) {
                 clearInterval(this.refreshTimer);
             }
-            window.location.href = "/login";
+            if (role == "admin") {
+                window.location.href = "/login";
+            } else {
+                window.location.href = "/";
+            }
         }
     },
 
