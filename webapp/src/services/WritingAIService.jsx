@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
+import Swal from "sweetalert2";
 let hasShownAlert = false;
 
 export const WritingAIService = {
@@ -19,7 +20,11 @@ export const WritingAIService = {
             console.error("Error fetching random topic:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                window.alert("Không thể kết nối đến server. Vui lòng kiểm tra server backend.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
             throw error;
         }
@@ -45,7 +50,11 @@ export const WritingAIService = {
             console.error("Error analyzing writing:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                window.alert("Không thể kết nối đến server. Vui lòng kiểm tra server backend.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
             throw error;
         }

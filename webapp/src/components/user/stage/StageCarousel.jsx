@@ -1,4 +1,5 @@
 import React, { useState, useCallback } from 'react';
+import Swal from "sweetalert2";
 
 const StageCarousel = ({
     questions,
@@ -24,7 +25,11 @@ const StageCarousel = ({
     const handleSubmitAnswer = useCallback(() => {
         const userAnswer = userAnswers[currentQuestionIndex];
         if (!userAnswer || userAnswer.trim() == '') {
-            alert("Vui lòng chọn/nhập câu trả lời !!");
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Vui lòng chọn/nhập câu trả lời !!"
+            });
             return;
         }
 

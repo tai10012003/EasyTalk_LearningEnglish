@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { GateService } from "@/services/GateService";
+import Swal from "sweetalert2";
 
 const AddStage = ({ onSubmit, title, returnUrl }) => {
     const navigate = useNavigate();
@@ -34,7 +35,11 @@ const AddStage = ({ onSubmit, title, returnUrl }) => {
 
     const handleAddQuestion = () => {
         if (!formData.type) {
-            alert("Vui lòng chọn loại bài tập trước!");
+            Swal.fire({
+                icon: "warning",
+                title: "Thiếu thông tin",
+                text: "Vui lòng chọn loại bài tập trước khi thêm!",
+            });
             return;
         }
         const newQuestion = {
@@ -50,14 +55,28 @@ const AddStage = ({ onSubmit, title, returnUrl }) => {
         }));
     };
 
-    const handleDeleteQuestion = (index) => {
-        const confirmDelete = window.confirm("Bạn có chắc chắn muốn xóa câu hỏi này không?");
-        if (!confirmDelete) return;
+    const handleDeleteQuestion = async (index) => {
+        const confirmDelete = await Swal.fire({
+            title: "Xác nhận xóa?",
+            text: "Bạn có chắc chắn muốn xóa câu hỏi này không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
+        });
+        if (!confirmDelete.isConfirmed) return;
         const updatedQuestions = formData.questions.filter((_, i) => i !== index);
         setFormData((prev) => ({
             ...prev,
             questions: updatedQuestions,
         }));
+        Swal.fire({
+            icon: "success",
+            title: "Đã xóa!",
+            text: "Câu hỏi đã được xóa thành công.",
+            timer: 1500,
+            showConfirmButton: false,
+        });
     };
 
     const handleQuestionChange = (index, field, value) => {
@@ -94,7 +113,11 @@ const AddStage = ({ onSubmit, title, returnUrl }) => {
             if (q.type == "multiple-choice") {
                 const filledOptions = q.options.filter((opt) => opt.trim() !== "");
                 if (filledOptions.length < 2) {
-                    alert("Mỗi câu trắc nghiệm phải có ít nhất 2 lựa chọn hợp lệ!");
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Thiếu lựa chọn",
+                        text: "Mỗi câu trắc nghiệm phải có ít nhất 2 lựa chọn được điền!",
+                    });
                     return;
                 }
             }

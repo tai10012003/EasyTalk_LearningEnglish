@@ -6,6 +6,7 @@ import VocabularyExerciseSidebar from "@/components/user/vocabularyexercise/Voca
 import VocabularyExerciseCarousel from "@/components/user/vocabularyexercise/VocabularyExerciseCarousel.jsx";
 import VocabularyExerciseResultScreen from "@/components/user/vocabularyexercise/VocabularyExerciseResultScreen.jsx";
 import VocabularyExerciseHistory from "@/components/user/vocabularyexercise/VocabularyExerciseHistory.jsx";
+import Swal from "sweetalert2";
 
 const VocabularyExerciseDetail = () => {
     const { id } = useParams();
@@ -142,7 +143,11 @@ const VocabularyExerciseDetail = () => {
             utterance.lang = 'en-US';
             window.speechSynthesis.speak(utterance);
         } else {
-            alert('Trình duyệt của bạn không hỗ trợ Speech Synthesis.');
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+            });
         }
     }, []);
 

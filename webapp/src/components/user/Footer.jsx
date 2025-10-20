@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import logo from "@/assets/images/logo.png"
+import Swal from "sweetalert2";
 
 function Footer() {
   const [email, setEmail] = useState('');
@@ -8,7 +9,11 @@ function Footer() {
   const handleEmailSubmit = (e) => {
     e.preventDefault();
     if (email.trim()) {
-      alert('Cảm ơn bạn đã đăng ký! Chúng tôi sẽ liên hệ sớm.');
+      Swal.fire({
+        icon: "success",
+        title: "Đăng ký thành công",
+        text: "Cảm ơn bạn đã đăng ký! Chúng tôi sẽ liên hệ sớm.",
+      });
       setEmail('');
     }
   };

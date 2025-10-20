@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthService } from "@/services/AuthService";
+import Swal from "sweetalert2";
 
 const UpdateUser = ({ onSubmit, title, initialData, returnUrl }) => {
     const navigate = useNavigate();
@@ -26,18 +27,38 @@ const UpdateUser = ({ onSubmit, title, initialData, returnUrl }) => {
     }, [initialData]);
 
     const handleResetTempPassword = async () => {
-        if (!window.confirm("Bạn có chắc muốn đặt lại mật khẩu tạm thời cho người dùng này không?")) return;
+        const result = await Swal.fire({
+            title: "Xác nhận",
+            text: "Bạn có chắc muốn đặt lại mật khẩu tạm thời cho người dùng này không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Đồng ý",
+            cancelButtonText: "Hủy"
+        });
+        if (!result.isConfirmed) return;
         try {
             const data = await AuthService.resetTempPassword(initialData._id);
             if (data.success) {
                 setTempPassword(data.tempPassword);
-                alert("Đặt lại mật khẩu tạm thời thành công! Mật khẩu đã được gửi đến email người dùng.");
+                Swal.fire({
+                    icon: "success",
+                    title: "Thành công",
+                    text: "Đặt lại mật khẩu tạm thời thành công! Mật khẩu đã được gửi đến email người dùng.",
+                });
             } else {
-                alert(data.message || "Không thể đặt lại mật khẩu tạm thời!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: data.message || "Không thể đặt lại mật khẩu tạm thời!",
+                });
             }
         } catch (error) {
             console.error("Error resetting temp password:", error);
-            alert("Lỗi hệ thống khi đặt lại mật khẩu tạm thời!");
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: "Lỗi hệ thống khi đặt lại mật khẩu tạm thời!",
+            });
         }
     };
 

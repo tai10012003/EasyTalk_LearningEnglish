@@ -3,6 +3,7 @@ import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import ChatAIMessage from "@/components/user/chatAI/ChatAIMessage.jsx";
 import ChatAIInput from "@/components/user/chatAI/ChatAIInput.jsx";
 import { ChatAIService } from "@/services/ChatAIService.jsx";
+import Swal from "sweetalert2";
 
 function ChatAI() {
     const [messages, setMessages] = useState([]);
@@ -82,7 +83,11 @@ function ChatAI() {
     };
 
     const handleSendMessage = async (text) => {
-        if (isSending) return alert("Đang gửi tin nhắn, vui lòng đợi...");
+        if (isSending) return Swal.fire({
+            icon: "warning",
+            title: "Cảnh báo",
+            text: "Đang gửi tin nhắn, vui lòng đợi..."
+        });
         setIsSending(true);
         setMessages((prev) => [...prev, { sender: "user", text }]);
         try {

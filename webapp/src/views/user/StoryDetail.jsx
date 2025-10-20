@@ -6,6 +6,7 @@ import StoryQuiz from "@/components/user/story/StoryQuiz.jsx";
 import StoryComplete from "@/components/user/story/StoryComplete.jsx";
 import StoryVocabularyQuiz from "@/components/user/story/StoryVocabularyQuiz.jsx";
 import { StoryService } from "@/services/StoryService.jsx";
+import Swal from "sweetalert2";
 
 function StoryDetail() {
     const { id } = useParams();
@@ -153,11 +154,21 @@ function StoryDetail() {
                             onComplete={async () => {
                                 try {
                                     await StoryService.completeStory(story._id);
-                                    window.alert("Chúc mừng! Bạn đã hoàn thành câu chuyện. Câu chuyện tiếp theo đã được mở khóa.");
-                                    window.location.href = "/story";
+                                    Swal.fire({
+                                        icon: "success",
+                                        title: "Thành công",
+                                        text: "Chúc mừng! Bạn đã hoàn thành bài học câu chuyện. Bài học câu chuyện tiếp theo đã được mở khóa.",
+                                        confirmButtonText: "Quay lại danh sách bài học câu chuyện",
+                                    }).then(() => {
+                                        window.location.href = "/story";
+                                    });
                                 } catch (err) {
                                     console.error("Error completing story:", err);
-                                    window.alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                                    Swal.fire({
+                                        icon: "error",
+                                        title: "Lỗi",
+                                        text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                                    });
                                 }
                             }} 
                         />

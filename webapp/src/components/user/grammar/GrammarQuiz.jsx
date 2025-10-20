@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Swal from "sweetalert2";
 
 function GrammarQuiz({ quizzes, onComplete }) {
   // Hàm shuffle chuẩn Fisher–Yates
@@ -24,7 +25,11 @@ function GrammarQuiz({ quizzes, onComplete }) {
 
   const handleCheck = () => {
     if (answers.some(a => a.trim() == "")) {
-      alert("Vui lòng trả lời hết các câu hỏi trước khi kiểm tra!");
+      Swal.fire({
+        icon: "warning",
+        title: "Cảnh báo",
+        text: "Vui lòng trả lời hết các câu hỏi trước khi kiểm tra!"
+      });
       return;
     }
     setChecked(true);

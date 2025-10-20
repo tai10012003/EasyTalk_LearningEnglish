@@ -116,18 +116,27 @@ export const AuthService = {
             "Authorization": `Bearer ${token}`,
         };
         let response = await fetch(url, { ...options, headers });
-        if ((response.status == 401 || response.status == 403) && !isRefreshing) {
-            isRefreshing = true;
-            try {
-                const newToken = await this.refreshToken();
-                isRefreshing = false;
-                onRefreshed(newToken);
-                headers["Authorization"] = `Bearer ${newToken}`;
-                response = await fetch(url, { ...options, headers });
-            } catch (error) {
-                isRefreshing = false;
-                throw error;
+        if (response.status == 401 || response.status == 403) {
+            if (!isRefreshing) {
+                isRefreshing = true;
+                try {
+                    const newToken = await this.refreshToken();
+                    isRefreshing = false;
+                    onRefreshed(newToken);
+                } catch (error) {
+                    isRefreshing = false;
+                    console.error("Refresh token failed, logging out...");
+                    this.logout();
+                    throw error;
+                }
             }
+            return new Promise((resolve) => {
+                addRefreshSubscriber(async (newToken) => {
+                    headers["Authorization"] = `Bearer ${newToken}`;
+                    const retryResponse = await fetch(url, { ...options, headers });
+                    resolve(retryResponse);
+                });
+            });
         }
         return response;
     },

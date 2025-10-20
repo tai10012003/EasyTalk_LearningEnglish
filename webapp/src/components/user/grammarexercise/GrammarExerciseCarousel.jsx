@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import Swal from "sweetalert2";
 
 const GrammarExerciseCarousel = ({
     questions,
@@ -25,7 +26,11 @@ const GrammarExerciseCarousel = ({
         const userAnswer = userAnswers[currentQuestionIndex];
         
         if (!userAnswer || userAnswer.trim() == '') {
-            alert("Vui lòng nhập câu trả lời.");
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Vui lòng nhập câu trả lời."
+            });
             return;
         }
 

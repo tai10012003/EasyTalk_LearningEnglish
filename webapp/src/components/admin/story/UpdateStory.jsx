@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
     const navigate = useNavigate();
@@ -47,11 +48,29 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
     };
 
     const handleDeleteContent = (index) => {
-        if (!window.confirm("Bạn có chắc muốn xóa nội dung này không?")) return;
-        setFormData((prev) => ({
-            ...prev,
-            content: prev.content.filter((_, i) => i !== index),
-        }));
+        Swal.fire({
+            title: "Xác nhận xóa?",
+            text: "Bạn có chắc muốn xóa nội dung này không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setFormData((prev) => ({
+                    ...prev,
+                    content: prev.content.filter((_, i) => i !== index),
+                }));
+
+                Swal.fire({
+                    icon: "success",
+                    title: "Đã xóa!",
+                    text: "Nội dung đã được xóa thành công.",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+            }
+        });
     };
 
     const handleContentChange = (index, field, value) => {
@@ -67,10 +86,27 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
     };
 
     const handleDeleteVocabulary = (cIndex, vIndex) => {
-        if (!window.confirm("Bạn có chắc muốn xóa từ vựng này không?")) return;
-        const updatedContent = [...formData.content];
-        updatedContent[cIndex].vocabulary.splice(vIndex, 1);
-        setFormData((prev) => ({ ...prev, content: updatedContent }));
+        Swal.fire({
+            title: "Xác nhận xóa?",
+            text: "Bạn có chắc muốn xóa từ vựng này không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const updatedContent = [...formData.content];
+                updatedContent[cIndex].vocabulary.splice(vIndex, 1);
+                setFormData((prev) => ({ ...prev, content: updatedContent }));
+                Swal.fire({
+                    icon: "success",
+                    title: "Đã xóa!",
+                    text: "Từ vựng đã được xóa thành công.",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+            }
+        });
     };
 
     const handleVocabularyChange = (cIndex, vIndex, value) => {
@@ -82,7 +118,11 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
     const handleAddQuiz = (cIndex) => {
         const updatedContent = [...formData.content];
         if (updatedContent[cIndex].quiz) {
-            alert("Mỗi nội dung chỉ được phép có 1 quiz!");
+            Swal.fire({
+                icon: "warning",
+                title: "Thông báo",
+                text: "Mỗi nội dung chỉ được phép có 1 quiz!",
+            });
             return;
         }
         updatedContent[cIndex].quiz = {
@@ -96,10 +136,27 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
     };
 
     const handleDeleteQuiz = (cIndex) => {
-        if (!window.confirm("Bạn có chắc muốn xóa quiz này không?")) return;
-        const updatedContent = [...formData.content];
-        updatedContent[cIndex].quiz = null;
-        setFormData((prev) => ({ ...prev, content: updatedContent }));
+        Swal.fire({
+            title: "Xác nhận xóa?",
+            text: "Bạn có chắc muốn xóa quiz này không?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const updatedContent = [...formData.content];
+                updatedContent[cIndex].quiz = null;
+                setFormData((prev) => ({ ...prev, content: updatedContent }));
+                Swal.fire({
+                    icon: "success",
+                    title: "Đã xóa!",
+                    text: "Quiz đã được xóa thành công.",
+                    timer: 1500,
+                    showConfirmButton: false,
+                });
+            }
+        });
     };
 
     const handleQuizChange = (cIndex, field, value) => {

@@ -14,17 +14,16 @@ function StudyCalendarStreak({ studyDates = [] }) {
         let newMonth = currentMonth + offset;
         let newYear = currentYear;
         if (newMonth < 0) {
-        newMonth = 11;
-        newYear -= 1;
+            newMonth = 11;
+            newYear -= 1;
         } else if (newMonth > 11) {
-        newMonth = 0;
-        newYear += 1;
+            newMonth = 0;
+            newYear += 1;
         }
         setCurrentMonth(newMonth);
         setCurrentYear(newYear);
     };
 
-    // format tháng năm
     const monthName = new Date(currentYear, currentMonth).toLocaleString("en-US", {
         month: "long",
         year: "numeric",
@@ -39,7 +38,7 @@ function StudyCalendarStreak({ studyDates = [] }) {
             </div>
             <div className="streak-weekdays">
                 {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                <div key={d} className="streak-weekday">{d}</div>
+                    <div key={d} className="streak-weekday">{d}</div>
                 ))}
             </div>
             <div className="streak-calendar">
@@ -50,7 +49,6 @@ function StudyCalendarStreak({ studyDates = [] }) {
                     const date = new Date(currentYear, currentMonth, day).toDateString();
                     const studied = studiedSet.has(date);
                     const isToday = date == today.toDateString();
-
                     return (
                         <div
                             key={day}

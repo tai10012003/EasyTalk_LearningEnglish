@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import Swal from "sweetalert2";
 
 function ChatAIInput({ onSend, disabled }) {
     const [input, setInput] = useState("");
@@ -8,7 +9,11 @@ function ChatAIInput({ onSend, disabled }) {
 
     const handleSend = () => {
         const trimmed = input.trim();
-        if (!trimmed) return alert("Vui lòng nhập nội dung tin nhắn.");
+        if (!trimmed) return Swal.fire({
+            icon: "warning",
+            title: "Cảnh báo",
+            text: "Vui lòng nhập nội dung tin nhắn."
+        });
         onSend(trimmed);
         setInput("");
     };
@@ -24,7 +29,11 @@ function ChatAIInput({ onSend, disabled }) {
 
     const startListening = () => {
         if (!("webkitSpeechRecognition" in window)) {
-            alert("Trình duyệt không hỗ trợ voice recognition.");
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: "Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói. Vui lòng sử dụng Google Chrome."
+            });
             return;
         }
         const recognition = new window.webkitSpeechRecognition();

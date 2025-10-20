@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import StudyCalendarStreak from "@/components/user/userprogress/StudyCalendarStreak.jsx";
 
 function UserStreak() {
     const [streakData, setStreakData] = useState(null);
-    const [loading, setLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         document.title = "Streak Học Tập - EasyTalk";
@@ -15,15 +16,15 @@ function UserStreak() {
             } catch (err) {
                 console.error(err);
             } finally {
-                setLoading(false);
+                setIsLoading(false);
             }
         }
         fetchStreak();
     }, []);
 
-    if (loading) return <p className="text-center">Loading streak...</p>;
+    if (isLoading) return <LoadingScreen />;
     if (!streakData)
-        return <p className="text-center text-red-500">Failed to load streak data</p>;
+        return <p className="text-center text-red-500 mt-4 mb-4">Không thể tải streak .... </p>;
 
     return (
         <div className="streak-container max-w-lg mx-auto mt-10 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-3xl shadow-xl">

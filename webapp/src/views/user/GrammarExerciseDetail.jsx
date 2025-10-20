@@ -6,6 +6,7 @@ import GrammarExerciseSidebar from "@/components/user/grammarexercise/GrammarExe
 import GrammarExerciseCarousel from "@/components/user/grammarexercise/GrammarExerciseCarousel.jsx";
 import GrammarExerciseResultScreen from "@/components/user/grammarexercise/GrammarExerciseResultScreen.jsx";
 import GrammarExerciseHistory from "@/components/user/grammarexercise/GrammarExerciseHistory.jsx";
+import Swal from "sweetalert2";
 
 const GrammarExerciseDetail = () => {
     const { id } = useParams();
@@ -142,7 +143,11 @@ const GrammarExerciseDetail = () => {
             utterance.lang = 'en-US';
             window.speechSynthesis.speak(utterance);
         } else {
-            alert('Trình duyệt của bạn không hỗ trợ Speech Synthesis.');
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+            });
         }
     }, []);
 

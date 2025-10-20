@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
+import Swal from "sweetalert2";
 
 function buildDetailedAnalysis(correctSentence, transcription) {
     const correctWords = correctSentence
@@ -66,7 +67,11 @@ const PronunciationExerciseCarousel = ({
         }
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('Trình duyệt không hỗ trợ ghi âm.');
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Trình duyệt không hỗ trợ ghi âm."
+            });
             return;
         }
 
@@ -125,7 +130,11 @@ const PronunciationExerciseCarousel = ({
         const questionIndex = currentQuestionIndex;
         const selectedInput = document.querySelector(`input[name="answer-${questionIndex}"]:checked`);
         if (!selectedInput) {
-            alert('Vui lòng chọn một đáp án.');
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Vui lòng chọn một đáp án."
+            });
             return;
         }
         const userAnswer = selectedInput.value;

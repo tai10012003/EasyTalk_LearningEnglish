@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
+import Swal from "sweetalert2";
 let hasShownAlert = false;
 
 export const FlashCardService = {
@@ -17,7 +18,11 @@ export const FlashCardService = {
             console.error("Error fetching flashcard list:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
             return { flashcardLists: [], currentPage: 1, totalPages: 1 };
         }
@@ -37,7 +42,11 @@ export const FlashCardService = {
             console.error("Error creating flashcard list:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -56,7 +65,11 @@ export const FlashCardService = {
             console.error("Error updating flashcard list:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -74,7 +87,11 @@ export const FlashCardService = {
             console.error("Error deleting flashcard list:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -92,7 +109,11 @@ export const FlashCardService = {
             console.error("Error fetching flashcards:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -115,7 +136,11 @@ export const FlashCardService = {
             console.error("Error creating flashcards:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -138,7 +163,11 @@ export const FlashCardService = {
             console.error("Error updating flashcards:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -156,7 +185,11 @@ export const FlashCardService = {
             console.error("Error deleting flashcards:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },
@@ -174,7 +207,11 @@ export const FlashCardService = {
             console.error("Error fetching flashcard review:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                alert("Không thể kết nối đến server!");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
         }
     },

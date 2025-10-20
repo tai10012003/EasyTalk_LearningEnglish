@@ -5,6 +5,7 @@ import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StageCarousel from "@/components/user/stage/StageCarousel.jsx";
 import StageResultScreen from "@/components/user/stage/StageResultScreen.jsx";
 import StageHistory from "@/components/user/stage/StageHistory.jsx";
+import Swal from "sweetalert2";
 
 const Stage = () => {
     const { id } = useParams();
@@ -110,7 +111,11 @@ const Stage = () => {
             utterance.lang = 'en-US';
             window.speechSynthesis.speak(utterance);
         } else {
-            alert('Trình duyệt của bạn không hỗ trợ Speech Synthesis.');
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+            });
         }
     }, []);
 

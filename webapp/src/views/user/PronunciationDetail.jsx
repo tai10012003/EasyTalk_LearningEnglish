@@ -5,6 +5,7 @@ import PronunciationSentence from "@/components/user/pronunciation/Pronunciation
 import PronunciationQuiz from "@/components/user/pronunciation/PronunciationQuiz.jsx";
 import PronunciationComplete from "@/components/user/pronunciation/PronunciationComplete.jsx";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
+import Swal from "sweetalert2";
 
 function PronunciationDetail() {
     const { id } = useParams();
@@ -89,11 +90,21 @@ function PronunciationDetail() {
                     onComplete={async () => {
                         try {
                             await PronunciationService.completePronunciation(pronunciation._id);
-                            window.alert("Chúc mừng! Bạn đã hoàn thành bài phát âm. Bài tiếp theo đã được mở khóa.");
-                            window.location.href = "/pronunciation";
+                            Swal.fire({
+                                icon: "success",
+                                title: "Hoàn thành!",
+                                text: "Chúc mừng! Bạn đã hoàn thành bài học phát âm. Bài học phát âm tiếp theo đã được mở khóa.",
+                                confirmButtonText: "Quay lại danh sách bài học phát âm",
+                            }).then(() => {
+                                window.location.href = "/pronunciation";
+                            });
                         } catch (err) {
                             console.error("Error completing pronunciation:", err);
-                            window.alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                            Swal.fire({
+                                icon: "error",
+                                title: "Lỗi",
+                                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                            });
                         }
                     }} 
                 />

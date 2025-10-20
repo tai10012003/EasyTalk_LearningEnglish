@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
+import Swal from "sweetalert2";
 let hasShownAlert = false;
 
 export const ChatAIService = {
@@ -21,18 +22,41 @@ export const ChatAIService = {
             console.error("Error sending message:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                window.alert("Không thể kết nối đến server. Vui lòng kiểm tra server backend đã bật chưa.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
             throw error;
         }
     },
 
     async startConversation() {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/chat/api/chat/start`, {
-            method: "GET",
-        });
-        if (!res.ok) throw new Error("Failed to start conversation");
-        return await res.json();
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/chat/api/chat/start`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+            }
+            const data = await res.json();
+            hasShownAlert = false;
+            console.log("ChatAI startConversation:", data);
+            return data;
+        } catch (error) {
+            console.error("Error starting conversation:", error.message);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
+            }
+            throw error;
+        }
     },
 
     resetAlertFlag() {

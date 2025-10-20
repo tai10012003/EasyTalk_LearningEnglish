@@ -6,6 +6,7 @@ import PronunciationExerciseSidebar from "@/components/user/pronunciationexercis
 import PronunciationExerciseCarousel from "@/components/user/pronunciationexercise/PronunciationExerciseCarousel.jsx";
 import PronunciationExerciseResultScreen from "@/components/user/pronunciationexercise/PronunciationExerciseResultScreen.jsx";
 import PronunciationExerciseHistory from "@/components/user/pronunciationexercise/PronunciationExerciseHistory.jsx";
+import Swal from "sweetalert2";
 
 const PronunciationExerciseDetail = () => {
     const { id } = useParams();
@@ -143,7 +144,11 @@ const PronunciationExerciseDetail = () => {
             utterance.lang = 'en-US';
             window.speechSynthesis.speak(utterance);
         } else {
-            alert('Trình duyệt của bạn không hỗ trợ Speech Synthesis.');
+            Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+            });
         }
     }, []);
 

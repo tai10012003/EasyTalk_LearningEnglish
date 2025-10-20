@@ -3,6 +3,7 @@ import { WritingAIService } from "@/services/WritingAIService.jsx";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import WritingAIInput from "@/components/user/writingAI/WritingAIInput.jsx";
 import WritingAIResult from "@/components/user/writingAI/WritingAIResult.jsx";
+import Swal from "sweetalert2";
 
 function WritingAI() {
     const [topic, setTopic] = useState("");
@@ -32,9 +33,17 @@ function WritingAI() {
 
     const handleSubmit = async () => {
         const trimmedText = userText.trim();
-        if (!trimmedText) return alert("Vui lòng viết bài trước khi nộp bài !!");
+        if (!trimmedText) return Swal.fire({
+            icon: "warning",
+            title: "Chú ý",
+            text: "Vui lòng nhập bài viết trước khi nộp!"
+        });
         if (trimmedText.length < 200) {
-            return alert("Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài !!");
+            return Swal.fire({
+                icon: "warning",
+                title: "Chú ý",
+                text: "Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài !!"
+            });
         }
         setIsSubmitting(true);
         try {
@@ -42,7 +51,11 @@ function WritingAI() {
             setAnalysisResult(result);
         } catch (err) {
             console.error("Error analyzing writing:", err);
-            alert("Không thể phân tích bài viết. Vui lòng thử lại.");
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: "Không thể phân tích bài viết. Vui lòng thử lại."
+            });
         } finally {
             setIsSubmitting(false);
         }

@@ -5,6 +5,7 @@ import GrammarSentence from "@/components/user/grammar/GrammarSentence.jsx";
 import GrammarQuiz from "@/components/user/grammar/GrammarQuiz.jsx";
 import GrammarComplete from "@/components/user/grammar/GrammarComplete.jsx";
 import { GrammarService } from "@/services/GrammarService.jsx";
+import Swal from "sweetalert2";
 
 function GrammarDetail() {
     const { id } = useParams();
@@ -91,11 +92,21 @@ function GrammarDetail() {
                     onComplete={async () => {
                         try {
                             await GrammarService.completeGrammar(grammar._id);
-                            window.alert("Chúc mừng! Bạn đã hoàn thành bài ngữ pháp. Bài tiếp theo đã được mở khóa.");
-                            window.location.href = "/grammar";
+                            Swal.fire({
+                                icon: "success",
+                                title: "Thành công",
+                                text: "Chúc mừng! Bạn đã hoàn thành bài học ngữ pháp. Bài học ngữ pháp tiếp theo đã được mở khóa.",
+                                confirmButtonText: "Quay lại danh sách bài học ngữ pháp",
+                            }).then(() => {
+                                window.location.href = "/grammar";
+                            });
                         } catch (err) {
                             console.error("Error completing grammar:", err);
-                            window.alert("Có lỗi xảy ra khi cập nhật tiến độ.");
+                            Swal.fire({
+                                icon: "error",
+                                title: "Lỗi",
+                                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                            });
                         }
                     }} 
                 />

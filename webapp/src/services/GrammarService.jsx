@@ -1,4 +1,5 @@
 import { AuthService } from './AuthService.jsx';
+import Swal from "sweetalert2";
 const API_URL = import.meta.env.VITE_API_URL;
 
 let hasShownAlert = false;
@@ -22,7 +23,11 @@ export const GrammarService = {
             console.error("Error fetching grammar:", error.message);
             if (!hasShownAlert) {
                 hasShownAlert = true;
-                window.alert("Không thể kết nối đến server. Vui lòng kiểm tra xem server (http://localhost:3000) đã được bật chưa hoặc có lỗi kết nối. Hệ thống sẽ hiển thị dữ liệu mặc định.");
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
             }
             return { data: [], currentPage: 1, totalPages: 1 };
         }

@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import Swal from "sweetalert2";
 
 const PronunciationExerciseSidebar = ({
         timeRemaining,
@@ -13,9 +14,18 @@ const PronunciationExerciseSidebar = ({
         selectedDuration
     }) => {
         const handleSubmitClick = useCallback(() => {
-            if (window.confirm('Bạn có chắc chắn muốn nộp bài?')) {
-                onSubmitQuiz();
-            }
+            Swal.fire({
+                title: 'Xác nhận',
+                text: 'Bạn có chắc chắn muốn nộp bài?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Đồng ý',
+                cancelButtonText: 'Hủy'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    onSubmitQuiz();
+                }
+            });
         }, [onSubmitQuiz]);
 
         const getCompletedTime = () => {
