@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarSentence from "@/components/user/grammar/GrammarSentence.jsx";
 import GrammarQuiz from "@/components/user/grammar/GrammarQuiz.jsx";
@@ -9,14 +9,63 @@ import Swal from "sweetalert2";
 
 function GrammarDetail() {
     const { id } = useParams();
+    const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [grammar, setGrammar] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [displayContent, setDisplayContent] = useState("");
     const [showQuiz, setShowQuiz] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
     const contentRef = useRef(null);
+    const [grammarCompleted, setGrammarCompleted] = useState(false);
+    const allowNavigationRef = useRef(false);
     const [currentStep, setCurrentStep] = useState(0);
     const [totalSteps, setTotalSteps] = useState(1);
+
+    useEffect(() => {
+        if (!navigator || !grammar || grammarCompleted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && displayContent && !grammarCompleted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang học giữa chừng. Nếu thoát ra, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, grammar, displayContent, grammarCompleted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!grammarCompleted && displayContent) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [grammarCompleted, displayContent]);
 
     useEffect(() => {
         document.title = "Chi tiết bài học ngữ pháp - EasyTalk";
@@ -88,10 +137,11 @@ function GrammarDetail() {
                 </div>
             )}
             {isComplete && (
-                <GrammarComplete 
+                <GrammarComplete
                     onComplete={async () => {
                         try {
                             await GrammarService.completeGrammar(grammar._id);
+                            setGrammarCompleted(true)
                             Swal.fire({
                                 icon: "success",
                                 title: "Thành công",

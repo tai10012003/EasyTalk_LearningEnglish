@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useParams, UNSAFE_NavigationContext } from 'react-router-dom';
 import { StageService } from "@/services/StageService.jsx";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StageCarousel from "@/components/user/stage/StageCarousel.jsx";
@@ -9,6 +9,7 @@ import Swal from "sweetalert2";
 
 const Stage = () => {
     const { id } = useParams();
+    const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [questions, setQuestions] = useState([]);
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [questionResults, setQuestionResults] = useState([]);
@@ -18,6 +19,53 @@ const Stage = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [stageTitle, setStageTitle] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const allowNavigationRef = useRef(false);
+
+    useEffect(() => {
+        if (!navigator || isCompleted || questions.length == 0) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && !isCompleted && questions.length > 0) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang làm bài luyện tập. Nếu thoát ra, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, isCompleted, questions.length]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!isCompleted && questions.length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [isCompleted, questions.length]);
 
     useEffect(() => {
         document.title = "Chặng hành trình - EasyTalk";
@@ -25,7 +73,6 @@ const Stage = () => {
             try {
                 setIsLoading(true);
                 const data = await StageService.getStage(id);
-
                 if (data && data.stage && data.stage.questions && data.stage.questions.length > 0) {
                     setQuestions(data.stage.questions);
                     setStageTitle(data.stage.title || "Bài học");
@@ -72,6 +119,7 @@ const Stage = () => {
     const handleSubmitStage = useCallback(async () => {
         setIsCompleted(true);
         setShowResult(true);
+        allowNavigationRef.current = true;
         try {
             await StageService.completeStage(id);
         } catch (err) {
@@ -93,7 +141,7 @@ const Stage = () => {
         setIsCompleted(false);
         setShowResult(false);
         setShowHistory(false);
-
+        allowNavigationRef.current = false;
         const resetResults = questions.map(q => ({
             question: q.question,
             userAnswer: "Chưa trả lời",
@@ -104,6 +152,13 @@ const Stage = () => {
         }));
         setQuestionResults(resetResults);
     }, [questions]);
+
+    const handleExit = useCallback(() => {
+        allowNavigationRef.current = true;
+        setTimeout(() => {
+            window.location.href = '/journey';
+        }, 0);
+    }, []);
 
     const speakText = useCallback((text) => {
         if ('speechSynthesis' in window) {
@@ -142,7 +197,7 @@ const Stage = () => {
                                 totalQuestions={questions.length}
                                 onRestart={handleRestart}
                                 onShowHistory={handleShowHistory}
-                                onExit={() => window.location.href = '/journey'}
+                                onExit={handleExit}
                             />
                         ) : (
                             <StageCarousel

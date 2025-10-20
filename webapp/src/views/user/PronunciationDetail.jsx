@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import PronunciationSentence from "@/components/user/pronunciation/PronunciationSentence.jsx";
 import PronunciationQuiz from "@/components/user/pronunciation/PronunciationQuiz.jsx";
@@ -9,14 +9,63 @@ import Swal from "sweetalert2";
 
 function PronunciationDetail() {
     const { id } = useParams();
+    const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [pronunciation, setPronunciation] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [displayContent, setDisplayContent] = useState("");
     const [showQuiz, setShowQuiz] = useState(false);
     const [isComplete, setIsComplete] = useState(false);
+    const allowNavigationRef = useRef(false);
+    const [pronunciationCompleted, setPronunciationCompleted] = useState(false);
     const contentRef = useRef(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [totalSteps, setTotalSteps] = useState(1);
+
+    useEffect(() => {
+        if (!navigator || !pronunciation || pronunciationCompleted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && displayContent && !pronunciationCompleted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang học giữa chừng. Nếu thoát ra, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, pronunciation, displayContent, pronunciationCompleted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!pronunciationCompleted && displayContent) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [pronunciationCompleted, displayContent]);
 
     useEffect(() => {
         document.title = "Chi tiết bài học phát âm - EasyTalk";
@@ -90,6 +139,7 @@ function PronunciationDetail() {
                     onComplete={async () => {
                         try {
                             await PronunciationService.completePronunciation(pronunciation._id);
+                            setPronunciationCompleted(true);
                             Swal.fire({
                                 icon: "success",
                                 title: "Hoàn thành!",

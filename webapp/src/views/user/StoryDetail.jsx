@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useRef } from "react";
-import { useParams } from "react-router-dom";
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, UNSAFE_NavigationContext } from 'react-router-dom';
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StorySentence from "@/components/user/story/StorySentence.jsx";
 import StoryQuiz from "@/components/user/story/StoryQuiz.jsx";
@@ -10,14 +10,63 @@ import Swal from "sweetalert2";
 
 function StoryDetail() {
     const { id } = useParams();
+    const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [story, setStory] = useState(null);
+    const [storyCompleted, setStoryCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [displayedItems, setDisplayedItems] = useState([]);
     const [showQuizOnly, setShowQuizOnly] = useState(false);
     const [quizResults, setQuizResults] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
-    const [totalSteps, setTotalSteps] = useState(1); 
+    const [totalSteps, setTotalSteps] = useState(1);
+    const allowNavigationRef = useRef(false);
     const contentRefs = useRef([]);
+
+    useEffect(() => {
+        if (!navigator || !story || storyCompleted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && displayedItems.length > 0 && !storyCompleted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang học giữa chừng. Nếu thoát ra, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, story, displayedItems.length, storyCompleted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!storyCompleted && displayedItems.length > 0) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [storyCompleted, displayedItems.length]);
 
     useEffect(() => {
         document.title = "Chi tiết bài học câu chuyện - EasyTalk";
@@ -149,11 +198,12 @@ function StoryDetail() {
                     {item.type == "quiz" && <StoryQuiz quiz={item.data} onNext={(result) => handleNext(idx, result)} />}
                     {item.type == "vocabQuiz" && <StoryVocabularyQuiz vocabulary={item.data} onNext={(result) => handleNext(idx, result)} />}
                     {item.type == "complete" && (
-                        <StoryComplete 
+                        <StoryComplete
                             quizResults={quizResults} 
                             onComplete={async () => {
                                 try {
                                     await StoryService.completeStory(story._id);
+                                    setStoryCompleted(true);
                                     Swal.fire({
                                         icon: "success",
                                         title: "Thành công",
