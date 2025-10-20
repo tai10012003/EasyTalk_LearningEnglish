@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodemailer = require("nodemailer");
-const config = require("../config/setting.json");
+const config = require("../config/setting");
 const { getGoogleUser } = require("../util/googleAuth");
 const { getFacebookAccessToken, getFacebookUser } = require("../util/facebookAuth");
 const { UserRepository } = require("./../repositories");

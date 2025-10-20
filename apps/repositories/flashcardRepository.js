@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb');
-const config = require('./../config/setting.json');
+const config = require('../config/setting');
 const DatabaseConnection = require('./../database/database');
 
 class FlashcardRepository {

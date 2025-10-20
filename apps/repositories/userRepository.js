@@ -1,6 +1,6 @@
 const { ObjectId } = require('mongodb');
 const DatabaseConnection = require('./../database/database');
-const config = require('./../config/setting.json');
+const config = require('../config/setting');
 
 class UserRepository {
     client;

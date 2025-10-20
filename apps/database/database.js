@@ -1,5 +1,5 @@
 const { use } = require('../controllers');
-var config = require("./../config/setting.json");
+var config = require("../config/setting");
 class DatabaseConnection{
     url;
     user;

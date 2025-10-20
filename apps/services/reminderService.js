@@ -1,6 +1,6 @@
 const nodemailer = require('nodemailer');
 const cron = require('node-cron');
-const config = require('./../config/setting.json');
+const config = require('../config/setting');
 const { ReminderRepository } = require('./../repositories');
 
 class ReminderService {
