@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { useParams, UNSAFE_NavigationContext } from 'react-router-dom';
 import { StageService } from "@/services/StageService.jsx";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
@@ -9,7 +9,8 @@ import Swal from "sweetalert2";
 
 const Stage = () => {
     const { id } = useParams();
-    const { navigator } = React.useContext(UNSAFE_NavigationContext);
+    const { navigator } = useContext(UNSAFE_NavigationContext);
+    const allowNavigationRef = useRef(false);
     const [questions, setQuestions] = useState([]);
     const [correctAnswers, setCorrectAnswers] = useState(0);
     const [questionResults, setQuestionResults] = useState([]);
@@ -19,53 +20,7 @@ const Stage = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [stageTitle, setStageTitle] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const allowNavigationRef = useRef(false);
-
-    useEffect(() => {
-        if (!navigator || isCompleted || questions.length == 0) return;
-        const originalPush = navigator.push;
-        const originalReplace = navigator.replace;
-        const handleNavigation = async (originalMethod, args) => {
-            if (!allowNavigationRef.current && !isCompleted && questions.length > 0) {
-                const result = await Swal.fire({
-                    icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện tập. Nếu thoát ra, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
-                    showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
-                    confirmButtonColor: "#d33",
-                    cancelButtonColor: "#3085d6",
-                });
-                if (result.isConfirmed) {
-                    allowNavigationRef.current = true;
-                    originalMethod.apply(navigator, args);
-                }
-            } else {
-                originalMethod.apply(navigator, args);
-            }
-        };
-        navigator.push = (...args) => handleNavigation(originalPush, args);
-        navigator.replace = (...args) => handleNavigation(originalReplace, args);
-        return () => {
-            navigator.push = originalPush;
-            navigator.replace = originalReplace;
-        };
-    }, [navigator, isCompleted, questions.length]);
-
-    useEffect(() => {
-        const handleBeforeUnload = (e) => {
-            if (!isCompleted && questions.length > 0) {
-                e.preventDefault();
-                e.returnValue = '';
-                return '';
-            }
-        };
-        window.addEventListener('beforeunload', handleBeforeUnload);
-        return () => {
-            window.removeEventListener('beforeunload', handleBeforeUnload);
-        };
-    }, [isCompleted, questions.length]);
+    const [hasStarted, setHasStarted] = useState(false);
 
     useEffect(() => {
         document.title = "Chặng hành trình - EasyTalk";
@@ -86,10 +41,10 @@ const Stage = () => {
                     }));
                     setQuestionResults(initialResults);
                 } else {
-                    console.error('Không tìm thấy câu hỏi');
+                    console.error("Không tìm thấy câu hỏi");
                 }
             } catch (error) {
-                console.error('Error fetching stage:', error);
+                console.error("Error fetching stage:", error);
             } finally {
                 setIsLoading(false);
             }
@@ -99,6 +54,7 @@ const Stage = () => {
     }, [id]);
 
     const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect) => {
+        setHasStarted(true);
         setQuestionResults(prev => {
             const newResults = [...prev];
             newResults[questionIndex] = {
@@ -108,7 +64,6 @@ const Stage = () => {
             };
             return newResults;
         });
-
         if (isCorrect) setCorrectAnswers(prev => prev + 1);
     }, []);
 
@@ -119,7 +74,6 @@ const Stage = () => {
     const handleSubmitStage = useCallback(async () => {
         setIsCompleted(true);
         setShowResult(true);
-        allowNavigationRef.current = true;
         try {
             await StageService.completeStage(id);
         } catch (err) {
@@ -141,7 +95,7 @@ const Stage = () => {
         setIsCompleted(false);
         setShowResult(false);
         setShowHistory(false);
-        allowNavigationRef.current = false;
+        setHasStarted(false);
         const resetResults = questions.map(q => ({
             question: q.question,
             userAnswer: "Chưa trả lời",
@@ -152,13 +106,6 @@ const Stage = () => {
         }));
         setQuestionResults(resetResults);
     }, [questions]);
-
-    const handleExit = useCallback(() => {
-        allowNavigationRef.current = true;
-        setTimeout(() => {
-            window.location.href = '/journey';
-        }, 0);
-    }, []);
 
     const speakText = useCallback((text) => {
         if ('speechSynthesis' in window) {
@@ -173,6 +120,50 @@ const Stage = () => {
             });
         }
     }, []);
+
+    useEffect(() => {
+        if (!navigator || isCompleted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && !isCompleted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang làm bài luyện tập. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, isCompleted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!isCompleted) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isCompleted]);
 
     if (isLoading) { return <LoadingScreen />; }
 
@@ -197,7 +188,7 @@ const Stage = () => {
                                 totalQuestions={questions.length}
                                 onRestart={handleRestart}
                                 onShowHistory={handleShowHistory}
-                                onExit={handleExit}
+                                onExit={() => window.location.href = '/journey'}
                             />
                         ) : (
                             <StageCarousel

@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import ChatAIMessage from "@/components/user/chatAI/ChatAIMessage.jsx";
 import ChatAIInput from "@/components/user/chatAI/ChatAIInput.jsx";
@@ -15,6 +16,9 @@ function ChatAI() {
     const [speakingWordIndex, setSpeakingWordIndex] = useState(null);
     const [isFirstMessage, setIsFirstMessage] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
+    const hasStarted = messages.length > 0;
+    const allowNavigationRef = useRef(false);
+    const { navigator } = useContext(UNSAFE_NavigationContext);
 
     useEffect(() => {
         document.title = "Giao tiếp với AI - EasyTalk";
@@ -47,6 +51,52 @@ function ChatAI() {
             chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: "smooth" });
         }
     }, [messages]);
+
+    useEffect(() => {
+        if (!navigator || !hasStarted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && hasStarted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang trong cuộc hội thoại với AI. Nếu rời đi, nội dung sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, hasStarted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (hasStarted) {
+                e.preventDefault();
+                e.returnValue = "";
+                return "";
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [hasStarted]);
 
     const speakText = (text) => {
         if (!window.speechSynthesis) return;
@@ -83,11 +133,12 @@ function ChatAI() {
     };
 
     const handleSendMessage = async (text) => {
-        if (isSending) return Swal.fire({
-            icon: "warning",
-            title: "Cảnh báo",
-            text: "Đang gửi tin nhắn, vui lòng đợi..."
-        });
+        if (isSending)
+            return Swal.fire({
+                icon: "warning",
+                title: "Cảnh báo",
+                text: "Đang gửi tin nhắn, vui lòng đợi...",
+            });
         setIsSending(true);
         setMessages((prev) => [...prev, { sender: "user", text }]);
         try {

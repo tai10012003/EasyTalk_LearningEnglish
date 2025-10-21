@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useContext } from "react";
+import { UNSAFE_NavigationContext } from "react-router-dom";
 import { WritingAIService } from "@/services/WritingAIService.jsx";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import WritingAIInput from "@/components/user/writingAI/WritingAIInput.jsx";
@@ -12,6 +13,9 @@ function WritingAI() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const { navigator } = useContext(UNSAFE_NavigationContext);
+    const allowNavigationRef = useRef(false);
+    const hasStarted = userText.trim().length > 0 && !analysisResult;
 
     useEffect(() => {
         document.title = "Luyện viết với AI - EasyTalk";
@@ -33,16 +37,17 @@ function WritingAI() {
 
     const handleSubmit = async () => {
         const trimmedText = userText.trim();
-        if (!trimmedText) return Swal.fire({
-            icon: "warning",
-            title: "Chú ý",
-            text: "Vui lòng nhập bài viết trước khi nộp!"
-        });
+        if (!trimmedText)
+            return Swal.fire({
+                icon: "warning",
+                title: "Chú ý",
+                text: "Vui lòng nhập bài viết trước khi nộp!",
+            });
         if (trimmedText.length < 200) {
             return Swal.fire({
                 icon: "warning",
                 title: "Chú ý",
-                text: "Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài !!"
+                text: "Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài!",
             });
         }
         setIsSubmitting(true);
@@ -54,7 +59,7 @@ function WritingAI() {
             Swal.fire({
                 icon: "error",
                 title: "Lỗi",
-                text: "Không thể phân tích bài viết. Vui lòng thử lại."
+                text: "Không thể phân tích bài viết. Vui lòng thử lại.",
             });
         } finally {
             setIsSubmitting(false);
@@ -66,6 +71,52 @@ function WritingAI() {
         setAnalysisResult(null);
         fetchTopic();
     };
+
+    useEffect(() => {
+        if (!navigator || !hasStarted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && hasStarted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang viết bài. Nếu rời trang, nội dung sẽ bị mất. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, hasStarted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (hasStarted) {
+                e.preventDefault();
+                e.returnValue = "";
+                return "";
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [hasStarted]);
 
     if (isLoading) return <LoadingScreen />;
 

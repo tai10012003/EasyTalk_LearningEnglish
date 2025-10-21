@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+import { useParams, useNavigate, UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import DictationControls from "@/components/user/dictationexercise/DictationControls.jsx";
 import DictationComplete from "@/components/user/dictationexercise/DictationComplete.jsx";
@@ -8,6 +9,7 @@ import { DictationExerciseService } from "@/services/DictationExerciseService.js
 
 function DictationExerciseDetail() {
     const { id } = useParams();
+    const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const navigate = useNavigate();
     const [title, setTitle] = useState("");
     const [sentences, setSentences] = useState([]);
@@ -21,6 +23,9 @@ function DictationExerciseDetail() {
     const [showNext, setShowNext] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [showScript, setShowScript] = useState(false);
+    const allowNavigationRef = React.useRef(false);
+    const [hasStarted, setHasStarted] = useState(false);
+    const [exerciseCompleted, setExerciseCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
@@ -39,6 +44,7 @@ function DictationExerciseDetail() {
                     setSentences(sentencesArr);
                     setFullScript(sentencesArr.join("<br>"));
                     setCurrentIndex(0);
+                    setHasStarted(true);
                 }
             } catch (err) {
                 console.error("Error fetching dictation:", err);
@@ -126,6 +132,52 @@ function DictationExerciseDetail() {
         setShowNext(true);
     };
 
+    useEffect(() => {
+        if (!navigator || !hasStarted || exerciseCompleted) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && hasStarted && !exerciseCompleted) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang làm bài luyện nghe. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [navigator, hasStarted, exerciseCompleted]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (!exerciseCompleted && hasStarted) {
+                e.preventDefault();
+                e.returnValue = "";
+                return "";
+            }
+        };
+        window.addEventListener("beforeunload", handleBeforeUnload);
+        return () => {
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+        };
+    }, [exerciseCompleted, hasStarted]);
+
     const nextSentence = () => {
         speechSynthesis.cancel();
         if (currentIndex + 1 < sentences.length) {
@@ -141,6 +193,7 @@ function DictationExerciseDetail() {
                 </p>
             );
             setShowActions(true);
+            setExerciseCompleted(true);
         }
     };
 
