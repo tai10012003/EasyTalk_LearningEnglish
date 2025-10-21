@@ -28,7 +28,7 @@ router.get("/api/reminder/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/api/reminder", verifyToken, async (req, res) => {
+router.post("/api/add", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const { email, reminderTime, frequency,additionalInfo } = req.body;
@@ -40,7 +40,7 @@ router.post("/api/reminder", verifyToken, async (req, res) => {
     }
 });
 
-router.put("/api/reminder/:id", verifyToken, async (req, res) => {
+router.put("/api/update/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         const updatedFields = req.body;
@@ -52,7 +52,7 @@ router.put("/api/reminder/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.delete("/api/reminder/:id", verifyToken, async (req, res) => {
+router.delete("/api/delete/:id", verifyToken, async (req, res) => {
     try {
         const { id } = req.params;
         await reminderService.deleteReminder(id);

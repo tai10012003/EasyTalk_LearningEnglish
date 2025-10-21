@@ -27,6 +27,7 @@ import DictationExerciseDetail from "@/views/user/DictationExerciseDetail.jsx";
 import ChatAI from "@/views/user/ChatAI.jsx";
 import WritingAI from "@/views/user/WritingAI.jsx";
 import UserStreak from "@/views/user/UserStreak.jsx";
+import Reminder from "@/views/user/Reminder.jsx";
 import NotFound from "@/views/user/NotFound.jsx";
 import PrivateRoute from "@/components/user/auth/PrivateRoute.jsx";
 
@@ -204,6 +205,14 @@ const UserRoute = [
         element: (
         <PrivateRoute>
             <UserStreak />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/reminder",
+        element: (
+        <PrivateRoute>
+            <Reminder />
         </PrivateRoute>
         ),
     },

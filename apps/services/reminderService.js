@@ -6,6 +6,7 @@ const { ReminderRepository } = require('./../repositories');
 class ReminderService {
     constructor() {
         this.reminderRepository = new ReminderRepository();
+        this.cronJobs = new Map();
         this.transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
@@ -13,9 +14,31 @@ class ReminderService {
                 pass: config.email.pass,
             },
         });
+        this.initReminders();
+    }
+
+    async initReminders() {
+        try {
+            const reminders = await this.reminderRepository.remindersCollection.find({ status: "active" }).toArray();
+            for (const reminder of reminders) {
+                this.scheduleEmail(reminder);
+            }
+            console.log(`✅ Loaded ${reminders.length} reminders on startup.`);
+        } catch (error) {
+            console.error("❌ Error initializing reminders:", error);
+        }
+    }
+
+    validateReminderTime(reminderTime) {
+        const now = new Date();
+        const reminderDate = new Date(reminderTime);
+        if (reminderDate <= now) {
+            throw new Error("Thời gian nhắc nhở phải ở trong tương lai.");
+        }
     }
 
     async createReminder(userId, email, reminderTime, frequency, additionalInfo) {
+        this.validateReminderTime(reminderTime);
         const reminder = {
             user: userId,
             email,
@@ -25,7 +48,8 @@ class ReminderService {
             status: "active",
         };
         const insertedId = await this.reminderRepository.createReminder(reminder);
-        this.scheduleEmail({ ...reminder, _id: insertedId });
+        const savedReminder = { ...reminder, _id: insertedId };
+        this.scheduleEmail(savedReminder);
         return insertedId;
     }
 
@@ -38,53 +62,100 @@ class ReminderService {
     }
 
     async updateReminder(reminderId, updatedFields) {
+        const reminder = await this.getReminderById(reminderId);
+        if (!reminder) throw new Error("Reminder không tồn tại");
+        if (updatedFields.reminderTime) this.validateReminderTime(updatedFields.reminderTime);
         const success = await this.reminderRepository.updateReminder(reminderId, updatedFields);
         if (success) {
             const updatedReminder = await this.getReminderById(reminderId);
+            this.stopScheduledEmail(reminderId);
             this.scheduleEmail(updatedReminder);
         }
         return success;
     }
 
     async deleteReminder(reminderId) {
+        this.stopScheduledEmail(reminderId);
         return await this.reminderRepository.deleteReminder(reminderId);
     }
 
-    scheduleEmail(reminder) {
-        const reminderDate = new Date(reminder.reminderTime);
-        const cronExpression = `${reminderDate.getMinutes()} ${reminderDate.getHours()} ${reminderDate.getDate()} ${reminderDate.getMonth() + 1} *`;
+    getCronExpression(reminder) {
+        const date = new Date(reminder.reminderTime);
+        const min = date.getMinutes();
+        const hour = date.getHours();
+        switch (reminder.frequency?.toLowerCase()) {
+            case "daily":
+                return `${min} ${hour} * * *`;
+            case "weekly":
+                return `${min} ${hour} * * 1`;
+            case "monthly":
+                return `${min} ${hour} ${date.getDate()} * *`;
+            default:
+                return `${min} ${hour} ${date.getDate()} ${date.getMonth() + 1} *`;
+        }
+    }
 
-        cron.schedule(cronExpression, () => {
-            this.sendEmail(
-                reminder.email,
-                reminder.reminderTime,
-                reminder.frequency,
-                reminder.additionalInfo || "No additional information provided."
+    scheduleEmail(reminder) {
+        try {
+            const cronExpression = this.getCronExpression(reminder);
+            const job = cron.schedule(
+                cronExpression,
+                () => {
+                    this.sendEmail(
+                        reminder.email,
+                        reminder.reminderTime,
+                        reminder.frequency,
+                        reminder.additionalInfo || "Không có ghi chú thêm."
+                    );
+                    if (
+                        !reminder.frequency ||
+                        reminder.frequency.toLowerCase() == "one-time"
+                    ) {
+                        job.stop();
+                        this.cronJobs.delete(reminder._id.toString());
+                        this.reminderRepository.updateReminder(reminder._id, { status: "completed" });
+                    }
+                },
+                {
+                    scheduled: true,
+                    timezone: "Asia/Ho_Chi_Minh",
+                }
             );
-        }, {
-            scheduled: true,
-            timezone: "Asia/Ho_Chi_Minh"
-        });
+            this.cronJobs.set(reminder._id.toString(), job);
+            console.log(`⏰ Scheduled reminder: ${reminder._id} (${reminder.frequency})`);
+        } catch (err) {
+            console.error("Error scheduling reminder:", err);
+        }
+    }
+
+    stopScheduledEmail(reminderId) {
+        const job = this.cronJobs.get(reminderId.toString());
+        if (job) {
+            job.stop();
+            this.cronJobs.delete(reminderId.toString());
+            console.log(`🛑 Stopped cron job for reminder ${reminderId}`);
+        }
     }
 
     sendEmail(email, reminderTime, frequency, additionalInfo) {
         const mailOptions = {
             from: config.email.user,
             to: email,
-            subject: 'Thông Báo Nhắc Nhở Học Tập Từ EasyTalk',
-            html: `<p>Xin chào,</p>
-                   <p>Đây là lời nhắc nhở nhẹ nhàng cho hoạt động đã lên lịch của bạn với <strong>EasyTalk</strong>. Lời nhắc nhở của bạn được đặt vào <strong>${reminderTime}</strong> và sẽ lặp lại <strong>${frequency.toLowerCase()}</strong>. Sau đây là một số lời nhắc nhở giúp bạn học tập:</p>
-                   <p style="white-space: pre-line"><strong>${additionalInfo}</strong></p>
-                   <p>Chúng tôi hy vọng lời nhắc nhở này giúp bạn duy trì mục tiêu của mình. Hãy thoải mái liên hệ với chúng tôi nếu bạn có bất kỳ câu hỏi hoặc cần hỗ trợ nào.</p>
-                   <p>Trân trọng, </p>
-                   <p>Nhóm EasyTalk</p>`
+            subject: "📘 EasyTalk - Nhắc nhở học tập",
+            html: `
+                <p>Xin chào 👋,</p>
+                <p>Bạn đã đặt lời nhắc học tập vào <strong>${reminderTime}</strong> (${frequency}).</p>
+                <p><strong>Lời nhắn của bạn:</strong></p>
+                <p style="white-space: pre-line">${additionalInfo}</p>
+                <p>Chúc bạn học tập thật hiệu quả và duy trì sự kỷ luật nhé 💪.</p>
+                <p>— EasyTalk Team</p>
+            `,
         };
-
         this.transporter.sendMail(mailOptions, (error, info) => {
             if (error) {
-                console.error('Lỗi gửi email:', error);
+                console.error("Lỗi gửi email:", error);
             } else {
-                console.log('Email đã gửi thành công:', info.response);
+                console.log("✅ Email đã gửi:", info.response);
             }
         });
     }
