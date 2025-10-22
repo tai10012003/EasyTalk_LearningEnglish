@@ -6,15 +6,22 @@ const config = require("../config/setting");
 const { getGoogleAuthURL } = require("./../util/googleAuth");
 const { getFacebookAuthURL } = require("../util/facebookAuth");
 const verifyToken = require("./../util/VerifyToken");
-const { UserService, UserprogressService } = require("../services");
+const { UserService, NotificationService, UserprogressService } = require("../services");
 const userService = new UserService();
+const notificationService = new NotificationService();
 const userprogressService = new UserprogressService();
 
 router.post("/register", async (req, res) => {
   try {
     const { username, email, password, confirmPassword, role } = req.body;
-    const result = await userService.register(username, email, password, confirmPassword, role);
-    res.status(201).json(result);
+    const user = await userService.register(username, email, password, confirmPassword, role);
+    await notificationService.createNotification(
+      user._id,
+      "Chào mừng bạn đến với EasyTalk!",
+      "Bạn đã đăng ký tài khoản mới thành công. Hãy bắt đầu học ngay hôm nay nhé!",
+      "success"
+    );
+    res.status(201).json({ success: true, message: "Đăng ký thành công !!", user });
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -87,6 +94,12 @@ router.post("/change-password", verifyToken, async (req, res) => {
   const { currentPassword, newPassword, confirmNewPassword } = req.body;
   try {
     const result = await userService.changePassword(req.user.id, currentPassword, newPassword, confirmNewPassword);
+    await notificationService.createNotification(
+      req.user.id,
+      "Đổi mật khẩu thành công",
+      "Bạn đã đổi mật khẩu thành công. Hãy ghi nhớ mật khẩu mới nhé!",
+      "success"
+    );
     res.json(result);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -117,6 +130,15 @@ router.post("/reset-password", async (req, res) => {
   try {
     const { email, newPassword } = req.body;
     const result = await userService.resetPassword(email, newPassword);
+    const user = await userService.getUserByEmail(email);
+    if (user) {
+      await notificationService.createNotification(
+        user._id,
+        "Lấy lại mật khẩu thành công",
+        "Bạn đã lấy lại mật khẩu thành công. Hãy ghi nhớ mật khẩu mới nhé!",
+        "success"
+      );
+    }
     res.json(result);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -253,11 +275,17 @@ router.post('/reset-temp-password/:userId', async (req, res) => {
         <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
       `,
     };
-    transporter.sendMail(mailOptions, (error) => {
+    transporter.sendMail(mailOptions, async (error) => {
       if (error) {
         console.error("Email send error:", error);
         return res.status(500).json({ message: "Gửi email thất bại!" });
       }
+      await notificationService.createNotification(
+        userId,
+        "Mật khẩu tạm thời đã được đặt lại",
+        `Quản trị viên đã đặt lại mật khẩu tạm thời cho tài khoản của bạn, vui lòng kiểm tra email`,
+        "system"
+      );
       res.json({
         success: true,
         message: "Đặt lại mật khẩu tạm thời thành công!",

@@ -27,6 +27,7 @@ function Login() {
     if (token) {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
+      sessionStorage.setItem("LoggedIn", "true");
       if (refreshToken) {
         localStorage.setItem("refreshToken", refreshToken);
       }
@@ -43,6 +44,7 @@ function Login() {
     try {
       const data = await AuthService.login(email, password);
       toast.success("Đăng nhập thành công !!");
+      sessionStorage.setItem("LoggedIn", "true");
       setTimeout(() => {
         window.location.href = data.role == "admin" ? "/admin/dashboard" : "/";
       }, 1500);

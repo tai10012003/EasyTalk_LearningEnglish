@@ -28,7 +28,7 @@ class NotificationRepository {
     }
 
     async getAllUsers() {
-        return await this.usersCollection.find({}, { projection: { _id: 1 } }).toArray();
+        return await this.usersCollection.find({}, { projection: { _id: 1, role: 1 } }).toArray();
     }
 
     async findNotificationsByUserId(userId) {

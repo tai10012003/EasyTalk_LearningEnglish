@@ -73,6 +73,17 @@ router.put("/api/read/:id", verifyToken, async (req, res) => {
     }
 });
 
+router.put("/api/un-read/:id", verifyToken, async (req, res) => {
+    try {
+        const updated = await notificationService.markAsUnRead(req.params.id);
+        if (!updated) return res.status(404).json({ message: "Không tìm thấy thông báo" });
+        res.json({ message: "Thông báo đã được đánh dấu là chưa đọc" });
+    } catch (error) {
+        console.error("Error marking as read:", error);
+        res.status(500).json({ message: "Lỗi khi cập nhật thông báo", error: error.message });
+    }
+});
+
 router.put("/api/read-all", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;

@@ -3,6 +3,7 @@ import { NavLink, Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { UserProgressService } from '@/services/UserProgressService.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
+import { NotificationService } from '@/services/NotificationService.jsx';
 import logo from '@/assets/images/logo.png';
 
 const parseJwt = (token) => {
@@ -30,6 +31,9 @@ function Menu() {
   });
   const [streakData, setStreakData] = useState({ streak: 0 });
   const [leaderData, setLeaderData] = useState({ experiencePoints: 0 });
+  const [notifications, setNotifications] = useState([]);
+  const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const location = useLocation();
   const lessonRoutes = ['/story', '/grammar', '/flashcards', '/pronunciation'];
@@ -71,6 +75,7 @@ function Menu() {
           setUsername(decoded.username);
           AuthService.startTokenRefreshTimer();
           fetchUserData();
+          fetchNotifications();
         }
       }
     };
@@ -94,12 +99,135 @@ function Menu() {
       .catch((err) => console.error("Error fetching experience points:", err));
   };
 
+  const fetchNotifications = async () => {
+    try {
+      const data = await NotificationService.fetchUserNotifications();
+      setNotifications(data);
+      const unread = data.filter(n => !n.isRead).length;
+      setUnreadCount(unread);
+    } catch (err) {
+      console.error("Error fetching notifications:", err);
+    }
+  };
+
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      await NotificationService.markAsRead(notificationId);
+      setNotifications(notifications.map(n => n._id == notificationId ? { ...n, isRead: true } : n ));
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    } catch (err) {
+      console.error("Error marking notification as read:", err);
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      await NotificationService.markAllAsRead();
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
+      setUnreadCount(0);
+      Swal.fire({
+        icon: 'success',
+        title: 'Thành công!',
+        text: 'Đã đánh dấu tất cả thông báo là đã đọc.',
+        timer: 1500,
+        showConfirmButton: false
+      });
+    } catch (err) {
+      console.error("Error marking all as read:", err);
+    }
+  };
+
+  const handleToggleReadStatus = async (notificationId, currentStatus) => {
+    try {
+      if (currentStatus) {
+        await NotificationService.markAsUnread(notificationId);
+        setNotifications(notifications.map(n =>
+          n._id == notificationId ? { ...n, isRead: false } : n
+        ));
+        setUnreadCount(prev => prev + 1);
+      } else {
+        await NotificationService.markAsRead(notificationId);
+        setNotifications(notifications.map(n =>
+          n._id == notificationId ? { ...n, isRead: true } : n
+        ));
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
+    } catch (err) {
+      console.error("Error toggling read status:", err);
+    }
+  };
+
+  const formatTime = (dateString) => {
+    const now = new Date();
+    const notifTime = new Date(dateString);
+    const diff = Math.floor((now - notifTime) / 1000);
+    if (diff < 60) return 'Vừa xong';
+    if (diff < 3600) return `${Math.floor(diff / 60)} phút trước`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)} giờ trước`;
+    if (diff < 604800) return `${Math.floor(diff / 86400)} ngày trước`;
+    return notifTime.toLocaleDateString('vi-VN');
+  };
+
+  const getNotificationIcon = (type) => {
+    switch (type) {
+      case 'success': return '✅';
+      case 'warning': return '⚠️';
+      case 'promo': return '🎁';
+      case 'system': return '⚙️';
+      case 'update': return '🆕';
+      default: return 'ℹ️';
+    }
+  };
+
+  const handleDeleteNotification = async (notificationId) => {
+    Swal.fire({
+      title: 'Xác nhận xóa?',
+      text: 'Bạn có chắc muốn xóa thông báo này không?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Xóa',
+      cancelButtonText: 'Hủy'
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await NotificationService.deleteNotification(notificationId);
+          setNotifications(notifications.filter(n => n._id !== notificationId));
+          setUnreadCount(notifications.filter(n => !n.isRead && n._id !== notificationId).length);
+          Swal.fire({
+            icon: 'success',
+            title: 'Đã xóa!',
+            text: 'Thông báo đã được xóa thành công.',
+            timer: 1200,
+            showConfirmButton: false
+          });
+        } catch (err) {
+          console.error("Error deleting notification:", err);
+          Swal.fire({
+            icon: 'error',
+            title: 'Lỗi!',
+            text: 'Không thể xóa thông báo. Vui lòng thử lại.',
+          });
+        }
+      }
+    });
+  };
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 50);
     };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (!e.target.closest('.notification-wrapper')) {
+        setShowNotificationDropdown(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
   }, []);
 
   const handleLogout = () => {
@@ -160,10 +288,96 @@ function Menu() {
               <div className="xp me-4">
                 ⭐ <strong>XP: {leaderData.experiencePoints}</strong>
               </div>
-              <div className="streak">
+              <div className="streak me-4">
                 <Link to="/streak" className="text-decoration-none text-dark" style={{ textDecoration: 'none' }}>
                   🔥 <strong>{streakData.streak} ngày</strong>
                 </Link>
+              </div>
+              <div className="notification-wrapper">
+                <button 
+                  className="notification-bell-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowNotificationDropdown(!showNotificationDropdown);
+                  }}
+                >
+                  <i className="fas fa-bell"></i>
+                  {unreadCount > 0 && (
+                    <span className="notification-badge">{unreadCount}</span>
+                  )}
+                </button>
+                {showNotificationDropdown && (
+                  <div className="notification-dropdown">
+                    <div className="notification-header">
+                      <h6>Thông báo của bạn</h6>
+                      {unreadCount > 0 && (
+                        <button 
+                          className="mark-all-read-btn"
+                          onClick={handleMarkAllAsRead}
+                        >
+                          Đánh dấu tất cả đã đọc
+                        </button>
+                      )}
+                    </div>
+                    <div className="notification-list">
+                      {notifications.length == 0 ? (
+                        <div className="no-notifications">
+                          <i className="fas fa-bell-slash"></i>
+                          <p>Không có thông báo nào</p>
+                        </div>
+                      ) : (
+                        notifications.map(notif => (
+                          <div 
+                            key={notif._id}
+                            className={`notification-item ${!notif.isRead ? 'unread' : ''}`}
+                          >
+                            <div
+                              className="notif-main"
+                              onClick={() => {
+                                if (!notif.isRead) handleMarkAsRead(notif._id);
+                                if (notif.link) window.open(notif.link, '_blank');
+                              }}
+                            >
+                              <div className="notif-icon">{getNotificationIcon(notif.type)}</div>
+                              <div className="notif-content">
+                                <h6 className="notif-title">{notif.title}</h6>
+                                <p>{notif.message}</p>
+                                <span className="notif-time">{formatTime(notif.createdAt)}</span>
+                              </div>
+
+                              <div className="notif-actions">
+                                {!notif.isRead && <span className="unread-dot"></span>}
+                                <button
+                                  className="toggle-read-btn"
+                                  title={notif.isRead ? "Đánh dấu là chưa đọc" : "Đánh dấu là đã đọc"}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleReadStatus(notif._id, notif.isRead);
+                                  }}
+                                >
+                                  {notif.isRead ? (
+                                    <i className="fas fa-envelope-open"></i>
+                                  ) : (
+                                    <i className="fas fa-envelope"></i>
+                                  )}
+                                </button>
+                                <button
+                                  className="delete-notif-btn"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteNotification(notif._id);
+                                  }}
+                                >
+                                  <i className="fas fa-trash"></i>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}

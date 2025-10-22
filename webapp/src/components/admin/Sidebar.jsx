@@ -234,6 +234,16 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
                         </li>
                         <li
                             className={`admin-nav-item ${
+                                location.pathname == "/admin/notification" ? "active" : ""
+                            }`}
+                        >
+                            <Link to="/admin/notification">
+                                <i className="fas fa-bell"></i>
+                                <p>Quản lý thông báo</p>
+                            </Link>
+                        </li>
+                        <li
+                            className={`admin-nav-item ${
                                 location.pathname == "/admin/userprogress" ? "active" : ""
                             }`}
                         >

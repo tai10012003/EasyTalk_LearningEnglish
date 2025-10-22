@@ -54,8 +54,9 @@ class UserService {
         if (password !== confirmPassword) throw new Error("Passwords do not match.");
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = { username, email, password: hashedPassword, role, active: "active" };
-        await this.userRepository.insert(user);
-        return { message: "Đăng ký thành công !!" };
+        const result = await this.userRepository.insert(user);
+        user._id = result.insertedId;
+        return user;
     }
 
     generateAccessToken(user) {

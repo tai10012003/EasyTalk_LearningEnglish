@@ -110,6 +110,19 @@ export const NotificationService = {
         }
     },
 
+    async markAsUnread(id) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/notification/api/un-read/${id}`, {
+                method: "PUT",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (error) {
+            console.error("Error marking notification as read:", error);
+            throw error;
+        }
+    },
+
     async markAllAsRead() {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/notification/api/read-all`, {

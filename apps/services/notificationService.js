@@ -23,10 +23,11 @@ class NotificationService {
     async createNotificationForAll(title, message, type = "info", link = null) {
         try {
             const users = await this.notificationRepository.getAllUsers();
-            if (users.length == 0) {
+            const normalUsers = users.filter(u => u.role == "user");
+            if (normalUsers.length == 0) {
                 return { count: 0, insertedIds: [] };
             }
-            const notifications = users.map(user => ({
+            const notifications = normalUsers.map(user => ({
                 user: new ObjectId(user._id),
                 title,
                 message,
@@ -57,6 +58,10 @@ class NotificationService {
 
     async markAsRead(notificationId) {
         return await this.notificationRepository.updateNotification(notificationId, { isRead: true });
+    }
+
+    async markAsUnRead(notificationId) {
+        return await this.notificationRepository.updateNotification(notificationId, { isRead: false });
     }
 
     async markAllAsRead(userId) {

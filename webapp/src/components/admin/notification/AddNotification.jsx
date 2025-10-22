@@ -12,17 +12,27 @@ const AddNotification = ({ isOpen, onClose, onCreated }) => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
 
+    const fetchAllUsers = async () => {
+        try {
+            let allUsers = [];
+            let page = 1;
+            let totalPages = 1;
+            do {
+                const res = await UserService.fetchUser(page, 100);
+                const usersOnly = (res.data || []).filter(u => u.role == 'user');
+                allUsers = allUsers.concat(usersOnly);
+                totalPages = res.totalPages || 1;
+                page++;
+            } while (page <= totalPages);
+            setUsers(allUsers);
+        } catch (err) {
+            console.error("Error loading all users:", err);
+        }
+    };
+
     useEffect(() => {
         if (!isOpen) return;
-        const loadUsers = async () => {
-            try {
-                const res = await UserService.fetchUser();
-                setUsers(res.data || []);
-            } catch (err) {
-                console.error("Error loading users:", err);
-            }
-        };
-        loadUsers();
+        fetchAllUsers();
     }, [isOpen]);
 
     const handleSubmit = async (e) => {
@@ -120,7 +130,7 @@ const AddNotification = ({ isOpen, onClose, onCreated }) => {
                         <div className="mb-3">
                             <label className="form-label">Loại thông báo:</label>
                             <select
-                                className="form-select"
+                                className="form-select select-colored"
                                 value={type}
                                 onChange={(e) => setType(e.target.value)}
                             >
@@ -146,7 +156,7 @@ const AddNotification = ({ isOpen, onClose, onCreated }) => {
                         <div className="mb-3">
                             <label className="form-label">Gửi đến người dùng:</label>
                             <select
-                                className="form-select"
+                                className="form-select select-colored"
                                 value={userId}
                                 onChange={(e) => setUserId(e.target.value)}
                             >
@@ -159,8 +169,8 @@ const AddNotification = ({ isOpen, onClose, onCreated }) => {
                             </select>
                             <small className="text-muted">
                                 {userId 
-                                    ? "✓ Sẽ gửi cho 1 người dùng đã chọn" 
-                                    : "✓ Sẽ gửi cho tất cả người dùng trong hệ thống"
+                                    ? " ✓ Sẽ gửi cho 1 người dùng đã chọn" 
+                                    : " ✓ Sẽ gửi cho tất cả người dùng trong hệ thống"
                                 }
                             </small>
                         </div>
