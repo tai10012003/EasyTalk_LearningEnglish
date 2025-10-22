@@ -3228,3 +3228,179 @@
     font-size: 12px;
   }
 }
+
+ /* === NOTIFICATION LIST === */
+.admin-notification-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-notification-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-notification-add {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.admin-notification-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-notification-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-notification-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-notification-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-notification-table th,
+.admin-notification-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-notification-table th:last-child,
+.admin-notification-table td:last-child {
+  border-right: none;
+}
+
+.admin-notification-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-notification-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-notification-image {
+  width: 120px;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.admin-notification-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-notification-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-notification-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-notification-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-notification-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-notification-page-item {
+  display: inline-block;
+}
+
+.admin-notification-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-notification-page-item.active .admin-notification-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-notification-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-notification-table {
+    min-width: 600px;
+  }
+  .admin-notification-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-notification-table {
+    min-width: 100%;
+  }
+  .admin-notification-title {
+    font-size: 20px;
+  }
+  .admin-notification-actions button,
+  .admin-notification-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}

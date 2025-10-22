@@ -28,6 +28,7 @@ import UpdateDictationExercise from "@/views/admin/dictation/UpdateDictationExer
 import User from "@/views/admin/user/User";
 import AddUser from "@/views/admin/user/AddUserPage";
 import UpdateUser from "@/views/admin/user/UpdateUserPage";
+import Notification from "@/views/admin/Notification";
 import NotFound from "@/views/admin/NotFound.jsx";
 import PrivateRoute from "@/components/user/auth/PrivateRoute.jsx";
 
@@ -269,6 +270,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateUser />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "notification",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <Notification />
             </PrivateRoute>
         ),
     },

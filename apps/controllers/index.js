@@ -17,9 +17,9 @@ router.use("/chat", require(__dirname + "/chatcontroller"));
 router.use("/communicate", require(__dirname + "/communicatecontroller"));
 router.use("/writing", require(__dirname + "/writingcontroller"));
 router.use("/reminder", require(__dirname + "/remindercontroller"));
+router.use("/notification", require(__dirname + "/notificationcontroller"));
 router.use("/userprogress", require(__dirname + "/userprogresscontroller"));
 router.use("/dictation-exercise", require(__dirname + "/dictationcontroller"))
-router.use("/dictionary", require(__dirname + "/dictionarycontroller"));
 
 router.get("/single-blog", function (req, res) {
     res.render("single-blog.ejs");
