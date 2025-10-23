@@ -189,7 +189,7 @@ router.post("/profile/update", verifyToken, async (req, res) => {
 router.get("/api/user-list", async function (req, res) {
   try {
     const page = parseInt(req.query.page) || 1;
-    const limit = 3;
+    const limit = 12;
     const role = req.query.role;
     const { users, totalUsers } = await userService.getUserList(page, limit, role);
     const totalPages = Math.ceil(totalUsers / limit);
@@ -260,51 +260,11 @@ router.put('/update/:id', async (req, res) => {
 router.post('/reset-temp-password/:userId', async (req, res) => {
   try {
     const { userId } = req.params;
-    const user = await userService.getUser(userId);
-    if (!user) {
-      return res.status(404).json({ message: "Không tìm thấy người dùng!" });
-    }
-    const tempPassword = Math.random().toString(36).slice(-8);
-    const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
-    await userService.updatePassword(userId, hashedTempPassword);
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user: config.email.user, pass: config.email.pass },
-    });
-    const mailOptions = {
-      from: config.email.user,
-      to: user.email,
-      subject: '🔑 Mật khẩu tạm thời mới từ EasyTalk',
-      html: `
-        <p>Xin chào <strong>${user.username}</strong>,</p>
-        <p>Quản trị viên đã đặt lại mật khẩu tạm thời cho tài khoản của bạn.</p>
-        <p>Vui lòng sử dụng mật khẩu tạm thời sau để đăng nhập và đổi lại mật khẩu mới:</p>
-        <h3 style="color:#4CAF50;">${tempPassword}</h3>
-        <p>Vì lý do bảo mật, bạn nên thay đổi mật khẩu ngay sau khi đăng nhập.</p>
-        <br/>
-        <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
-      `,
-    };
-    transporter.sendMail(mailOptions, async (error) => {
-      if (error) {
-        console.error("Email send error:", error);
-        return res.status(500).json({ message: "Gửi email thất bại!" });
-      }
-      await notificationService.createNotification(
-        userId,
-        "Mật khẩu tạm thời đã được đặt lại",
-        `Quản trị viên đã đặt lại mật khẩu tạm thời cho tài khoản của bạn, vui lòng kiểm tra email`,
-        "system"
-      );
-      res.json({
-        success: true,
-        message: "Đặt lại mật khẩu tạm thời thành công!",
-        tempPassword,
-      });
-    });
+    const result = await userService.resetTempPassword(userId);
+    res.json(result);
   } catch (error) {
     console.error("Error resetting temp password:", error);
-    res.status(500).json({ message: "Lỗi khi đặt lại mật khẩu tạm thời!" });
+    res.status(500).json({ message: error.message || "Lỗi khi đặt lại mật khẩu tạm thời!" });
   }
 });
 

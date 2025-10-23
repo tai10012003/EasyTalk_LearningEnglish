@@ -13,6 +13,10 @@ class NotificationRepository {
         this.db = this.client.db(config.mongodb.database);
         this.notificationsCollection = this.db.collection("notifications");
         this.usersCollection = this.db.collection("users");
+        this.notificationsCollection.createIndex(
+            { expireAt: 1 },
+            { expireAfterSeconds: 0 }
+        );
     }
 
     async createNotification(notification) {
@@ -87,6 +91,10 @@ class NotificationRepository {
             _id: new ObjectId(notificationId),
         });
         return result.deletedCount > 0;
+    }
+
+    async deleteManyByUser(userId) {
+        return await this.notificationsCollection.deleteMany({ user: new ObjectId(userId) });
     }
 
     async markAllAsRead(userId) {

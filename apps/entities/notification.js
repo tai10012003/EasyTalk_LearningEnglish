@@ -6,6 +6,7 @@ class Notification {
     type;
     isRead;
     createdAt;
+    expireAt;
     constructor() {}
 }
 

@@ -15,7 +15,6 @@ class GateRepository {
 
     async findGates(page = 1, limit = 12) {
         const skip = (page - 1) * limit;
-
         const gates = await this.gatesCollection.aggregate([
             {
                 $lookup: {
@@ -29,7 +28,6 @@ class GateRepository {
             { $skip: skip },
             { $limit: limit }
         ]).toArray();
-
         const totalGates = await this.gatesCollection.countDocuments();
         return { gates, totalGates };
     }

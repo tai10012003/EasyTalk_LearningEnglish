@@ -7,6 +7,8 @@ class NotificationService {
     }
 
     async createNotification(userId, title, message, type = "info", link = null) {
+        const expireAt = new Date();
+        expireAt.setDate(expireAt.getDate() + 7);
         const notification = {
             user: new ObjectId(userId),
             title,
@@ -15,6 +17,7 @@ class NotificationService {
             link: link || null,
             isRead: false,
             createdAt: new Date(),
+            expireAt,
         };
         const insertedId = await this.notificationRepository.createNotification(notification);
         return insertedId;
@@ -27,6 +30,8 @@ class NotificationService {
             if (normalUsers.length == 0) {
                 return { count: 0, insertedIds: [] };
             }
+            const expireAt = new Date();
+            expireAt.setDate(expireAt.getDate() + 7);
             const notifications = normalUsers.map(user => ({
                 user: new ObjectId(user._id),
                 title,
@@ -35,6 +40,7 @@ class NotificationService {
                 link: link || null,
                 isRead: false,
                 createdAt: new Date(),
+                expireAt,
             }));
             const result = await this.notificationRepository.createManyNotifications(notifications);
             return { count: result.insertedCount, insertedIds: result.insertedIds };
@@ -70,6 +76,16 @@ class NotificationService {
 
     async deleteNotification(notificationId) {
         return await this.notificationRepository.deleteNotification(notificationId);
+    }
+
+    async deleteNotificationsByUser(userId) {
+        try {
+            const result = await this.notificationRepository.deleteManyByUser(userId);
+            return result;
+        } catch (error) {
+            console.error("Lỗi khi xóa thông báo của user:", error);
+            throw error;
+        }
     }
 }
 

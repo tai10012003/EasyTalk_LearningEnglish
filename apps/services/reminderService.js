@@ -2,6 +2,7 @@ const nodemailer = require('nodemailer');
 const cron = require('node-cron');
 const config = require('../config/setting');
 const { ReminderRepository } = require('./../repositories');
+const NotificationService = require("./notificationService");
 
 class ReminderService {
     constructor() {
@@ -14,6 +15,7 @@ class ReminderService {
                 pass: config.email.pass,
             },
         });
+        this.notificationService = new NotificationService();
         this.initReminders();
     }
 
@@ -105,7 +107,8 @@ class ReminderService {
                         reminder.email,
                         reminder.reminderTime,
                         reminder.frequency,
-                        reminder.additionalInfo || "Không có ghi chú thêm."
+                        reminder.additionalInfo || "Không có ghi chú thêm.",
+                        reminder.user
                     );
                     if (
                         !reminder.frequency ||
@@ -137,25 +140,52 @@ class ReminderService {
         }
     }
 
-    sendEmail(email, reminderTime, frequency, additionalInfo) {
+    sendEmail(email, reminderTime, frequency, additionalInfo, userId = null) {
         const mailOptions = {
             from: config.email.user,
             to: email,
-            subject: "📘 EasyTalk - Nhắc nhở học tập",
+            subject: "📘 EasyTalk - Lời Nhắc Học Tập Dành Cho Bạn",
             html: `
-                <p>Xin chào 👋,</p>
-                <p>Bạn đã đặt lời nhắc học tập vào <strong>${reminderTime}</strong> (${frequency}).</p>
-                <p><strong>Lời nhắn của bạn:</strong></p>
-                <p style="white-space: pre-line">${additionalInfo}</p>
-                <p>Chúc bạn học tập thật hiệu quả và duy trì sự kỷ luật nhé 💪.</p>
-                <p>— EasyTalk Team</p>
+                <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 10px; color: #333;">
+                    <h2 style="color: #4CAF50; text-align: center;">⏰ Đã đến giờ học rồi!</h2>
+                    <p>Xin chào bạn 👋,</p>
+                    <p>Bạn đã đặt lời nhắc học tập vào lúc <strong>${reminderTime}</strong> (<em>${frequency}</em>).</p>
+                    <p style="margin-top: 10px;"><strong>Lời nhắn bạn đã để lại cho chính mình:</strong></p>
+                    <blockquote style="border-left: 4px solid #4CAF50; padding-left: 10px; color: #555; font-style: italic;">
+                        ${additionalInfo || "Không có lời nhắn nào, nhưng EasyTalk tin rằng bạn sẽ làm tốt hôm nay!"}
+                    </blockquote>
+                    <p style="margin-top: 15px;">Hãy dành một chút thời gian để ôn luyện, luyện nghe, hoặc học vài từ vựng mới nhé. Mỗi bước nhỏ hôm nay đều giúp bạn tiến gần hơn đến mục tiêu của mình 💪.</p>
+                    <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
+                    <p style="font-size: 14px; color: #666;">
+                        Nếu bạn muốn thay đổi hoặc hủy lời nhắc, vui lòng đăng nhập vào tài khoản của bạn trên 
+                        <a href="https://easytalk.vn" style="color: #4CAF50; text-decoration: none;">EasyTalk</a>.
+                    </p>
+                    <p style="font-size: 14px; color: #666; margin-top: 20px;">
+                        Chúc bạn một ngày học tập hiệu quả và đầy năng lượng! 🌟<br>
+                        — <strong>Đội ngũ EasyTalk</strong><br>
+                        <a href="https://easytalk.vn" style="color: #4CAF50; text-decoration: none;">www.easytalk.vn</a>
+                    </p>
+                </div>
             `,
         };
-        this.transporter.sendMail(mailOptions, (error, info) => {
+        this.transporter.sendMail(mailOptions, async (error, info) => {
             if (error) {
                 console.error("Lỗi gửi email:", error);
             } else {
                 console.log("✅ Email đã gửi:", info.response);
+                if (userId) {
+                    try {
+                        await this.notificationService.createNotification(
+                            userId,
+                            "Email nhắc nhở đã gửi!",
+                            `Email nhắc nhở học tập vào lúc ${reminderTime} (${frequency}) đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.`,
+                            "system"
+                        );
+                        console.log(`🔔 Notification đã tạo cho user ${userId}`);
+                    } catch (err) {
+                        console.error("❌ Lỗi tạo notification:", err);
+                    }
+                }
             }
         });
     }

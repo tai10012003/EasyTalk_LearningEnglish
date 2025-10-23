@@ -48,8 +48,64 @@ class UserService {
         return await this.userRepository.update(_id, updateFields);
     }
 
+    async resetTempPassword(userId) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) throw new Error("Không tìm thấy người dùng!");
+        const tempPassword = Math.random().toString(36).slice(-8);
+        const hashedTempPassword = await bcrypt.hash(tempPassword, 10);
+        await this.userRepository.updatePassword(userId, hashedTempPassword);
+        const mailOptions = {
+            from: config.email.user,
+            to: user.email,
+            subject: "🔑 Mật Khẩu Tạm Thời Mới Từ EasyTalk",
+            html: `
+            <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 8px; color: #333;">
+                <h2 style="text-align: center; color: #4CAF50;">Cập nhật mật khẩu tạm thời 🔒</h2>
+                <p>Xin chào <strong>${user.username}</strong>,</p>
+                <p>Đây là thông báo từ hệ thống <strong>EasyTalk</strong>.</p>
+                <p>Quản trị viên đã tiến hành <strong>đặt lại mật khẩu tạm thời</strong> cho tài khoản của bạn nhằm đảm bảo tính an toàn và bảo mật.</p>
+                <p>Bạn có thể sử dụng mật khẩu tạm thời bên dưới để đăng nhập:</p>
+                <div style="text-align: center; margin: 25px 0;">
+                <h2 style="color: #4CAF50; letter-spacing: 2px;">${tempPassword}</h2>
+                </div>
+                <p style="font-size: 15px;">Vì lý do bảo mật, <strong>bạn nên đổi mật khẩu ngay sau khi đăng nhập</strong> để đảm bảo tài khoản của bạn luôn được bảo vệ.</p>
+                <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
+                <p style="font-size: 14px; color: #666;">
+                Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng <strong>bỏ qua email này</strong> hoặc 
+                <a href="mailto:pductai14@gmail.com" style="color: #4CAF50; text-decoration: none;">liên hệ với đội ngũ hỗ trợ EasyTalk</a> để được trợ giúp.
+                </p>
+                <p style="font-size: 14px; color: #666; margin-top: 20px;">
+                Trân trọng,<br>
+                <strong>Đội ngũ EasyTalk</strong><br>
+                <a href="https://easytalk.vn" style="color: #4CAF50; text-decoration: none;">www.easytalk.vn</a>
+                </p>
+            </div>
+            `,
+        };
+        await this.transporter.sendMail(mailOptions);
+        await notificationService.createNotification(
+            userId,
+            "Mật khẩu tạm thời đã được đặt lại",
+            `Quản trị viên đã đặt lại mật khẩu tạm thời cho tài khoản của bạn, vui lòng kiểm tra email.`,
+            "system"
+        );
+        return {
+            success: true,
+            message: "Đặt lại mật khẩu tạm thời thành công! Email đã được gửi tới người dùng.",
+            tempPassword,
+        };
+    }
+
     async deleteUser(id) {
-        return await this.userRepository.delete(id);
+        const user = await this.userRepository.findById(id);
+        if (!user) throw new Error("Không tìm thấy người dùng.");
+        const result = await this.userRepository.delete(id);
+        try {
+            await notificationService.deleteNotificationsByUser(id);
+        } catch (error) {
+            console.error(`Không thể xóa thông báo liên quan tới user ${id}:`, error);
+        }
+        return result;
     }
 
     // async register(username, email, password, confirmPassword, role = "user") {
@@ -74,13 +130,22 @@ class UserService {
         const mailOptions = {
             from: config.email.user,
             to: email,
-            subject: "Mã xác thực đăng ký tài khoản EasyTalk",
+            subject: "🔐 Xác thực đăng ký tài khoản EasyTalk",
             html: `
-                <p>Xin chào <strong>${username}</strong>,</p>
-                <p>Bạn vừa yêu cầu đăng ký tài khoản trên EasyTalk.</p>
-                <p>Vui lòng nhập mã xác thực 5 số bên dưới để hoàn tất đăng ký:</p>
-                <h2 style="color: #4CAF50;">${verificationCode}</h2>
-                <p>Mã có hiệu lực trong 5 phút.</p>
+                <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 8px; color: #333;">
+                    <h2 style="text-align: center; color: #4CAF50;">Chào mừng bạn đến với EasyTalk! 🎉</h2>
+                    <p>Xin chào <strong>${username}</strong>,</p>
+                    <p>Cảm ơn bạn đã lựa chọn <strong>EasyTalk</strong> để đồng hành trong hành trình học tiếng Anh của mình.</p>
+                    <p>Để hoàn tất việc đăng ký tài khoản, vui lòng nhập mã xác thực gồm <strong>5 chữ số</strong> dưới đây vào ô xác thực trên trang đăng ký:</p>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <h1 style="color: #4CAF50; letter-spacing: 5px;">${verificationCode}</h1>
+                    </div>
+                    <p><strong>Lưu ý:</strong> Mã này chỉ có hiệu lực trong <strong>1 phút 30 giây</strong>. Sau thời gian này, bạn có thể yêu cầu gửi lại mã mới nếu cần.</p>
+                    <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+                    <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
+                    <p style="font-size: 14px; color: #666;">Thân mến,<br><strong>Đội ngũ EasyTalk</strong><br>
+                    <a href="https://easytalk.vn" style="color: #4CAF50; text-decoration: none;">www.easytalk.vn</a></p>
+                </div>
             `,
         };
         await this.transporter.sendMail(mailOptions);
@@ -149,13 +214,21 @@ class UserService {
                 to: email,
                 subject: "🔑 Mật khẩu tạm thời từ EasyTalk",
                 html: `
-                    <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
-                    <p>Bạn vừa đăng ký tài khoản bằng Google trên EasyTalk.</p>
-                    <p>Đây là mật khẩu tạm thời để bạn có thể đăng nhập bằng email nếu muốn:</p>
-                    <h3 style="color:#4CAF50;">${tempPassword}</h3>
-                    <p>Vì lý do bảo mật, bạn nên đổi mật khẩu sau khi đăng nhập.</p>
-                    <br/>
-                    <p>Trân trọng,<br>Nhóm hỗ trợ EasyTalk</p>
+                    <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 8px; color: #333;">
+                        <h2 style="text-align: center; color: #4CAF50;">Chào mừng bạn đến với EasyTalk! 🎉</h2>
+                        <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
+                        <p>Cảm ơn bạn đã đăng ký và đăng nhập bằng <strong>Google</strong> trên nền tảng <strong>EasyTalk</strong>.</p>
+                        <p>Chúng tôi đã tạo cho bạn một <strong>mật khẩu tạm thời</strong> để bạn có thể đăng nhập bằng tài khoản thông thường (email & mật khẩu) nếu muốn. 
+                        Điều này giúp bạn linh hoạt sử dụng cả hai cách đăng nhập — bằng Google hoặc trực tiếp qua hệ thống.</p>
+                        <div style="text-align: center; margin: 25px 0;">
+                            <h1 style="color: #4CAF50; letter-spacing: 3px;">${tempPassword}</h1>
+                        </div>
+                        <p><strong>Vì lý do bảo mật</strong>, bạn nên thay đổi mật khẩu ngay sau khi đăng nhập lần đầu bằng mật khẩu tạm thời này.</p>
+                        <p>Nếu bạn không thực hiện yêu cầu này, vui lòng bỏ qua email này.</p>
+                        <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
+                        <p style="font-size: 14px; color: #666;">Thân mến,<br><strong>Đội ngũ EasyTalk</strong><br>
+                        <a href="https://easytalk.vn" style="color: #4CAF50; text-decoration: none;">www.easytalk.vn</a></p>
+                    </div>
                 `,
             };
             this.transporter.sendMail(mailOptions, (error) => {
@@ -294,15 +367,28 @@ class UserService {
         const mailOptions = {
             from: config.email.user,
             to: email,
-            subject: "Thông Báo Mã Xác Thực Đặt Lại Mật Khẩu Từ EasyTalk",
-            html: `<p>Xin chào,</p>
-            <p>Chúng tôi đã nhận được yêu cầu đặt lại mật khẩu của bạn. Vui lòng sử dụng mã xác minh bên dưới để tiến hành đặt lại mật khẩu của bạn. Mã này có hiệu lực trong <strong>1 phút</strong>.</p>
-            <h2 style="color: #4CAF50;">${verificationCode}</h2>
-            <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng bỏ qua email này hoặc <a href="pductai14@gmail.com">liên hệ với bộ phận hỗ trợ</a> nếu bạn có bất kỳ thắc mắc nào.</p>
-            <p>Trân trọng,</p>
-            <p>Nhóm hỗ trợ EasyTalk</p>`,
+            subject: "🔒 Mã Xác Thực Đặt Lại Mật Khẩu - EasyTalk",
+            html: `
+                <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 8px; color: #333;">
+                    <h2 style="text-align: center; color: #4CAF50;">Yêu cầu đặt lại mật khẩu 🔑</h2>
+                    <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
+                    <p>Chúng tôi đã nhận được yêu cầu <strong>đặt lại mật khẩu</strong> cho tài khoản của bạn trên <strong>EasyTalk</strong>.</p>
+                    <p>Vui lòng sử dụng <strong>mã xác thực 5 số</strong> bên dưới để tiếp tục quá trình đặt lại mật khẩu.  
+                    Mã có hiệu lực trong <strong>1 phút</strong>.</p>
+                    <div style="text-align: center; margin: 25px 0;">
+                        <h1 style="color: #4CAF50; letter-spacing: 4px;">${verificationCode}</h1>
+                    </div>
+                    <p>Nếu bạn không yêu cầu đặt lại mật khẩu, vui lòng <strong>bỏ qua email này</strong> hoặc 
+                    <a href="mailto:pductai14@gmail.com" style="color: #4CAF50; text-decoration: none;">liên hệ với bộ phận hỗ trợ EasyTalk</a> để được trợ giúp.</p>
+                    <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
+                    <p style="font-size: 14px; color: #666;">
+                        Trân trọng,<br>
+                        <strong>Đội ngũ EasyTalk</strong><br>
+                        <a href="https://easytalk.vn" style="color: #4CAF50; text-decoration: none;">www.easytalk.vn</a>
+                    </p>
+                </div>
+            `,
         };
-
         await this.transporter.sendMail(mailOptions);
         return { success: true, message: "Mã xác thực đã được gửi đến email của bạn!", expiresAt, serverTime: Date.now() };
     }
