@@ -5,7 +5,7 @@ const config = require("../config/setting");
 const { getGoogleUser } = require("../util/googleAuth");
 const { getFacebookAccessToken, getFacebookUser } = require("../util/facebookAuth");
 const { UserRepository } = require("./../repositories");
-const NotificationService = require("./NotificationService");
+const NotificationService = require("./notificationService");
 const notificationService = new NotificationService();
 
 class UserService {
