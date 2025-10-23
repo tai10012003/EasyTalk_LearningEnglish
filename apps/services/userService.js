@@ -5,6 +5,8 @@ const config = require("../config/setting");
 const { getGoogleUser } = require("../util/googleAuth");
 const { getFacebookAccessToken, getFacebookUser } = require("../util/facebookAuth");
 const { UserRepository } = require("./../repositories");
+const NotificationService = require("./NotificationService");
+const notificationService = new NotificationService();
 
 class UserService {
     constructor() {
@@ -50,12 +52,55 @@ class UserService {
         return await this.userRepository.delete(id);
     }
 
-    async register(username, email, password, confirmPassword, role = "user") {
-        if (password !== confirmPassword) throw new Error("Passwords do not match.");
+    // async register(username, email, password, confirmPassword, role = "user") {
+    //     if (password !== confirmPassword) throw new Error("Passwords do not match.");
+    //     const hashedPassword = await bcrypt.hash(password, 10);
+    //     const user = { username, email, password: hashedPassword, role, active: "active" };
+    //     const result = await this.userRepository.insert(user);
+    //     user._id = result.insertedId;
+    //     return user;
+    // }
+
+    async sendRegisterCode(username, email, password, role = "user") {
+        const exist = await this.userRepository.findByEmail(email);
+        if (exist) throw new Error("Email đã được sử dụng trong hệ thống, vui lòng nhập email khác!");
+        const verificationCode = Math.floor(10000 + Math.random() * 90000);
+        const expiresAt = Date.now() + 90 * 1000;
+        this.verificationCodes[email] = {
+            code: verificationCode,
+            expiresAt,
+            dataToRegister: { username, email, password, role },
+        };
+        const mailOptions = {
+            from: config.email.user,
+            to: email,
+            subject: "Mã xác thực đăng ký tài khoản EasyTalk",
+            html: `
+                <p>Xin chào <strong>${username}</strong>,</p>
+                <p>Bạn vừa yêu cầu đăng ký tài khoản trên EasyTalk.</p>
+                <p>Vui lòng nhập mã xác thực 5 số bên dưới để hoàn tất đăng ký:</p>
+                <h2 style="color: #4CAF50;">${verificationCode}</h2>
+                <p>Mã có hiệu lực trong 5 phút.</p>
+            `,
+        };
+        await this.transporter.sendMail(mailOptions);
+        return { success: true, message: "Mã xác thực đã được gửi tới email của bạn.", expiresAt, serverTime: Date.now(), };
+    }
+
+    async verifyRegisterCode(email, code) {
+        const record = this.verificationCodes[email];
+        if (!record) throw new Error("Mã xác thực đã hết hạn hoặc không tồn tại!");
+        if (Date.now() > record.expiresAt) {
+            delete this.verificationCodes[email];
+            throw new Error("Mã xác thực đã hết hạn, vui lòng gửi lại mã mới!");
+        }
+        if (String(record.code) !== String(code)) throw new Error("Mã xác thực không hợp lệ. Vui lòng nhập chính xác!");
+        const { username, password, role } = record.dataToRegister;
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = { username, email, password: hashedPassword, role, active: "active" };
         const result = await this.userRepository.insert(user);
         user._id = result.insertedId;
+        delete this.verificationCodes[email];
         return user;
     }
 
@@ -86,16 +131,19 @@ class UserService {
         const googleUser = await getGoogleUser(code);
         const { email, name } = googleUser;
         let user = await this.userRepository.findByEmail(email);
+        let isNewUser = false;
         if (!user) {
             const tempPassword = Math.random().toString(36).slice(-8);
             const hashedPassword = await bcrypt.hash(tempPassword, 10);
-            await this.userRepository.insert({
+            const insertResult = await this.userRepository.insert({
                 username: name || email.split("@")[0],
                 password: hashedPassword,
                 email,
                 role: "user",
                 active: "active",
             });
+            user = { _id: insertResult.insertedId, username: name || email.split("@")[0], email, role: "user", active: "active" };
+            isNewUser = true;
             const mailOptions = {
                 from: config.email.user,
                 to: email,
@@ -114,10 +162,23 @@ class UserService {
                 if (error) console.error("Gửi email thất bại:", error);
                 else console.log(`✅ Đã gửi mật khẩu tạm thời đến ${email}`);
             });
-            user = await this.userRepository.findByEmail(email);
         }
         if (user.active == "locked") {
             throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ!");
+        }
+        if (isNewUser) {
+            await notificationService.createNotification(
+                user._id,
+                "Chào mừng bạn đến với EasyTalk!",
+                "Bạn đã đăng ký tài khoản mới thành công. Hãy bắt đầu học ngay hôm nay nhé!",
+                "success"
+            );
+            await notificationService.createNotification(
+                user._id,
+                "Mật khẩu tạm thời đã gửi tới email!",
+                `Khi đăng nhập Google, mật khẩu tạm thời sẽ được gửi đến email ${email}. Vui lòng kiểm tra hộp thư email nhé!`,
+                "system"
+            );
         }
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);

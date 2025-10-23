@@ -11,19 +11,29 @@ const userService = new UserService();
 const notificationService = new NotificationService();
 const userprogressService = new UserprogressService();
 
-router.post("/register", async (req, res) => {
+router.post("/register/send-code", async (req, res) => {
   try {
-    const { username, email, password, confirmPassword, role } = req.body;
-    const user = await userService.register(username, email, password, confirmPassword, role);
+    const { username, email, password } = req.body;
+    const result = await userService.sendRegisterCode(username, email, password);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
+
+router.post("/register/verify-code", async (req, res) => {
+  try {
+    const { email, code } = req.body;
+    const user = await userService.verifyRegisterCode(email, code);
     await notificationService.createNotification(
       user._id,
       "Chào mừng bạn đến với EasyTalk!",
       "Bạn đã đăng ký tài khoản mới thành công. Hãy bắt đầu học ngay hôm nay nhé!",
       "success"
     );
-    res.status(201).json({ success: true, message: "Đăng ký thành công !!", user });
+    res.status(201).json({ success: true, message: "Đăng ký tài khoản thành công!", user });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 
@@ -100,9 +110,9 @@ router.post("/change-password", verifyToken, async (req, res) => {
       "Bạn đã đổi mật khẩu thành công. Hãy ghi nhớ mật khẩu mới nhé!",
       "success"
     );
-    res.json(result);
+    res.json({ success: true, message: result.message });
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    res.status(400).json({ success: false, message: error.message });
   }
 });
 

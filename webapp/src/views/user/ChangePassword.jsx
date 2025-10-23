@@ -6,24 +6,16 @@ import "react-toastify/dist/ReactToastify.css";
 
 const ChangePassword = () => {
     const handleChangePassword = async (currentPassword, newPassword, confirmNewPassword) => {
-        const result = await AuthService.changePassword(currentPassword, newPassword, confirmNewPassword);
-        if (result.success) {
-            toast.success("Mật khẩu thay đổi thành công!", {
-                position: "top-right",
-                autoClose: 2500,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-            });
-            setTimeout(() => {
-                window.location.href = "/login";
-            }, 2500);
-        } else {
-            toast.error(result.message, {
-                position: "top-right",
-                autoClose: 3000,
-            });
+        try {
+            const result = await AuthService.changePassword(currentPassword, newPassword, confirmNewPassword);
+            if (result.success) {
+                toast.success(result.message);
+                setTimeout(() => window.location.href = "/login", 2500);
+            } else {
+                toast.error(result.message);
+            }
+        } catch (err) {
+            toast.error(err.response?.data?.message || "Đã có lỗi xảy ra!");
         }
     };
 

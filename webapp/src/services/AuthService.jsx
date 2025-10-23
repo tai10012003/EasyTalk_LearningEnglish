@@ -41,28 +41,30 @@ export const AuthService = {
         }
     },
 
-    async register(username, email, password, confirmPassword) {
-        try {
-            const res = await fetch(`${API_URL}/user/register`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ username, email, password, confirmPassword }),
-            });
-
-            if (!res.ok) {
-                const errData = await res.json();
-                throw new Error(errData.message || `HTTP error! Status: ${res.status}`);
-            }
-
-            const data = await res.json();
-            hasShownAlert = false;
-            return { success: true, message: data.message || "Đăng ký thành công" };
-        } catch (error) {
-            console.error("Error registering:", error.message);
-            return { success: false, message: error.message || "Đăng ký thất bại" };
+    async sendRegisterCode(username, email, password, confirmPassword) {
+        const res = await fetch(`${API_URL}/user/register/send-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username, email, password, confirmPassword }),
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || "Lỗi khi gửi mã xác thực");
         }
+        return await res.json();
+    },
+
+    async verifyRegisterCode(email, code) {
+        const res = await fetch(`${API_URL}/user/register/verify-code`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, code }),
+        });
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.message || "Mã xác thực không đúng");
+        }
+        return await res.json();
     },
 
     async refreshToken() {

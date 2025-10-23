@@ -17,7 +17,12 @@ const ChangePasswordForm = ({ onSubmit }) => {
         e.preventDefault();
         const { currentPassword, newPassword, confirmNewPassword } = formData;
         if (newPassword !== confirmNewPassword) {
-            onSubmit(null, null, null, "Mật khẩu mới không khớp.");
+            onSubmit(null, null, null, "Mật khẩu mới và xác nhận mật khẩu không khớp!");
+            return;
+        }
+        const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/;
+        if (!passwordRegex.test(newPassword)) {
+            onSubmit(null, null, null, "Mật khẩu phải ít nhất 8 ký tự, chứa chữ hoa, số và ký tự đặc biệt!");
             return;
         }
         onSubmit(currentPassword, newPassword, confirmNewPassword);
