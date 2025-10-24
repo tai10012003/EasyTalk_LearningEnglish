@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import Swal from 'sweetalert2';
+import { io } from "socket.io-client";
 import { UserProgressService } from '@/services/UserProgressService.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
 import { NotificationService } from '@/services/NotificationService.jsx';
 import logo from '@/assets/images/logo.png';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const parseJwt = (token) => {
   try {
@@ -21,6 +24,7 @@ const isTokenExpired = (token) => {
 
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [socket, setSocket] = useState(null);
   const [username, setUsername] = useState('User');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -54,6 +58,31 @@ function Menu() {
   const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);
 
   useEffect(() => {
+    if (!isLoggedIn) return;
+    console.log("🔹 Initializing socket...");
+    const newSocket = io(API_URL, { transports: ['websocket', 'polling'] });
+    setSocket(newSocket);
+    newSocket.on("connect", () => {
+      const token = localStorage.getItem("token");
+      const decoded = parseJwt(token);
+      if (decoded && decoded.id) {
+        newSocket.emit("register", decoded.id);
+      }
+    });
+    newSocket.on("connect_error", (err) => console.error("❌ Socket connect error:", err));
+    newSocket.on("disconnect", (reason) => console.log("⚠️ Socket disconnected:", reason));
+    newSocket.on("new-notification", (notif) => {
+      setNotifications(prev => [notif, ...prev]);
+      setUnreadCount(prev => prev + 1);
+    });
+    return () => {
+      console.log("🔹 Disconnecting socket...");
+      newSocket.disconnect();
+      setSocket(null);
+    };
+  }, [isLoggedIn]);
+
+  useEffect(() => {
     const checkAndRefreshToken = async () => {
       const token = localStorage.getItem("token");
       const refreshToken = localStorage.getItem("refreshToken");
@@ -79,9 +108,9 @@ function Menu() {
         }
       }
     };
-
     checkAndRefreshToken();
   }, []);
+
   const fetchUserData = () => {
     UserProgressService.getUserStreak()
       .then((data) => {

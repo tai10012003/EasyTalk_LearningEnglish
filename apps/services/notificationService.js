@@ -1,9 +1,11 @@
 const { ObjectId } = require("mongodb");
 const { NotificationRepository } = require("../repositories");
+const { getIo } = require("../util/socket");
 
 class NotificationService {
     constructor() {
         this.notificationRepository = new NotificationRepository();
+        this.io = getIo();
     }
 
     async createNotification(userId, title, message, type = "info", link = null) {
@@ -20,6 +22,16 @@ class NotificationService {
             expireAt,
         };
         const insertedId = await this.notificationRepository.createNotification(notification);
+        const socketId = global.onlineUsers.get(userId.toString());
+        if (socketId) {
+            this.io.to(socketId).emit("new-notification", { 
+                _id: insertedId,
+                ...notification
+            });
+            console.log(`🔔 Notification đã gửi realtime cho user ${userId}`);
+        } else {
+            console.log(`⚠️ User ${userId} not online. Notification will be received on next page load.`);
+        }
         return insertedId;
     }
 
@@ -43,6 +55,14 @@ class NotificationService {
                 expireAt,
             }));
             const result = await this.notificationRepository.createManyNotifications(notifications);
+            normalUsers.forEach(user => {
+                const socketId = global.onlineUsers.get(user._id.toString());
+                if (socketId) {
+                    const notif = notifications.find(n => n.user.toString() == user._id.toString());
+                    this.io.to(socketId).emit("new-notification", { _id: notif._id, ...notif });
+                    console.log(`🔔 Notification đã gửi realtime cho user ${user._id}`);
+                }
+            });
             return { count: result.insertedCount, insertedIds: result.insertedIds };
         } catch (error) {
             console.error("Error creating notifications for all users:", error);

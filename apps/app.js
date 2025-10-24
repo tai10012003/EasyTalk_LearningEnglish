@@ -1,8 +1,12 @@
 var express = require("express");
+var app = express();
+const http = require("http");
+const server = http.createServer(app);
 var bodyParser = require("body-parser");
 const cors = require("cors");
-var app = express();
 require('dotenv').config();
+const { initSocket } = require("./util/socket");
+initSocket(server);
 
 // Cho phép tất cả domain (tạm thời)
 app.use(cors());
@@ -73,6 +77,6 @@ app.use("/static", express.static(__dirname + "/public"));
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
