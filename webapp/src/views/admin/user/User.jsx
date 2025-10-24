@@ -4,7 +4,7 @@ import { UserService } from "@/services/UserService.jsx";
 
 function User() {
     const fetchUser = async (page = 1, role = "") => {
-        const data = await UserService.fetchUser(page, 6, { role })
+        const data = await UserService.fetchUser(page, 12, { role })
         return {
             users: data.data || [],
             currentPage: data.currentPage,

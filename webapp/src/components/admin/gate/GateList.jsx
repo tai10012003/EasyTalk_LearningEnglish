@@ -7,6 +7,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
     const [gates, setGates] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
+    const [limit, setLimit] = useState(12);
     const [selectedGate, setSelectedGate] = useState(null);
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
@@ -19,6 +20,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
             setGates(data[dataKey] || []);
             setCurrentPage(data.currentPage);
             setTotalPages(data.totalPages);
+            if (data.limit) setLimit(data.limit);
         } catch (err) {
             console.error(err);
             setGates([]);
@@ -131,7 +133,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
                                     );
                                     return (
                                         <tr key={gate._id}>
-                                            <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                            <td>{(currentPage - 1) * limit + index + 1}</td>
                                             <td>{gate.title}</td>
                                             <td>{gate.journeyInfo ? gate.journeyInfo.title : "Không có hành trình"}</td>
                                             <td>{gate.stages ? gate.stages.length : 0}</td>

@@ -4,7 +4,7 @@ import { DictationExerciseService } from "@/services/DictationExerciseService.js
 
 function DictationExercise() {
     const fetchDictationExercise = async (page = 1) => {
-        const data = await DictationExerciseService.fetchDictationExercise(page, 6);
+        const data = await DictationExerciseService.fetchDictationExercise(page, 12);
         return {
             lessons: data.dictationExercises || [],
             currentPage: data.currentPage,

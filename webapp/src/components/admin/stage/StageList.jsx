@@ -123,7 +123,7 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                     );
                                     return (
                                         <tr key={stage._id}>
-                                            <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                            <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>{stage.title}</td>
                                             <td>{stage.gateInfo? `${stage.gateInfo.title} - ${stage.gateInfo.journeyInfo?.title}`: "Không có cổng"}</td>
                                             <td>{stage.questions ? stage.questions.length : 0}</td>

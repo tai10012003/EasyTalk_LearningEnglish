@@ -156,7 +156,7 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
                                     );
                                     return (
                                         <tr key={user._id}>
-                                            <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                            <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>{user.username}</td>
                                             <td>{user.email}</td>
                                             <td>

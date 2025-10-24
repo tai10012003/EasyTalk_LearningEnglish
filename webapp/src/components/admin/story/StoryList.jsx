@@ -121,7 +121,7 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                             {stories.length > 0 ? (
                                 stories.map((story, index) => (
                                     <tr key={story._id}>
-                                        <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                        <td>{(currentPage - 1) * 12 + index + 1}</td>
                                         <td>
                                             {story.image ? (
                                                 <img

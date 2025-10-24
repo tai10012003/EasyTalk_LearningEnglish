@@ -10,6 +10,7 @@ function Gate() {
             gates: res.gates || [],
             currentPage: res.currentPage,
             totalPages: res.totalPages,
+            limit,
         };
     };
 

@@ -124,7 +124,7 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                                     );
                                     return (
                                         <tr key={lesson._id}>
-                                            <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                            <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>
                                                 {lesson.images ? (
                                                     <img

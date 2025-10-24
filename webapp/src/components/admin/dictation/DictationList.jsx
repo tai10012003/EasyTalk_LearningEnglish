@@ -124,7 +124,7 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                                     );
                                     return (
                                         <tr key={dictation._id}>
-                                            <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                            <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>{dictation.title}</td>
                                             <td>{dictation.description?.length > 50 ? `${dictation.description.slice(0,50)} ...` : dictation.description}</td>
                                             <td>{dictation.content.length > 80 ? `${dictation.content.slice(0,80)} ...` : dictation.content}</td>

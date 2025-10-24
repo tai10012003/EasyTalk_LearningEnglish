@@ -130,7 +130,7 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
                                     );
                                     return (
                                         <tr key={journey._id}>
-                                            <td>{(currentPage - 1) * 6 + index + 1}</td>
+                                            <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>{journey.title}</td>
                                             <td>{journey.gates ? journey.gates.length : 0}</td>
                                             <td>{createdAt}</td>

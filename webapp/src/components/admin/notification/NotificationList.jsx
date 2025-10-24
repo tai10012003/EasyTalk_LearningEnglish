@@ -122,7 +122,7 @@ function NotificationList({ fetchData, deleteItem, title, dataKey }) {
                             className="admin-notification-page-link" 
                             onClick={() => setCurrentPage(currentPage - 1)}
                         >
-                            &laquo; Trước
+                            &laquo;
                         </button>
                     </li>
                 )}
@@ -133,7 +133,7 @@ function NotificationList({ fetchData, deleteItem, title, dataKey }) {
                             className="admin-notification-page-link" 
                             onClick={() => setCurrentPage(currentPage + 1)}
                         >
-                            Sau &raquo;
+                            &raquo;
                         </button>
                     </li>
                 )}
