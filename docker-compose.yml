@@ -18,5 +18,9 @@ services:
     container_name: frontend
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
+    volumes:
+      - /etc/letsencrypt/live/easytalk.id.vn/fullchain.pem:/etc/letsencrypt/live/easytalk.id.vn/fullchain.pem:ro
+      - /etc/letsencrypt/live/easytalk.id.vn/privkey.pem:/etc/letsencrypt/live/easytalk.id.vn/privkey.pem:ro
