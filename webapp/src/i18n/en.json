@@ -1,0 +1,11 @@
+{
+  "generalSettings": "General Settings",
+  "generalDesc": "Customize your language, timezone and date format.",
+  "dateFormat": "Date Format",
+  "language": "Language",
+  "timezone": "Timezone",
+  "saveChanges": "Save Changes",
+  "successSave": "Saved successfully!",
+  "errorSave": "Cannot save settings, please try again.",
+  "loading": "Loading settings..."
+}

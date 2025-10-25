@@ -1,0 +1,11 @@
+{
+  "generalSettings": "Cài đặt chung",
+  "generalDesc": "Tùy chỉnh ngôn ngữ, múi giờ và định dạng ngày để phù hợp với bạn.",
+  "dateFormat": "Định dạng ngày",
+  "language": "Ngôn ngữ",
+  "timezone": "Múi giờ học viên",
+  "saveChanges": "Lưu thay đổi",
+  "successSave": "Đã lưu thành công!",
+  "errorSave": "Không thể lưu cài đặt, vui lòng thử lại.",
+  "loading": "Đang tải cài đặt chung..."
+}
