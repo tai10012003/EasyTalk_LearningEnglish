@@ -22,4 +22,5 @@ services:
     depends_on:
       - backend
     volumes:
-      - ./webapp/certs:/usr/share/nginx/certs:ro
+      - /etc/letsencrypt/live/easytalk.id.vn:/etc/letsencrypt/live/easytalk.id.vn:ro
+      - /etc/letsencrypt/archive/easytalk.id.vn:/etc/letsencrypt/archive/easytalk.id.vn:ro
