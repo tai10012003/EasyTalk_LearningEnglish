@@ -13,6 +13,7 @@ const GateRepository = require('./gateRepository');
 const StageRepository = require('./stageRepository');
 const ReminderRepository = require('./reminderRepository');
 const NotificationRepository = require('./notificationRepository');
+const UserSettingRepository = require("./usersettingRepository")
 
 module.exports = {
     UserRepository,
@@ -30,4 +31,5 @@ module.exports = {
     StageRepository,
     ReminderRepository,
     NotificationRepository,
+    UserSettingRepository,
 };

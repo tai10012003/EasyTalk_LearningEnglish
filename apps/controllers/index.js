@@ -18,6 +18,7 @@ router.use("/communicate", require(__dirname + "/communicatecontroller"));
 router.use("/writing", require(__dirname + "/writingcontroller"));
 router.use("/reminder", require(__dirname + "/remindercontroller"));
 router.use("/notification", require(__dirname + "/notificationcontroller"));
+router.use("/setting", require(__dirname + "/usersettingcontroller"));
 router.use("/userprogress", require(__dirname + "/userprogresscontroller"));
 router.use("/dictation-exercise", require(__dirname + "/dictationcontroller"))
 

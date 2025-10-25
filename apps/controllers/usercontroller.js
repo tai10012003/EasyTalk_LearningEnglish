@@ -159,24 +159,16 @@ router.get("/profile/data", verifyToken, async (req, res) => {
   try {
     const user = await userService.getUserById(req.user.id);
     if (!user) return res.status(404).json({ message: "Không tìm thấy người dùng !" });
-    const userProgress = await userprogressService.getUserProgressByUserId(req.user.id);
-    if (!userProgress)
-      return res.status(404).json({ message: "User progress not found" });
     res.json({
       success: true,
       user,
-      achievements: {
-        unlockedGates: userProgress.unlockedGates.length,
-        unlockedStages: userProgress.unlockedStages.length,
-        experiencePoints: userProgress.experiencePoints,
-      },
     });
   } catch (error) {
     res.status(500).json({ message: "Error fetching profile data", error });
   }
 });
 
-router.post("/profile/update", verifyToken, async (req, res) => {
+router.put("/profile/update", verifyToken, async (req, res) => {
   try {
     const { username, email } = req.body;
     const result = await userService.updateProfile(req.user.id, username, email);

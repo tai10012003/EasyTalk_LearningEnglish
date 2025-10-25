@@ -13,6 +13,7 @@ const GateService= require('./gateService');
 const StageService= require('./stageService');
 const ReminderService= require('./reminderService');
 const NotificationService= require('./notificationService')
+const UserSettingService= require('./usersettingService')
 
 module.exports = {
     UserService,
@@ -30,4 +31,5 @@ module.exports = {
     StageService,
     ReminderService,
     NotificationService,
+    UserSettingService,
 };

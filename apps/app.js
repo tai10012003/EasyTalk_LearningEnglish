@@ -70,6 +70,9 @@ app.use(reminderController);
 var notificationController = require(__dirname + "/controllers/notificationcontroller");
 app.use(notificationController);
 
+var usersettingController = require(__dirname + "/controllers/usersettingcontroller");
+app.use(usersettingController);
+
 var userprogressController = require(__dirname + "/controllers/userprogresscontroller");
 app.use(userprogressController);
 

@@ -80,6 +80,20 @@ export const UserService = {
         }
     },
 
+    async updateProfile(formData) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/user/profile/update`, {
+                method: "PUT",
+                body: JSON.stringify(formData),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error updating user:", err);
+            throw err;
+        }
+    },
+
     async deleteUser(id) {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/user/delete/${id}`, {

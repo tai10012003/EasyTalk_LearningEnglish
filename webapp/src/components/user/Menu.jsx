@@ -648,13 +648,13 @@ function Menu() {
                           >
                             <i className="fas fa-bell me-2"></i>NHẮC NHỞ HỌC TẬP
                           </NavLink>
-                          <NavLink
+                          {/* <NavLink
                             className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                             to="/change-password"
                             onClick={handleLinkClick}
                           >
                             <i className="fas fa-key me-2"></i>ĐỔI MẬT KHẨU
-                          </NavLink>
+                          </NavLink> */}
                           <NavLink
                             className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                             to="/setting"
