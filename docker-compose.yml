@@ -9,6 +9,8 @@ services:
       - "3000:3000"
     env_file:
       - ./apps/.env.production
+    environment:
+      - NODE_ENV=production
 
   frontend:
     build:

@@ -4,7 +4,9 @@ const http = require("http");
 const server = http.createServer(app);
 var bodyParser = require("body-parser");
 const cors = require("cors");
-require('dotenv').config();
+const dotenv = require('dotenv');
+const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
+dotenv.config({ path: envFile });
 const { initSocket } = require("./util/socket");
 initSocket(server);
 
