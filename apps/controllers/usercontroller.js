@@ -54,12 +54,13 @@ router.get("/auth/google", (req, res) => {
 router.get("/auth/google/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực");
+  const redirectBase = process.env.CLIENT_URL || "http://localhost:5173";
   try {
     const { token, refreshToken, role } = await userService.loginWithGoogle(code);
-    const redirectUrl = `http://localhost:5173/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=google`;
+    const redirectUrl = `${redirectBase}/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=google`;
     res.redirect(redirectUrl);
   } catch (error) {
-    res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
+    res.redirect(`${redirectBase}/login?error=${encodeURIComponent(error.message)}`);
   }
 });
 
@@ -70,13 +71,14 @@ router.get("/auth/facebook", (req, res) => {
 router.get("/auth/facebook/callback", async (req, res) => {
   const code = req.query.code;
   if (!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực từ Facebook");
+  const redirectBase = process.env.CLIENT_URL || "http://localhost:5173";
   try {
     const { token, refreshToken, role } = await userService.loginWithFacebook(code);
-    const redirectUrl = `http://localhost:5173/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=facebook`;
+    const redirectUrl = `${redirectBase}/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=facebook`;
     res.redirect(redirectUrl);
   } catch (error) {
     console.error("Facebook login error:", error);
-    res.redirect(`http://localhost:5173/login?error=${encodeURIComponent(error.message)}`);
+    res.redirect(`${redirectBase}/login?error=${encodeURIComponent(error.message)}`);
   }
 });
 
