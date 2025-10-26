@@ -6,16 +6,21 @@ WORKDIR /app
 COPY webapp/package*.json ./
 RUN npm ci
 
-# Copy source webapp và build
+# Copy file .env.production vào môi trường build
+COPY webapp/.env.production .env.production
+
+# Copy toàn bộ source
 COPY webapp/ ./
+
+# Build frontend
 RUN npm run build
 
 # Stage 2: Serve với Nginx
 FROM nginx:alpine
-# Copy build output (Vite build ra /dist)
+# Copy build output
 COPY --from=build /app/dist /usr/share/nginx/html
 
-# Copy static files từ backend (giờ path đúng rồi vì context là root)
+# Copy static files từ backend
 COPY apps/public /usr/share/nginx/html/static
 
 # Copy Nginx config

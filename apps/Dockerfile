@@ -10,5 +10,8 @@ FROM node:18-alpine
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+# Copy file .env.production vào môi trường production
+COPY .env.production .env
+
 EXPOSE 3000
 CMD ["npm", "start"]
