@@ -90,7 +90,7 @@ const UserRoute = [
         ),
     },
     {
-        path: "/grammar/:id",
+        path: "/grammar/:slug",
         element: (
         <PrivateRoute>
             <GrammarDetail />
@@ -106,7 +106,7 @@ const UserRoute = [
         ),
     },
     {
-        path: "/pronunciation/:id",
+        path: "/pronunciation/:slug",
         element: (
         <PrivateRoute>
             <PronunciationDetail />

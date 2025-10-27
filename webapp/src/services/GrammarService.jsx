@@ -33,16 +33,16 @@ export const GrammarService = {
         }
     },
 
-    async getGrammarById(id) {
+    async getGrammarBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/slug/${encodeURIComponent(slug)}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching grammar by slug:", err);
             return null;
         }
     },
@@ -52,7 +52,6 @@ export const GrammarService = {
             const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
                 method: "GET",
             });
-
             if (!res.ok) {
                 const err = new Error(`HTTP error! Status: ${res.status}`);
                 err.status = res.status;

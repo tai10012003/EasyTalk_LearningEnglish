@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const UpdateGrammar = () => {
     const { id } = useParams();
     const [grammar, setGrammar] = useState(null);
+    const [existingGrammars, setExistingGrammars] = useState([]);
 
     useEffect(() => {
         const fetchGrammar = async () => {
@@ -23,6 +24,18 @@ const UpdateGrammar = () => {
         };
         fetchGrammar();
     },  [id]);
+
+    useEffect(() => {
+        const fetchGrammars = async () => {
+            try {
+                const data = await GrammarService.fetchGrammars(1, 10000);
+                setExistingGrammars(data.grammars || []);
+            } catch (err) {
+                console.error("Error fetching grammars:", err);
+            }
+        };
+        fetchGrammars();
+    }, []);
 
     const handleSubmit = async (formData, id) => {
         try {
@@ -52,6 +65,7 @@ const UpdateGrammar = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/grammar"
             initialData={grammar}
+            existingItems={existingGrammars}
         />
     );
 };

@@ -21,11 +21,11 @@ function PronunciationCard({ pronunciation, isLocked }) {
                     </p>
                     {isLocked ? (
                             <button className="lesson-locked-btn" disabled>
-                            <i className="fas fa-lock me-2"></i>
+                                <i className="fas fa-lock me-2"></i>
                             </button>
                         ) : (
-                            <Link to={`/pronunciation/${pronunciation._id}`} className="lesson-link">
-                            <i className="fas fa-book-open me-2"></i>Vào đọc
+                            <Link to={`/pronunciation/${pronunciation.slug}`} className="lesson-link">
+                                <i className="fas fa-book-open me-2"></i>Vào đọc
                             </Link>
                         )}
                 </div>

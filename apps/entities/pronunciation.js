@@ -13,6 +13,9 @@ class pronunciations {
     content;
     images;
     quizzes = [];
+    slug;
+    sort;
+    display;
     createdAt;
 
     addQuestion(question, type, correctAnswer, explanation, options = []) {

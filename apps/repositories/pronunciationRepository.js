@@ -14,7 +14,7 @@ class PronunciationRepository {
     }
 
     async findAll(filter = {}, skip = 0, limit = 12) {
-        const cursor = await this.collection.find(filter).skip(skip).limit(limit);
+        const cursor = await this.collection.find(filter).sort({ sort: 1 }).skip(skip).limit(limit);
         const items = await cursor.toArray();
         const total = await this.collection.countDocuments(filter);
         return { items, total };
@@ -22,6 +22,10 @@ class PronunciationRepository {
 
     async findById(id) {
         return await this.collection.findOne({ _id: new ObjectId(id) });
+    }
+
+    async findBySlug(slug) {
+        return await this.collection.findOne({ slug });
     }
 
     async insert(item) {

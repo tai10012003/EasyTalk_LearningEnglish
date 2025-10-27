@@ -33,22 +33,18 @@ export const PronunciationService = {
         }
     },
 
-    async getPronunciationById(id) {
+    async getPronunciationBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/slug/${encodeURIComponent(slug)}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;
         } catch (err) {
-            console.error(err);
+            console.error("Error fetching pronunciation by slug:", err);
             return null;
         }
-    },
-
-    resetAlertFlag() {
-        hasShownAlert = false;
     },
 
     async getPronunciationDetail(id) {
@@ -133,5 +129,9 @@ export const PronunciationService = {
             console.error("Error deleting pronunciation:", err);
             throw err;
         }
-    }
+    },
+
+    resetAlertFlag() {
+        hasShownAlert = false;
+    },
 };

@@ -816,6 +816,7 @@
   width: 100%;
   border-collapse: collapse;
   min-width: 800px;
+  table-layout: fixed;
 }
 
 .admin-lesson-table th,
@@ -842,6 +843,68 @@
 
 .admin-lesson-table tbody tr:hover {
   background-color: #f1f5f9;
+}
+
+.admin-lesson-table th:nth-child(1),
+.admin-lesson-table td:nth-child(1) {
+  width: 50px;
+  text-align: center;
+}
+
+.admin-lesson-table th:nth-child(2),
+.admin-lesson-table td:nth-child(2) {
+  width: 135px;
+}
+
+.admin-lesson-table th:nth-child(3),
+.admin-lesson-table td:nth-child(3) {
+  width: 170px;
+}
+
+.admin-lesson-table th:nth-child(4),
+.admin-lesson-table td:nth-child(4) {
+  width: 300px;
+}
+
+.admin-lesson-table th:nth-child(5),
+.admin-lesson-table td:nth-child(5) {
+  width: 80px;
+  text-align: center;
+}
+
+.admin-lesson-table th:nth-child(6),
+.admin-lesson-table td:nth-child(6) {
+  width: 100px;
+  text-align: center;
+}
+
+.admin-lesson-table th:nth-child(7),
+.admin-lesson-table td:nth-child(7) {
+  width: 150px;
+}
+
+.admin-lesson-table th:nth-child(8),
+.admin-lesson-table td:nth-child(8) {
+  width: 120px;
+  text-align: center;
+}
+
+.display-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: capitalize;
+  color: #fff;
+}
+
+.display-allow {
+  background-color: #007bff;
+}
+
+.display-hidden {
+  background-color: #dc3545;
 }
 
 .admin-lesson-image {
@@ -980,6 +1043,7 @@
 }
 
 .admin-lesson-add-group input[type="text"],
+.admin-lesson-add-group input[type="number"],
 .admin-lesson-add-group select,
 .admin-lesson-add-group textarea {
   padding: 10px 12px;
@@ -992,6 +1056,7 @@
 }
 
 .admin-lesson-add-group input[type="text"]:focus,
+.admin-lesson-add-group input[type="number"]:focus,
 .admin-lesson-add-group select:focus,
 .admin-lesson-add-group textarea:focus {
   border: 1px solid #3498db;
@@ -1150,6 +1215,7 @@
 }
 
 .admin-lesson-update-group input[type="text"],
+.admin-lesson-update-group input[type="number"],
 .admin-lesson-update-group select,
 .admin-lesson-update-group textarea {
   padding: 10px 12px;
@@ -1162,6 +1228,7 @@
 }
 
 .admin-lesson-update-group input[type="text"]:focus,
+.admin-lesson-update-group input[type="number"]:focus,
 .admin-lesson-update-group select:focus,
 .admin-lesson-update-group textarea:focus {
   border: 1px solid #3498db;

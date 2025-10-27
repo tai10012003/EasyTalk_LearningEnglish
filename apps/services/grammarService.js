@@ -2,6 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const { GrammarRepository } = require("./../repositories");
 
+function generateSlug(title) {
+    return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 class GrammarsService {
     constructor() {
         this.grammarRepository = new GrammarRepository();
@@ -9,9 +13,12 @@ class GrammarsService {
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
 
-    async getGrammarList(page = 1, limit = 12, search = "") {
+    async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
         const skip = (page - 1) * limit;
         const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
         if (search) filter.title = { $regex: search, $options: "i" };
         const { grammars, total } = await this.grammarRepository.findAll(filter, skip, limit);
         return { grammars, totalGrammars: total };
@@ -21,6 +28,10 @@ class GrammarsService {
         return await this.grammarRepository.findById(id);
     }
 
+    async getGrammarBySlug(slug) {
+        return await this.grammarRepository.findBySlug(slug);
+    }
+
     async insertGrammar(grammar) {
         const newGrammar = {
             title: grammar.title,
@@ -28,6 +39,9 @@ class GrammarsService {
             content: grammar.content,
             images: grammar.images,
             quizzes: [],
+            slug: grammar.slug || generateSlug(grammar.title),
+            sort: grammar.sort || 0,
+            display: grammar.display !== undefined ? grammar.display : true,
             createdAt: new Date()
         };
         if (grammar.quizzes && Array.isArray(grammar.quizzes)) {
@@ -58,6 +72,9 @@ class GrammarsService {
             content: grammar.content.trim(),
             images: grammar.images.trim(),
             quizzes: formattedQuestions,
+            slug: grammar.slug || generateSlug(grammar.title),
+            sort: grammar.sort || 0,
+            display: grammar.display !== undefined ? grammar.display : true,
             updatedAt: new Date()
         };
         return await this.grammarRepository.update(id, updateData);

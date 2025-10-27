@@ -25,7 +25,8 @@ router.get("/api/pronunciation-list", verifyToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 12;  
     try {
-        const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit);
+        const role = req.user.role || "user";
+        const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit, role);
         const totalPages = Math.ceil(totalPronunciations / limit);
         res.json({
             pronunciations,
@@ -56,6 +57,19 @@ router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
             return res.status(404).json({ message: "Pronunciation not found" });
         }
         res.json({ pronunciation, userProgress });
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching pronunciation details", error: err });
+    }
+});
+
+router.get("/api/pronunciation/slug/:slug", verifyToken, async function (req, res) {
+    try {
+        const slug = req.params.slug;
+        const pronunciation = await pronunciationService.getPronunciationBySlug(slug);
+        if (!pronunciation) {
+            return res.status(404).json({ message: "Pronunciation not found" });
+        }
+        res.json({ pronunciation });
     } catch (err) {
         res.status(500).json({ message: "Error fetching pronunciation details", error: err });
     }
@@ -127,7 +141,10 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
             description: req.body.description,
             content: req.body.content,
             images: req.file ? `/static/images/pronunciation/${req.file.filename}` : null,
-            quizzes: quizzes
+            quizzes: quizzes,
+            slug: req.body.slug || undefined,
+            sort: parseInt(req.body.sort) || 0,
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await pronunciationService.insertPronunciation(pronunciation);
         res.status(201).json({ message: "Bài học phát âm đã được thêm thành công !", result });
@@ -185,6 +202,9 @@ router.put("/api/update/:id", upload.single("image"), async function (req, res) 
             content: req.body.content,
             quizzes: quizzes,
             images: imagePath,
+            slug: req.body.slug || undefined,
+            sort: parseInt(req.body.sort) || 0,
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await pronunciationService.updatePronunciation(req.params.id, pronunciation);
         res.json({ message: "Bài học phát âm đã được cập nhật thành công !", result });

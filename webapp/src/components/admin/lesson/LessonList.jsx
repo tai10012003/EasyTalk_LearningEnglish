@@ -111,6 +111,8 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                                 <th>Hình ảnh</th>
                                 <th>Tiêu đề</th>
                                 <th>Mô tả</th>
+                                <th>Thứ tự</th>
+                                <th>Hiển thị</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
@@ -138,6 +140,18 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                                             </td>
                                             <td>{lesson.title}</td>
                                             <td>{lesson.description.length > 80 ? `${lesson.description.slice(0,80)} ...` : lesson.description}</td>
+                                            <td>{lesson.sort}</td>
+                                            <td>
+                                                <span
+                                                    className={`display-badge ${
+                                                        lesson.display == true
+                                                            ? "display-allow"
+                                                            : "display-hidden"
+                                                    }`}
+                                                >
+                                                    {lesson.display == true ? "Cho phép" : "Ẩn"}
+                                                </span>
+                                            </td>
                                             <td>{createdAt}</td>
                                             <td className="admin-lesson-actions">
                                                 <a
@@ -158,7 +172,7 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={6}>Không có bài học.</td>
+                                    <td colSpan={8}>Không có bài học.</td>
                                 </tr>
                             )}
                         </tbody>

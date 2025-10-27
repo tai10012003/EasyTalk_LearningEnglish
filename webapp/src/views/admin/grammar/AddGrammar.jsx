@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AddLesson from "../../../components/admin/lesson/AddLesson";
 import { GrammarService } from "@/services/GrammarService.jsx";
 import Swal from "sweetalert2";
 
 const AddGrammar = () => {
+    const [existingGrammars, setExistingGrammars] = useState([]);
+
+    useEffect(() => {
+        const fetchGrammars = async () => {
+            try {
+                const data = await GrammarService.fetchGrammars(1, 10000);
+                setExistingGrammars(data.grammars || []);
+            } catch (err) {
+                console.error("Error fetching grammars:", err);
+            }
+        };
+        fetchGrammars();
+    }, []);
+
     const handleSubmit = async (data) => {
         try {
             const res = await GrammarService.addGrammar(data);
@@ -24,7 +38,7 @@ const AddGrammar = () => {
         }
     };
     
-    return <AddLesson onSubmit={handleSubmit} returnUrl="/admin/grammar" title="THÊM BÀI HỌC NGỮ PHÁP" />;
+    return <AddLesson onSubmit={handleSubmit} returnUrl="/admin/grammar" title="THÊM BÀI HỌC NGỮ PHÁP" existingItems={existingGrammars}/>;
 };
 
 export default AddGrammar;

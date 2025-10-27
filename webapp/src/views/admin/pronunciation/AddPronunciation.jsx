@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AddLesson from "../../../components/admin/lesson/AddLesson";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
 import Swal from "sweetalert2";
 
 const AddPronunciation = () => {
+    const [existingPronunciations, setExistingPronunciations] = useState([]);
+
+    useEffect(() => {
+        const fetchPronunciations = async () => {
+            try {
+                const data = await PronunciationService.fetchPronunciations(1, 10000);
+                setExistingPronunciations(data.pronunciations || []);
+            } catch (err) {
+                console.error("Error fetching pronunciations:", err);
+            }
+        };
+        fetchPronunciations();
+    }, []);
+
     const handleSubmit = async (data) => {
         try {
             const res = await PronunciationService.addPronunciation(data);
@@ -24,7 +38,7 @@ const AddPronunciation = () => {
         }
     };
     
-    return <AddLesson onSubmit={handleSubmit} returnUrl="/admin/pronunciation" title="THÊM BÀI HỌC PHÁT ÂM" />;
+    return <AddLesson onSubmit={handleSubmit} returnUrl="/admin/pronunciation" title="THÊM BÀI HỌC PHÁT ÂM" existingItems={existingPronunciations}/>
 };
 
 export default AddPronunciation;

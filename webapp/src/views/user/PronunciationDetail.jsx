@@ -8,7 +8,7 @@ import { PronunciationService } from "@/services/PronunciationService.jsx";
 import Swal from "sweetalert2";
 
 function PronunciationDetail() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [pronunciation, setPronunciation] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +72,7 @@ function PronunciationDetail() {
         const fetchPronunciationDetail = async () => {
             setIsLoading(true);
             try {
-                const res = await PronunciationService.getPronunciationById(id);
+                const res = await PronunciationService.getPronunciationBySlug(slug);
                 if (res && res.pronunciation && res.pronunciation.content) {
                     setPronunciation(res.pronunciation);
                     setTimeout(() => {
@@ -91,7 +91,7 @@ function PronunciationDetail() {
             }
         };
         fetchPronunciationDetail();
-    }, [id]);
+    }, [slug]);
 
     const handleStepChange = (step, total) => {
         setCurrentStep(step);

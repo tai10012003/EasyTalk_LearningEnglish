@@ -2,15 +2,23 @@ const fs = require("fs");
 const path = require("path");
 const { PronunciationRepository } = require("./../repositories");
 
+function generateSlug(title) {
+    return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 class PronunciationsService {
     constructor() {
         this.pronunciationRepository = new PronunciationRepository();
         this.imageFolder = path.join(__dirname, "../public/images/pronunciation");
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
-    async getPronunciationList(page = 1, limit = 12) {
+    async getPronunciationList(page = 1, limit = 12, role = "user") {
         const skip = (page - 1) * limit;
-        const { items, total } = await this.pronunciationRepository.findAll({}, skip, limit);
+        const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
+        const { items, total } = await this.pronunciationRepository.findAll(filter, skip, limit);
         return {
             pronunciations: items,
             totalPronunciations: total
@@ -21,6 +29,10 @@ class PronunciationsService {
         return await this.pronunciationRepository.findById(id);
     }
 
+    async getPronunciationBySlug(slug) {
+        return await this.pronunciationRepository.findBySlug(slug);
+    }
+
     async insertPronunciation(pronunciation) {
         const newPronunciation = {
             title: pronunciation.title,
@@ -28,6 +40,9 @@ class PronunciationsService {
             content: pronunciation.content,
             images: pronunciation.images,
             quizzes: [],
+            slug: pronunciation.slug || generateSlug(pronunciation.title),
+            sort: pronunciation.sort || 0,
+            display: pronunciation.display !== undefined ? pronunciation.display : true,
             createdAt: new Date()
         };
         if (pronunciation.quizzes && Array.isArray(pronunciation.quizzes)) {
@@ -58,6 +73,9 @@ class PronunciationsService {
             content: pronunciation.content.trim(),
             images: pronunciation.images.trim(),
             quizzes: formattedQuestions,
+            slug: pronunciation.slug || generateSlug(pronunciation.title),
+            sort: pronunciation.sort || 0,
+            display: pronunciation.display !== undefined ? pronunciation.display : true,
             updatedAt: new Date()
         };
         return await this.pronunciationRepository.update(id, updateData);

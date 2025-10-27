@@ -25,7 +25,8 @@ router.get("/api/grammar-list", verifyToken, async function (req, res) {
   const page = parseInt(req.query.page) || 1;
   const limit = 12;
   try {
-    const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit);
+    const role = req.user.role || "user";
+    const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit, "", role);
     const totalPages = Math.ceil(totalGrammars / limit);
     res.json({
       grammars,
@@ -56,6 +57,19 @@ router.get("/api/grammar/:id", verifyToken, async function (req, res) {
       return res.status(403).json({ success: false, message: "This grammar is locked for you. Please complete previous grammars first." });
     }
     res.json({ grammar, userProgress });
+  } catch (err) {
+    res.status(500).json({ message: "Error fetching grammar details", error: err });
+  }
+});
+
+router.get("/api/grammar/slug/:slug", verifyToken, async function(req, res) {
+  try {
+    const slug = req.params.slug;
+    const grammar = await grammarService.getGrammarBySlug(slug);
+    if (!grammar) {
+      return res.status(404).json({ message: "Grammar not found" });
+    }
+    res.json({ grammar });
   } catch (err) {
     res.status(500).json({ message: "Error fetching grammar details", error: err });
   }
@@ -125,7 +139,10 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
       description: req.body.description,
       content: req.body.content,
       images: req.file ? `/static/images/grammar/${req.file.filename}` : null,
-      quizzes: quizzes
+      quizzes: quizzes,
+      slug: req.body.slug || undefined,
+      sort: parseInt(req.body.sort) || 0,
+      display: req.body.display !== undefined ? req.body.display == "true" : true
     };
     const result = await grammarService.insertGrammar(grammar);
     res.status(201).json({ message: "Bài học ngữ pháp đã được thêm thành công !", result });
@@ -183,6 +200,9 @@ router.put("/api/update/:id", upload.single("image"), async function (req, res) 
       content: req.body.content,
       quizzes: quizzes,
       images: imagePath,
+      slug: req.body.slug || undefined,
+      sort: parseInt(req.body.sort) || 0,
+      display: req.body.display !== undefined ? req.body.display == "true" : true
     };
     const result = await grammarService.updateGrammar(req.params.id, grammar);
     res.json({ message: "Bài học ngữ pháp đã được cập nhật thành công !", result });

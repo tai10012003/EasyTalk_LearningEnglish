@@ -24,7 +24,7 @@ function GrammarCard({ grammar, isLocked }) {
                             <i className="fas fa-lock me-2"></i>
                             </button>
                         ) : (
-                            <Link to={`/grammar/${grammar._id}`} className="lesson-link">
+                            <Link to={`/grammar/${grammar.slug}`} className="lesson-link">
                             <i className="fas fa-book-open me-2"></i>Vào đọc
                             </Link>
                         )}

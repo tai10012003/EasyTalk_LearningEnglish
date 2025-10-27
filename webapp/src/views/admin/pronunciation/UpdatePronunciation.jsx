@@ -7,6 +7,7 @@ import Swal from "sweetalert2";
 
 const UpdatePronunciation = () => {
     const { id } = useParams();
+    const [existingPronunciations, setExistingPronunciations] = useState([]);
     const [pronunciation, setPronunciation] = useState(null);
 
     useEffect(() => {
@@ -23,6 +24,18 @@ const UpdatePronunciation = () => {
         };
         fetchPronunciation();
     },  [id]);
+
+    useEffect(() => {
+        const fetchPronunciations = async () => {
+            try {
+                const data = await PronunciationService.fetchPronunciations(1, 10000);
+                setExistingPronunciations(data.pronunciations || []);
+            } catch (err) {
+                console.error("Error fetching pronunciations:", err);
+            }
+        };
+        fetchPronunciations();
+    }, []);
 
     const handleSubmit = async (formData, id) => {
         try {
@@ -52,6 +65,7 @@ const UpdatePronunciation = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/pronunciation"
             initialData={pronunciation}
+            existingItems={existingPronunciations}
         />
     );
 };

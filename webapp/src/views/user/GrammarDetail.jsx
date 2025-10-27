@@ -8,7 +8,7 @@ import { GrammarService } from "@/services/GrammarService.jsx";
 import Swal from "sweetalert2";
 
 function GrammarDetail() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [grammar, setGrammar] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -72,7 +72,7 @@ function GrammarDetail() {
         const fetchGrammarDetail = async () => {
             setIsLoading(true);
             try {
-                const res = await GrammarService.getGrammarById(id);
+                const res = await GrammarService.getGrammarBySlug(slug);
                 if (res && res.grammar && res.grammar.content) {
                     setGrammar(res.grammar);
                     setTimeout(() => {
@@ -93,7 +93,7 @@ function GrammarDetail() {
             }
         };
         fetchGrammarDetail();
-    }, [id]);
+    }, [slug]);
 
     const handleStepChange = (step, total) => {
         setCurrentStep(step);
