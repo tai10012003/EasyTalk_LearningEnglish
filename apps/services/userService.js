@@ -7,6 +7,8 @@ const { getFacebookAccessToken, getFacebookUser } = require("../util/facebookAut
 const { UserRepository } = require("./../repositories");
 const NotificationService = require("./notificationService");
 const notificationService = new NotificationService();
+const UserSettingService = require("./usersettingService");
+const usersettingService = new UserSettingService();
 
 class UserService {
     constructor() {
@@ -189,7 +191,8 @@ class UserService {
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(refreshToken, user._id.toString());
-        return { token: accessToken, refreshToken: refreshToken, role: user.role };
+        const language = await usersettingService.getUserLanguage(user._id);
+        return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
 
     async loginWithGoogle(code) {
@@ -256,7 +259,8 @@ class UserService {
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(refreshToken, user._id.toString());
-        return { token: accessToken, refreshToken: refreshToken, role: user.role };
+        const language = await usersettingService.getUserLanguage(user._id);
+        return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
 
     async loginWithFacebook(code) {

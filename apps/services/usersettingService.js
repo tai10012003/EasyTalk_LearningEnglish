@@ -33,6 +33,14 @@ class UserSettingService {
         );
     }
 
+    async getUserLanguage(userId) {
+        const setting = await this.userSettingRepository.findByUserId(userId);
+        if (setting && setting.general && setting.general.language) {
+            return setting.general.language;
+        }
+        return "vi";
+    }
+
     async deleteUserSetting(userId) {
         return await this.userSettingRepository.delete(userId);
     }

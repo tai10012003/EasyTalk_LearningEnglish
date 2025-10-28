@@ -56,8 +56,8 @@ router.get("/auth/google/callback", async (req, res) => {
   if (!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực");
   const redirectBase = process.env.CLIENT_URL || "http://localhost:5173";
   try {
-    const { token, refreshToken, role } = await userService.loginWithGoogle(code);
-    const redirectUrl = `${redirectBase}/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=google`;
+    const { token, refreshToken, role, language } = await userService.loginWithGoogle(code);
+    const redirectUrl = `${redirectBase}/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=google&language=${language}`;
     res.redirect(redirectUrl);
   } catch (error) {
     res.redirect(`${redirectBase}/login?error=${encodeURIComponent(error.message)}`);

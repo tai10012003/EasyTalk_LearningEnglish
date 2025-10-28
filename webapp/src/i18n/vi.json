@@ -1,11 +1,47 @@
 {
-  "generalSettings": "Cài đặt chung",
-  "generalDesc": "Tùy chỉnh ngôn ngữ, múi giờ và định dạng ngày để phù hợp với bạn.",
-  "dateFormat": "Định dạng ngày",
-  "language": "Ngôn ngữ",
-  "timezone": "Múi giờ học viên",
-  "saveChanges": "Lưu thay đổi",
-  "successSave": "Đã lưu thành công!",
-  "errorSave": "Không thể lưu cài đặt, vui lòng thử lại.",
-  "loading": "Đang tải cài đặt chung..."
+  "menu": {
+    "marquee": "Chào mừng bạn đến EasyTalk! – Cùng bạn chinh phục tiếng Anh mỗi ngày – Học dễ dàng, nói tự tin 🚀",
+    "day": "ngày",
+    "yournotification": "Thông báo của bạn",
+    "markallread" : "Đánh dấu tất cả đã đọc",
+    "home": "TRANG CHỦ",
+    "journey": "HÀNH TRÌNH",
+    "lessons": "BÀI HỌC",
+    "story": "CÂU CHUYỆN",
+    "grammar": "NGỮ PHÁP",
+    "flashcards": "TỪ VỰNG FLASHCARD",
+    "pronunciation": "PHÁT ÂM",
+    "practice": "LUYỆN TẬP",
+    "grammar_exercise": "NGỮ PHÁP",
+    "vocabulary_exercise": "TỪ VỰNG",
+    "pronunciation_exercise": "PHÁT ÂM",
+    "dictation_exercise": "NGHE CHÉP CHÍNH TẢ",
+    "chat": "GIAO TIẾP VỚI AI",
+    "reading": "LUYỆN ĐỌC",
+    "writing": "LUYỆN VIẾT VỚI AI",
+    "leaderboard": "BẢNG XẾP HẠNG",
+    "statistics": "THỐNG KÊ",
+    "login": "Đăng nhập"
+  },
+  "footer": {
+    "description": "Khi tham gia EasyTalk, người dùng sẽ có trải nghiệm giao tiếp liền mạch. Cho dù đang học hay đang thực hành, nền tảng này sẽ hướng dẫn người học dễ dàng qua từng giai đoạn, đảm bảo tiến trình suôn sẻ và cải thiện đáng kể.",
+    "send_email": "Gửi Thư",
+    "email_desc": "Bạn có thắc mắc hay khó khăn gì thì gửi về cho chúng tôi.",
+    "email_input": "Nhập email của bạn",
+    "contact_us": "Liên Hệ Chúng Tôi",
+    "address": "Địa chỉ",
+    "phone": "Số điện thoại",
+    "email": "Email"
+  },
+  "setting": {
+    "generalSettings": "Cài đặt chung",
+    "generalDesc": "Tùy chỉnh ngôn ngữ, múi giờ và định dạng ngày để phù hợp với bạn.",
+    "dateFormat": "Định dạng ngày",
+    "language": "Ngôn ngữ",
+    "timezone": "Múi giờ học viên",
+    "saveChanges": "Lưu thay đổi",
+    "successSave": "Đã lưu thành công!",
+    "errorSave": "Không thể lưu cài đặt, vui lòng thử lại.",
+    "loading": "Đang tải cài đặt chung..."
+  }
 }

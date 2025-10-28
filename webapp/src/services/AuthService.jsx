@@ -1,3 +1,4 @@
+import i18n from "@/i18n";
 const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
 let isRefreshing = false;
@@ -31,6 +32,9 @@ export const AuthService = {
             localStorage.setItem("token", data.token);
             localStorage.setItem("refreshToken", data.refreshToken);
             localStorage.setItem("role", data.role);
+            const lang = data.language || "vi";
+            localStorage.setItem("language", lang);
+            i18n.changeLanguage(lang);
             this.startTokenRefreshTimer();
             hasShownAlert = false;
             console.log("Login success:", data);
@@ -160,6 +164,8 @@ export const AuthService = {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
+            localStorage.removeItem("language");
+            i18n.changeLanguage("vi");
             if (this.refreshTimer) {
                 clearInterval(this.refreshTimer);
             }

@@ -1,11 +1,47 @@
 {
-  "generalSettings": "General Settings",
-  "generalDesc": "Customize your language, timezone and date format.",
-  "dateFormat": "Date Format",
-  "language": "Language",
-  "timezone": "Timezone",
-  "saveChanges": "Save Changes",
-  "successSave": "Saved successfully!",
-  "errorSave": "Cannot save settings, please try again.",
-  "loading": "Loading settings..."
+  "menu": {
+    "marquee": "Welcome to EasyTalk! – Conquer English with you every day – Learn easily, speak confidently 🚀",
+    "day": "day",
+    "yournotification": "Your Notification",
+    "markallread" : "Mark all read",
+    "home": "HOME",
+    "journey": "JOURNEY",
+    "lessons": "LESSONS",
+    "story": "STORY",
+    "grammar": "GRAMMAR",
+    "flashcards": "FLASHCARDS",
+    "pronunciation": "PRONUNCIATION",
+    "practice": "PRACTICE",
+    "grammar_exercise": "GRAMMAR",
+    "vocabulary_exercise": "VOCABULARY",
+    "pronunciation_exercise": "PRONUNCIATION",
+    "dictation_exercise": "DICTATION",
+    "chat": "CHAT WITH AI",
+    "reading": "READING",
+    "writing": "WRITING WITH AI",
+    "leaderboard": "LEADERBOARD",
+    "statistics": "STATISTICS",
+    "login": "Login"
+  },
+  "footer": {
+    "description": "By joining EasyTalk, users will enjoy seamless communication. Whether learning or practicing, this platform guides learners easily through each stage, ensuring smooth progress and significant improvement.",
+    "send_email": "Send Email",
+    "email_desc": "If you have any questions, please send them to us.",
+    "email_input": "Enter your email",
+    "contact_us": "Contact Us",
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email"
+  },
+  "setting": {
+    "generalSettings": "General Settings",
+    "generalDesc": "Customize your language, timezone and date format.",
+    "dateFormat": "Date Format",
+    "language": "Language",
+    "timezone": "Timezone",
+    "saveChanges": "Save Changes",
+    "successSave": "Saved successfully!",
+    "errorSave": "Cannot save settings, please try again.",
+    "loading": "Loading settings..."
+  }
 }

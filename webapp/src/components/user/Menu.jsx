@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 import Swal from 'sweetalert2';
 import { io } from "socket.io-client";
 import { UserProgressService } from '@/services/UserProgressService.jsx';
@@ -25,6 +26,7 @@ const isTokenExpired = (token) => {
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [socket, setSocket] = useState(null);
+  const { t, i18n } = useTranslation();
   const [username, setUsername] = useState('User');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -308,7 +310,7 @@ function Menu() {
           <div className="top-bar-center">
             <div className="marquee">
               <span>
-                Chào mừng bạn đến EasyTalk! – Cùng bạn chinh phục tiếng Anh mỗi ngày – Học dễ dàng, nói tự tin 🚀
+                {t("menu.marquee")}
               </span>
             </div>
           </div>
@@ -319,7 +321,7 @@ function Menu() {
               </div>
               <div className="streak me-4">
                 <Link to="/streak" className="text-decoration-none text-dark" style={{ textDecoration: 'none' }}>
-                  🔥 <strong>{streakData.streak} ngày</strong>
+                  🔥 <strong>{streakData.streak} {t("menu.day")}</strong>
                 </Link>
               </div>
               <div className="notification-wrapper">
@@ -338,13 +340,13 @@ function Menu() {
                 {showNotificationDropdown && (
                   <div className="notification-dropdown">
                     <div className="notification-header">
-                      <h6>Thông báo của bạn</h6>
+                      <h6>{t("menu.yournotification")}</h6>
                       {unreadCount > 0 && (
                         <button 
                           className="mark-all-read-btn"
                           onClick={handleMarkAllAsRead}
                         >
-                          Đánh dấu tất cả đã đọc
+                          {t("menu.markallread")}
                         </button>
                       )}
                     </div>
@@ -443,7 +445,7 @@ function Menu() {
                         end
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-home me-2"></i>TRANG CHỦ
+                        <i className="fas fa-home me-2"></i>{t("menu.home")}
                       </NavLink>
                     </li>
                     {/* <li className="nav-item">
@@ -461,7 +463,7 @@ function Menu() {
                         to="/journey"
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-road me-2"></i>HÀNH TRÌNH
+                        <i className="fas fa-road me-2"></i>{t("menu.journey")}
                       </NavLink>
                     </li>
                     <li className={`nav-item dropdown ${showLessons ? 'show' : ''}`}>
@@ -471,7 +473,7 @@ function Menu() {
                         role="button"
                         aria-expanded={showLessons}
                       >
-                        <i className="fas fa-book-open me-2"></i>BÀI HỌC
+                        <i className="fas fa-book-open me-2"></i>{t("menu.lessons")}
                       </a>
                       <div
                         className={`dropdown-menu ${showLessons ? 'show' : ''}`}
@@ -482,28 +484,28 @@ function Menu() {
                           to="/story"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-book me-2"></i>CÂU CHUYỆN
+                          <i className="fas fa-book me-2"></i>{t("menu.story")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/grammar"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-language me-2"></i>NGỮ PHÁP
+                          <i className="fas fa-language me-2"></i>{t("menu.grammar")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/flashcards"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-clone me-2"></i>TỪ VỰNG FLASHCARD
+                          <i className="fas fa-clone me-2"></i>{t("menu.flashcards")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/pronunciation"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-microphone me-2"></i>PHÁT ÂM
+                          <i className="fas fa-microphone me-2"></i>{t("menu.pronunciation")}
                         </NavLink>
                       </div>
                     </li>
@@ -514,7 +516,7 @@ function Menu() {
                         role="button"
                         aria-expanded={showPractice}
                       >
-                        <i className="fas fa-dumbbell me-2"></i>LUYỆN TẬP
+                        <i className="fas fa-dumbbell me-2"></i>{t("menu.practice")}
                       </a>
                       <div
                         className={`dropdown-menu ${showPractice ? 'show' : ''}`}
@@ -525,28 +527,28 @@ function Menu() {
                           to="/grammar-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-pen me-2"></i>NGỮ PHÁP
+                          <i className="fas fa-pen me-2"></i>{t("menu.grammar_exercise")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/vocabulary-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-spell-check me-2"></i>TỪ VỰNG
+                          <i className="fas fa-spell-check me-2"></i>{t("menu.vocabulary_exercise")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/pronunciation-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-volume-up me-2"></i>PHÁT ÂM
+                          <i className="fas fa-volume-up me-2"></i>{t("menu.pronunciation_exercise")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/dictation-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-headphones me-2"></i>NGHE CHÉP CHÍNH TẢ
+                          <i className="fas fa-headphones me-2"></i>{t("menu.dictation_exercise")}
                         </NavLink>
                         {/* <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
@@ -560,21 +562,21 @@ function Menu() {
                           to="/chat"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-comments me-2"></i>GIAO TIẾP VỚI AI
+                          <i className="fas fa-comments me-2"></i>{t("menu.chat")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/reading"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fas fa-book me-2"></i>LUYỆN ĐỌC
+                          <i className="fas fas fa-book me-2"></i>{t("menu.reading")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/writing"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-keyboard me-2"></i>LUYỆN VIẾT VỚI AI
+                          <i className="fas fa-keyboard me-2"></i>{t("menu.writing")}
                         </NavLink>
                       </div>
                     </li>
@@ -593,7 +595,7 @@ function Menu() {
                         to="/leaderboard"
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-trophy me-2"></i>BẢNG XẾP HẠNG
+                        <i className="fas fa-trophy me-2"></i>{t("menu.leaderboard")}
                       </NavLink>
                     </li>
                     <li className="nav-item">
@@ -602,7 +604,7 @@ function Menu() {
                         to="/statistic"
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-chart-line me-2"></i>THỐNG KÊ
+                        <i className="fas fa-chart-line me-2"></i>{t("menu.statistics")}
                       </NavLink>
                     </li>
                     {/* <li className="nav-item">

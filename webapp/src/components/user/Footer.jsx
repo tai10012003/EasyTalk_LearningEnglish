@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 import logo from "@/assets/images/logo.png"
 import Swal from "sweetalert2";
 
 function Footer() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
 
   const handleEmailSubmit = (e) => {
@@ -28,20 +30,20 @@ function Footer() {
                 <img src={logo} alt="logo" width="120" />
               </Link>
               <p>
-                Khi tham gia EasyTalk, người dùng sẽ có trải nghiệm giao tiếp liền mạch. Cho dù đang học hay đang thực hành, nền tảng này sẽ hướng dẫn người học dễ dàng qua từng giai đoạn, đảm bảo tiến trình suôn sẻ và cải thiện đáng kể.
+                {t("footer.description")}
               </p>
             </div>
           </div>
           <div className="col-sm-6 col-md-4">
             <div className="single-footer-widget footer_2">
-              <h4>Gửi Thư</h4>
-              <p>Bạn có thắc mắc hay khó khăn gì thì gửi về cho chúng tôi.</p>
+              <h4>{t("footer.send_email")}</h4>
+              <p>{t("footer.email_desc")}</p>
               <form onSubmit={handleEmailSubmit}>
                 <div className="input-group">
                   <input
                     type="email"
                     className="form-control"
-                    placeholder="Nhập email của bạn"
+                    placeholder={t("footer.email_input")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
@@ -69,11 +71,11 @@ function Footer() {
           </div>
           <div className="col-sm-6 col-md-4">
             <div className="single-footer-widget footer_2">
-              <h4>Liên Hệ Chúng Tôi</h4>
+              <h4>{t("footer.contact_us")}</h4>
               <div className="contact_info">
-                <p><span>Địa chỉ:</span>2 Đ. Hải Triều, Bến Nghé, Quận 1, Hồ Chí Minh</p>
-                <p><span>Số điện thoại:</span>0927749820</p>
-                <p><span>Email:</span>pductai14@gmail.com</p>
+                <p><span>{t("footer.address")}:</span>2 Đ. Hải Triều, Bến Nghé, Quận 1, Hồ Chí Minh</p>
+                <p><span>{t("footer.phone")}:</span>0927749820</p>
+                <p><span>{t("footer.email")}:</span>pductai14@gmail.com</p>
               </div>
             </div>
           </div>

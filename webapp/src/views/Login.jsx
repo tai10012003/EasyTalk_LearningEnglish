@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { toast, ToastContainer } from "react-toastify";
+import i18n from "@/i18n";
 import "react-toastify/dist/ReactToastify.css";
 import LoginForm from '@/components/user/auth/LoginForm.jsx';
 import Mascot from '@/components/user/auth/Mascot.jsx';
@@ -18,6 +19,7 @@ function Login() {
     const role = query.get("role");
     const error = query.get("error");
     const provider = query.get("provider");
+    const language = query.get("language");
     if (error) {
       const providerName = provider == "facebook" ? "Facebook" : "Google";
       toast.error(`Đăng nhập ${providerName} thất bại: ${error}`);
@@ -28,6 +30,10 @@ function Login() {
       localStorage.setItem("token", token);
       localStorage.setItem("role", role);
       sessionStorage.setItem("LoggedIn", "true");
+      if (language) {
+        localStorage.setItem("language", language);
+        i18n.changeLanguage(language);
+      }
       if (refreshToken) {
         localStorage.setItem("refreshToken", refreshToken);
       }
