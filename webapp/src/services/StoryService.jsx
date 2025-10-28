@@ -4,7 +4,7 @@ import Swal from "sweetalert2";
 
 let hasShownAlert = false;
 export const StoryService = {
-  async fetchStories(page = 1, limit = 12, filters = {}) {
+    async fetchStories(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;
@@ -34,9 +34,9 @@ export const StoryService = {
         }
     },
 
-    async getStoryById(id) {
+    async getStoryBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/slug/${encodeURIComponent(slug)}`, {
                 method: "GET",
             });
             if (!res.ok) {

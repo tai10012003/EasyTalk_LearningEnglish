@@ -24,7 +24,7 @@ function StoryCard({ story, isLocked }) {
                         <i className="fas fa-lock me-2"></i>
                         </button>
                     ) : (
-                        <Link to={`/story/${story._id}`} className="lesson-link">
+                        <Link to={`/story/${story.slug}`} className="lesson-link">
                         <i className="fas fa-book-open me-2"></i>Vào đọc
                         </Link>
                     )}

@@ -74,7 +74,7 @@ const UserRoute = [
         ),
     },
     {
-        path: "/story/:id",
+        path: "/story/:slug",
         element: (
         <PrivateRoute>
             <StoryDetail />

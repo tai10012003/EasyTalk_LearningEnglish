@@ -9,7 +9,7 @@ import { StoryService } from "@/services/StoryService.jsx";
 import Swal from "sweetalert2";
 
 function StoryDetail() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [story, setStory] = useState(null);
     const [storyCompleted, setStoryCompleted] = useState(false);
@@ -73,7 +73,7 @@ function StoryDetail() {
         const fetchStoryDetail = async () => {
             setIsLoading(true);
             try {
-                const res = await StoryService.getStoryById(id);
+                const res = await StoryService.getStoryBySlug(slug);
                 setStory(res);
                 setTimeout(() => {
                     setDisplayedItems([{ type: "sentence", data: res.content[0] }]);
@@ -89,7 +89,7 @@ function StoryDetail() {
             }
         };
         fetchStoryDetail();
-    }, [id]);
+    }, [slug]);
 
     const getRandomWords = (arr, count) => {
         const shuffled = [...arr].sort(() => 0.5 - Math.random());

@@ -2,6 +2,10 @@ const fs = require("fs");
 const path = require("path");
 const { StoryRepository } = require("./../repositories");
 
+function generateSlug(title) {
+    return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
 class StoryService {
     constructor() {
         this.storyRepository = new StoryRepository();
@@ -9,9 +13,12 @@ class StoryService {
         if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
     }
 
-    async getStoryList(page = 1, limit = 12, category = "", level = "", search = "") {
+    async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user") {
         const skip = (page - 1) * limit;
         const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
         if (category) filter.category = category;
         if (level) filter.level = level;
         if (search) filter.title = { $regex: search, $options: "i" };
@@ -24,6 +31,10 @@ class StoryService {
         return await this.storyRepository.findById(id);
     }
 
+    async getStoryBySlug(slug) {
+        return await this.storyRepository.findBySlug(slug);
+    }
+
     async insertStory(storyData) {
         const newStory = {
             title: storyData.title,
@@ -32,6 +43,9 @@ class StoryService {
             category: storyData.category,
             image: storyData.image || '',
             content: [],
+            slug: storyData.slug || generateSlug(storyData.title),
+            sort: storyData.sort || 0,
+            display: storyData.display !== undefined ? storyData.display : true,
             createdAt: new Date()
         };
         if (storyData.content && Array.isArray(storyData.content)) {
@@ -58,7 +72,6 @@ class StoryService {
 
     async updateStory(storyData) {
         const { _id, ...updateFields } = storyData;
-
         if (updateFields.content && Array.isArray(updateFields.content)) {
             updateFields.content = updateFields.content.map(sentence => ({
                 en: sentence.en,

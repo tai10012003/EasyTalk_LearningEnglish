@@ -40,14 +40,20 @@ class Story {
     image;
     level;
     category;
+    slug;
+    sort;
+    display;
     createdAt;
 
-    constructor(title, description, level, category, image) {
+    constructor(title, description, level, category, image, slug, sort, display) {
         this.title = title;
         this.description = description;
         this.level = level;
         this.category = category;
         this.image = image;
+        this.slug = slug;
+        this.sort = sort;
+        this.display = display;
     }
 
     addSentence(en, vi, vocabulary = []) {

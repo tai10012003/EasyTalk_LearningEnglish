@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
+const UpdateStory = ({ onSubmit, title, returnUrl, initialData, existingItems = [] }) => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: "",
@@ -11,6 +11,9 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
         category: "",
         image: null,
         content: [],
+        slug: "",
+        sort: "",
+        display: true,
     });
 
     useEffect(() => {
@@ -22,16 +25,54 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                 category: initialData.category || "",
                 image: null,
                 content: initialData.content || [],
+                slug: initialData.slug || "",
+                sort: initialData.sort || "",
+                display: initialData.display,
             });
         }
     }, [initialData]);
 
+    const generateSlug = (title) => {
+        return title.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/đ/g, "d").replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-").replace(/-+/g, "-").replace(/^-+|-+$/g, "");
+    };
+
+    const validateSort = (sortValue) => {
+        const sortNum = parseInt(sortValue);
+        if (sortNum == 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Thứ tự không hợp lệ",
+                text: "Thứ tự phải bắt đầu từ 1 trở lên!",
+            });
+            return false;
+        }
+        const existingItem = existingItems.find(item => item.sort == sortNum);
+        if (existingItem) {
+            Swal.fire({
+                icon: "warning",
+                title: "Thứ tự đã tồn tại",
+                text: `Thứ tự số ${sortNum} là bài "${existingItem.title}". Vui lòng chọn số thứ tự khác!`,
+            });
+            return false;
+        }
+        return true;
+    };
+
     const handleChange = (e) => {
         const { name, value, files } = e.target;
-        setFormData((prev) => ({
-            ...prev,
-            [name]: files ? files[0] : value,
-        }));
+        if (name == "title") {
+            const newSlug = generateSlug(value);
+            setFormData((prev) => ({
+                ...prev,
+                title: value,
+                slug: newSlug,
+            }));
+        } else {
+            setFormData((prev) => ({
+                ...prev,
+                [name]: files ? files[0] : value,
+            }));
+        }
     };
 
     const handleAddContent = () => {
@@ -183,6 +224,9 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (!validateSort(formData.sort)) {
+            return;
+        }
         const dataToSubmit = new FormData();
         dataToSubmit.append("title", formData.title);
         dataToSubmit.append("description", formData.description);
@@ -192,6 +236,9 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
             dataToSubmit.append("image", formData.image);
         }
         dataToSubmit.append("content", JSON.stringify(formData.content));
+        dataToSubmit.append("slug", formData.slug);
+        dataToSubmit.append("sort", formData.sort);
+        dataToSubmit.append("display", formData.display);
         onSubmit(dataToSubmit, initialData._id);
     };
 
@@ -270,6 +317,47 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData }) => {
                             <img src={initialData.image} alt="current" width="150" />
                         </div>
                     )}
+                </div>
+                <div className="admin-story-update-group">
+                    <label htmlFor="admin-update-story-slug">Slug (URL):</label>
+                    <input
+                        type="text"
+                        id="admin-update-story-slug"
+                        name="slug"
+                        value={formData.slug}
+                        disabled
+                        className="form-control"
+                        style={{ backgroundColor: "#e9ecef", cursor: "not-allowed" }}
+                    />
+                    <small className="text-muted">Slug được tạo tự động từ tiêu đề</small>
+                </div>
+                <div className="admin-story-update-group">
+                    <label htmlFor="admin-update-story-sort">Thứ tự:</label>
+                    <input
+                        type="number"
+                        id="admin-update-story-sort"
+                        name="sort"
+                        value={formData.sort}
+                        onChange={handleChange}
+                        required
+                        min="1"
+                        className="form-control"
+                        placeholder="Nhập số thứ tự (bắt đầu từ 1)"
+                    />
+                </div>
+                <div className="admin-story-update-group">
+                    <label htmlFor="admin-update-story-display">Hiển thị:</label>
+                    <select
+                        id="admin-update-story-display"
+                        name="display"
+                        value={formData.display}
+                        onChange={handleChange}
+                        required
+                        className="form-control"
+                    >
+                        <option value={true}>Cho phép</option>
+                        <option value={false}>Ẩn</option>
+                    </select>
                 </div>
                 <div id="admin-story-add-contents">
                     {formData.content.map((c, cIndex) => (

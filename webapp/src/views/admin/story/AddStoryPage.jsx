@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AddStory from "../../../components/admin/story/AddStory";
 import { StoryService } from "@/services/StoryService.jsx";
 import Swal from "sweetalert2";
 
 const AddStoryPage = () => {
+    const [existingStories, setExistingStories] = useState([]);
+
+    useEffect(() => {
+        const fetchStories = async () => {
+            try {
+                const data = await StoryService.fetchStories(1, 10000);
+                setExistingStories(data.data || []);
+            } catch (err) {
+                console.error("Error fetching stories:", err);
+            }
+        };
+        fetchStories();
+    }, []);
+
     const handleSubmit = async (data) => {
         try {
             const res = await StoryService.addStory(data);
@@ -29,6 +43,7 @@ const AddStoryPage = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/story"
             title="THÊM BÀI HỌC CÂU CHUYỆN"
+            existingItems={existingStories}
         />
     );
 };

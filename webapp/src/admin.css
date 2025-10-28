@@ -1563,6 +1563,7 @@
 }
 
 .admin-story-add-group input[type="text"],
+.admin-story-add-group input[type="number"],
 .admin-story-add-group select,
 .admin-story-add-group textarea {
   padding: 10px 12px;
@@ -1575,6 +1576,7 @@
 }
 
 .admin-story-add-group input[type="text"]:focus,
+.admin-story-add-group input[type="number"]:focus,
 .admin-story-add-group select:focus,
 .admin-story-add-group textarea:focus {
   border: 1px solid #3498db;
@@ -1842,6 +1844,7 @@
 }
 
 .admin-story-update-group input[type="text"],
+.admin-story-update-group input[type="number"],
 .admin-story-update-group select,
 .admin-story-update-group textarea {
   padding: 10px 12px;
@@ -1854,6 +1857,7 @@
 }
 
 .admin-story-update-group input[type="text"]:focus,
+.admin-story-update-group input[type="number"]:focus,
 .admin-story-update-group select:focus,
 .admin-story-update-group textarea:focus {
   border: 1px solid #3498db;

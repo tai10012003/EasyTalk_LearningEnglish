@@ -28,7 +28,8 @@ router.get("/api/story-list", verifyToken, async (req, res) => {
         const category = req.query.category;
         const level = req.query.level;
         const search = req.query.search;
-        const { stories, totalStory } = await storyService.getStoryList(page, limit, category, level, search);
+        const role = req.user.role || "user";
+        const { stories, totalStory } = await storyService.getStoryList(page, limit, category, level, search, role);
         const totalPages = Math.ceil(totalStory / limit);
         res.json({
             success: true,
@@ -79,6 +80,19 @@ router.get("/api/story/:id", verifyToken, async (req, res) => {
             message: "Error fetching story details",
             error: error.message,
         });
+    }
+});
+
+router.get("/api/story/slug/:slug", verifyToken, async function(req, res) {
+    try {
+        const slug = req.params.slug;
+        const story = await storyService.getStoryBySlug(slug);
+        if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+        }
+        res.json({ data: story });
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching story details", error: err });
     }
 });
 
@@ -149,6 +163,9 @@ router.post("/api/add", upload.single("image"), async (req, res) => {
             category,
             image: req.file ? `/static/images/story/${req.file.filename}` : null,
             content: JSON.parse(content),
+            slug: req.body.slug || undefined,
+            sort: parseInt(req.body.sort) || 0,
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await storyService.insertStory(storyData);
         res.status(201).json({ success: true, message: "Câu chuyện đã được thêm thành công!", result });
@@ -207,6 +224,9 @@ router.put("/api/update/:id", upload.single("image"), async (req, res) => {
             category,
             content: JSON.parse(content),
             image: imagePath,
+            slug: req.body.slug || undefined,
+            sort: parseInt(req.body.sort) || 0,
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await storyService.updateStory(storyData);
         res.json({ success: true, message: "Câu chuyện đã được cập nhật thành công!", result });

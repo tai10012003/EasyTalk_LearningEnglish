@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const UpdateStoryPage = () => {
     const { id } = useParams();
     const [story, setStory] = useState(null);
+    const [existingStories, setExistingStories] = useState([]);
 
     useEffect(() => {
         const fetchStory = async () => {
@@ -23,6 +24,18 @@ const UpdateStoryPage = () => {
         };
         fetchStory();
     }, [id]);
+
+    useEffect(() => {
+        const fetchStories = async () => {
+            try {
+                const data = await StoryService.fetchStories(1, 10000);
+                setExistingStories(data.data || []);
+            } catch (err) {
+                console.error("Error fetching stories:", err);
+            }
+        };
+        fetchStories();
+    }, []);
 
     const handleSubmit = async (formData, id) => {
         try {
@@ -52,6 +65,7 @@ const UpdateStoryPage = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/story"
             initialData={story}
+            existingItems={existingStories}
         />
     );
 };
