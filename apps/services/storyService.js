@@ -2,10 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const { StoryRepository } = require("./../repositories");
 
-function generateSlug(title) {
-    return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
-
 class StoryService {
     constructor() {
         this.storyRepository = new StoryRepository();
@@ -43,9 +39,9 @@ class StoryService {
             category: storyData.category,
             image: storyData.image || '',
             content: [],
-            slug: storyData.slug || generateSlug(storyData.title),
-            sort: storyData.sort || 0,
-            display: storyData.display !== undefined ? storyData.display : true,
+            slug: storyData.slug,
+            sort: storyData.sort,
+            display: storyData.display,
             createdAt: new Date()
         };
         if (storyData.content && Array.isArray(storyData.content)) {

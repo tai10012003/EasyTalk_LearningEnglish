@@ -163,8 +163,8 @@ router.post("/api/add", upload.single("image"), async (req, res) => {
             category,
             image: req.file ? `/static/images/story/${req.file.filename}` : null,
             content: JSON.parse(content),
-            slug: req.body.slug || undefined,
-            sort: parseInt(req.body.sort) || 0,
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
             display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await storyService.insertStory(storyData);
@@ -224,8 +224,8 @@ router.put("/api/update/:id", upload.single("image"), async (req, res) => {
             category,
             content: JSON.parse(content),
             image: imagePath,
-            slug: req.body.slug || undefined,
-            sort: parseInt(req.body.sort) || 0,
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
             display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await storyService.updateStory(storyData);

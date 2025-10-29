@@ -5,12 +5,20 @@ class GrammarexerciseService {
         this.grammarexerciseRepository = new GrammarexerciseRepository();
     }
 
-    async getGrammarexerciseList(page = 1, limit = 12) {
-        return await this.grammarexerciseRepository.findGrammarExercises(page, limit);
+    async getGrammarexerciseList(page = 1, limit = 12, role = "user") {
+        const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
+        return await this.grammarexerciseRepository.findGrammarExercises(filter, page, limit);
     }
 
     async getGrammarexerciseById(id) {
         return await this.grammarexerciseRepository.findGrammarExerciseById(id);
+    }
+
+    async getGrammarexerciseBySlug(slug) {
+        return await this.grammarexerciseRepository.findGrammarExerciseBySlug(slug);
     }
 
     async insertGrammarexercise(exerciseData) {

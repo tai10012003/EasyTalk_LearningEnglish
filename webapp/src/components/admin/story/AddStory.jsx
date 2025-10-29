@@ -12,7 +12,7 @@ const AddStory = ({ onSubmit, title, returnUrl, existingItems = [] }) => {
         image: null,
         content: [],
         slug: "",
-        sort: "",
+        sort: 0,
         display: true,
     });
 

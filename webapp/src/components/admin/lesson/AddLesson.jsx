@@ -12,7 +12,7 @@ const AddLesson = ({ onSubmit, title, returnUrl, existingItems = [] }) => {
         image: null,
         quizzes: [],
         slug: "",
-        sort: "",
+        sort: 0,
         display: true,
     });
 

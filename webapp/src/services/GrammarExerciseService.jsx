@@ -8,13 +8,9 @@ export const GrammarExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/grammar-exercise/api/grammar-exercises${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
@@ -36,9 +32,9 @@ export const GrammarExerciseService = {
         }
     },
 
-    async getGrammarExerciseById(id) {
+    async getGrammarExerciseBySlug(slug) {
         try {
-            const res = await fetch(`${API_URL}/grammar-exercise/api/grammar-exercises/${id}`);
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/slug/${slug}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

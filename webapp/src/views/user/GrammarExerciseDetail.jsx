@@ -9,7 +9,7 @@ import GrammarExerciseHistory from "@/components/user/grammarexercise/GrammarExe
 import Swal from "sweetalert2";
 
 const GrammarExerciseDetail = () => {
-    const { id } = useParams();
+    const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [questions, setQuestions] = useState([]);
     const [timeRemaining, setTimeRemaining] = useState(0);
@@ -78,7 +78,7 @@ const GrammarExerciseDetail = () => {
         const fetchExerciseData = async () => {
             try {
                 setIsLoading(true);
-                const data = await GrammarExerciseService.getGrammarExerciseById(id);
+                const data = await GrammarExerciseService.getGrammarExerciseBySlug(slug);
                 if (data && data.questions && data.questions.length > 0) {
                     setQuestions(data.questions);
                     setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
@@ -100,10 +100,10 @@ const GrammarExerciseDetail = () => {
                 setIsLoading(false);
             }
         };
-        if (id) {
+        if (slug) {
             fetchExerciseData();
         }
-    }, [id]);
+    }, [slug]);
 
     useEffect(() => {
         if (!isCompleted && hasStarted && questions.length > 0) {

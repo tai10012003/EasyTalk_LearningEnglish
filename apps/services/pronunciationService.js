@@ -2,10 +2,6 @@ const fs = require("fs");
 const path = require("path");
 const { PronunciationRepository } = require("./../repositories");
 
-function generateSlug(title) {
-    return title.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
-}
-
 class PronunciationsService {
     constructor() {
         this.pronunciationRepository = new PronunciationRepository();
@@ -40,9 +36,9 @@ class PronunciationsService {
             content: pronunciation.content,
             images: pronunciation.images,
             quizzes: [],
-            slug: pronunciation.slug || generateSlug(pronunciation.title),
-            sort: pronunciation.sort || 0,
-            display: pronunciation.display !== undefined ? pronunciation.display : true,
+            slug: pronunciation.slug,
+            sort: pronunciation.sort,
+            display: pronunciation.display,
             createdAt: new Date()
         };
         if (pronunciation.quizzes && Array.isArray(pronunciation.quizzes)) {
@@ -73,9 +69,9 @@ class PronunciationsService {
             content: pronunciation.content.trim(),
             images: pronunciation.images.trim(),
             quizzes: formattedQuestions,
-            slug: pronunciation.slug || generateSlug(pronunciation.title),
-            sort: pronunciation.sort || 0,
-            display: pronunciation.display !== undefined ? pronunciation.display : true,
+            slug: pronunciation.slug,
+            sort: pronunciation.sort,
+            display: pronunciation.display,
             updatedAt: new Date()
         };
         return await this.pronunciationRepository.update(id, updateData);

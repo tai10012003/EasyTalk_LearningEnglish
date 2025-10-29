@@ -110,6 +110,8 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
                                 <th>#</th>
                                 <th>Tiêu đề</th>
                                 <th>Số lượng câu hỏi</th>
+                                <th>Thứ tự</th>
+                                <th>Hiển thị</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
@@ -132,6 +134,18 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
                                             <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>{exercise.title}</td>
                                             <td>{exercise.questions ? exercise.questions.length : 0}</td>
+                                            <td>{exercise.sort}</td>
+                                            <td>
+                                                <span
+                                                    className={`display-badge ${
+                                                        exercise.display == true
+                                                            ? "display-allow"
+                                                            : "display-hidden"
+                                                    }`}
+                                                >
+                                                    {exercise.display == true ? "Cho phép" : "Ẩn"}
+                                                </span>
+                                            </td>
                                             <td>{createdAt}</td>
                                             <td className="admin-exercise-actions">
                                                 <a
@@ -152,7 +166,7 @@ function ExerciseList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={6}>Không có bài luyện tập.</td>
+                                    <td colSpan={8}>Không có bài luyện tập.</td>
                                 </tr>
                             )}
                         </tbody>

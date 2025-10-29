@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AddExercise from "../../../components/admin/exercise/AddExercise";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 import Swal from "sweetalert2";
 
 const AddGrammarExercise = () => {
+    const [existingGrammarExercises, setExistingGrammarExercises] = useState([]);
+    
+    useEffect(() => {
+        const fetchGrammarExercises = async () => {
+            try {
+                const data = await GrammarExerciseService.fetchGrammarExercise(1, 10000);
+                setExistingGrammarExercises(data.data || []);
+            } catch (err) {
+                console.error("Error fetching grammar exercises:", err);
+            }
+        };
+        fetchGrammarExercises();
+    }, []);
+
     const handleSubmit = async (data) => {
         try {
             const res = await GrammarExerciseService.addGrammarExercise(data);
@@ -24,7 +38,7 @@ const AddGrammarExercise = () => {
         }
     };
     
-    return <AddExercise onSubmit={handleSubmit} returnUrl="/admin/grammar-exercise" title="THÊM BÀI LUYỆN TẬP NGỮ PHÁP" />;
+    return <AddExercise onSubmit={handleSubmit} returnUrl="/admin/grammar-exercise" title="THÊM BÀI LUYỆN TẬP NGỮ PHÁP" existingItems={existingGrammarExercises} />;
 };
 
 export default AddGrammarExercise;

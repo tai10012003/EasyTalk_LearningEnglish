@@ -12,7 +12,7 @@ const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems =
         image: null,
         quizzes: [],
         slug: "",
-        sort: "",
+        sort: 0,
         display: true,
     });
 
@@ -26,7 +26,7 @@ const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems =
                 image: null,
                 quizzes: initialData.quizzes || [],
                 slug: initialData.slug || "",
-                sort: initialData.sort || "",
+                sort: initialData.sort || 0,
                 display: initialData.display,
             });
         }
@@ -46,7 +46,7 @@ const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems =
             });
             return false;
         }
-        const existingItem = existingItems.find(item => item.sort == sortNum);
+        const existingItem = existingItems.find((item) => item.sort == sortNum && item._id !== initialData._id);
         if (existingItem) {
             Swal.fire({
                 icon: "warning",

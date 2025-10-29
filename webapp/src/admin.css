@@ -2181,6 +2181,7 @@
 }
 
 .admin-exercise-add-group input[type="text"],
+.admin-exercise-add-group input[type="number"],
 .admin-exercise-add-group select,
 .admin-exercise-add-group textarea {
   padding: 10px 12px;
@@ -2193,6 +2194,7 @@
 }
 
 .admin-exercise-add-group input[type="text"]:focus,
+.admin-exercise-add-group input[type="number"]:focus,
 .admin-exercise-add-group select:focus,
 .admin-exercise-add-group textarea:focus {
   border: 1px solid #3498db;
@@ -2351,6 +2353,7 @@
 }
 
 .admin-exercise-update-group input[type="text"],
+.admin-exercise-update-group input[type="number"],
 .admin-exercise-update-group select,
 .admin-exercise-update-group textarea {
   padding: 10px 12px;
@@ -2363,6 +2366,7 @@
 }
 
 .admin-exercise-update-group input[type="text"]:focus,
+.admin-exercise-update-group input[type="number"]:focus,
 .admin-exercise-update-group select:focus,
 .admin-exercise-update-group textarea:focus {
   border: 1px solid #3498db;

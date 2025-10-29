@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const UpdateGrammarExercise = () => {
     const { id } = useParams();
     const [grammarexercise, setGrammarExercise] = useState(null);
+    const [existingGrammarExercises, setExistingGrammarExercises] = useState([]);
 
     useEffect(() => {
         const fetchGrammarExercise = async () => {
@@ -23,6 +24,18 @@ const UpdateGrammarExercise = () => {
         };
         fetchGrammarExercise();
     },  [id]);
+    
+    useEffect(() => {
+        const fetchGrammarExercises = async () => {
+            try {
+                const data = await GrammarExerciseService.fetchGrammarExercise(1, 10000);
+                setExistingGrammarExercises(data.data || []);
+            } catch (err) {
+                console.error("Error fetching grammar exercises:", err);
+            }
+        };
+        fetchGrammarExercises();
+    }, []);
 
     const handleSubmit = async (formData, id) => {
         try {
@@ -51,6 +64,7 @@ const UpdateGrammarExercise = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/grammar-exercise"
             initialData={grammarexercise}
+            existingItems={existingGrammarExercises}
         />
     );
 };

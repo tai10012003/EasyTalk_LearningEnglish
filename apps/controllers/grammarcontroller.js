@@ -140,8 +140,8 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
       content: req.body.content,
       images: req.file ? `/static/images/grammar/${req.file.filename}` : null,
       quizzes: quizzes,
-      slug: req.body.slug || undefined,
-      sort: parseInt(req.body.sort) || 0,
+      slug: req.body.slug,
+      sort: parseInt(req.body.sort),
       display: req.body.display !== undefined ? req.body.display == "true" : true
     };
     const result = await grammarService.insertGrammar(grammar);
@@ -200,8 +200,8 @@ router.put("/api/update/:id", upload.single("image"), async function (req, res) 
       content: req.body.content,
       quizzes: quizzes,
       images: imagePath,
-      slug: req.body.slug || undefined,
-      sort: parseInt(req.body.sort) || 0,
+      slug: req.body.slug,
+      sort: parseInt(req.body.sort),
       display: req.body.display !== undefined ? req.body.display == "true" : true
     };
     const result = await grammarService.updateGrammar(req.params.id, grammar);

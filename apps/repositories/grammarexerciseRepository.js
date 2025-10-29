@@ -13,9 +13,9 @@ class GrammarexerciseRepository {
         this.grammarExercisesCollection = this.db.collection("grammarexercises");
     }
 
-    async findGrammarExercises(page = 1, limit = 12) {
+    async findGrammarExercises(filter = {}, page = 1, limit = 12) {
         const skip = (page - 1) * limit;
-        const cursor = await this.grammarExercisesCollection.find({}).skip(skip).limit(limit);
+        const cursor = await this.grammarExercisesCollection.find(filter).sort({ sort: 1 }).skip(skip).limit(limit);
         const grammarexercises = await cursor.toArray();
         const totalExercises = await this.grammarExercisesCollection.countDocuments();
         return { grammarexercises, totalExercises };
@@ -23,6 +23,10 @@ class GrammarexerciseRepository {
 
     async findGrammarExerciseById(id) {
         return await this.grammarExercisesCollection.findOne({ _id: new ObjectId(id) });
+    }
+
+    async findGrammarExerciseBySlug(slug) {
+        return await this.grammarExercisesCollection.findOne({ slug });
     }
 
     async insertGrammarExercise(exerciseData) {
@@ -35,6 +39,9 @@ class GrammarexerciseRepository {
                 explanation: q.explanation || "",
                 options: q.options || [],
             })) : [],
+            slug: exerciseData.slug,
+            sort: exerciseData.sort,
+            display: exerciseData.display,
             createdAt: new Date()
         };
         return await this.grammarExercisesCollection.insertOne(newExercise);
@@ -53,6 +60,9 @@ class GrammarexerciseRepository {
         const update = {
             title: updateData.title.trim(),
             questions: formattedQuestions,
+            slug: updateData.slug,
+            sort: updateData.sort,
+            display: updateData.display,
             updatedAt: new Date(),
         };
 

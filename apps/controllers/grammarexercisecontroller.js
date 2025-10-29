@@ -1,13 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const verifyToken = require("./../util/VerifyToken");
 const { GrammarexerciseService } = require("./../services");
 const grammarexerciseService = new GrammarexerciseService();
 
-router.get("/api/grammar-exercises", async (req, res) => {
+router.get("/api/grammar-exercises", verifyToken, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { grammarexercises, totalExercises } = await grammarexerciseService.getGrammarexerciseList(page, limit);
+        const role = req.user.role || "user";
+        const { grammarexercises, totalExercises } = await grammarexerciseService.getGrammarexerciseList(page, limit, role);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
           success: true,
@@ -33,11 +35,27 @@ router.get("/api/grammar-exercises/:id", async function (req, res) {
     }
 });
 
+router.get("/api/grammar-exercises/slug/:slug", async function(req, res) {
+    try {
+        const slug = req.params.slug;
+        const exercise = await grammarexerciseService.getGrammarexerciseBySlug(slug);
+        if (!exercise) {
+        return res.status(404).json({ message: "Grammar exercise not found" });
+        }
+        res.json(exercise);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching Grammar exercise details", error: err });
+    }
+});
+
 router.post("/add", async (req, res) => {
     try {
         const grammarexercise = {
             title: req.body.title,
-            questions: req.body.questions || []
+            questions: req.body.questions || [],
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display
         };
         const result = await grammarexerciseService.insertGrammarexercise(grammarexercise);
         res.status(201).json({ success: true, message: "Bài luyện tập ngữ pháp đã được thêm thành công !", result});
@@ -68,7 +86,10 @@ router.put("/update/:id", async (req, res) => {
         }
         const grammarexercise = {
             title: req.body.title,
-            questions: req.body.questions || []
+            questions: req.body.questions || [],
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display
         };
         const result = await grammarexerciseService.updateGrammarexercise(req.params.id, grammarexercise);
         res.json({ message: "Bài luyện tập ngữ pháp đã được cập nhật thành công !", result });

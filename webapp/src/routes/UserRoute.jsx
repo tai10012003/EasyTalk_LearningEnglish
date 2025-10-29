@@ -140,13 +140,17 @@ const UserRoute = [
     {
         path: "/grammar-exercise",
         element: (
-        <GrammarExercise />
+        <PrivateRoute>
+            <GrammarExercise />
+        </PrivateRoute>
         ),
     },
     {
-        path: "/grammar-exercise/:id",
+        path: "/grammar-exercise/:slug",
         element: (
-        <GrammarExerciseDetail />
+        <PrivateRoute>
+            <GrammarExerciseDetail />
+        </PrivateRoute>
         ),
     },
     {

@@ -12,7 +12,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData, existingItems = 
         image: null,
         content: [],
         slug: "",
-        sort: "",
+        sort: 0,
         display: true,
     });
 
@@ -26,7 +26,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData, existingItems = 
                 image: null,
                 content: initialData.content || [],
                 slug: initialData.slug || "",
-                sort: initialData.sort || "",
+                sort: initialData.sort || 0,
                 display: initialData.display,
             });
         }
@@ -46,7 +46,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData, existingItems = 
             });
             return false;
         }
-        const existingItem = existingItems.find(item => item.sort == sortNum);
+        const existingItem = existingItems.find((item) => item.sort == sortNum && item._id !== initialData._id);
         if (existingItem) {
             Swal.fire({
                 icon: "warning",
