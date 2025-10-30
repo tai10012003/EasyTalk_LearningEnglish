@@ -13,9 +13,9 @@ class DictationRepository {
         this.dictationCollection = this.db.collection("dictationexercises");
     }
 
-    async findDictations(page = 1, limit = 12) {
+    async findDictations(filter = {}, page = 1, limit = 12) {
         const skip = (page - 1) * limit;
-        const cursor = await this.dictationCollection.find({}).skip(skip).limit(limit);
+        const cursor = await this.dictationCollection.find(filter).sort({ sort: 1 }).skip(skip).limit(limit);
         const dictationExercises = await cursor.toArray();
         const totalDictationExercises = await this.dictationCollection.countDocuments();
         return { dictationExercises, totalDictationExercises };
@@ -23,6 +23,10 @@ class DictationRepository {
 
     async findDictationById(id) {
         return await this.dictationCollection.findOne({ _id: new ObjectId(id) });
+    }
+
+    async findDictationBySlug(slug) {
+        return await this.dictationCollection.findOne({ slug });
     }
 
     async insertDictation(dictationData) {

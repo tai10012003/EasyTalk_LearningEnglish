@@ -8,11 +8,8 @@ export const PronunciationExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
 
             if (!res.ok) {
@@ -36,9 +33,9 @@ export const PronunciationExerciseService = {
         }
     },
 
-    async getPronunciationExerciseById(id) {
+    async getPronunciationExerciseBySlug(slug) {
         try {
-            const res = await fetch(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${id}`);
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const UpdateDictationExercise = () => {
     const { id } = useParams();
     const [dictationexercise, setDictationExercise] = useState(null);
+    const [existingDictations, setExistingDictations] = useState([]);
 
     useEffect(() => {
         const fetchDictationExercise = async () => {
@@ -23,6 +24,18 @@ const UpdateDictationExercise = () => {
         };
         fetchDictationExercise();
     },  [id]);
+
+    useEffect(() => {
+        const fetchDictations = async () => {
+            try {
+                const data = await DictationExerciseService.fetchDictationExercise(1, 10000);
+                setExistingDictations(data.dictationExercises || []);
+            } catch (err) {
+                console.error("Error fetching dictation:", err);
+            }
+        };
+        fetchDictations();
+    }, []);
 
     const handleSubmit = async (formData, id) => {
         try {
@@ -51,6 +64,7 @@ const UpdateDictationExercise = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/dictation-exercise"
             initialData={dictationexercise}
+            existingItems={existingDictations}
         />
     );
 };

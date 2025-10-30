@@ -9,7 +9,7 @@ import VocabularyExerciseHistory from "@/components/user/vocabularyexercise/Voca
 import Swal from "sweetalert2";
 
 const VocabularyExerciseDetail = () => {
-    const { id } = useParams();
+    const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [questions, setQuestions] = useState([]);
     const [timeRemaining, setTimeRemaining] = useState(0);
@@ -78,10 +78,10 @@ const VocabularyExerciseDetail = () => {
         const fetchExerciseData = async () => {
             try {
                 setIsLoading(true);
-                const data = await VocabularyExerciseService.getVocabularyExerciseById(id);
+                const data = await VocabularyExerciseService.getVocabularyExerciseBySlug(slug);
                 if (data && data.questions && data.questions.length > 0) {
                     setQuestions(data.questions);
-                    setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
+                    setExerciseTitle(data.title || "Bài luyện tập từ vựng");
                     const initialResults = data.questions.map(question => ({
                         question: question.question,
                         userAnswer: "Chưa trả lời",
@@ -100,10 +100,10 @@ const VocabularyExerciseDetail = () => {
                 setIsLoading(false);
             }
         };
-        if (id) {
+        if (slug) {
             fetchExerciseData();
         }
-    }, [id]);
+    }, [slug]);
 
     useEffect(() => {
         if (!isCompleted && hasStarted && questions.length > 0) {

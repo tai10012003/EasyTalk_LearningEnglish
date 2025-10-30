@@ -156,37 +156,49 @@ const UserRoute = [
     {
         path: "/vocabulary-exercise",
         element: (
-        <VocabularyExercise />
+        <PrivateRoute>
+            <VocabularyExercise />
+        </PrivateRoute>
         ),
     },
     {
-        path: "/vocabulary-exercise/:id",
+        path: "/vocabulary-exercise/:slug",
         element: (
-        <VocabularyExerciseDetail />
+        <PrivateRoute>
+            <VocabularyExerciseDetail />
+        </PrivateRoute>
         ),
     },
     {
         path: "/pronunciation-exercise",
         element: (
-        <PronunciationExercise />
+        <PrivateRoute>
+            <PronunciationExercise />
+        </PrivateRoute>
         ),
     },
     {
-        path: "/pronunciation-exercise/:id",
+        path: "/pronunciation-exercise/:slug",
         element: (
-        <PronunciationExerciseDetail />
+        <PrivateRoute>
+            <PronunciationExerciseDetail />
+        </PrivateRoute>
         ),
     },
     {
         path: "/dictation-exercise",
         element: (
-        <DictationExercise />
+        <PrivateRoute>
+            <DictationExercise />
+        </PrivateRoute>
         ),
     },
     {
-        path: "/dictation-exercise/:id",
+        path: "/dictation-exercise/:slug",
         element: (
-        <DictationExerciseDetail />
+        <PrivateRoute>
+            <DictationExerciseDetail />
+        </PrivateRoute>
         ),
     },
     {

@@ -10,7 +10,7 @@ function DictationExerciseCard({ exercise }) {
                     <p className="lesson-category">
                         Số câu: {exercise.content ? exercise.content.split('.').length : 0}
                     </p>
-                    <Link to={`/dictation-exercise/${exercise._id}`} className="lesson-link">
+                    <Link to={`/dictation-exercise/${exercise.slug}`} className="lesson-link">
                         <i className="fas fa-pencil-alt me-2"></i>Luyện tập
                     </Link>
                 </div>

@@ -11,7 +11,6 @@ export const DictationExerciseService = {
             const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises${query}`, {
                 method: 'GET',
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
@@ -36,6 +35,18 @@ export const DictationExerciseService = {
     async getDictationExerciseById(id) {
         try {
             const res = await fetch(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`);
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    },
+
+    async getDictationExerciseBySlug(slug) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

@@ -110,7 +110,9 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                                 <th>#</th>
                                 <th>Tiêu đề</th>
                                 <th>Mô tả</th>
-                                <th>Nội dung</th>
+                                {/* <th>Nội dung</th> */}
+                                <th>Thứ tự</th>
+                                <th>Hiển thị</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
@@ -127,7 +129,19 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                                             <td>{(currentPage - 1) * 12 + index + 1}</td>
                                             <td>{dictation.title}</td>
                                             <td>{dictation.description?.length > 50 ? `${dictation.description.slice(0,50)} ...` : dictation.description}</td>
-                                            <td>{dictation.content.length > 80 ? `${dictation.content.slice(0,80)} ...` : dictation.content}</td>
+                                            {/* <td>{dictation.content.length > 80 ? `${dictation.content.slice(0,80)} ...` : dictation.content}</td> */}
+                                            <td>{dictation.sort}</td>
+                                            <td>
+                                                <span
+                                                    className={`display-badge ${
+                                                        dictation.display == true
+                                                            ? "display-allow"
+                                                            : "display-hidden"
+                                                    }`}
+                                                >
+                                                    {dictation.display == true ? "Cho phép" : "Ẩn"}
+                                                </span>
+                                            </td>
                                             <td>{createdAt}</td>
                                             <td className="admin-exercise-actions">
                                                 <a
@@ -148,7 +162,7 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                                 })
                             ) : (
                                 <tr>
-                                    <td colSpan={6}>Không có bài luyện tập.</td>
+                                    <td colSpan={8}>Không có bài luyện tập.</td>
                                 </tr>
                             )}
                         </tbody>

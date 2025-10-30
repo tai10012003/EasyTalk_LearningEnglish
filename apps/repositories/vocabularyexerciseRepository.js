@@ -13,9 +13,9 @@ class VocabularyexerciseRepository {
         this.vocabularyExercisesCollection = this.db.collection("vocabularyexercises");
     }
 
-    async findVocabularyExercises(page = 1, limit = 12) {
+    async findVocabularyExercises(filter = {}, page = 1, limit = 12) {
         const skip = (page - 1) * limit;
-        const cursor = await this.vocabularyExercisesCollection.find({}).skip(skip).limit(limit);
+        const cursor = await this.vocabularyExercisesCollection.find(filter).sort({ sort: 1 }).skip(skip).limit(limit);
         const vocabularyExercises = await cursor.toArray();
         const totalExercises = await this.vocabularyExercisesCollection.countDocuments();
         return { vocabularyExercises, totalExercises };
@@ -23,6 +23,10 @@ class VocabularyexerciseRepository {
 
     async findVocabularyExerciseById(id) {
         return await this.vocabularyExercisesCollection.findOne({ _id: new ObjectId(id) });
+    }
+
+    async findVocabularyExerciseBySlug(slug) {
+        return await this.vocabularyExercisesCollection.findOne({ slug });
     }
 
     async insertVocabularyExercise(exerciseData) {
@@ -37,6 +41,9 @@ class VocabularyexerciseRepository {
                     options: q.options || [],
                 }))
                 : [],
+            slug: exerciseData.slug,
+            sort: exerciseData.sort,
+            display: exerciseData.display,
             createdAt: new Date()
         };
         return await this.vocabularyExercisesCollection.insertOne(newExercise);
@@ -57,6 +64,9 @@ class VocabularyexerciseRepository {
         const update = {
             title: updateData.title.trim(),
             questions: formattedQuestions,
+            slug: updateData.slug,
+            sort: updateData.sort,
+            display: updateData.display,
             updatedAt: new Date(),
         };
 

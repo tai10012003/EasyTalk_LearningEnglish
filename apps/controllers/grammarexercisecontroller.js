@@ -35,7 +35,7 @@ router.get("/api/grammar-exercises/:id", async function (req, res) {
     }
 });
 
-router.get("/api/grammar-exercises/slug/:slug", async function(req, res) {
+router.get("/api/grammar-exercises/slug/:slug", verifyToken, async function(req, res) {
     try {
         const slug = req.params.slug;
         const exercise = await grammarexerciseService.getGrammarexerciseBySlug(slug);
@@ -55,7 +55,7 @@ router.post("/add", async (req, res) => {
             questions: req.body.questions || [],
             slug: req.body.slug,
             sort: parseInt(req.body.sort),
-            display: req.body.display
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await grammarexerciseService.insertGrammarexercise(grammarexercise);
         res.status(201).json({ success: true, message: "Bài luyện tập ngữ pháp đã được thêm thành công !", result});
@@ -89,7 +89,7 @@ router.put("/update/:id", async (req, res) => {
             questions: req.body.questions || [],
             slug: req.body.slug,
             sort: parseInt(req.body.sort),
-            display: req.body.display
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await grammarexerciseService.updateGrammarexercise(req.params.id, grammarexercise);
         res.json({ message: "Bài luyện tập ngữ pháp đã được cập nhật thành công !", result });

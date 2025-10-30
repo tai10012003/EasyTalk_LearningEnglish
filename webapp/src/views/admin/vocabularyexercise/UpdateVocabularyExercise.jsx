@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const UpdateVocabularyExercise = () => {
     const { id } = useParams();
     const [vocabularyexercise, setVocabularyExercise] = useState(null);
+    const [existingVocabularyExercises, setExistingVocabularyExercises] = useState([]);
 
     useEffect(() => {
         const fetchVocabularyExercise = async () => {
@@ -23,6 +24,18 @@ const UpdateVocabularyExercise = () => {
         };
         fetchVocabularyExercise();
     },  [id]);
+
+    useEffect(() => {
+        const fetchVocabularyExercises = async () => {
+            try {
+                const data = await VocabularyExerciseService.fetchVocabularyExercise(1, 10000);
+                setExistingVocabularyExercises(data.data || []);
+            } catch (err) {
+                console.error("Error fetching vocabulary exercises:", err);
+            }
+        };
+        fetchVocabularyExercises();
+    }, []);
     
     const handleSubmit = async (formData, id) => {
         try {
@@ -35,7 +48,7 @@ const UpdateVocabularyExercise = () => {
             window.location.href = "/admin/vocabulary-exercise";
             return res;
         } catch (err) {
-            console.error("Error adding pronunciation:", err);
+            console.error("Error adding vocabulary:", err);
             await Swal.fire({
                 icon: 'error',
                 title: 'Thất bại!',
@@ -52,6 +65,7 @@ const UpdateVocabularyExercise = () => {
             onSubmit={handleSubmit}
             returnUrl="/admin/vocabulary-exercise"
             initialData={vocabularyexercise}
+            existingItems={existingVocabularyExercises}
         />
     );
 };

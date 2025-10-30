@@ -5,14 +5,16 @@ const axios = require('axios');
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const FormData = require('form-data');
+const verifyToken = require("./../util/VerifyToken");
 const { PronunciationexerciseService } = require("../services");
 const pronunciationexerciseService = new PronunciationexerciseService();
 
-router.get("/api/pronunciation-exercises", async (req, res) => {
+router.get("/api/pronunciation-exercises", verifyToken, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { pronunciationexercises, totalExercises } = await pronunciationexerciseService.getPronunciationexerciseList(page, limit);
+        const role = req.user.role || "user";
+        const { pronunciationexercises, totalExercises } = await pronunciationexerciseService.getPronunciationexerciseList(page, limit, role);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
           success: true,
@@ -29,6 +31,19 @@ router.get("/api/pronunciation-exercises", async (req, res) => {
 router.get("/api/pronunciation-exercises/:id", async function (req, res) {
     try {
         const exercise = await pronunciationexerciseService.getPronunciationexerciseById(req.params.id);
+        if (!exercise) {
+            return res.status(404).json({ message: "Pronunciation exercise not found" });
+        }
+        res.json(exercise);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching Pronunciation exercise details", error: err });
+    }
+});
+
+router.get("/api/pronunciation-exercises/slug/:slug", verifyToken, async function(req, res) {
+    try {
+        const slug = req.params.slug;
+        const exercise = await pronunciationexerciseService.getPronunciationexerciseBySlug(slug);
         if (!exercise) {
             return res.status(404).json({ message: "Pronunciation exercise not found" });
         }
@@ -105,7 +120,10 @@ router.post("/add", async (req, res) => {
     try {
         const pronunciationexercise = {
             title: req.body.title,
-            questions: req.body.questions || []
+            questions: req.body.questions || [],
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await pronunciationexerciseService.insertPronunciationexercise(pronunciationexercise);
         res.status(201).json({ success: true, message: "Bài luyện tập phát âm đã được thêm thành công !", result});
@@ -136,7 +154,10 @@ router.put("/update/:id", async (req, res) => {
         }
         const pronunciationexercise = {
             title: req.body.title,
-            questions: req.body.questions || []
+            questions: req.body.questions || [],
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await pronunciationexerciseService.updatePronunciationexercise(req.params.id, pronunciationexercise);
         res.json({ message: "Bài luyện tập phát âm đã được cập nhật thành công !", result });

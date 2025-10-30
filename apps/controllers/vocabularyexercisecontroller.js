@@ -1,13 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const { VocabularyexerciseService } = require("./../services");
+const verifyToken = require("./../util/VerifyToken");
 const vocabularyexerciseService = new VocabularyexerciseService();
 
-router.get("/api/vocabulary-exercises", async (req, res) => {
+router.get("/api/vocabulary-exercises", verifyToken, async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { vocabularyExercises, totalExercises } = await vocabularyexerciseService.getVocabularyExerciseList(page, limit);
+        const role = req.user.role || "user";
+        const { vocabularyExercises, totalExercises } = await vocabularyexerciseService.getVocabularyExerciseList(page, limit, role);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
           success: true,
@@ -33,11 +35,27 @@ router.get("/api/vocabulary-exercises/:id", async function (req, res) {
     }
 });
 
+router.get("/api/vocabulary-exercises/slug/:slug", verifyToken, async function(req, res) {
+    try {
+        const slug = req.params.slug;
+        const exercise = await vocabularyexerciseService.getVocabularyexerciseBySlug(slug);
+        if (!exercise) {
+            return res.status(404).json({ message: "Vocabulary exercise not found" });
+        }
+        res.json(exercise);
+    } catch (err) {
+        res.status(500).json({ message: "Error fetching vocabulary exercise details", error: err });
+    }
+});
+
 router.post("/add", async (req, res) => {
     try {
         const vocabularyexercise = {
             title: req.body.title,
-            questions: req.body.questions || []
+            questions: req.body.questions || [],
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await vocabularyexerciseService.insertVocabularyExercise(vocabularyexercise);
         res.status(201).json({ success: true, message: "Bài luyện tập từ vựng đã được thêm thành công !", result});
@@ -68,7 +86,10 @@ router.put("/update/:id", async (req, res) => {
         }
         const vocabularyexercise = {
             title: req.body.title,
-            questions: req.body.questions || []
+            questions: req.body.questions || [],
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await vocabularyexerciseService.updateVocabularyExercise(req.params.id, vocabularyexercise);
         res.json({ message: "Bài luyện tập từ vựng đã được cập nhật thành công !", result });

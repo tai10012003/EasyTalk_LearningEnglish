@@ -10,7 +10,7 @@ function PronunciationExerciseCard({ exercise }) {
                     <p className="lesson-category">
                         Số câu hỏi: {exercise.questions ? exercise.questions.length : 0}
                     </p>
-                    <Link to={`/pronunciation-exercise/${exercise._id}`} className="lesson-link">
+                    <Link to={`/pronunciation-exercise/${exercise.slug}`} className="lesson-link">
                         <i className="fas fa-pencil-alt me-2"></i>Luyện tập
                     </Link>
                 </div>

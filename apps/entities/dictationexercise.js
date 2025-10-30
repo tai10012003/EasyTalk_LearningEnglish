@@ -3,6 +3,9 @@ class dictationexercises {
     title;
     description;
     content;
+    slug;
+    sort;
+    display;
     createdAt;
     constructor() {
         

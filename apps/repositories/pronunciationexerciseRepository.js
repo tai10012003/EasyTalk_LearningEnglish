@@ -13,9 +13,9 @@ class PronunciationexerciseRepository {
         this.pronunciationExercisesCollection = this.db.collection("pronunciationexercises");
     }
 
-    async findPronunciationExercises(page = 1, limit = 12) {
+    async findPronunciationExercises(filter = {}, page = 1, limit = 12) {
         const skip = (page - 1) * limit;
-        const cursor = await this.pronunciationExercisesCollection.find({}).skip(skip).limit(limit);
+        const cursor = await this.pronunciationExercisesCollection.find(filter).sort({ sort: 1 }).skip(skip).limit(limit);
         const pronunciationexercises = await cursor.toArray();
         const totalExercises = await this.pronunciationExercisesCollection.countDocuments();
         return { pronunciationexercises, totalExercises };
@@ -23,6 +23,10 @@ class PronunciationexerciseRepository {
 
     async findPronunciationExerciseById(id) {
         return await this.pronunciationExercisesCollection.findOne({ _id: new ObjectId(id) });
+    }
+
+    async findPronunciationExerciseBySlug(slug) {
+        return await this.pronunciationExercisesCollection.findOne({ slug });
     }
 
     async insertPronunciationExercise(exerciseData) {
@@ -35,6 +39,9 @@ class PronunciationexerciseRepository {
                 explanation: q.explanation || "",
                 options: q.options || [],
             })) : [],
+            slug: exerciseData.slug,
+            sort: exerciseData.sort,
+            display: exerciseData.display,
             createdAt: new Date()
         };
         return await this.pronunciationExercisesCollection.insertOne(newExercise);
@@ -53,6 +60,9 @@ class PronunciationexerciseRepository {
         const update = {
             title: updateData.title.trim(),
             questions: formattedQuestions,
+            slug: updateData.slug,
+            sort: updateData.sort,
+            display: updateData.display,
             updatedAt: new Date(),
         };
 

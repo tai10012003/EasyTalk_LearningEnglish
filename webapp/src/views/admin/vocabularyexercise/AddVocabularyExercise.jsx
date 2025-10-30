@@ -1,9 +1,23 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import AddExercise from "../../../components/admin/exercise/AddExercise";
 import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
 import Swal from "sweetalert2";
 
 const AddVocabularyExercise = () => {
+    const [existingVocabularyExercises, setExistingVocabularyExercises] = useState([]);
+    
+    useEffect(() => {
+        const fetchVocabularyExercises = async () => {
+            try {
+                const data = await VocabularyExerciseService.fetchVocabularyExercise(1, 10000);
+                setExistingVocabularyExercises(data.data || []);
+            } catch (err) {
+                console.error("Error fetching vocabulary exercises:", err);
+            }
+        };
+        fetchVocabularyExercises();
+    }, []);
+
     const handleSubmit = async (data) => {
         try {
             const res = await VocabularyExerciseService.addVocabularyExercise(data);
@@ -24,7 +38,7 @@ const AddVocabularyExercise = () => {
         }
     };
     
-    return <AddExercise onSubmit={handleSubmit} returnUrl="/admin/vocabulary-exercise" title="THÊM BÀI LUYỆN TẬP TỪ VỰNG" />;
+    return <AddExercise onSubmit={handleSubmit} returnUrl="/admin/vocabulary-exercise" title="THÊM BÀI LUYỆN TẬP TỪ VỰNG" existingItems={existingVocabularyExercises} />;
 };
 
 export default AddVocabularyExercise;

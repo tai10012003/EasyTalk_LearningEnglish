@@ -8,11 +8,8 @@ export const VocabularyExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
@@ -35,9 +32,9 @@ export const VocabularyExerciseService = {
         }
     },
 
-    async getVocabularyExerciseById(id) {
+    async getVocabularyExerciseBySlug(slug) {
         try {
-            const res = await fetch(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${id}`);
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/slug/${slug}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             return data;

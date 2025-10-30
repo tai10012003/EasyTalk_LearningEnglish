@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 const UpdatePronunciationExercise = () => {
     const { id } = useParams();
     const [pronunciationexercise, setPronunciationExercise] = useState(null);
+    const [existingPronunciationExercises, setExistingPronunciationExercises] = useState([]);
 
     useEffect(() => {
         const fetchPronunciationExercise = async () => {
@@ -23,6 +24,18 @@ const UpdatePronunciationExercise = () => {
         };
         fetchPronunciationExercise();
     },  [id]);
+
+    useEffect(() => {
+        const fetchPronunciationExercises = async () => {
+            try {
+                const data = await PronunciationExerciseService.fetchPronunciationExercise(1, 10000);
+                setExistingPronunciationExercises(data.data || []);
+            } catch (err) {
+                console.error("Error fetching pronunciation exercises:", err);
+            }
+        };
+        fetchPronunciationExercises();
+    }, []);
 
     const handleSubmit = async (formData, id) => {
         try {
@@ -53,6 +66,7 @@ const UpdatePronunciationExercise = () => {
             returnUrl="/admin/pronunciation-exercise"
             initialData={pronunciationexercise}
             isPronunciationPage={true}
+            existingItems={existingPronunciationExercises}
         />
     );
 };

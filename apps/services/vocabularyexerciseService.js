@@ -5,12 +5,20 @@ class VocabularyexerciseService {
         this.vocabularyexerciseRepository = new VocabularyexerciseRepository();
     }
 
-    async getVocabularyExerciseList(page = 1, limit = 12) {
-        return await this.vocabularyexerciseRepository.findVocabularyExercises(page, limit);
+    async getVocabularyExerciseList(page = 1, limit = 12, role = "user") {
+        const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
+        return await this.vocabularyexerciseRepository.findVocabularyExercises(filter, page, limit);
     }
 
     async getVocabularyExerciseById(id) {
         return await this.vocabularyexerciseRepository.findVocabularyExerciseById(id);
+    }
+
+    async getVocabularyexerciseBySlug(slug) {
+        return await this.vocabularyexerciseRepository.findVocabularyExerciseBySlug(slug);
     }
 
     async insertVocabularyExercise(exerciseData) {

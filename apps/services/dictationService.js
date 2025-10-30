@@ -5,12 +5,20 @@ class DictationService {
         this.dictationRepository = new DictationRepository();
     }
 
-    async getDictationList(page = 1, limit = 12) {
-        return await this.dictationRepository.findDictations(page, limit);
+    async getDictationList(page = 1, limit = 12, role = "user") {
+        const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
+        return await this.dictationRepository.findDictations(filter, page, limit);
     }
 
     async getDictation(id) {
         return await this.dictationRepository.findDictationById(id);
+    }
+
+    async getDictationBySlug(slug) {
+        return await this.dictationRepository.findDictationBySlug(slug);
     }
 
     async insertDictation(dictationData) {

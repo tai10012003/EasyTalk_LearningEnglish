@@ -8,7 +8,7 @@ import DictationFullScript from "@/components/user/dictationexercise/DictationFu
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 
 function DictationExerciseDetail() {
-    const { id } = useParams();
+    const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const navigate = useNavigate();
     const [title, setTitle] = useState("");
@@ -33,7 +33,7 @@ function DictationExerciseDetail() {
         async function fetchDictation() {
             setIsLoading(true);
             try {
-                const data = await DictationExerciseService.getDictationExerciseById(id);
+                const data = await DictationExerciseService.getDictationExerciseBySlug(slug);
                 if (data.success) {
                     setTitle(data.data.title);
                     const sentencesArr = data.data.content
@@ -53,7 +53,7 @@ function DictationExerciseDetail() {
             }
         }
         fetchDictation();
-    }, [id]);
+    }, [slug]);
 
     const removePunctuation = (text) => text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s{2,}/g, " ");
 

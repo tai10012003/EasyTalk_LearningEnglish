@@ -1,13 +1,15 @@
 const express = require("express");
 const router = express.Router();
+const verifyToken = require("./../util/VerifyToken");
 const { DictationService } = require("../services");
 const dictationService = new DictationService();
 
-router.get("/api/dictation-exercises", async (req, res) => {
+router.get("/api/dictation-exercises", verifyToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
+    const role = req.user.role || "user";
     try {
-        const { dictationExercises, totalDictationExercises } = await dictationService.getDictationList(page, limit);
+        const { dictationExercises, totalDictationExercises } = await dictationService.getDictationList(page, limit, role);
         const totalPages = Math.ceil(totalDictationExercises / limit);
         res.json({
             success: true,
@@ -37,12 +39,29 @@ router.get("/api/dictationexercise/:id", async (req, res) => {
     }
 });
 
+router.get("/api/dictationexercise/slug/:slug", verifyToken, async function(req, res) {
+    try {
+        const slug = req.params.slug;
+        const dictationExercise = await dictationService.getDictationBySlug(slug);
+        if (!dictationExercise) {
+            return res.status(404).json({ success: false, message: "Dictation exercise not found" });
+        }
+        res.json({ success: true, data: dictationExercise });
+    } catch (error) {
+        console.error("Error fetching dictation exercise details:", error);
+        res.status(500).json({ success: false, message: "Error fetching dictation exercise details", error: error.message });
+    }
+});
+
 router.post("/add", async function (req, res) {
     try {
         const dictationexercises = {
             title: req.body.title,
             description: req.body.description,
             content: req.body.content,
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await dictationService.insertDictation(dictationexercises);
         res.status(201).json({ message: "Bài nghe chép chính tả đã được thêm thành công!", result });
@@ -71,6 +90,9 @@ router.put("/update/:id", async function (req, res) {
             title: req.body.title,
             description: req.body.description,
             content: req.body.content,
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await dictationService.updateDictation(dictationexercises);
         res.json({ message: "Bài nghe chép chính tả đã được cập nhật thành công!", result });

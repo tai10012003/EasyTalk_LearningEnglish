@@ -9,9 +9,11 @@ class PronunciationQuestion {
 class PronunciationExercise {
     _id;
     title;
-    createdAt;
     questions = [];
-
+    slug;
+    sort;
+    display;
+    createdAt;
 
     addQuestion(question, type, correctAnswer, explanation, options = []) {
         const newQuestion = new PronunciationQuestion();

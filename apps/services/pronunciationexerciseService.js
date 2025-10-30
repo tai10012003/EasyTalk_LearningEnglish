@@ -5,12 +5,20 @@ class PronunciationexerciseService {
         this.pronunciationexerciseRepository = new PronunciationexerciseRepository();
     }
 
-    async getPronunciationexerciseList(page = 1, limit = 12) {
-        return await this.pronunciationexerciseRepository.findPronunciationExercises(page, limit);
+    async getPronunciationexerciseList(page = 1, limit = 12, role = "user") {
+        const filter = {};
+        if (role !== "admin") {
+            filter.display = true;
+        }
+        return await this.pronunciationexerciseRepository.findPronunciationExercises(filter, page, limit);
     }
 
     async getPronunciationexerciseById(id) {
         return await this.pronunciationexerciseRepository.findPronunciationExerciseById(id);
+    }
+
+    async getPronunciationexerciseBySlug(slug) {
+        return await this.pronunciationexerciseRepository.findPronunciationExerciseBySlug(slug);
     }
 
     async insertPronunciationexercise(exerciseData) {
