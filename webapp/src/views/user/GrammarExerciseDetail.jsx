@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 
 const GrammarExerciseDetail = () => {
     const { slug } = useParams();
+    const [exerciseId, setExerciseId] = useState(null);
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [questions, setQuestions] = useState([]);
     const [timeRemaining, setTimeRemaining] = useState(0);
@@ -26,6 +27,7 @@ const GrammarExerciseDetail = () => {
     const [exerciseCompleted, setExerciseCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
+    const [answeredCount, setAnsweredCount] = useState(0);
 
     useEffect(() => {
         if (!navigator || !hasStarted || exerciseCompleted) return;
@@ -80,6 +82,7 @@ const GrammarExerciseDetail = () => {
                 setIsLoading(true);
                 const data = await GrammarExerciseService.getGrammarExerciseBySlug(slug);
                 if (data && data.questions && data.questions.length > 0) {
+                    setExerciseId(data._id);
                     setQuestions(data.questions);
                     setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
                     const initialResults = data.questions.map(question => ({
@@ -254,8 +257,27 @@ const GrammarExerciseDetail = () => {
                             <GrammarExerciseResultScreen
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
-                                onRestart={handleRestart}
-                                onExit={() => window.location.href = '/grammar-exercise'}
+                                onComplete={async () => {
+                                    try {
+                                        await GrammarExerciseService.completeGrammarExercise(exerciseId);
+                                        setExerciseCompleted(true);
+                                        Swal.fire({
+                                            icon: "success",
+                                            title: "Hoàn thành!",
+                                            text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập ngữ pháp. Bài luyện tập ngữ pháp tiếp theo đã được mở khóa.",
+                                            confirmButtonText: "Quay lại danh sách bài luyện tập ngữ pháp",
+                                        }).then(() => {
+                                            window.location.href = "/grammar-exercise";
+                                        });
+                                    } catch (err) {
+                                        console.error("Error completing grammar exercise:", err);
+                                        Swal.fire({
+                                            icon: "error",
+                                            title: "Lỗi",
+                                            text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                                        });
+                                    }
+                                }} 
                             />
                         ) : (
                             <GrammarExerciseCarousel
@@ -266,6 +288,7 @@ const GrammarExerciseDetail = () => {
                                 onSpeakText={speakText}
                                 questionResults={questionResults}
                                 isCompleted={isCompleted}
+                                onAnsweredQuestionsChange={setAnsweredCount}
                             />
                         )}
                     </div>
@@ -283,6 +306,7 @@ const GrammarExerciseDetail = () => {
                         onQuestionNavigation={handleQuestionNavigation}
                         onShowHistory={handleShowHistory}
                         selectedDuration={selectedDuration}
+                        answeredCount={answeredCount}
                     />
                 </div>
             </div>

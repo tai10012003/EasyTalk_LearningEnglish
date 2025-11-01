@@ -6,6 +6,10 @@ class UserProgress {
     unlockedStories = [];
     unlockedGrammars = [];
     unlockedPronunciations = [];
+    unlockedGrammarExercises = [];
+    unlockedPronunciationExercises = [];
+    unlockedVocabularyExercises = [];
+    unlockedDictations = [];
     experiencePoints = 0;
     streak = 0;
     maxStreak = 0;

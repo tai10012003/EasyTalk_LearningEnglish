@@ -26,6 +26,7 @@ const VocabularyExerciseDetail = () => {
     const [exerciseCompleted, setExerciseCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
+    const [answeredCount, setAnsweredCount] = useState(0);
 
     useEffect(() => {
         if (!navigator || !hasStarted || exerciseCompleted) return;
@@ -266,6 +267,7 @@ const VocabularyExerciseDetail = () => {
                                 onSpeakText={speakText}
                                 questionResults={questionResults}
                                 isCompleted={isCompleted}
+                                onAnsweredQuestionsChange={setAnsweredCount}
                             />
                         )}
                     </div>
@@ -283,6 +285,7 @@ const VocabularyExerciseDetail = () => {
                         onQuestionNavigation={handleQuestionNavigation}
                         onShowHistory={handleShowHistory}
                         selectedDuration={selectedDuration}
+                        answeredCount={answeredCount}
                     />
                 </div>
             </div>

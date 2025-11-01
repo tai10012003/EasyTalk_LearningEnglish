@@ -4,12 +4,14 @@ import GrammarExerciseCard from "@/components/user/grammarexercise/GrammarExerci
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 
 function GrammarExercise() {
+    const [allGrammarExercises, setAllGrammarExercises] = useState([]);
     const [exercises, setExercises] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [unlockedGrammarExercises, setUnlockedGrammarExercises] = useState([]); 
     const pageLimit = 12;
 
     useEffect(() => {
@@ -18,21 +20,45 @@ function GrammarExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                const allResp = await GrammarExerciseService.fetchGrammarExercise(1, 10000, {
+                    search: searchKeyword,
+                });
+                const all = allResp.data || [];
+                setAllGrammarExercises(all);
                 const data = await GrammarExerciseService.fetchGrammarExercise(currentPage, pageLimit, {
                     search: searchKeyword,
                 });
                 setExercises(data.data || []);
                 setTotalPages(data.totalPages || 1);
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await GrammarExerciseService.getGrammarExerciseDetail(all[0]._id);
+                        const userProg = detailResp?.userProgress || null;
+                        setUnlockedGrammarExercises(
+                            Array.isArray(userProg?.unlockedGrammarExercises) ? userProg.unlockedGrammarExercises.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedGrammarExercises([]);
+                    }
+                } else {
+                    setUnlockedGrammarExercises([]);
+                }
             } catch (err) {
                 console.error(err);
+                setAllGrammarExercises([]);
                 setExercises([]);
                 setTotalPages(1);
+                setUnlockedGrammarExercises([]);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
     }, [currentPage, searchKeyword]);
+
+    const isGrammarExerciseLocked = (grammarexerciseId) => {
+        return !unlockedGrammarExercises.includes(grammarexerciseId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -113,6 +139,7 @@ function GrammarExercise() {
                                         <GrammarExerciseCard
                                             key={exercise._id}
                                             exercise={exercise}
+                                            isLocked={isGrammarExerciseLocked(exercise._id)}
                                         />
                                     ))}
                                 </div>

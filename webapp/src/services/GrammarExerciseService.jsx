@@ -44,6 +44,40 @@ export const GrammarExerciseService = {
         }
     },
 
+    async getGrammarExerciseDetail(id) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/${id}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async completeGrammarExercise(grammarexerciseId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/complete/${grammarexerciseId}`, {
+                method: "POST",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     },

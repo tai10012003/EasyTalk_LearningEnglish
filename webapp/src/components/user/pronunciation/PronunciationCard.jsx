@@ -20,14 +20,14 @@ function PronunciationCard({ pronunciation, isLocked }) {
                         {pronunciation.description.length > 80 ? `${pronunciation.description.substring(0, 80)}...` : pronunciation.description}
                     </p>
                     {isLocked ? (
-                            <button className="lesson-locked-btn" disabled>
-                                <i className="fas fa-lock me-2"></i>
-                            </button>
-                        ) : (
-                            <Link to={`/pronunciation/${pronunciation.slug}`} className="lesson-link">
-                                <i className="fas fa-book-open me-2"></i>Vào đọc
-                            </Link>
-                        )}
+                        <button className="lesson-locked-btn" disabled>
+                            <i className="fas fa-lock me-2"></i>
+                        </button>
+                    ) : (
+                        <Link to={`/pronunciation/${pronunciation.slug}`} className="lesson-link">
+                            <i className="fas fa-book-open me-2"></i>Vào đọc
+                        </Link>
+                    )}
                 </div>
             </div>
         </div>

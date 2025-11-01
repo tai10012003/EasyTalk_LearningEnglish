@@ -8,7 +8,8 @@ const GrammarExerciseCarousel = ({
     onQuestionNavigation,
     onSpeakText,
     questionResults,
-    isCompleted
+    isCompleted,
+    onAnsweredQuestionsChange
 }) => {
     const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
     const [userAnswers, setUserAnswers] = useState({});
@@ -22,9 +23,14 @@ const GrammarExerciseCarousel = ({
         }));
     }, [currentQuestionIndex]);
 
+    useEffect(() => {
+        if (onAnsweredQuestionsChange) {
+            onAnsweredQuestionsChange(answeredQuestions.size);
+        }
+    }, [answeredQuestions, onAnsweredQuestionsChange]);
+
     const handleSubmitAnswer = useCallback(() => {
         const userAnswer = userAnswers[currentQuestionIndex];
-        
         if (!userAnswer || userAnswer.trim() == '') {
             Swal.fire({
                 icon: "warning",
@@ -33,11 +39,9 @@ const GrammarExerciseCarousel = ({
             });
             return;
         }
-
         const correctAnswer = currentQuestion.correctAnswer.trim().toLowerCase();
         const normalizedUserAnswer = userAnswer.trim().toLowerCase();
         const isCorrect = normalizedUserAnswer == correctAnswer;
-
         onAnswerSubmit(currentQuestionIndex, userAnswer, isCorrect);
         setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
     }, [currentQuestionIndex, userAnswers, currentQuestion, onAnswerSubmit]);

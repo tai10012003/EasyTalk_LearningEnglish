@@ -4,12 +4,14 @@ import PronunciationExerciseCard from "@/components/user/pronunciationexercise/P
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
 
 function PronunciationExercise() {
+    const [allPronunciationExercises, setAllPronunciationExercises] = useState([]);
     const [exercises, setExercises] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [unlockedPronunciationExercises, setUnlockedPronunciationExercises] = useState([]); 
     const pageLimit = 12;
 
     useEffect(() => {
@@ -18,21 +20,45 @@ function PronunciationExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                const allResp = await PronunciationExerciseService.fetchPronunciationExercise(1, 10000, {
+                    search: searchKeyword,
+                });
+                const all = allResp.data || [];
+                setAllPronunciationExercises(all);
                 const data = await PronunciationExerciseService.fetchPronunciationExercise(currentPage, pageLimit, {
                     search: searchKeyword,
                 });
                 setExercises(data.data || []);
                 setTotalPages(data.totalPages || 1);
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await PronunciationExerciseService.getPronunciationExerciseDetail(all[0]._id);
+                        const userProg = detailResp?.userProgress || null;
+                        setUnlockedPronunciationExercises(
+                            Array.isArray(userProg?.unlockedPronunciationExercises) ? userProg.unlockedPronunciationExercises.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedPronunciationExercises([]);
+                    }
+                } else {
+                    setUnlockedPronunciationExercises([]);
+                }
             } catch (err) {
                 console.error(err);
+                setAllPronunciationExercises([]);
                 setExercises([]);
                 setTotalPages(1);
+                setUnlockedPronunciationExercises([]);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
     }, [currentPage, searchKeyword]);
+
+    const isPronunciationExerciseLocked = (pronunciationexerciseId) => {
+        return !unlockedPronunciationExercises.includes(pronunciationexerciseId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -113,6 +139,7 @@ function PronunciationExercise() {
                                         <PronunciationExerciseCard
                                             key={exercise._id}
                                             exercise={exercise}
+                                            isLocked={isPronunciationExerciseLocked(exercise._id)}
                                         />
                                     ))}
                                 </div>

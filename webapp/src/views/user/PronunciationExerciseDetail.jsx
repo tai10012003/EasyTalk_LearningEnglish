@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 
 const PronunciationExerciseDetail = () => {
     const { slug } = useParams();
+    const [exerciseId, setExerciseId] = useState(null);
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [questions, setQuestions] = useState([]);
     const [timeRemaining, setTimeRemaining] = useState(0);
@@ -80,6 +81,7 @@ const PronunciationExerciseDetail = () => {
                 setIsLoading(true);
                 const data = await PronunciationExerciseService.getPronunciationExerciseBySlug(slug);
                 if (data && data.questions && data.questions.length > 0) {
+                    setExerciseId(data._id);
                     setQuestions(data.questions);
                     setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
                     const initialResults = data.questions.map(question => ({
@@ -255,8 +257,27 @@ const PronunciationExerciseDetail = () => {
                             <PronunciationExerciseResultScreen
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
-                                onRestart={handleRestart}
-                                onExit={() => window.location.href = '/pronunciation-exercise'}
+                                onComplete={async () => {
+                                    try {
+                                        await PronunciationExerciseService.completePronunciationExercise(exerciseId);
+                                        setExerciseCompleted(true);
+                                        Swal.fire({
+                                            icon: "success",
+                                            title: "Hoàn thành!",
+                                            text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập phát âm. Bài luyện tập phát âm tiếp theo đã được mở khóa.",
+                                            confirmButtonText: "Quay lại danh sách bài luyện tập phát âm",
+                                        }).then(() => {
+                                            window.location.href = "/pronunciation-exercise";
+                                        });
+                                    } catch (err) {
+                                        console.error("Error completing pronunciation exercise:", err);
+                                        Swal.fire({
+                                            icon: "error",
+                                            title: "Lỗi",
+                                            text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                                        });
+                                    }
+                                }} 
                             />
                         ) : (
                             <PronunciationExerciseCarousel

@@ -64,6 +64,40 @@ export const PronunciationExerciseService = {
         }
     },
 
+    async getPronunciationExerciseDetail(id) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${id}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async completePronunciationExercise(pronunciationexerciseId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/complete/${pronunciationexerciseId}`, {
+                method: "POST",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     },

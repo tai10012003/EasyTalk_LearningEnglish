@@ -6,8 +6,9 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const FormData = require('form-data');
 const verifyToken = require("./../util/VerifyToken");
-const { PronunciationexerciseService } = require("../services");
+const { PronunciationexerciseService, UserprogressService } = require("../services");
 const pronunciationexerciseService = new PronunciationexerciseService();
+const userprogressService = new UserprogressService();
 
 router.get("/api/pronunciation-exercises", verifyToken, async (req, res) => {
     try {
@@ -28,13 +29,25 @@ router.get("/api/pronunciation-exercises", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/pronunciation-exercises/:id", async function (req, res) {
+router.get("/api/pronunciation-exercises/:id", verifyToken, async function (req, res) {
     try {
-        const exercise = await pronunciationexerciseService.getPronunciationexerciseById(req.params.id);
+        const userId = req.user.id;
+        const pronunciationexerciseId = req.params.id;
+        const exercise = await pronunciationexerciseService.getPronunciationexerciseById(pronunciationexerciseId);
         if (!exercise) {
             return res.status(404).json({ message: "Pronunciation exercise not found" });
         }
-        res.json(exercise);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPage = await pronunciationexerciseService.getPronunciationexerciseList(1, 1);
+            const firstPronunciationExercise = (firstPage && firstPage.pronunciationexercises && firstPage.pronunciationexercises[0]) ? firstPage.pronunciationexercises[0] : null;
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, null, firstPronunciationExercise ? firstPronunciationExercise._id : null, null, null);
+        }
+        const isUnlocked = (userProgress.unlockedPronunciationExercises || []).some(s => s.toString() == pronunciationexerciseId.toString());
+        if (!isUnlocked) {
+            return res.status(403).json({ success: false, message: "This pronunciation exercise is locked for you. Please complete previous pronunciation exercise first." });
+        }
+        res.json({ exercise, userProgress });
     } catch (err) {
         res.status(500).json({ message: "Error fetching Pronunciation exercise details", error: err });
     }
@@ -115,6 +128,55 @@ function calculateAccuracy(transcription, correctAnswer) {
     const accuracy = ((matchedWords / totalWords) * 100).toFixed(2);
     return { accuracy, detailedResult };
 }
+
+router.post("/api/pronunciation-exercises/complete/:id", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const pronunciationexerciseId = req.params.id;
+        const exercise = await pronunciationexerciseService.getPronunciationexerciseById(pronunciationexerciseId);
+        if (!exercise) {
+            return res.status(404).json({ success: false, message: "Pronunciation exercise not found" });
+        }
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPage = await pronunciationexerciseService.getPronunciationexerciseList(1, 1);
+            const firstPronunciationExercise = (firstPage?.pronunciationexercises?.[0]) || null;
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, null, firstPronunciationExercise ? firstPronunciationExercise._id : null, null, null);
+        }
+        const isUnlocked = (userProgress.unlockedPronunciationExercises || []).some(s => s.toString() == pronunciationexerciseId.toString());
+        if (!isUnlocked) {
+            return res.status(403).json({ success: false, message: "You cannot complete a locked pronunciation exercise." });
+        }
+        const all = await pronunciationexerciseService.getPronunciationexerciseList(1, 10000);
+        const allPronunciationExercises = all?.pronunciationexercises || [];
+        const idx = allPronunciationExercises.findIndex(s => s._id.toString() == pronunciationexerciseId.toString());
+        let nextPronunciationExercise = null;
+        if (idx !== -1 && idx < allPronunciationExercises.length - 1) {
+            nextPronunciationExercise = allPronunciationExercises[idx + 1];
+        }
+        if (nextPronunciationExercise) {
+            userProgress = await userprogressService.unlockNextPronunciationExercise(userProgress, nextPronunciationExercise._id, 10);
+        } else {
+            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        }
+        await userprogressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
+        return res.json({
+            success: true,
+            message: nextPronunciationExercise ? "Pronunciation exercise completed. Next pronunciation exercise unlocked." : "Pronunciation exercise completed. You have finished all pronunciation exercise.",
+            userProgress: {
+                unlockedPronunciationExercises: updatedUserProgress.unlockedPronunciationExercises,
+                experiencePoints: updatedUserProgress.experiencePoints,
+                streak: updatedUserProgress.streak,
+                maxStreak: updatedUserProgress.maxStreak,
+                studyDates: updatedUserProgress.studyDates
+            }
+        });
+    } catch (error) {
+        console.error("Error completing pronunciation exercise: ", error);
+        res.status(500).json({ success: false, message: "Error processing completion", error: error.message });
+    }
+});
 
 router.post("/add", async (req, res) => {
     try {

@@ -11,7 +11,8 @@ const GrammarExerciseSidebar = ({
         onSubmitQuiz,
         onQuestionNavigation,
         onShowHistory,
-        selectedDuration
+        selectedDuration,
+        answeredCount
     }) => {
         const handleSubmitClick = useCallback(() => {
             Swal.fire({
@@ -48,6 +49,8 @@ const GrammarExerciseSidebar = ({
         }
     };
 
+    const allQuestionsAnswered = answeredCount === questions.length;
+
     return (
         <div className="exercise-sidebar">
             {!isCompleted ? (
@@ -56,18 +59,22 @@ const GrammarExerciseSidebar = ({
                         <span id="exercise-timeLabel">Thời gian còn lại: </span>
                         <span id="exercise-time">{formatTime(timeRemaining)}</span>
                     </div>
-                    
-                    <button
-                        id="exercise-submitQuizBtn"
-                        className="btn_1 mb-4"
-                        style ={{ width: '100%' }}
-                        onClick={handleSubmitClick}
-                    >
-                        Nộp bài
-                    </button>
-                    
+                    {allQuestionsAnswered && (
+                        <button
+                            id="exercise-submitQuizBtn"
+                            className="btn_1 mb-4"
+                            style={{ width: '100%' }}
+                            onClick={handleSubmitClick}
+                        >
+                            Nộp bài
+                        </button>
+                    )}
+                    {!allQuestionsAnswered && (
+                        <div className="text-center mb-4">
+                            Đã trả lời: {answeredCount}/{questions.length} câu
+                        </div>
+                    )}
                     <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>
-                    
                     <div className="exercise-question-list mt-3" id="exercise-question-list">
                         {questions.map((_, index) => (
                             <button

@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const { GrammarexerciseService } = require("./../services");
+const { GrammarexerciseService, UserprogressService } = require("./../services");
 const grammarexerciseService = new GrammarexerciseService();
+const userprogressService = new UserprogressService();
 
 router.get("/api/grammar-exercises", verifyToken, async (req, res) => {
     try {
@@ -23,13 +24,25 @@ router.get("/api/grammar-exercises", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/grammar-exercises/:id", async function (req, res) {
+router.get("/api/grammar-exercises/:id", verifyToken, async function (req, res) {
     try {
-        const exercise = await grammarexerciseService.getGrammarexerciseById(req.params.id);
+        const userId = req.user.id;
+        const grammarexerciseId = req.params.id;
+        const exercise = await grammarexerciseService.getGrammarexerciseById(grammarexerciseId);
         if (!exercise) {
             return res.status(404).json({ message: "Grammar exercise not found." });
         }
-        res.json(exercise);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPage = await grammarexerciseService.getGrammarexerciseList(1, 1);
+            const firstGrammarExercise = (firstPage && firstPage.grammarexercises && firstPage.grammarexercises[0]) ? firstPage.grammarexercises[0] : null;
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, firstGrammarExercise ? firstGrammarExercise._id : null, null, null, null);
+        }
+        const isUnlocked = (userProgress.unlockedGrammarExercises || []).some(s => s.toString() == grammarexerciseId.toString());
+        if (!isUnlocked) {
+            return res.status(403).json({ success: false, message: "This grammar exercise is locked for you. Please complete previous grammar exercise first." });
+        }
+        res.json({ exercise, userProgress });
     } catch (err) {
         res.status(500).json({ message: "Error fetching grammar exercise details", error: err });
     }
@@ -45,6 +58,55 @@ router.get("/api/grammar-exercises/slug/:slug", verifyToken, async function(req,
         res.json(exercise);
     } catch (err) {
         res.status(500).json({ message: "Error fetching Grammar exercise details", error: err });
+    }
+});
+
+router.post("/api/grammar-exercises/complete/:id", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const grammarexerciseId = req.params.id;
+        const exercise = await grammarexerciseService.getGrammarexerciseById(grammarexerciseId);
+        if (!exercise) {
+            return res.status(404).json({ success: false, message: "Grammar exercise not found" });
+        }
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPage = await grammarexerciseService.getGrammarexerciseList(1, 1);
+            const firstGrammarExercise = (firstPage?.grammarexercises?.[0]) || null;
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, firstGrammarExercise ? firstGrammarExercise._id : null, null, null, null);
+        }
+        const isUnlocked = (userProgress.unlockedGrammarExercises || []).some(s => s.toString() == grammarexerciseId.toString());
+        if (!isUnlocked) {
+            return res.status(403).json({ success: false, message: "You cannot complete a locked grammar exercise." });
+        }
+        const all = await grammarexerciseService.getGrammarexerciseList(1, 10000);
+        const allGrammarExercises = all?.grammarexercises || [];
+        const idx = allGrammarExercises.findIndex(s => s._id.toString() == grammarexerciseId.toString());
+        let nextGrammarExercise = null;
+        if (idx !== -1 && idx < allGrammarExercises.length - 1) {
+            nextGrammarExercise = allGrammarExercises[idx + 1];
+        }
+        if (nextGrammarExercise) {
+            userProgress = await userprogressService.unlockNextGrammarExercise(userProgress, nextGrammarExercise._id, 10);
+        } else {
+            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        }
+        await userprogressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
+        return res.json({
+            success: true,
+            message: nextGrammarExercise ? "Grammar exercise completed. Next grammar exercise unlocked." : "Grammar exercise completed. You have finished all grammar exercise.",
+            userProgress: {
+                unlockedGrammarExercises: updatedUserProgress.unlockedGrammarExercises,
+                experiencePoints: updatedUserProgress.experiencePoints,
+                streak: updatedUserProgress.streak,
+                maxStreak: updatedUserProgress.maxStreak,
+                studyDates: updatedUserProgress.studyDates
+            }
+        });
+    } catch (error) {
+        console.error("Error completing grammar exercise: ", error);
+        res.status(500).json({ success: false, message: "Error processing completion", error: error.message });
     }
 });
 
