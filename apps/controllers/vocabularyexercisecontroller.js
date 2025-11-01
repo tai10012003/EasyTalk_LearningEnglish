@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { VocabularyexerciseService } = require("./../services");
+const { VocabularyexerciseService, UserprogressService } = require("./../services");
 const verifyToken = require("./../util/VerifyToken");
 const vocabularyexerciseService = new VocabularyexerciseService();
+const userprogressService = new UserprogressService();
 
 router.get("/api/vocabulary-exercises", verifyToken, async (req, res) => {
     try {
@@ -23,13 +24,25 @@ router.get("/api/vocabulary-exercises", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/vocabulary-exercises/:id", async function (req, res) {
+router.get("/api/vocabulary-exercises/:id", verifyToken, async function (req, res) {
     try {
-        const exercise = await vocabularyexerciseService.getVocabularyExerciseById(req.params.id);
+        const userId = req.user.id;
+        const vocabularyexerciseId = req.params.id;
+        const exercise = await vocabularyexerciseService.getVocabularyExerciseById(vocabularyexerciseId);
         if (!exercise) {
             return res.status(404).json({ message: "Vocabulary exercise not found." });
         }
-        res.json(exercise);
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPage = await vocabularyexerciseService.getVocabularyExerciseList(1, 1);
+            const firstVocabularyExercise = (firstPage && firstPage.vocabularyExercises && firstPage.vocabularyExercises[0]) ? firstPage.vocabularyExercises[0] : null;
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null);
+        }
+        const isUnlocked = (userProgress.unlockedVocabularyExercises || []).some(s => s.toString() == vocabularyexerciseId.toString());
+        if (!isUnlocked) {
+            return res.status(403).json({ success: false, message: "This vocabulary exercise is locked for you. Please complete previous vocabulary exercise first." });
+        }
+        res.json({ exercise, userProgress });
     } catch (err) {
         res.status(500).json({ message: "Error fetching vocabulary exercise details", error: err });
     }
@@ -45,6 +58,55 @@ router.get("/api/vocabulary-exercises/slug/:slug", verifyToken, async function(r
         res.json(exercise);
     } catch (err) {
         res.status(500).json({ message: "Error fetching vocabulary exercise details", error: err });
+    }
+});
+
+router.post("/api/vocabulary-exercises/complete/:id", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const vocabularyexerciseId = req.params.id;
+        const exercise = await vocabularyexerciseService.getVocabularyExerciseById(vocabularyexerciseId);
+        if (!exercise) {
+            return res.status(404).json({ success: false, message: "Vocabulary exercise not found" });
+        }
+        let userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPage = await vocabularyexerciseService.getVocabularyExerciseList(1, 1);
+            const firstVocabularyExercise = (firstPage?.vocabularyExercises?.[0]) || null;
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null);
+        }
+        const isUnlocked = (userProgress.unlockedVocabularyExercises || []).some(s => s.toString() == vocabularyexerciseId.toString());
+        if (!isUnlocked) {
+            return res.status(403).json({ success: false, message: "You cannot complete a locked vocabulary exercise." });
+        }
+        const all = await vocabularyexerciseService.getVocabularyExerciseList(1, 10000);
+        const allVocabularyExercises = all?.vocabularyExercises || [];
+        const idx = allVocabularyExercises.findIndex(s => s._id.toString() == vocabularyexerciseId.toString());
+        let nextVocabularyExercise = null;
+        if (idx !== -1 && idx < allVocabularyExercises.length - 1) {
+            nextVocabularyExercise = allVocabularyExercises[idx + 1];
+        }
+        if (nextVocabularyExercise) {
+            userProgress = await userprogressService.unlockNextVocabularyExercise(userProgress, nextVocabularyExercise._id, 10);
+        } else {
+            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        }
+        await userprogressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
+        return res.json({
+            success: true,
+            message: nextVocabularyExercise ? "Vocabulary exercise completed. Next vocabulary exercise unlocked." : "Vocabulary exercise completed. You have finished all vocabulary exercise.",
+            userProgress: {
+                unlockedVocabularyExercises: updatedUserProgress.unlockedVocabularyExercises,
+                experiencePoints: updatedUserProgress.experiencePoints,
+                streak: updatedUserProgress.streak,
+                maxStreak: updatedUserProgress.maxStreak,
+                studyDates: updatedUserProgress.studyDates
+            }
+        });
+    } catch (error) {
+        console.error("Error completing vocabulary exercise: ", error);
+        res.status(500).json({ success: false, message: "Error processing completion", error: error.message });
     }
 });
 

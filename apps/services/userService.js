@@ -9,6 +9,8 @@ const NotificationService = require("./notificationService");
 const notificationService = new NotificationService();
 const UserSettingService = require("./usersettingService");
 const usersettingService = new UserSettingService();
+const UserprogressService = require("./userprogressService");
+const userprogressService = new UserprogressService();
 
 class UserService {
     constructor() {
@@ -104,6 +106,7 @@ class UserService {
         const result = await this.userRepository.delete(id);
         try {
             await notificationService.deleteNotificationsByUser(id);
+            await userprogressService.deleteUserProgress(id);
         } catch (error) {
             console.error(`Không thể xóa thông báo liên quan tới user ${id}:`, error);
         }

@@ -44,6 +44,40 @@ export const VocabularyExerciseService = {
         }
     },
 
+    async getVocabularyExerciseDetail(id) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${id}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
+    async completeVocabularyExercise(vocabularyexerciseId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/complete/${vocabularyexerciseId}`, {
+                method: "POST",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            throw error;
+        }
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     },

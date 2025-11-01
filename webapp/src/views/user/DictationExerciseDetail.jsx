@@ -9,6 +9,7 @@ import { DictationExerciseService } from "@/services/DictationExerciseService.js
 
 function DictationExerciseDetail() {
     const { slug } = useParams();
+    const [exerciseId, setExerciseId] = useState(null);
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const navigate = useNavigate();
     const [title, setTitle] = useState("");
@@ -35,6 +36,7 @@ function DictationExerciseDetail() {
             try {
                 const data = await DictationExerciseService.getDictationExerciseBySlug(slug);
                 if (data.success) {
+                    setExerciseId(data.data._id);
                     setTitle(data.data.title);
                     const sentencesArr = data.data.content
                         .split(". ")
@@ -228,8 +230,27 @@ function DictationExerciseDetail() {
             ) : (
                 <>
                     <DictationComplete
-                        retryExercise={retryExercise}
-                        goBackToList={goBackToList}
+                        onComplete={async () => {
+                            try {
+                                await DictationExerciseService.completeDictationExercise(exerciseId);
+                                setExerciseCompleted(true);
+                                Swal.fire({
+                                    icon: "success",
+                                    title: "Hoàn thành!",
+                                    text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập nghe chính tả. Bài luyện tập nghe chính tả tiếp theo đã được mở khóa.",
+                                    confirmButtonText: "Quay lại danh sách bài luyện tập nghe chính tả",
+                                }).then(() => {
+                                    window.location.href = "/dictation-exercise";
+                                });
+                            } catch (err) {
+                                console.error("Error completing dictation exercise:", err);
+                                Swal.fire({
+                                    icon: "error",
+                                    title: "Lỗi",
+                                    text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                                });
+                            }
+                        }}
                     />
                     <DictationFullScript
                         fullScript={fullScript}

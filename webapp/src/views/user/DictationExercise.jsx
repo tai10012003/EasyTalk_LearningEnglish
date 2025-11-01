@@ -4,13 +4,14 @@ import DictationExerciseCard from "@/components/user/dictationexercise/Dictation
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 
 function DictationExercise() {
+    const [allDictationExercises, setAllDictationExercises] = useState([]);
     const [exercises, setExercises] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
-
+    const [unlockedDictationExercises, setUnlockedDictationExercises] = useState([]);
     const pageLimit = 12;
 
     useEffect(() => {
@@ -19,21 +20,45 @@ function DictationExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                const allResp = await DictationExerciseService.fetchDictationExercise(1, 10000, {
+                    search: searchKeyword,
+                });
+                const all = allResp.dictationExercises || [];
+                setAllDictationExercises(all);
                 const data = await DictationExerciseService.fetchDictationExercise(currentPage, pageLimit, {
                     search: searchKeyword,
                 });
                 setExercises(data.dictationExercises || []);
                 setTotalPages(data.totalPages || 1);
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await DictationExerciseService.getDictationExerciseDetail(all[0]._id);
+                        const userProg = detailResp.userProgress || null;
+                        setUnlockedDictationExercises(
+                            Array.isArray(userProg?.unlockedDictations) ? userProg.unlockedDictations.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedDictationExercises([]);
+                    }
+                } else {
+                    setUnlockedDictationExercises([]);
+                }
             } catch (err) {
                 console.error(err);
+                setAllDictationExercises([]);
                 setExercises([]);
                 setTotalPages(1);
+                setUnlockedDictationExercises([]);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
     }, [currentPage, searchKeyword]);
+
+    const isDictationExerciseLocked = (dictationexerciseId) => {
+        return !unlockedDictationExercises.includes(dictationexerciseId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -114,6 +139,7 @@ function DictationExercise() {
                                         <DictationExerciseCard
                                             key={exercise._id}
                                             exercise={exercise}
+                                            isLocked={isDictationExerciseLocked(exercise._id)}
                                         />
                                     ))}
                                 </div>

@@ -4,12 +4,14 @@ import VocabularyExerciseCard from "@/components/user/vocabularyexercise/Vocabul
 import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
 
 function VocabularyExercise() {
+    const [allVocabularyExercises, setAllVocabularyExercises] = useState([]);
     const [exercises, setExercises] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchKeyword, setSearchKeyword] = useState("");
+    const [unlockedVocabularyExercises, setUnlockedVocabularyExercises] = useState([]);
     const pageLimit = 12;
 
     useEffect(() => {
@@ -18,21 +20,45 @@ function VocabularyExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
+                const allResp = await VocabularyExerciseService.fetchVocabularyExercise(1, 10000, {
+                    search: searchKeyword,
+                });
+                const all = allResp.data || [];
+                setAllVocabularyExercises(all);
                 const data = await VocabularyExerciseService.fetchVocabularyExercise(currentPage, pageLimit, {
                     search: searchKeyword,
                 });
                 setExercises(data.data || []);
                 setTotalPages(data.totalPages || 1);
+                if (all.length > 0) {
+                    try {
+                        const detailResp = await VocabularyExerciseService.getVocabularyExerciseDetail(all[0]._id);
+                        const userProg = detailResp?.userProgress || null;
+                        setUnlockedVocabularyExercises(
+                            Array.isArray(userProg?.unlockedVocabularyExercises) ? userProg.unlockedVocabularyExercises.map(s => s.toString()) : []
+                        );
+                    } catch (err) {
+                        setUnlockedVocabularyExercises([]);
+                    }
+                } else {
+                    setUnlockedVocabularyExercises([]);
+                }
             } catch (err) {
                 console.error(err);
+                setAllVocabularyExercises([]);
                 setExercises([]);
                 setTotalPages(1);
+                setUnlockedVocabularyExercises([]);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
     }, [currentPage, searchKeyword]);
+
+    const isVocabularyExerciseLocked = (vocabularyexerciseId) => {
+        return !unlockedVocabularyExercises.includes(vocabularyexerciseId.toString());
+    };
 
     const renderPagination = () => {
         const pages = [];
@@ -113,6 +139,7 @@ function VocabularyExercise() {
                                         <VocabularyExerciseCard
                                             key={exercise._id}
                                             exercise={exercise}
+                                            isLocked={isVocabularyExerciseLocked(exercise._id)}
                                         />
                                     ))}
                                 </div>
