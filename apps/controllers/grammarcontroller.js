@@ -1,24 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const path = require("path");
-const fs = require("fs");
 const multer = require("multer");
 const verifyToken = require("./../util/VerifyToken");
 const { GrammarService, UserprogressService } = require("../services");
 const grammarService = new GrammarService();
 const userprogressService = new UserprogressService();
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, grammarService.imageFolder);
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const newName = grammarService.getNextImageFilename(ext);
-    cb(null, newName);
-  },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
 router.get("/api/grammar-list", verifyToken, async function (req, res) {
@@ -138,15 +125,16 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
       title: req.body.title,
       description: req.body.description,
       content: req.body.content,
-      images: req.file ? `/static/images/grammar/${req.file.filename}` : null,
+      images: req.body.images || null,
       quizzes: quizzes,
       slug: req.body.slug,
-      sort: parseInt(req.body.sort),
+      sort: parseInt(req.body.sort) || 0,
       display: req.body.display !== undefined ? req.body.display == "true" : true
     };
-    const result = await grammarService.insertGrammar(grammar);
+    const result = await grammarService.insertGrammar(grammar, req.file || null);
     res.status(201).json({ message: "Bài học ngữ pháp đã được thêm thành công !", result });
   } catch (error) {
+    console.error("Add grammar error:", error);
     res.status(500).json({ message: "Error adding grammar", error });
   }
 });
@@ -178,33 +166,17 @@ router.put("/api/update/:id", upload.single("image"), async function (req, res) 
     if (!existingGrammar) {
       return res.status(404).json({ message: "Bài học ngữ pháp không tìm thấy." });
     }
-    let imagePath = existingGrammar.images || "";
-    if (req.file) {
-      if (existingGrammar.images) {
-        const oldFilename = path.basename(existingGrammar.images);
-        const oldFilePath = path.join(grammarService.imageFolder, oldFilename);
-        if (fs.existsSync(oldFilePath)) {
-          fs.unlinkSync(oldFilePath);
-        }
-        const ext = path.extname(req.file.originalname);
-        const newFilePath = path.join(grammarService.imageFolder, oldFilename);
-        fs.renameSync(req.file.path, newFilePath);
-        imagePath = `/static/images/grammar/${oldFilename}`;
-      } else {
-        imagePath = `/static/images/grammar/${req.file.filename}`;
-      }
-    }
     const grammar = {
       title: req.body.title,
       description: req.body.description,
       content: req.body.content,
       quizzes: quizzes,
-      images: imagePath,
+      images: existingGrammar.images || req.body.images || "",
       slug: req.body.slug,
-      sort: parseInt(req.body.sort),
+      sort: parseInt(req.body.sort) || 0,
       display: req.body.display !== undefined ? req.body.display == "true" : true
     };
-    const result = await grammarService.updateGrammar(req.params.id, grammar);
+    const result = await grammarService.updateGrammar(req.params.id, grammar, req.file || null);
     res.json({ message: "Bài học ngữ pháp đã được cập nhật thành công !", result });
   } catch (error) {
     console.error("Update grammar error:", error);
@@ -217,12 +189,6 @@ router.delete("/api/grammar/:id", async function (req, res) {
     const grammar = await grammarService.getGrammar(req.params.id);
     if (!grammar) {
       return res.status(404).json({ message: "Bài học ngữ pháp không tìm thấy." });
-    }
-    if (grammar.images) {
-      const filePath = path.join(grammarService.imageFolder, path.basename(grammar.images));
-      if (fs.existsSync(filePath)) {
-        fs.unlinkSync(filePath);
-      }
     }
     const result = await grammarService.deleteGrammar(req.params.id);
     if (result.deletedCount == 0) {

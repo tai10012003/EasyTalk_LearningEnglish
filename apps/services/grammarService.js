@@ -1,12 +1,19 @@
 const fs = require("fs");
 const path = require("path");
+const cloudinary = require("cloudinary").v2;
+const streamifier = require("streamifier");
 const { GrammarRepository } = require("./../repositories");
+
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 class GrammarsService {
     constructor() {
         this.grammarRepository = new GrammarRepository();
-        this.imageFolder = path.join(__dirname, "../public/images/grammar");
-        if (!fs.existsSync(this.imageFolder)) fs.mkdirSync(this.imageFolder, { recursive: true });
+        this.cloudFolder = "easytalk/grammar";
     }
 
     async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
@@ -28,12 +35,18 @@ class GrammarsService {
         return await this.grammarRepository.findBySlug(slug);
     }
 
-    async insertGrammar(grammar) {
+    async insertGrammar(grammar, file = null) {
+        let imageUrl = null;
+        if (file) {
+            imageUrl = await this.uploadNewImage(file);
+        } else if (grammar.images) {
+            imageUrl = grammar.images;
+        }
         const newGrammar = {
             title: grammar.title,
             description: grammar.description,
             content: grammar.content,
-            images: grammar.images,
+            images: imageUrl,
             quizzes: [],
             slug: grammar.slug,
             sort: grammar.sort,
@@ -54,7 +67,7 @@ class GrammarsService {
         return await this.grammarRepository.insert(newGrammar);
     }
 
-    async updateGrammar(id, grammar) {
+    async updateGrammar(id, grammar, file = null) {
         const formattedQuestions = grammar.quizzes.map(q => ({
             question: q.question,
             type: q.type,
@@ -62,11 +75,21 @@ class GrammarsService {
             explanation: q.explanation || "",
             options: q.options || []
         }));
+        const existing = await this.getGrammar(id);
+        let imageUrl = existing && existing.images ? existing.images : (grammar.images || "");
+        if (file) {
+            const existingPublicId = existing && existing.images ? this._extractPublicIdFromUrl(existing.images) : null;
+            if (existingPublicId) {
+                imageUrl = await this.uploadReplacementImage(file, existingPublicId);
+            } else {
+                imageUrl = await this.uploadNewImage(file);
+            }
+        }
         const updateData = {
             title: grammar.title.trim(),
             description: grammar.description.trim(),
             content: grammar.content.trim(),
-            images: grammar.images.trim(),
+            images: imageUrl,
             quizzes: formattedQuestions,
             slug: grammar.slug,
             sort: grammar.sort,
@@ -77,24 +100,97 @@ class GrammarsService {
     }
 
     async deleteGrammar(id) {
+        const existing = await this.getGrammar(id);
+            if (existing && existing.images) {
+            const publicId = this._extractPublicIdFromUrl(existing.images);
+            if (publicId) {
+                try {
+                    await cloudinary.uploader.destroy(`${this.cloudFolder}/${publicId}`);
+                } catch (err) {
+                    console.warn("Không thể xóa ảnh Cloudinary:", err.message);
+                }
+            }
+        }
         return await this.grammarRepository.delete(id);
     }
 
-    getNextImageFilename(ext) {
-        const files = fs.readdirSync(this.imageFolder).filter(f => f.startsWith("grammar-"));
-        const numbers = files
-            .map(f => parseInt(f.match(/^grammar-(\d+)\./)?.[1]))
-            .filter(n => !isNaN(n))
-            .sort((a, b) => a - b);
-        let nextNumber = 1;
-        for (let i = 0; i < numbers.length; i++) {
-            if (numbers[i] !== i + 1) {
-                nextNumber = i + 1;
-                break;
-            }
-            nextNumber = numbers.length + 1;
+    _extractPublicIdFromUrl(url) {
+        try {
+            if (!url) return null;
+            const m = url.match(/\/easytalk\/grammar\/([^\.\/\?]+)/);
+            if (m && m[1]) return m[1];
+            const base = path.basename(url).split(".")[0];
+            return base;
+        } catch (err) {
+            return null;
         }
-        return `grammar-${nextNumber}${ext}`;
+    }
+
+    async _getNextGrammarPublicId() {
+        try {
+            const coll = this.grammarRepository.collection;
+            const cursor = await coll.find({ images: { $regex: "grammar-\\d+" } }, { projection: { images: 1 } });
+            const docs = await cursor.toArray();
+            const nums = [];
+            docs.forEach((d) => {
+                if (d.images) {
+                    const m = ("" + d.images).match(/grammar-(\d+)/);
+                    if (m && m[1]) nums.push(parseInt(m[1], 10));
+                }
+            });
+            nums.sort((a, b) => a - b);
+            let next = 1;
+            for (let i = 0; i < nums.length; i++) {
+                if (nums[i] !== i + 1) {
+                    next = i + 1;
+                    break;
+                }
+                next = nums.length + 1;
+            }
+            return `grammar-${next}`;
+        } catch (err) {
+            return `grammar-${Date.now()}`;
+        }
+    }
+
+    async uploadNewImage(file) {
+        if (!file) return null;
+        const ext = path.extname(file.originalname) || ".jpg";
+        const publicIdBase = await this._getNextGrammarPublicId();
+        return await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    public_id: publicIdBase,
+                    folder: this.cloudFolder,
+                    overwrite: true,
+                    resource_type: "image",
+                },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result.secure_url);
+                }
+            );
+            streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        });
+    }
+
+    async uploadReplacementImage(file, existingPublicId) {
+        if (!file) return null;
+        return await new Promise((resolve, reject) => {
+            const uploadStream = cloudinary.uploader.upload_stream(
+                {
+                    public_id: existingPublicId,
+                    folder: this.cloudFolder,
+                    overwrite: true,
+                    resource_type: "image",
+                },
+                (error, result) => {
+                    if (error) return reject(error);
+                    resolve(result.secure_url);
+                }
+            );
+            streamifier.createReadStream(file.buffer).pipe(uploadStream);
+        });
     }
 }
 

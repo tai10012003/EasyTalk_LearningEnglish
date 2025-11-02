@@ -1,24 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const path = require("path");
-const fs = require("fs");
 const verifyToken = require("./../util/VerifyToken");
 const { StoryService, UserprogressService } = require("./../services");
 const storyService = new StoryService();
 const userprogressService = new UserprogressService();
-
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, storyService.imageFolder);
-    },
-    filename: function (req, file, cb) {
-        const ext = path.extname(file.originalname);
-        const newName = storyService.getNextImageFilename(ext);
-        cb(null, newName);
-    },
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
 router.get("/api/story-list", verifyToken, async (req, res) => {
@@ -161,16 +148,16 @@ router.post("/api/add", upload.single("image"), async (req, res) => {
             description,
             level,
             category,
-            image: req.file ? `/static/images/story/${req.file.filename}` : null,
+            image: req.body.image || null,
             content: JSON.parse(content),
             slug: req.body.slug,
-            sort: parseInt(req.body.sort),
+            sort: parseInt(req.body.sort) || 0,
             display: req.body.display !== undefined ? req.body.display == "true" : true
         };
-        const result = await storyService.insertStory(storyData);
+        const result = await storyService.insertStory(storyData,  req.file || null);
         res.status(201).json({ success: true, message: "Câu chuyện đã được thêm thành công!", result });
     } catch (err) {
-        console.error(err);
+        console.error("Add story error:", err);
         res.status(500).json({ success: false, message: "Error adding story", error: err.message });
     }
 });
@@ -200,22 +187,6 @@ router.put("/api/update/:id", upload.single("image"), async (req, res) => {
         }
         const existingStory = await storyService.getStory(storyId);
         if (!existingStory) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
-        let imagePath = existingStory.image || "";
-        if (req.file) {
-            if (existingStory.image) {
-                const oldFilename = path.basename(existingStory.image);
-                const oldFilePath = path.join(storyService.imageFolder, oldFilename);
-                if (fs.existsSync(oldFilePath)) {
-                    fs.unlinkSync(oldFilePath);
-                }
-                const ext = path.extname(req.file.originalname);
-                const newFilePath = path.join(storyService.imageFolder, oldFilename);
-                fs.renameSync(req.file.path, newFilePath);
-                imagePath = `/static/images/story/${oldFilename}`;
-            } else {
-                imagePath = `/static/images/story/${req.file.filename}`;
-            }
-        }
         const storyData = {
             _id: storyId,
             title,
@@ -223,12 +194,12 @@ router.put("/api/update/:id", upload.single("image"), async (req, res) => {
             level,
             category,
             content: JSON.parse(content),
-            image: imagePath,
+            image: existingStory.image || req.body.image || "",
             slug: req.body.slug,
-            sort: parseInt(req.body.sort),
+            sort: parseInt(req.body.sort) || 0,
             display: req.body.display !== undefined ? req.body.display == "true" : true
         };
-        const result = await storyService.updateStory(storyData);
+        const result = await storyService.updateStory(storyData, req.file || null);
         res.json({ success: true, message: "Câu chuyện đã được cập nhật thành công!", result });
     } catch (err) {
         console.error(err);
@@ -240,12 +211,6 @@ router.delete("/api/story/:id", async (req, res) => {
     try {
         const story = await storyService.getStory(req.params.id);
         if (!story) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
-        if (story.image) {
-            const filePath = path.join(storyService.imageFolder, path.basename(story.image));
-            if (fs.existsSync(filePath)) {
-                fs.unlinkSync(filePath);
-            }
-        }
         const result = await storyService.deleteStory(req.params.id);
         if (result.deletedCount == 0) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
         res.json({ success: true, message: "Câu chuyện đã xóa thành công!" });
