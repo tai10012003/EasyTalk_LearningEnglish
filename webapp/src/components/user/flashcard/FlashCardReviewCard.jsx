@@ -99,7 +99,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
                         </p>
                         {card.image && (
                             <img
-                                src={`data:image/jpeg;base64,${card.image}`}
+                                src={card.image}
                                 alt={card.word}
                             />
                         )}

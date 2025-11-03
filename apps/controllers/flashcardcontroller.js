@@ -15,7 +15,9 @@ router.get("/api/flashcard-list", verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
-    const data = await flashcardService.getFlashcardList(page, limit);
+    const tab = req.query.tab || "explore";
+    const userId = req.user.id;
+    const data = await flashcardService.getFlashcardList(page, limit, tab, userId);
     res.json({ success: true, ...data });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -24,7 +26,8 @@ router.get("/api/flashcard-list", verifyToken, async (req, res) => {
 
 router.post("/create", verifyToken, async (req, res) => {
   try {
-    const result = await flashcardService.insertFlashcardList(req.body);
+    const userId = req.user.id;
+    const result = await flashcardService.insertFlashcardList(req.body, userId);
     res.status(201).json({ success: true, flashcardList: result });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -33,7 +36,8 @@ router.post("/create", verifyToken, async (req, res) => {
 
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
-    await flashcardService.deleteFlashcardList(req.params.id);
+    const userId = req.user.id;
+    await flashcardService.deleteFlashcardList(req.params.id, userId);
     res.json({ success: true, message: "Flashcard list đã bị xóa" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -42,7 +46,8 @@ router.delete("/:id", verifyToken, async (req, res) => {
 
 router.put("/flashcardlist/:id", verifyToken, async (req, res) => {
   try {
-    const result = await flashcardService.updateFlashcardList(req.params.id, req.body);
+    const userId = req.user.id;
+    const result = await flashcardService.updateFlashcardList(req.params.id, req.body, userId);
     res.json({ success: true, flashcardList: result });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -53,7 +58,8 @@ router.get("/api/flashcardlist/:id", verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
-    const result = await flashcardService.getFlashcardListById(req.params.id, page, limit);
+    const userId = req.user.id;
+    const result = await flashcardService.getFlashcardListById(req.params.id, page, limit, userId);
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -62,11 +68,12 @@ router.get("/api/flashcardlist/:id", verifyToken, async (req, res) => {
 
 router.post("/flashcardlist/:id", verifyToken, upload.single("image"), async (req, res) => {
   try {
+    const userId = req.user.id;
     const newFlashcard = await flashcardService.insertFlashcard({
       ...req.body,
-      image: req.file ? req.file.buffer.toString("base64") : null,
+      imageBuffer: req.file ? req.file.buffer : null,
       flashcardList: req.params.id,
-    });
+    }, userId);
     res.status(201).json({ success: true, flashcard: newFlashcard });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -75,10 +82,12 @@ router.post("/flashcardlist/:id", verifyToken, upload.single("image"), async (re
 
 router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (req, res) => {
   try {
+    const userId = req.user.id;
     const updated = await flashcardService.updateFlashcard(
       req.params.id,
       req.body,
-      req.file ? req.file.buffer : null
+      req.file ? req.file.buffer : null,
+      userId
     );
     res.json({ success: true, message: "Cập nhật thành công", updatedFlashcard: updated });
   } catch (err) {
@@ -88,7 +97,8 @@ router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (
 
 router.delete("/delete-flashcard/:id", verifyToken, async (req, res) => {
   try {
-    await flashcardService.deleteFlashcard(req.params.id);
+    const userId = req.user.id;
+    await flashcardService.deleteFlashcard(req.params.id, userId);
     res.json({ success: true, message: "Flashcard đã bị xóa" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -97,7 +107,8 @@ router.delete("/delete-flashcard/:id", verifyToken, async (req, res) => {
 
 router.get("/flashcardlist/:listId/review", verifyToken, async (req, res) => {
   try {
-    const result = await flashcardService.getFlashcardReview(req.params.listId);
+    const userId = req.user.id;
+    const result = await flashcardService.getFlashcardReview(req.params.listId, userId);
     res.json({ success: true, ...result });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });

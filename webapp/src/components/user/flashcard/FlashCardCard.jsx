@@ -3,7 +3,7 @@ import UpdateFlashCard from "@/components/user/flashcard/UpdateFlashCard.jsx";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import Swal from "sweetalert2";
 
-const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
+const FlashCardCard = ({ flashcard, onUpdate, onDelete, isOwner = false }) => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleDelete = async () => {
@@ -62,31 +62,34 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete }) => {
         <p className="example">
           <strong>Ví dụ:</strong> {flashcard.exampleSentence}
         </p>
+        <p>Người tạo: {flashcard.username || 'Unknown'}</p>
       </div>
       <div className="col-md-5 text-center">
         {flashcard.image && (
           <div className="flashcard-image mb-2">
             <img
-              src={`data:image/jpeg;base64,${flashcard.image}`}
+              src={flashcard.image}
               alt={flashcard.word}
               width="130px"
             />
           </div>
         )}
-        <div className="actions d-flex justify-content-center align-items-center gap-2">
-          <button
-            className="btn_4"
-            onClick={() => setIsEditModalOpen(true)}
-          >
-            <i className="fas fa-edit"></i>Sửa
-          </button>
-          <button
-            className="btn_4"
-            onClick={handleDelete}
-          >
-            <i className="fas fa-trash-alt"></i>Xóa
-          </button>
-        </div>
+        {isOwner && (
+          <div className="actions d-flex justify-content-center align-items-center gap-2">
+            <button
+              className="btn_4"
+              onClick={() => setIsEditModalOpen(true)}
+            >
+              <i className="fas fa-edit"></i>Sửa
+            </button>
+            <button
+              className="btn_4"
+              onClick={handleDelete}
+            >
+              <i className="fas fa-trash-alt"></i>Xóa
+            </button>
+          </div>
+        )}
       </div>
       <UpdateFlashCard
         isOpen={isEditModalOpen}

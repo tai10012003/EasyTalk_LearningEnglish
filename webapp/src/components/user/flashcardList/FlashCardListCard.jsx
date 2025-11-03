@@ -16,6 +16,7 @@ const FlashCardListCard = ({ flashcardLists }) => {
                     <p>Đã nhớ: {flashcardLists.remembered || 0}</p>
                 </div>
                 <div className="lesson-review-status">
+                    <p>Người tạo: {flashcardLists.username || 'Unknown'}</p>
                     <p>Ngày tạo: {new Date(flashcardLists.createdAt).toLocaleDateString()}</p>
                 </div>
             </div>

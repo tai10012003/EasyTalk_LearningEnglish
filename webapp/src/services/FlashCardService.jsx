@@ -4,9 +4,9 @@ import Swal from "sweetalert2";
 let hasShownAlert = false;
 
 export const FlashCardService = {
-    async fetchFlashcardLists(page = 1, limit = 12) {
+    async fetchFlashcardLists(page = 1, limit = 12, tab = "mine") {
         try {
-            let query = `?page=${page}&limit=${limit}`;
+            let query = `?page=${page}&limit=${limit}&tab=${tab}`;
             const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/api/flashcard-list${query}`, {
                 method: "GET",
             });

@@ -11,6 +11,8 @@ const UserSettingService = require("./usersettingService");
 const usersettingService = new UserSettingService();
 const UserprogressService = require("./userprogressService");
 const userprogressService = new UserprogressService();
+const FlashcardService = require("./flashcardService");
+const flashcardService = new FlashcardService();
 
 class UserService {
     constructor() {
@@ -107,8 +109,9 @@ class UserService {
         try {
             await notificationService.deleteNotificationsByUser(id);
             await userprogressService.deleteUserProgress(id);
+            await flashcardService.deleteUserFlashcards(id);
         } catch (error) {
-            console.error(`Không thể xóa thông báo liên quan tới user ${id}:`, error);
+            console.error(`Không thể xóa dữ liệu liên quan tới user ${id}:`, error);
         }
         return result;
     }
@@ -378,7 +381,7 @@ class UserService {
             html: `
                 <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 8px; color: #333;">
                     <h2 style="text-align: center; color: #4CAF50;">Yêu cầu đặt lại mật khẩu 🔑</h2>
-                    <p>Xin chào <strong>${name || email.split("@")[0]}</strong>,</p>
+                    <p>Xin chào <strong>${user.username || email.split("@")[0]}</strong>,</p>
                     <p>Chúng tôi đã nhận được yêu cầu <strong>đặt lại mật khẩu</strong> cho tài khoản của bạn trên <strong>EasyTalk</strong>.</p>
                     <p>Vui lòng sử dụng <strong>mã xác thực 5 số</strong> bên dưới để tiếp tục quá trình đặt lại mật khẩu.  
                     Mã có hiệu lực trong <strong>1 phút</strong>.</p>

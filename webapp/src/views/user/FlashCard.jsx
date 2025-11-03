@@ -15,6 +15,7 @@ const FlashCard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalFlashcards, setTotalFlashcards] = useState(0);
+  const [isOwner, setIsOwner] = useState(false);
   const [limit] = useState(5);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditListModalOpen, setIsEditListModalOpen] = useState(false);
@@ -28,6 +29,7 @@ const FlashCard = () => {
       setFlashcards(data.flashcards || []);
       setTotalPages(data.totalPages || 1);
       setTotalFlashcards(data.totalFlashcards || 0);
+      setIsOwner(data.isOwner || false);
     } catch (error) {
       console.error("Error fetching flashcard list:", error);
       Swal.fire({
@@ -139,17 +141,19 @@ const FlashCard = () => {
           </div>
           <p className="flashcard-detail-description">{flashcardList.description}</p>
         </div>
-        <div className="flashcard-detail-actions">
-          <button className="btn_4 mx-2" onClick={() => setIsCreateModalOpen(true)}>
-            <i className="fas fa-plus"></i>Thêm từ mới
-          </button>
-          <button className="btn_4 mx-2" onClick={() => setIsEditListModalOpen(true)}>
-            <i className="fas fa-edit"></i>Chỉnh sửa danh sách
-          </button>
-          <button className="btn_4 mx-2" onClick={handleDeleteList}>
-            <i className="fas fa-trash-alt"></i>Xoá danh sách
-          </button>
-        </div>
+        {isOwner && (
+          <div className="flashcard-detail-actions">
+            <button className="btn_4 mx-2" onClick={() => setIsCreateModalOpen(true)}>
+              <i className="fas fa-plus"></i>Thêm từ mới
+            </button>
+            <button className="btn_4 mx-2" onClick={() => setIsEditListModalOpen(true)}>
+              <i className="fas fa-edit"></i>Chỉnh sửa danh sách
+            </button>
+            <button className="btn_4 mx-2" onClick={handleDeleteList}>
+              <i className="fas fa-trash-alt"></i>Xoá danh sách
+            </button>
+          </div>
+        )}
         <div className="flashcard-detail-alert alert alert-success">
           Chú ý: nếu như list từ vựng của bạn là tiếng Trung, Nhật, hay Hàn,
           click vào nút chỉnh sửa để thay đổi ngôn ngữ. Audio mặc định là
@@ -180,6 +184,7 @@ const FlashCard = () => {
                 flashcard={flashcard}
                 onUpdate={fetchData}
                 onDelete={fetchData}
+                isOwner={isOwner && flashcard.username === flashcardList.username}
               />
             ))
           )}
@@ -196,12 +201,14 @@ const FlashCard = () => {
         listId={id}
         onCreated={fetchData}
       />
-      <UpdateFlashCardList
-        isOpen={isEditListModalOpen}
-        onClose={() => setIsEditListModalOpen(false)}
-        flashcardList={flashcardList}
-        onUpdated={fetchData}
-      />
+      {isOwner && (
+        <UpdateFlashCardList
+          isOpen={isEditListModalOpen}
+          onClose={() => setIsEditListModalOpen(false)}
+          flashcardList={flashcardList}
+          onUpdated={fetchData}
+        />
+      )}
     </div>
   );
 };

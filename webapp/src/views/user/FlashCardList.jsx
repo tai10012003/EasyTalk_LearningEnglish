@@ -10,12 +10,12 @@ const FlashCardList = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [activeTab, setActiveTab] = useState("explore");
+    const [activeTab, setActiveTab] = useState("mine");
 
-    const loadFlashcards = async (page = currentPage) => {
+    const loadFlashcards = async (page = currentPage, tab = activeTab) => {
         setIsLoading(true);
         try {
-            const data = await FlashCardService.fetchFlashcardLists(page, 3);
+            const data = await FlashCardService.fetchFlashcardLists(page, 3, tab);
             setFlashcards(data.flashcardLists || []);
             setTotalPages(data.totalPages);
         } catch (err) {
@@ -28,7 +28,11 @@ const FlashCardList = () => {
     useEffect(() => {
         document.title = "Danh sách flashcard - EasyTalk";
         FlashCardService.resetAlertFlag();
-        loadFlashcards(currentPage);
+        setCurrentPage(1);
+    }, [activeTab]);
+
+    useEffect(() => {
+        loadFlashcards(currentPage, activeTab);
     }, [currentPage, activeTab]);
 
     const renderPagination = () => {
@@ -81,7 +85,7 @@ const FlashCardList = () => {
                 <CreateFlashCardList
                     isOpen={isModalOpen}
                     onClose={() => setIsModalOpen(false)}
-                    onCreated={() => loadFlashcards(currentPage)}
+                    onCreated={() => loadFlashcards(1, activeTab)}
                 />
                 <div className="flashcard-menu d-flex justify-content-between align-items-center mb-4">
                     <div className="flashcard-btn-group btn-group">
@@ -100,12 +104,14 @@ const FlashCardList = () => {
                     </div>
                 </div>
                 <div className="lesson-list">
-                     <button
-                        className="btn_1 mb-4"
-                        onClick={() => setIsModalOpen(true)}
-                    >
-                        <i className="fas fa-plus mr-2"></i>Tạo mới
-                    </button>
+                    {activeTab === "mine" && (
+                        <button
+                            className="btn_1 mb-4"
+                            onClick={() => setIsModalOpen(true)}
+                        >
+                            <i className="fas fa-plus mr-2"></i>Tạo mới
+                        </button>
+                    )}
                     { flashcards.length > 0 ? (
                         <div className="container">
                             <div className="row">
