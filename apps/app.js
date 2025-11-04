@@ -8,22 +8,26 @@ const dotenv = require('dotenv');
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 dotenv.config({ path: envFile });
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('Unhandled Rejection at:', promise);
-  console.error('Reason:', reason);
+  console.error('Unhandled Rejection at:', promise, 'Reason:', reason);
 });
 
 process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
 
-const { getRedisClient } = require('./util/redisClient');
-try {
-  getRedisClient();
-  console.log('Redis initialization started');
-} catch (err) {
-  console.error('Redis init error:', err.message);
-  console.error('App will continue without cache');
+const { connectRedis } = require('./util/redisClient');
+async function initRedis() {
+  try {
+    await connectRedis(5000);
+    console.log('Redis connected successfully');
+  } catch (err) {
+    console.error(`Redis init failed: ${err.message}`);
+    console.error('Running without Redis cache - fallback to DB (app stable)');
+  }
 }
+
+initRedis().catch(() => {});
+
 const { initSocket } = require("./util/socket");
 initSocket(server);
 

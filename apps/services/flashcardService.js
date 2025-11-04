@@ -3,6 +3,7 @@ const config = require('../config/setting');
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const { FlashcardRepository } = require('./../repositories');
+const { getRedisClient } = require('../util/redisClient');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -82,6 +83,18 @@ class FlashcardService {
     }
 
     async getFlashcardList(page = 1, limit = 12, tab = "explore", userId) {
+        const redis = getRedisClient();
+        const cacheKey = `flashcard:list:page=${page}:limit=${limit}:tab=${tab}:userId=${userId}`;
+        const ttl = 300;
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                console.log(`Direct cache hit: ${cacheKey}`);
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            console.error('Direct cache get error:', err);
+        }
         let filter = {};
         if (tab === "mine") {
             filter.user = new ObjectId(userId);
@@ -89,14 +102,33 @@ class FlashcardService {
             filter.user = { $ne: new ObjectId(userId) };
         }
         const { flashcardLists, totalFlashcardLists } = await this.flashcardRepository.findFlashcardLists(filter, page, limit);
-        return {
+        const result = {
             flashcardLists,
             currentPage: page,
             totalPages: Math.ceil(totalFlashcardLists / limit),
         };
+        try {
+            await redis.setex(cacheKey, ttl, JSON.stringify(result));
+            console.log(`Direct cache set: ${cacheKey}`);
+        } catch (err) {
+            console.error('Direct cache set error:', err);
+        }
+        return result;
     }
 
     async getFlashcardListById(id, page = 1, limit = 12, userId) {
+        const redis = getRedisClient();
+        const cacheKey = `flashcard:listById:id=${id}:page=${page}:limit=${limit}:userId=${userId}`;
+        const ttl = 300;
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                console.log(`Direct cache hit: ${cacheKey}`);
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            console.error('Direct cache get error:', err);
+        }
         const { flashcardList, flashcards } = await this.flashcardRepository.findFlashcardListById(id);
         if (!flashcardList) {
             throw new Error("Không tìm thấy danh sách flashcards.");
@@ -105,7 +137,7 @@ class FlashcardService {
         const totalFlashcards = flashcards.length;
         const skip = (page - 1) * limit;
         const paginatedFlashcards = flashcards.slice(skip, skip + limit);
-        return {
+        const result = {
             flashcardList,
             flashcards: paginatedFlashcards,
             currentPage: page,
@@ -113,16 +145,25 @@ class FlashcardService {
             totalFlashcards,
             isOwner
         };
+        try {
+            await redis.setex(cacheKey, ttl, JSON.stringify(result));
+            console.log(`Direct cache set: ${cacheKey}`);
+        } catch (err) {
+            console.error('Direct cache set error:', err);
+        }
+        return result;
     }
 
     async insertFlashcardList(flashcardListData, userId) {
         const { name, description } = flashcardListData;
         if (!name || !description) throw new Error("Thiếu thông tin cần thiết");
-        return await this.flashcardRepository.insertFlashcardList({ 
+        const result = await this.flashcardRepository.insertFlashcardList({ 
             name, 
             description, 
             user: new ObjectId(userId) 
         });
+        await this._invalidateCache();
+        return result;
     }
 
     async updateFlashcardList(id, flashcardListData, userId) {
@@ -132,6 +173,7 @@ class FlashcardService {
         }
         const updated = await this.flashcardRepository.updateFlashcardList(id, flashcardListData);
         if (!updated.modifiedCount) throw new Error("Không tìm thấy danh sách để cập nhật");
+        await this._invalidateCache();
         return updated;
     }
 
@@ -156,7 +198,9 @@ class FlashcardService {
             }
         }
         await this.flashcardRepository.deleteFlashcardsByListId(id);
-        return await this.flashcardRepository.deleteFlashcardList(id);
+        const result = await this.flashcardRepository.deleteFlashcardList(id);
+        await this._invalidateCache();
+        return result;
     }
 
     async insertFlashcard(flashcardData, userId) {
@@ -170,7 +214,7 @@ class FlashcardService {
         if (flashcardData.imageBuffer) {
             imageUrl = await this.uploadNewImage(flashcardData.imageBuffer, userId);
         }
-        return await this.flashcardRepository.insertFlashcard({
+        const result = await this.flashcardRepository.insertFlashcard({
             word,
             meaning,
             pos,
@@ -180,6 +224,8 @@ class FlashcardService {
             flashcardList: new ObjectId(flashcardList),
             user: new ObjectId(userId)
         });
+        await this._invalidateCache();
+        return result;
     }
 
     async updateFlashcard(id, data, fileBuffer = null, userId) {
@@ -205,6 +251,7 @@ class FlashcardService {
         };
         const updated = await this.flashcardRepository.updateFlashcard(id, updatedData);
         if (!updated.modifiedCount) throw new Error("Flashcard không tồn tại");
+        await this._invalidateCache();
         return updated;
     }
 
@@ -225,7 +272,9 @@ class FlashcardService {
                 }
             }
         }
-        return await this.flashcardRepository.deleteFlashcard(id);
+        const result = await this.flashcardRepository.deleteFlashcard(id);
+        await this._invalidateCache();
+        return result;
     }
 
     async getFlashcardReview(listId, userId) {
@@ -259,7 +308,39 @@ class FlashcardService {
             }
             await this.flashcardRepository.deleteFlashcardsByListId(list._id.toString());
         }
-        await this.flashcardRepository.flashcardListsCollection.deleteMany({ user: new ObjectId(userId) });
+        const result = await this.flashcardRepository.flashcardListsCollection.deleteMany({ user: new ObjectId(userId) });
+        await this._invalidateCache();
+        return result;
+    }
+
+    async _invalidateCache() {
+        const redis = getRedisClient();
+        const scanAndDelete = async (pattern) => {
+            let cursor = '0';
+            let totalDeleted = 0;
+            do {
+                const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+                if (keys.length > 0) {
+                    const deleted = await redis.del(keys);
+                    totalDeleted += deleted;
+                }
+                cursor = nextCursor;
+            } while (cursor !== '0');
+            return totalDeleted;
+        };
+        try {
+            const deletedList = await scanAndDelete('flashcard:list:*');
+            const deletedItem = await scanAndDelete('flashcard:item:*');
+            const deletedApi = await scanAndDelete('cache:/api/flashcard*');
+            const total = deletedList + deletedItem + deletedApi;
+            if (total > 0) {
+                console.log(`Flashcard cache invalidated (${total} keys deleted)`);
+            } else {
+                console.log('No flashcard cache keys found to invalidate.');
+            }
+        } catch (err) {
+            console.error('Invalidate flashcard cache error:', err);
+        }
     }
 }
 

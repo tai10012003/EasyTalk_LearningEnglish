@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const { FlashcardService } = require("./../services");
+const { cacheMiddleware } = require('../util/cacheMiddleware');
 const flashcardService = new FlashcardService();
 const multer = require("multer");
 
@@ -11,7 +12,7 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-router.get("/api/flashcard-list", verifyToken, async (req, res) => {
+router.get("/api/flashcard-list", verifyToken, cacheMiddleware(300), async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -37,7 +38,10 @@ router.post("/create", verifyToken, async (req, res) => {
 router.delete("/:id", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    await flashcardService.deleteFlashcardList(req.params.id, userId);
+    const result = await flashcardService.deleteFlashcardList(req.params.id, userId);
+    if (!result || result.deletedCount == 0) {
+      return res.status(404).json({ success: false, message: "Flashcard list not found" });
+    }
     res.json({ success: true, message: "Flashcard list đã bị xóa" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
@@ -54,7 +58,7 @@ router.put("/flashcardlist/:id", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/api/flashcardlist/:id", verifyToken, async (req, res) => {
+router.get("/api/flashcardlist/:id", verifyToken, cacheMiddleware(300), async (req, res) => {  // Thêm middleware
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -98,7 +102,10 @@ router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (
 router.delete("/delete-flashcard/:id", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    await flashcardService.deleteFlashcard(req.params.id, userId);
+    const result = await flashcardService.deleteFlashcard(req.params.id, userId);
+    if (!result || result.deletedCount == 0) {
+      return res.status(404).json({ success: false, message: "Flashcard not found" });
+    }
     res.json({ success: true, message: "Flashcard đã bị xóa" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
