@@ -3,12 +3,13 @@ const router = express.Router();
 const multer = require("multer");
 const verifyToken = require("./../util/VerifyToken");
 const { GrammarService, UserprogressService } = require("../services");
+const { cacheMiddleware } = require('./../util/cacheMiddleware');
 const grammarService = new GrammarService();
 const userprogressService = new UserprogressService();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-router.get("/api/grammar-list", verifyToken, async function (req, res) {
+router.get("/api/grammar-list", verifyToken, cacheMiddleware(300), async function (req, res) {
   const page = parseInt(req.query.page) || 1;
   const limit = 12;
   try {
@@ -25,7 +26,7 @@ router.get("/api/grammar-list", verifyToken, async function (req, res) {
   }
 });
 
-router.get("/api/grammar/:id", verifyToken, async function (req, res) {
+router.get("/api/grammar/:id", verifyToken, cacheMiddleware(600), async function (req, res) {
   try {
     const userId = req.user.id;
     const grammarId = req.params.id;
@@ -49,7 +50,7 @@ router.get("/api/grammar/:id", verifyToken, async function (req, res) {
   }
 });
 
-router.get("/api/grammar/slug/:slug", verifyToken, async function(req, res) {
+router.get("/api/grammar/slug/:slug", verifyToken, cacheMiddleware(600), async function(req, res) {
   try {
     const slug = req.params.slug;
     const grammar = await grammarService.getGrammarBySlug(slug);
@@ -139,7 +140,7 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
   }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
   try {
     const grammar = await grammarService.getGrammar(req.params.id);
     if (!grammar) {
@@ -191,9 +192,6 @@ router.delete("/api/grammar/:id", async function (req, res) {
       return res.status(404).json({ message: "Bài học ngữ pháp không tìm thấy." });
     }
     const result = await grammarService.deleteGrammar(req.params.id);
-    if (result.deletedCount == 0) {
-      return res.status(404).json({ message: "Bài học ngữ pháp không tìm thấy." });
-    }
     res.json({ message: "Bài học ngữ pháp đã xóa thành công !" });
   } catch (error) {
     console.error("Delete grammar error:", error);

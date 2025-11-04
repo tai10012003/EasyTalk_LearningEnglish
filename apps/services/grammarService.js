@@ -3,6 +3,7 @@ const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const { GrammarRepository } = require("./../repositories");
+const { getRedisClient } = require('../util/redisClient');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,13 +11,25 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-class GrammarsService {
+class GrammarService {
     constructor() {
         this.grammarRepository = new GrammarRepository();
         this.cloudFolder = "easytalk/grammar";
     }
 
     async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
+        const redis = getRedisClient();
+        const cacheKey = `grammar:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
+        const ttl = 300;
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                console.log(`Direct cache hit: ${cacheKey}`);
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            console.error('Direct cache get error:', err);
+        }
         const skip = (page - 1) * limit;
         const filter = {};
         if (role !== "admin") {
@@ -24,7 +37,14 @@ class GrammarsService {
         }
         if (search) filter.title = { $regex: search, $options: "i" };
         const { grammars, total } = await this.grammarRepository.findAll(filter, skip, limit);
-        return { grammars, totalGrammars: total };
+        const result = { grammars, totalGrammars: total };
+        try {
+            await redis.setex(cacheKey, ttl, JSON.stringify(result));
+            console.log(`Direct cache set: ${cacheKey}`);
+        } catch (err) {
+            console.error('Direct cache set error:', err);
+        }
+        return result;
     }
 
     async getGrammar(id) {
@@ -64,7 +84,9 @@ class GrammarsService {
                 });
             });
         }
-        return await this.grammarRepository.insert(newGrammar);
+        const result = await this.grammarRepository.insert(newGrammar);
+        await this._invalidateCache();
+        return result;
     }
 
     async updateGrammar(id, grammar, file = null) {
@@ -96,12 +118,14 @@ class GrammarsService {
             display: grammar.display,
             updatedAt: new Date()
         };
-        return await this.grammarRepository.update(id, updateData);
+        const result = await this.grammarRepository.update(id, updateData);
+        await this._invalidateCache();
+        return result;
     }
 
     async deleteGrammar(id) {
         const existing = await this.getGrammar(id);
-            if (existing && existing.images) {
+        if (existing && existing.images) {
             const publicId = this._extractPublicIdFromUrl(existing.images);
             if (publicId) {
                 try {
@@ -111,7 +135,39 @@ class GrammarsService {
                 }
             }
         }
-        return await this.grammarRepository.delete(id);
+        const result = await this.grammarRepository.delete(id);
+        await this._invalidateCache();
+        return result;
+    }
+
+    async _invalidateCache() {
+        const redis = getRedisClient();
+        const scanAndDelete = async (pattern) => {
+            let cursor = '0';
+            let totalDeleted = 0;
+            do {
+                const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+                if (keys.length > 0) {
+                    await redis.del(keys);
+                    totalDeleted += keys.length;
+                }
+                cursor = nextCursor;
+            } while (cursor !== '0');
+            return totalDeleted;
+        };
+        try {
+            const deletedList = await scanAndDelete('grammar:list:*');
+            const deletedItem = await scanAndDelete('grammar:item:*');
+            const deletedApi = await scanAndDelete('cache:/api/grammar*');
+            const total = deletedList + deletedItem + deletedApi;
+            if (total > 0) {
+                console.log(`Grammar cache invalidated (${total} keys deleted)`);
+            } else {
+                console.log('No grammar cache keys found to invalidate.');
+            }
+        } catch (err) {
+            console.error('Invalidate grammar cache error:', err);
+        }
     }
 
     _extractPublicIdFromUrl(url) {
@@ -194,4 +250,4 @@ class GrammarsService {
     }
 }
 
-module.exports = GrammarsService;
+module.exports = GrammarService;

@@ -11,6 +11,10 @@ services:
       - ./apps/.env.production
     environment:
       - NODE_ENV=production
+    depends_on:
+      - redis
+    networks:
+      - app-network
 
   frontend:
     build:
@@ -25,3 +29,23 @@ services:
       - backend
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    networks:
+      - app-network
+
+volumes:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge
