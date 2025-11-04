@@ -7,6 +7,23 @@ const cors = require("cors");
 const dotenv = require('dotenv');
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 dotenv.config({ path: envFile });
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise);
+  console.error('Reason:', reason);
+});
+
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+});
+
+const { getRedisClient } = require('./util/redisClient');
+try {
+  getRedisClient();
+  console.log('Redis initialization started');
+} catch (err) {
+  console.error('Redis init error:', err.message);
+  console.error('App will continue without cache');
+}
 const { initSocket } = require("./util/socket");
 initSocket(server);
 
