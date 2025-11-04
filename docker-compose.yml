@@ -12,7 +12,9 @@ services:
     environment:
       - NODE_ENV=production
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - app-network
 
@@ -29,6 +31,7 @@ services:
       - backend
     volumes:
       - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
     networks:
       - app-network
 
@@ -40,6 +43,13 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
     networks:
       - app-network
 
