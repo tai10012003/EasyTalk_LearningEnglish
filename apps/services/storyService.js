@@ -3,6 +3,7 @@ const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const { StoryRepository } = require("./../repositories");
+const { getRedisClient } = require('../util/redisClient');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -17,6 +18,18 @@ class StoryService {
     }
 
     async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user") {
+        const redis = getRedisClient();
+        const cacheKey = `story:list:page=${page}:limit=${limit}:category=${category}:level=${level}:search=${search}:role=${role}`;
+        const ttl = 300;
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                console.log(`Direct cache hit: ${cacheKey}`);
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            console.error('Direct cache get error:', err);
+        }
         const skip = (page - 1) * limit;
         const filter = {};
         if (role !== "admin") {
@@ -27,7 +40,14 @@ class StoryService {
         if (search) filter.title = { $regex: search, $options: "i" };
 
         const { stories, total } = await this.storyRepository.findAll(filter, skip, limit);
-        return { stories, totalStory: total };
+        const result = { stories, totalStory: total };
+        try {
+            await redis.setex(cacheKey, ttl, JSON.stringify(result));
+            console.log(`Direct cache set: ${cacheKey}`);
+        } catch (err) {
+            console.error('Direct cache set error:', err);
+        }
+        return result;
     }
 
     async getStory(id) {
@@ -76,7 +96,9 @@ class StoryService {
                 newStory.content.push(sentenceObj);
             });
         }
-        return await this.storyRepository.insert(newStory);
+        const result = await this.storyRepository.insert(newStory);
+        await this._invalidateCache();
+        return result;
     }
 
     async updateStory(storyData, file = null) {
@@ -110,12 +132,14 @@ class StoryService {
         }
         updateFields.image = imageUrl;
         updateFields.updatedAt = new Date();
-        return await this.storyRepository.update(_id, updateFields);
+        const result = await this.storyRepository.update(_id, updateFields);
+        await this._invalidateCache();
+        return result;
     }
 
     async deleteStory(id) {
         const existing = await this.getStory(id);
-            if (existing && existing.image) {
+        if (existing && existing.image) {
             const publicId = this._extractPublicIdFromUrl(existing.image);
             if (publicId) {
                 try {
@@ -125,7 +149,39 @@ class StoryService {
                 }
             }
         }
-        return await this.storyRepository.delete(id);
+        const result = await this.storyRepository.delete(id);
+        await this._invalidateCache();
+        return result;
+    }
+
+    async _invalidateCache() {
+        const redis = getRedisClient();
+        const scanAndDelete = async (pattern) => {
+            let cursor = '0';
+            let totalDeleted = 0;
+            do {
+                const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+                if (keys.length > 0) {
+                    const deleted = await redis.del(keys);
+                    totalDeleted += deleted;
+                }
+                cursor = nextCursor;
+            } while (cursor !== '0');
+            return totalDeleted;
+        };
+        try {
+            const deletedList = await scanAndDelete('story:list:*');
+            const deletedItem = await scanAndDelete('story:item:*');
+            const deletedApi = await scanAndDelete('cache:/api/story*');
+            const total = deletedList + deletedItem + deletedApi;
+            if (total > 0) {
+                console.log(`Story cache invalidated (${total} keys deleted)`);
+            } else {
+                console.log('No story cache keys found to invalidate.');
+            }
+        } catch (err) {
+            console.error('Invalidate story cache error:', err);
+        }
     }
 
     _extractPublicIdFromUrl(url) {

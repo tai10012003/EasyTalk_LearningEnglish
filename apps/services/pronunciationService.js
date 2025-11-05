@@ -3,6 +3,7 @@ const path = require("path");
 const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const { PronunciationRepository } = require("./../repositories");
+const { getRedisClient } = require('../util/redisClient');
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,22 +11,41 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-class PronunciationsService {
+class PronunciationService {
     constructor() {
         this.pronunciationRepository = new PronunciationRepository();
         this.cloudFolder = "easytalk/pronunciation";
     }
     async getPronunciationList(page = 1, limit = 12, role = "user") {
+        const redis = getRedisClient();
+        const cacheKey = `pronunciation:list:page=${page}:limit=${limit}:role=${role}`;
+        const ttl = 300;
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                console.log(`Direct cache hit: ${cacheKey}`);
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            console.error('Direct cache get error:', err);
+        }
         const skip = (page - 1) * limit;
         const filter = {};
         if (role !== "admin") {
             filter.display = true;
         }
         const { items, total } = await this.pronunciationRepository.findAll(filter, skip, limit);
-        return {
+        const result = {
             pronunciations: items,
             totalPronunciations: total
         };
+        try {
+            await redis.setex(cacheKey, ttl, JSON.stringify(result));
+            console.log(`Direct cache set: ${cacheKey}`);
+        } catch (err) {
+            console.error('Direct cache set error:', err);
+        }
+        return result;
     }
 
     async getPronunciation(id) {
@@ -65,7 +85,9 @@ class PronunciationsService {
                 });
             });
         }
-        return await this.pronunciationRepository.insert(newPronunciation);
+        const result = await this.pronunciationRepository.insert(newPronunciation);
+        await this._invalidateCache();
+        return result;
     }
 
     async updatePronunciation(id, pronunciation, file = null) {
@@ -97,12 +119,14 @@ class PronunciationsService {
             display: pronunciation.display,
             updatedAt: new Date()
         };
-        return await this.pronunciationRepository.update(id, updateData);
+        const result = await this.pronunciationRepository.update(id, updateData);
+        await this._invalidateCache();
+        return result;
     }
 
     async deletePronunciation(id) {
         const existing = await this.getPronunciation(id);
-            if (existing && existing.images) {
+        if (existing && existing.images) {
             const publicId = this._extractPublicIdFromUrl(existing.images);
             if (publicId) {
                 try {
@@ -112,7 +136,39 @@ class PronunciationsService {
                 }
             }
         }
-        return await this.pronunciationRepository.delete(id);
+        const result = await this.pronunciationRepository.delete(id);
+        await this._invalidateCache();
+        return result;
+    }
+
+    async _invalidateCache() {
+        const redis = getRedisClient();
+        const scanAndDelete = async (pattern) => {
+            let cursor = '0';
+            let totalDeleted = 0;
+            do {
+                const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+                if (keys.length > 0) {
+                    const deleted = await redis.del(keys);
+                    totalDeleted += deleted;
+                }
+                cursor = nextCursor;
+            } while (cursor !== '0');
+            return totalDeleted;
+        };
+        try {
+            const deletedList = await scanAndDelete('pronunciation:list:*');
+            const deletedItem = await scanAndDelete('pronunciation:item:*');
+            const deletedApi = await scanAndDelete('cache:/api/pronunciation*');
+            const total = deletedList + deletedItem + deletedApi;
+            if (total > 0) {
+                console.log(`Pronunciation cache invalidated (${total} keys deleted)`);
+            } else {
+                console.log('No pronunciation cache keys found to invalidate.');
+            }
+        } catch (err) {
+            console.error('Invalidate pronunciation cache error:', err);
+        }
     }
 
     _extractPublicIdFromUrl(url) {
@@ -195,4 +251,4 @@ class PronunciationsService {
     }
 }
 
-module.exports = PronunciationsService;
+module.exports = PronunciationService;

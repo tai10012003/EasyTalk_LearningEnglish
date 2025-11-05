@@ -3,12 +3,13 @@ const router = express.Router();
 const multer = require("multer");
 const verifyToken = require("./../util/VerifyToken");
 const { StoryService, UserprogressService } = require("./../services");
+const { cacheMiddleware } = require('../util/cacheMiddleware');
 const storyService = new StoryService();
 const userprogressService = new UserprogressService();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.get("/api/story-list", verifyToken, async (req, res) => {
+router.get("/api/story-list", verifyToken, cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -34,7 +35,7 @@ router.get("/api/story-list", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/story/:id", verifyToken, async (req, res) => {
+router.get("/api/story/:id", verifyToken, cacheMiddleware(600), async (req, res) => {
     try {
         const userId = req.user.id;
         const storyId = req.params.id;
@@ -70,12 +71,12 @@ router.get("/api/story/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/story/slug/:slug", verifyToken, async function(req, res) {
+router.get("/api/story/slug/:slug", verifyToken, cacheMiddleware(600), async function(req, res) {
     try {
         const slug = req.params.slug;
         const story = await storyService.getStoryBySlug(slug);
         if (!story) {
-        return res.status(404).json({ message: "Story not found" });
+            return res.status(404).json({ message: "Story not found" });
         }
         res.json({ data: story });
     } catch (err) {
@@ -162,7 +163,7 @@ router.post("/api/add", upload.single("image"), async (req, res) => {
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const story = await storyService.getStory(req.params.id);
         if (!story) {
@@ -212,7 +213,9 @@ router.delete("/api/story/:id", async (req, res) => {
         const story = await storyService.getStory(req.params.id);
         if (!story) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
         const result = await storyService.deleteStory(req.params.id);
-        if (result.deletedCount == 0) return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
+        if (!result || result.deletedCount == 0) {
+            return res.status(404).json({ success: false, message: "Câu chuyện không tìm thấy." });
+        }
         res.json({ success: true, message: "Câu chuyện đã xóa thành công!" });
     } catch (err) {
         console.error(err);

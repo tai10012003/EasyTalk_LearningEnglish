@@ -3,12 +3,13 @@ const router = express.Router();
 const multer = require("multer");
 const verifyToken = require("./../util/VerifyToken");
 const { PronunciationService, UserprogressService } = require("../services");
+const { cacheMiddleware } = require('../util/cacheMiddleware');
 const userprogressService = new UserprogressService();
 const pronunciationService = new PronunciationService();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-router.get("/api/pronunciation-list", verifyToken, async (req, res) => {
+router.get("/api/pronunciation-list", verifyToken, cacheMiddleware(300), async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 12;  
     try {
@@ -25,7 +26,7 @@ router.get("/api/pronunciation-list", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
+router.get("/api/pronunciation/:id", verifyToken, cacheMiddleware(600), async (req, res) => {
     try {
         const userId = req.user.id;
         const pronunciationId = req.params.id;
@@ -49,7 +50,7 @@ router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/pronunciation/slug/:slug", verifyToken, async function (req, res) {
+router.get("/api/pronunciation/slug/:slug", verifyToken, cacheMiddleware(600), async function (req, res) {
     try {
         const slug = req.params.slug;
         const pronunciation = await pronunciationService.getPronunciationBySlug(slug);
@@ -141,7 +142,7 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const pronunciation = await pronunciationService.getPronunciation(req.params.id);
         if (!pronunciation) {
@@ -193,7 +194,7 @@ router.delete("/api/pronunciation/:id", async function (req, res) {
             return res.status(404).json({ message: "Bài học phát âm không tìm thấy." });
         }
         const result = await pronunciationService.deletePronunciation(req.params.id);
-        if (result.deletedCount == 0) {
+        if (!result) {
             return res.status(404).json({ message: "Bài học phát âm không tìm thấy." });
         }
         res.json({ message: "Bài học phát âm đã xóa thành công !" });
