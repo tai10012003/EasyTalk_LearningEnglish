@@ -6,7 +6,8 @@ const cacheMiddleware = (duration = 300) => {
             return next();
         }
         const redis = getRedisClient();
-        const key = `cache:${req.originalUrl}`;
+        const userId = req.user?.id || "";
+        const key = `cache:${userId}:${req.originalUrl}`;
         try {
             const cachedData = await redis.get(key);
             if (cachedData) {
@@ -23,15 +24,15 @@ const cacheMiddleware = (duration = 300) => {
                 console.error(`Cache GET failed: ${err.message}`);
             }
         }
-        const originalJson = res.json;
-        res.json = function (data) {
+        const originalJson = res.json.bind(res);
+        res.json = (data) => {
             if (isRedisConnected()) {
                 redis.setex(key, duration, JSON.stringify(data)).catch(() => {});
                 if (process.env.NODE_ENV !== 'production') {
                     console.log(`Cache SET: ${key} (TTL: ${duration}s)`);
                 }
             }
-            originalJson.call(this, data);
+            return originalJson(data);
         };
         next();
     };

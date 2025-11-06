@@ -6,6 +6,7 @@ const config = require("../config/setting");
 const { getGoogleAuthURL } = require("./../util/googleAuth");
 const { getFacebookAuthURL } = require("../util/facebookAuth");
 const verifyToken = require("./../util/VerifyToken");
+const { getRedisClient } = require('../util/redisClient');
 const { UserService, NotificationService, UserprogressService } = require("../services");
 const userService = new UserService();
 const notificationService = new NotificationService();
@@ -92,12 +93,20 @@ router.post("/refresh-token", async (req, res) => {
   }
 });
 
-router.post("/logout", async (req, res) => {
+router.post("/logout", verifyToken, async (req, res) => {
   try {
     const { refreshToken } = req.body;
     const result = await userService.logout(refreshToken);
+    const redis = getRedisClient();
+    const userId = req.user.id;
+    const keys = await redis.keys(`cache:${userId}:*`);
+    if (keys.length > 0) {
+      await redis.del(keys);
+      console.log(`Cache cleared for user ${userId}`);
+    }
     res.json(result);
   } catch (error) {
+    console.error("Logout error:", error);
     res.status(500).json({ message: error.message });
   }
 });
