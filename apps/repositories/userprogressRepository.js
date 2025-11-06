@@ -21,11 +21,24 @@ class UserprogressRepository {
         return await this.collection.insertOne(userProgress);
     }
 
-    async update(userId, updateFields, upsert = true) {
+    async update(userId, updateOperator, upsert = true) {
         return await this.collection.updateOne(
             { user: new ObjectId(userId) },
-            { $set: updateFields },
+            updateOperator,
             { upsert }
+        );
+    }
+
+    async getDailyGoal(userId) {
+        const doc = await this.collection.findOne({ user: new ObjectId(userId) });
+        return doc?.dailyFlashcardGoal || 10;
+    }
+
+    async updateDailyGoal(userId, goal) {
+        return await this.collection.updateOne(
+            { user: new ObjectId(userId) },
+            { $set: { dailyFlashcardGoal: goal } },
+            { upsert: true }
         );
     }
 

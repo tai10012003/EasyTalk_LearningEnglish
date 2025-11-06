@@ -2,8 +2,10 @@ const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const { FlashcardService } = require("./../services");
+const { UserprogressService } = require("./../services");
 const { cacheMiddleware } = require('../util/cacheMiddleware');
 const flashcardService = new FlashcardService();
+const userprogressService = new UserprogressService();
 const multer = require("multer");
 
 const storage = multer.memoryStorage();
@@ -58,7 +60,7 @@ router.put("/flashcardlist/:id", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/api/flashcardlist/:id", verifyToken, cacheMiddleware(300), async (req, res) => {  // Thêm middleware
+router.get("/api/flashcardlist/:id", verifyToken, cacheMiddleware(300), async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -94,6 +96,21 @@ router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (
       userId
     );
     res.json({ success: true, message: "Cập nhật thành công", updatedFlashcard: updated });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
+router.put("/update-difficulty/:id", verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { difficulty } = req.body;
+    if (!difficulty || ![1, 2, 3].includes(difficulty)) {
+      return res.status(400).json({ success: false, message: "Invalid difficulty level" });
+    }
+    await flashcardService.updateFlashcardDifficulty(req.params.id, difficulty, userId);
+    await userprogressService.incrementDailyFlashcardReview(userId);
+    res.json({ success: true, message: "Difficulty updated" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

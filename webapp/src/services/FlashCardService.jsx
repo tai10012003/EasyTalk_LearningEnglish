@@ -28,6 +28,20 @@ export const FlashCardService = {
         }
     },
 
+    async fetchDailyReviews() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/dailyreviews`, {
+                method: "GET",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching daily reviews:", error.message);
+            return { dailyFlashcardReviews: {} };
+        }
+    },
+
     async createFlashcardList(name, description) {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/create`, {
@@ -169,6 +183,50 @@ export const FlashCardService = {
                     text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
                 });
             }
+        }
+    },
+
+    async updateDifficulty(id, difficulty) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/update-difficulty/${id}`, {
+                method: "PUT",
+                body: JSON.stringify({ difficulty }),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Error updating difficulty:", error.message);
+            throw error;
+        }
+    },
+
+    async fetchDailyGoal() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/daily-goal`, {
+                method: "GET",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching daily goal:", error.message);
+            return { goal: 20, todayCount: 0, isAchieved: false };
+        }
+    },
+
+    async updateDailyGoal(goal) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/update-goal`, {
+                method: "POST",
+                body: JSON.stringify({ goal }),
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Error updating daily goal:", error.message);
+            throw error;
         }
     },
 

@@ -17,6 +17,35 @@ class UserprogressService {
         return await this.userprogressRepository.getLeaderboard(limit);
     }
 
+    async getDailyFlashcardGoal(userId) {
+        return await this.userprogressRepository.getDailyGoal(userId);
+    }
+
+    async updateDailyFlashcardGoal(userId, goal) {
+        if (goal < 0 || goal > 200) throw new Error("Goal must be between 0 and 200");
+        return await this.userprogressRepository.updateDailyGoal(userId, goal);
+    }
+
+    async incrementDailyFlashcardReview(userId) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const userProgress = await this.getUserProgressByUserId(userId);
+        const goal = userProgress?.dailyFlashcardGoal || 20;
+        const todayCount = (userProgress?.dailyFlashcardReviews?.[todayStr] || 0) + 1;
+        const updateOp = { 
+            $inc: { [`dailyFlashcardReviews.${todayStr}`]: 1 } 
+        };
+        let expBonus = 0;
+        if (todayCount >= goal && (userProgress?.dailyFlashcardReviews?.[todayStr] || 0) < goal) {
+            if (goal <= 20) expBonus = 10;
+            else if (goal <= 70) expBonus = 20;
+            else if (goal <= 130) expBonus = 30;
+            else expBonus = 50;
+            updateOp.$inc = { ...updateOp.$inc, experiencePoints: expBonus };
+        }
+        const result = await this.userprogressRepository.update(userId, updateOp, true);
+        return { ...result, expBonus, todayCount };
+    }
+
     async createUserProgress(userId, journey = null, initialStory = null, initialGrammar = null, initialPronunciation = null, initialGrammarExercise = null, initialPronunciationExercise = null, initialVocabularyExercise = null, initialDictation = null) {
         const grammarService = new GrammarService();
         const storyService = new StoryService();
@@ -47,6 +76,8 @@ class UserprogressService {
         }
         const userProgress = {
             user: new ObjectId(userId),
+            dailyFlashcardReviews: {},
+            dailyFlashcardGoal: 20,
             unlockedGates: firstGate ? [new ObjectId(firstGate)] : [],
             unlockedStages: firstStage ? [new ObjectId(firstStage)] : [],
             unlockedStories: initialStory ? [new ObjectId(initialStory)] : [],
@@ -110,13 +141,15 @@ class UserprogressService {
             }
         }
         if (streak > maxStreak) maxStreak = streak;
-        return this.userprogressRepository.update(userProgress.user, {
+        const setFields = {
             ...normalizedData,
             experiencePoints: userProgress.experiencePoints || 0,
             streak,
             maxStreak,
             studyDates
-        });
+        };
+        const updateOp = { $set: setFields };
+        return this.userprogressRepository.update(userProgress.user, updateOp);
     }
 
     async deleteUserProgress(userId) {

@@ -5,7 +5,7 @@ let hasShownAlert = false;
 export const UserProgressService = {
     async getUserStreak() {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress/streak`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/streak`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -31,7 +31,7 @@ export const UserProgressService = {
 
     async getUserExperiencePoints() {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress/experiencepoint`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/experiencepoint`, {
                 method: "GET",
             });
             if (!res.ok) {

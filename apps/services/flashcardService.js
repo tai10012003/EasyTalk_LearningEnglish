@@ -4,6 +4,8 @@ const cloudinary = require("cloudinary").v2;
 const streamifier = require("streamifier");
 const { FlashcardRepository } = require('./../repositories');
 const { getRedisClient } = require('../util/redisClient');
+const UserprogressService= require('./userprogressService');
+const userprogressService = new UserprogressService();
 
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -102,6 +104,18 @@ class FlashcardService {
             filter.user = { $ne: new ObjectId(userId) };
         }
         const { flashcardLists, totalFlashcardLists } = await this.flashcardRepository.findFlashcardLists(filter, page, limit);
+        if (tab === "mine") {
+            for (let list of flashcardLists) {
+                const pipeline = [
+                    { $match: { flashcardList: new ObjectId(list._id) } },
+                    { $group: { _id: { $ifNull: ["$difficulty", 2] }, count: { $sum: 1 } } }
+                ];
+                const counts = await this.flashcardRepository.flashcardsCollection.aggregate(pipeline).toArray();
+                const countMap = counts.reduce((acc, c) => { acc[c._id] = c.count; return acc; }, {});
+                list.toReview = (countMap[2] || 0) + (countMap[3] || 0);
+                list.remembered = countMap[1] || 0;
+            }
+        }
         const result = {
             flashcardLists,
             currentPage: page,
@@ -222,7 +236,8 @@ class FlashcardService {
             exampleSentence,
             image: imageUrl,
             flashcardList: new ObjectId(flashcardList),
-            user: new ObjectId(userId)
+            user: new ObjectId(userId),
+            difficulty: 2
         });
         await this._invalidateCache();
         return result;
@@ -249,9 +264,28 @@ class FlashcardService {
             exampleSentence: data.exampleSentence,
             image: imageUrl,
         };
+        if (data.difficulty !== undefined) {
+            updatedData.difficulty = data.difficulty;
+        }
         const updated = await this.flashcardRepository.updateFlashcard(id, updatedData);
-        if (!updated.modifiedCount) throw new Error("Flashcard không tồn tại");
+        if (updated.matchedCount == 0) throw new Error("Flashcard không tồn tại");
         await this._invalidateCache();
+        return updated;
+    }
+
+    async updateFlashcardDifficulty(id, difficulty, userId) {
+        const existing = await this.flashcardRepository.findFlashcardById(id);
+        if (!existing || existing.user.toString() !== userId) {
+            throw new Error("Không được phép cập nhật độ khó flashcard này");
+        }
+        const updatedData = { difficulty };
+        const updated = await this.flashcardRepository.updateFlashcard(id, updatedData);
+        if (updated.matchedCount == 0) throw new Error("Flashcard không tồn tại");
+        await this._invalidateCache();
+        const { expBonus } = await userprogressService.incrementDailyFlashcardReview(userId);
+        if (expBonus > 0) {
+            console.log(`Goal reward: +${expBonus} EXP for user ${userId}`);
+        }
         return updated;
     }
 
@@ -282,10 +316,11 @@ class FlashcardService {
         if (!flashcardList) {
             throw new Error("Không tìm thấy danh sách flashcards.");
         }
+        const isOwner = flashcardList.user.toString() === userId;
         if (!flashcards || flashcards.length === 0) {
             throw new Error("Không có flashcard nào trong danh sách này.");
         }
-        return { flashcards, flashcardList };
+        return { flashcards, flashcardList, isOwner };
     }
 
     async deleteUserFlashcards(userId) {
