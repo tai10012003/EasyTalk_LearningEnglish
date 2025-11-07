@@ -1,11 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
-    const [goal, setGoal] = useState(currentGoal.goal || 20);
+    const [goal, setGoal] = useState(20);
     const [isLoading, setIsLoading] = useState(false);
-    const todayCount = currentGoal.todayCount || 0;
+    const [todayCount, setTodayCount] = useState(0);
+    const [isFetching, setIsFetching] = useState(false);
 
     const getBonusByGoal = (g) => {
         if (g <= 20) return 10;
@@ -14,6 +15,33 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
         if (g <= 200) return 50;
         return 50;
     };
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const fetchGoal = async () => {
+            setIsFetching(true);
+            try {
+                const res = await FlashCardService.fetchDailyGoal();
+                if (res && res.data) {
+                    setGoal(res.data.goal || 20);
+                    setTodayCount(res.data.todayCount || 0);
+                } else if (currentGoal) {
+                    setGoal(currentGoal.goal || 20);
+                    setTodayCount(currentGoal.todayCount || 0);
+                }
+            } catch (error) {
+                console.error("Lỗi khi tải goal:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Không thể tải mục tiêu hiện tại",
+                    text: "Vui lòng thử lại sau.",
+                });
+            } finally {
+                setIsFetching(false);
+            }
+        };
+        fetchGoal();
+    }, [isOpen]);
 
     const handleSave = async () => {
         if (todayCount > 0) {
@@ -40,19 +68,31 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
                 icon: "success",
                 title: "Cập nhật thành công!",
                 text: `Mục tiêu mới: ${goal} flashcard/ngày. Bonus EXP khi đạt: +${bonus}XP.`,
+            }).then(() => {
+                onClose(goal);
+                window.location.reload();
             });
-            onClose(goal);
         } catch (error) {
             Swal.fire({
                 icon: "error",
                 title: "Lỗi",
                 text: "Không thể cập nhật mục tiêu.",
             });
+        } finally {
+            setIsLoading(false);
         }
-        setIsLoading(false);
     };
 
     if (!isOpen) return null;
+    if (isFetching) {
+        return (
+            <div className="custom-modal-overlay">
+                <div className="custom-modal text-center">
+                    <p>Đang tải mục tiêu hiện tại...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="custom-modal-overlay" onClick={onClose}>

@@ -230,6 +230,20 @@ export const FlashCardService = {
         }
     },
 
+    async fetchBadges() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/badges`, {
+                method: "GET",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            return data;
+        } catch (error) {
+            console.error("Error fetching badges:", error.message);
+            return { monthlyTotal: 0, status: [] };
+        }
+    },
+
     async deleteFlashcard(id) {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/delete-flashcard/${id}`, {

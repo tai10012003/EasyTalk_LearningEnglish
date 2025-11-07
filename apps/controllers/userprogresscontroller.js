@@ -76,4 +76,15 @@ router.post("/update-goal", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/badges", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const status = await userprogressService.getMonthlyBadgesStatus(userId);
+    res.json(status);
+    } catch (error) {
+        console.error("Error fetching badges:", error);
+        res.status(500).json({ error: "Internal server error" });
+    }
+});
+
 module.exports = router;

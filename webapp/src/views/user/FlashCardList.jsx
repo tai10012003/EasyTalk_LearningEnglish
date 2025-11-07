@@ -10,11 +10,11 @@ import FlashCardGoal from "@/components/user/flashcardList/FlashCardGoal.jsx";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 
 const BADGES = [
-    { name: "Tân binh chăm chỉ", threshold: 1000, icon: "🥉" }, // 300XP
-    { name: "Chiến binh ngôn từ", threshold: 3000, icon: "🥈" }, // 900XP
-    { name: "Bậc thầy từ vựng", threshold: 6000, icon: "🥇" },  // 2500XP
-    { name: "Huyền thoại ôn tập", threshold: 10000, icon: "🏆" }, // 5000XP
-    { name: "Vua từ vựng", threshold: 15000, icon: "👑" }, // 9000XP
+    { name: "Tân binh chăm chỉ", threshold: 1000, icon: "🥉" },
+    { name: "Chiến binh ngôn từ", threshold: 3000, icon: "🥈" },
+    { name: "Bậc thầy từ vựng", threshold: 6000, icon: "🥇" },
+    { name: "Huyền thoại ôn tập", threshold: 10000, icon: "🏆" },
+    { name: "Vua từ vựng", threshold: 15000, icon: "👑" },
 ];
 
 const FlashCardList = () => {
@@ -32,6 +32,7 @@ const FlashCardList = () => {
     const [goalModalOpen, setGoalModalOpen] = useState(false);
     const [activeTab, setActiveTab] = useState("mine");
     const [lastBadge, setLastBadge] = useState(localStorage.getItem("lastBadge") || "");
+    const [monthlyBadges, setMonthlyBadges] = useState({ monthlyTotal: 0, status: [] });
 
     const loadFlashcards = async (page = currentPage, tab = activeTab) => {
         setIsLoading(true);
@@ -81,11 +82,23 @@ const FlashCardList = () => {
                 setDailyReviews(data.dailyFlashcardReviews || {});
             });
             loadDailyGoal();
+            loadBadges();
         } else {
             setDailyReviews({});
             setDailyGoal({ goal: 20, todayCount: 0, isAchieved: false });
+            setMonthlyBadges({ monthlyTotal: 0, status: [] });
         }
     }, [activeTab]);
+
+    const loadBadges = async () => {
+        try {
+            const data = await FlashCardService.fetchBadges();
+            setMonthlyBadges(data);
+        } catch (err) {
+            console.error("Error loading badges:", err);
+            setMonthlyBadges({ monthlyTotal: 0, status: [] });
+        }
+    };
 
     useEffect(() => {
         if (activeTab === "mine" && flashcards.length > 0) {
@@ -171,14 +184,8 @@ const FlashCardList = () => {
     };
 
     useEffect(() => {
-        if (activeTab !== "mine" || !dailyReviews) return;
-        const now = new Date();
-        const totalMonthReviews = Object.entries(dailyReviews)
-            .filter(([date]) => {
-                const d = new Date(date);
-                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-            })
-            .reduce((sum, [, val]) => sum + val, 0);
+        if (activeTab !== "mine" || !monthlyBadges.monthlyTotal) return;
+        const totalMonthReviews = monthlyBadges.monthlyTotal;
         const latestBadge = BADGES.slice().reverse().find(b => totalMonthReviews >= b.threshold);
         if (latestBadge && latestBadge.name !== lastBadge) {
             setLastBadge(latestBadge.name);
@@ -193,7 +200,7 @@ const FlashCardList = () => {
                 confirmButtonText: "Tuyệt vời 🎉",
             });
         }
-    }, [dailyReviews]);
+    }, [monthlyBadges]);
 
     const renderPagination = () => {
         const pages = [];
@@ -239,7 +246,7 @@ const FlashCardList = () => {
     const isMine = activeTab === "mine";
 
     const renderBadges = () => {
-        const totalMonthReviews = Object.values(dailyReviews).reduce((sum, val) => sum + val, 0);
+        const totalMonthReviews = monthlyBadges.monthlyTotal || 0;
         const handleBadgeClick = (badge, unlocked) => {
             Swal.fire({
                 title: `${badge.icon} ${badge.name}`,

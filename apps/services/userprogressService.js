@@ -8,6 +8,14 @@ const VocabularyexerciseService= require('./vocabularyexerciseService');
 const DictationService= require('./dictationService');
 const { UserprogressRepository } = require('./../repositories');
 
+const BADGES = [
+    { name: "Tân binh chăm chỉ", threshold: 1000, xp: 300 },
+    { name: "Chiến binh ngôn từ", threshold: 3000, xp: 900 },
+    { name: "Bậc thầy từ vựng", threshold: 6000, xp: 2500 },
+    { name: "Huyền thoại ôn tập", threshold: 10000, xp: 5000 },
+    { name: "Vua từ vựng", threshold: 15000, xp: 9000 },
+];
+
 class UserprogressService {
     constructor() {
         this.userprogressRepository = new UserprogressRepository();
@@ -26,24 +34,72 @@ class UserprogressService {
         return await this.userprogressRepository.updateDailyGoal(userId, goal);
     }
 
+    async getMonthlyBadgesStatus(userId) {
+        const now = new Date();
+        const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const monthlyTotal = await this.userprogressRepository.getMonthlyReviewTotal(userId, monthYear);
+        const unlocked = await this.userprogressRepository.getUnlockedBadgesForMonth(userId, monthYear);
+        const status = BADGES.map(b => ({
+            ...b,
+            unlocked: unlocked.includes(b.name) || monthlyTotal >= b.threshold
+        }));
+        return { monthYear, monthlyTotal, status };
+    }
+
     async incrementDailyFlashcardReview(userId) {
         const todayStr = new Date().toISOString().split('T')[0];
         const userProgress = await this.getUserProgressByUserId(userId);
         const goal = userProgress?.dailyFlashcardGoal || 20;
-        const todayCount = (userProgress?.dailyFlashcardReviews?.[todayStr] || 0) + 1;
-        const updateOp = { 
-            $inc: { [`dailyFlashcardReviews.${todayStr}`]: 1 } 
-        };
+        const prevTodayCount = userProgress?.dailyFlashcardReviews?.[todayStr] || 0;
+        const todayCount = prevTodayCount + 1;
+        const updateOp = { $inc: { [`dailyFlashcardReviews.${todayStr}`]: 1 } };
         let expBonus = 0;
-        if (todayCount >= goal && (userProgress?.dailyFlashcardReviews?.[todayStr] || 0) < goal) {
-            if (goal <= 20) expBonus = 10;
-            else if (goal <= 70) expBonus = 20;
-            else if (goal <= 130) expBonus = 30;
-            else expBonus = 50;
-            updateOp.$inc = { ...updateOp.$inc, experiencePoints: expBonus };
+        const expFromGoal = this._calculateExpBonus(goal, prevTodayCount, todayCount);
+        if (expFromGoal > 0) {
+            updateOp.$inc.experiencePoints = expFromGoal;
+            expBonus += expFromGoal;
+        }
+        const badgeResult = await this._handleBadgeUnlock(userId);
+        if (badgeResult.totalXp > 0) {
+            updateOp.$inc.experiencePoints =
+                (updateOp.$inc.experiencePoints || 0) + badgeResult.totalXp;
+            expBonus += badgeResult.totalXp;
         }
         const result = await this.userprogressRepository.update(userId, updateOp, true);
-        return { ...result, expBonus, todayCount };
+        return {
+            ...result,
+            expBonus,
+            todayCount,
+            monthlyTotal: badgeResult.monthlyTotal,
+            unlockedBadges: badgeResult.unlockedBadges,
+        };
+    }
+
+    _calculateExpBonus(goal, prevCount, newCount) {
+        if (newCount >= goal && prevCount < goal) {
+            if (goal <= 20) return 10;
+            if (goal <= 70) return 20;
+            if (goal <= 130) return 30;
+            return 50;
+        }
+        return 0;
+    }
+
+    async _handleBadgeUnlock(userId) {
+        const now = new Date();
+        const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const monthlyTotal = await this.userprogressRepository.getMonthlyReviewTotal(userId, monthYear);
+        const unlockedBadges = await this.userprogressRepository.getUnlockedBadgesForMonth(userId, monthYear);
+        let totalXp = 0;
+        const newlyUnlocked = [];
+        for (const badge of BADGES) {
+            if (monthlyTotal >= badge.threshold && !unlockedBadges.includes(badge.name)) {
+                await this.userprogressRepository.unlockBadge(userId, monthYear, badge.name);
+                totalXp += badge.xp;
+                newlyUnlocked.push(badge.name);
+            }
+        }
+        return { monthlyTotal, totalXp, unlockedBadges: newlyUnlocked };
     }
 
     async createUserProgress(userId, journey = null, initialStory = null, initialGrammar = null, initialPronunciation = null, initialGrammarExercise = null, initialPronunciationExercise = null, initialVocabularyExercise = null, initialDictation = null) {
@@ -78,6 +134,7 @@ class UserprogressService {
             user: new ObjectId(userId),
             dailyFlashcardReviews: {},
             dailyFlashcardGoal: 20,
+            unlockedFlashcardBadges: {},
             unlockedGates: firstGate ? [new ObjectId(firstGate)] : [],
             unlockedStages: firstStage ? [new ObjectId(firstStage)] : [],
             unlockedStories: initialStory ? [new ObjectId(initialStory)] : [],

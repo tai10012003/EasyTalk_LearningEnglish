@@ -31,13 +31,35 @@ class UserprogressRepository {
 
     async getDailyGoal(userId) {
         const doc = await this.collection.findOne({ user: new ObjectId(userId) });
-        return doc?.dailyFlashcardGoal || 10;
+        return doc?.dailyFlashcardGoal || 20;
     }
 
     async updateDailyGoal(userId, goal) {
         return await this.collection.updateOne(
             { user: new ObjectId(userId) },
             { $set: { dailyFlashcardGoal: goal } },
+            { upsert: true }
+        );
+    }
+
+    async getMonthlyReviewTotal(userId, monthYear) {
+        const userProgress = await this.findByUserId(userId);
+        if (!userProgress?.dailyFlashcardReviews) return 0;
+        return Object.entries(userProgress.dailyFlashcardReviews).filter(([dateStr]) => dateStr.startsWith(monthYear)).reduce((sum, [, count]) => sum + count, 0);
+    }
+
+    async getUnlockedBadgesForMonth(userId, monthYear) {
+        const userProgress = await this.findByUserId(userId);
+        if (!userProgress?.unlockedFlashcardBadges) return [];
+        return userProgress.unlockedFlashcardBadges[monthYear] || [];
+    }
+
+    async unlockBadge(userId, monthYear, badgeName) {
+        return await this.collection.updateOne(
+            { user: new ObjectId(userId) },
+            {
+                $addToSet: { [`unlockedFlashcardBadges.${monthYear}`]: badgeName }
+            },
             { upsert: true }
         );
     }
