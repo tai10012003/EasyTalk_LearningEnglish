@@ -1,4 +1,5 @@
 const { ObjectId } = require('mongodb');
+const { getRedisClient } = require("../util/redisClient");
 const GrammarService = require('./grammarService');
 const StoryService = require('./storyService');
 const PronunciationService = require('./pronunciationService');
@@ -21,6 +22,42 @@ class UserprogressService {
         this.userprogressRepository = new UserprogressRepository();
     }
 
+    async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
+        const redis = getRedisClient();
+        const cacheKey = `userprogress:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
+        const ttl = 300;
+        try {
+            const cached = await redis.get(cacheKey);
+            if (cached) {
+                console.log(`Direct cache hit: ${cacheKey}`);
+                return JSON.parse(cached);
+            }
+        } catch (err) {
+            console.error("Cache get error:", err);
+        }
+        const skip = (page - 1) * limit;
+        const filter = {};
+        if (search) {
+            const db = this.userprogressRepository.db;
+            const users = await db.collection("users").find({ username: { $regex: search, $options: "i" } }).project({ _id: 1 }).toArray();
+            const userIds = users.map((u) => u._id);
+            filter.user = { $in: userIds };
+        }
+        const { userprogresses, total } = await this.userprogressRepository.findAll(filter, skip, limit);
+        const result = { userprogresses, totalUserProgresses: total };
+        try {
+            await redis.setex(cacheKey, ttl, JSON.stringify(result));
+            console.log(`Direct cache set: ${cacheKey}`);
+        } catch (err) {
+            console.error("Cache set error:", err);
+        }
+        return result;
+    }
+
+    async getUserProgress(id) {
+        return await this.userprogressRepository.findUserProgressById(id);
+    }
+
     async getLeaderboard(limit = 10) {
         return await this.userprogressRepository.getLeaderboard(limit);
     }
@@ -31,7 +68,9 @@ class UserprogressService {
 
     async updateDailyFlashcardGoal(userId, goal) {
         if (goal < 0 || goal > 200) throw new Error("Goal must be between 0 and 200");
-        return await this.userprogressRepository.updateDailyGoal(userId, goal);
+        const result = await this.userprogressRepository.updateDailyGoal(userId, goal);
+        await this._invalidateCache();
+        return result;
     }
 
     async getMonthlyBadgesStatus(userId) {
@@ -66,6 +105,7 @@ class UserprogressService {
             expBonus += badgeResult.totalXp;
         }
         const result = await this.userprogressRepository.update(userId, updateOp, true);
+        await this._invalidateCache();
         return {
             ...result,
             expBonus,
@@ -150,6 +190,7 @@ class UserprogressService {
             studyDates: [],
         };
         await this.userprogressRepository.insert(userProgress);
+        await this._invalidateCache();
         return userProgress;
     }
 
@@ -206,11 +247,21 @@ class UserprogressService {
             studyDates
         };
         const updateOp = { $set: setFields };
-        return this.userprogressRepository.update(userProgress.user, updateOp);
+        const result = await this.userprogressRepository.update(userProgress.user, updateOp);
+        await this._invalidateCache();
+        return result;
     }
 
-    async deleteUserProgress(userId) {
-        return await this.userprogressRepository.delete(userId);
+    async deleteUserProgressByUser(userId) {
+        const result = await this.userprogressRepository.deleteByUser(userId);
+        await this._invalidateCache();
+        return result;
+    }
+
+    async deleteUserProgress(id) {
+        const result = await this.userprogressRepository.deleteProgress(id);
+        await this._invalidateCache();
+        return result;
     }
 
     async unlockJourneyInitial(userProgress, journey) {
@@ -225,11 +276,9 @@ class UserprogressService {
             userProgress.unlockedStages.push(firstStage);
             isUpdated = true;
         }
-
         if (isUpdated) {
             await this.updateUserProgress(userProgress);
         }
-
         return userProgress;
     }
 
@@ -345,6 +394,35 @@ class UserprogressService {
     async isDictationUnlocked(userProgress, DictationId) {
         if (!userProgress || !userProgress.unlockedDictations) return false;
         return userProgress.unlockedDictations.some(s => s.toString() == DictationId.toString());
+    }
+
+    async _invalidateCache() {
+        const redis = getRedisClient();
+        const scanAndDelete = async (pattern) => {
+            let cursor = '0';
+            let totalDeleted = 0;
+            do {
+                const [nextCursor, keys] = await redis.scan(cursor, 'MATCH', pattern, 'COUNT', 100);
+                if (keys.length > 0) {
+                    const deleted = await redis.del(keys);
+                    totalDeleted += deleted;
+                }
+                cursor = nextCursor;
+            } while (cursor !== '0');
+            return totalDeleted;
+        };
+        try {
+            const deletedList = await scanAndDelete('userprogress:list:*');
+            const deletedApi = await scanAndDelete('cache:/api/userprogress*');
+            const total = deletedList + deletedApi;
+            if (total > 0) {
+                console.log(`UserProgress cache invalidated (${total} keys deleted)`);
+            } else {
+                console.log('No userprogress cache keys found to invalidate.');
+            }
+        } catch (err) {
+            console.error('Invalidate userprogress cache error:', err);
+        }
     }
 }
 

@@ -108,7 +108,7 @@ class UserService {
         const result = await this.userRepository.delete(id);
         try {
             await notificationService.deleteNotificationsByUser(id);
-            await userprogressService.deleteUserProgress(id);
+            await userprogressService.deleteUserProgressByUser(id);
             await flashcardService.deleteUserFlashcards(id);
         } catch (error) {
             console.error(`Không thể xóa dữ liệu liên quan tới user ${id}:`, error);

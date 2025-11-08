@@ -29,6 +29,8 @@ import User from "@/views/admin/user/User";
 import AddUser from "@/views/admin/user/AddUserPage";
 import UpdateUser from "@/views/admin/user/UpdateUserPage";
 import Notification from "@/views/admin/Notification";
+import UserProgress from "@/views/admin/userprogress/UserProgress";
+import UserProgressDetail from "@/views/admin/userprogress/UserProgressDetailPage"
 import NotFound from "@/views/admin/NotFound.jsx";
 import PrivateRoute from "@/components/user/auth/PrivateRoute.jsx";
 
@@ -278,6 +280,22 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <Notification />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "userprogress",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UserProgress />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "userprogress/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UserProgressDetail />
             </PrivateRoute>
         ),
     },

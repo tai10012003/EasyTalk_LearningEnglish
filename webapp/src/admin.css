@@ -3479,3 +3479,390 @@
     font-size: 12px;
   }
 }
+
+/* === USERPROGRESS === */
+.admin-userprogress-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-userprogress-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.admin-userprogress-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-userprogress-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-userprogress-table th,
+.admin-userprogress-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-userprogress-table th:last-child,
+.admin-userprogress-table td:last-child {
+  border-right: none;
+}
+
+.admin-userprogress-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-userprogress-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-userprogress-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-userprogress-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-userprogress-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-userprogress-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-userprogress-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-userprogress-page-item {
+  display: inline-block;
+}
+
+.admin-userprogress-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-userprogress-page-item.active .admin-userprogress-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-userprogress-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-userprogress-table {
+    min-width: 600px;
+  }
+  .admin-userprogress-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-userprogress-table {
+    min-width: 100%;
+  }
+  .admin-userprogress-title {
+    font-size: 20px;
+  }
+  .admin-userprogress-actions button,
+  .admin-userprogress-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* === USERPROGRESS DETAIL === */
+.admin-userprogress-detail-container {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 30px 25px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  font-family: "Inter", sans-serif;
+}
+
+.admin-userprogress-detail-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+  text-transform: uppercase;
+}
+
+.admin-userprogress-detail-section {
+  margin-bottom: 30px;
+}
+
+.admin-userprogress-detail-section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 20px;
+}
+
+.admin-userprogress-detail-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 14px 16px;
+}
+
+.admin-userprogress-detail-item {
+  font-size: 14px;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.admin-userprogress-detail-value {
+  background: #eef2ff;
+  border-radius: 8px;
+  padding: 8px 14px;
+  font-weight: 600;
+  color: #1e40af;
+  font-size: 14px;
+  display: inline-block;
+}
+
+.admin-userprogress-detail-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.admin-userprogress-detail-btn {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 7px 13px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  color: #fff;
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  transition: all 0.25s ease;
+}
+
+.admin-userprogress-detail-btn:hover {
+  background: linear-gradient(135deg, #2563eb, #1e40af);
+  transform: translateY(-1.5px);
+}
+
+.admin-userprogress-detail-date {
+  display: inline-block;
+  background: #2563eb;
+  color: #fff;
+  padding: 5px 9px;
+  border-radius: 6px;
+  margin: 4px;
+  font-size: 12.5px;
+}
+
+.admin-userprogress-detail-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 15px;
+}
+
+.admin-userprogress-detail-mini-card {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 10px;
+  padding: 12px 14px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.admin-userprogress-detail-mini-card:hover {
+  background: #f3f4f6;
+  transform: translateY(-2px);
+}
+
+.admin-userprogress-detail-mini-card .mini-card-date {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e3a8a;
+  margin-bottom: 5px;
+}
+
+.admin-userprogress-detail-mini-card .mini-card-value {
+  font-size: 13px;
+  color: #374151;
+}
+
+.admin-userprogress-detail-mini-card .badge-card {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+
+.admin-userprogress-detail-mini-card .mini-card-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: center;
+}
+
+.admin-userprogress-detail-mini-card .badge-item {
+  background: #4d4d4d;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.admin-userprogress-detail-mini-card .study-card {
+  background: linear-gradient(135deg, #60a5fa, #2563eb);
+  color: #fff;
+  border: none;
+}
+
+.admin-userprogress-detail-mini-card .study-card .mini-card-date {
+  color: #fff;
+}
+
+.admin-userprogress-detail-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+}
+
+.admin-userprogress-detail-modal-content {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 400px;
+  max-height: 75vh;
+  overflow-y: auto;
+  padding: 24px 20px;
+  box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.2);
+  animation: admin-userprogress-fadeIn 0.3s ease-in-out;
+}
+
+.admin-userprogress-detail-modal-content h3 {
+  margin-bottom: 18px;
+  color: #1e40af;
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.admin-userprogress-detail-modal-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.admin-userprogress-detail-modal-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f1f5f9;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #1e293b;
+  transition: background 0.2s ease;
+}
+
+.admin-userprogress-detail-modal-list-item:hover {
+  background: #e2e8f0;
+}
+
+.admin-userprogress-detail-modal-list-index {
+  font-weight: 600;
+  color: #3b82f6;
+  min-width: 20px;
+  text-align: right;
+}
+
+.admin-userprogress-detail-btn-close {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+  padding: 10px 0;
+  background: linear-gradient(135deg, #3b82f6, #1e40af);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.25s ease;
+}
+
+.admin-userprogress-detail-btn-close:hover {
+  background: linear-gradient(135deg, #1e40af, #1e3a8a);
+  transform: translateY(-2px);
+}
+
+@keyframes admin-userprogress-fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

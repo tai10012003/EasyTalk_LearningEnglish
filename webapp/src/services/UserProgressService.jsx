@@ -53,5 +53,61 @@ export const UserProgressService = {
             }
             throw err;
         }
-    }
+    },
+
+    async fetchUserProgressList(page = 1, limit = 12, filters = {}) {
+        try {
+            let query = `?page=${page}&limit=${limit}`;
+            if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress-list${query}`, {
+                method: "GET",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const data = await res.json();
+            hasShownAlert = false;
+            console.log("Fetch user progress success:", data);
+            return data;
+        } catch (error) {
+            console.error("Error fetching user progress:", error.message);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối. Dữ liệu mặc định sẽ được hiển thị.",
+                });
+            }
+            return { data: [], currentPage: 1, totalPages: 1 };
+        }
+    },
+
+    async getUserProgressDetail(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress/${userId}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            return await res.json();
+        } catch (error) {
+            console.error("Error fetching user progress detail:", error);
+            throw error;
+        }
+    },
+
+    async deleteUserProgress(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/delete/${userId}`, {
+                method: "DELETE",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            return await res.json();
+        } catch (err) {
+            console.error("Error deleting user progress:", err);
+            throw err;
+        }
+    },
 };

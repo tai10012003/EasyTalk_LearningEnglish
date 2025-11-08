@@ -1,8 +1,28 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { UserprogressService } = require("./../services");
 const userprogressService = new UserprogressService();
+
+router.get("/api/userprogress-list", verifyToken, cacheMiddleware(300), async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = 12;
+    try {
+        const role = req.user.role || "user";
+        const search = req.query.search || "";
+        const { userprogresses, totalUserProgresses } = await userprogressService.getUserProgressList(page, limit, search, role);
+        const totalPages = Math.ceil(totalUserProgresses / limit);
+        res.json({
+            userprogresses,
+            currentPage: page,
+            totalPages,
+        });
+    } catch (err) {
+        console.error("Error fetching userprogress list:", err);
+        res.status(500).json({ message: "Error fetching userprogress list", error: err });
+    }
+});
 
 router.get("/streak", verifyToken, async (req, res) => {
     try {
@@ -84,6 +104,37 @@ router.get("/badges", verifyToken, async (req, res) => {
     } catch (error) {
         console.error("Error fetching badges:", error);
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
+    try {
+        const userProgressId = req.params.id;
+        const userProgress = await userprogressService.getUserProgress(userProgressId);
+        if (!userProgress) {
+            return res.status(404).json({ message: "Không tìm thấy tiến trình của người dùng." });
+        }
+        res.json(userProgress);
+    } catch (error) {
+        console.error("Lỗi khi lấy chi tiết userprogress:", error);
+        res.status(500).json({ message: "Lỗi server khi lấy chi tiết userprogress." });
+    }
+});
+
+router.delete("/delete/:id", async (req, res) => {
+    try {
+        const userprogress = await userprogressService.getUserProgress(req.params.id);
+        if (!userprogress) {
+            return res.status(404).json({ message: "Tiến trình của người dùng không tìm thấy." });
+        }
+        const result = await userprogressService.deleteUserProgress(req.params.id);
+        if (!result || result.deletedCount == 0) {
+            return res.status(404).json({ success: false, message: "Tiến trình của người dùng không tìm thấy." });
+        }
+        res.json({ success: true, message: "Tiến trình của người dùng đã xóa thành công !" });
+    } catch (error) {
+        console.error("Delete user progress error:", error);
+        res.status(500).json({ message: "Error deleting user progress", error: error.message });
     }
 });
 
