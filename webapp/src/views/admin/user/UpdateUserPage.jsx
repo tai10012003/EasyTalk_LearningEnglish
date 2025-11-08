@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateUser from "../../../components/admin/user/UpdateUser";
+import UpdateUser from "@/components/admin/user/UpdateUser";
 import { UserService } from "@/services/UserService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";

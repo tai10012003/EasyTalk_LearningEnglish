@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AddStory from "../../../components/admin/story/AddStory";
+import AddStory from "@/components/admin/story/AddStory";
 import { StoryService } from "@/services/StoryService.jsx";
 import Swal from "sweetalert2";
 

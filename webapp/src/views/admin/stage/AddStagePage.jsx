@@ -1,5 +1,5 @@
 import React from "react";
-import AddStage from "../../../components/admin/stage/AddStage";
+import AddStage from "@/components/admin/stage/AddStage";
 import { StageService } from "@/services/StageService.jsx";
 import Swal from "sweetalert2";
 

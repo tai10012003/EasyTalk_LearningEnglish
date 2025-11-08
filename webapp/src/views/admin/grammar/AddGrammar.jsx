@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AddLesson from "../../../components/admin/lesson/AddLesson";
+import AddLesson from "@/components/admin/lesson/AddLesson";
 import { GrammarService } from "@/services/GrammarService.jsx";
 import Swal from "sweetalert2";
 

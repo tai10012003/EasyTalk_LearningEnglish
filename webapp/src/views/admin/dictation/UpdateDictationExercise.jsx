@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateDictation from "../../../components/admin/dictation/UpdateDictation";
+import UpdateDictation from "@/components/admin/dictation/UpdateDictation";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";

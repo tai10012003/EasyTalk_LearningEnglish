@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateStory from "../../../components/admin/story/UpdateStory";
+import UpdateStory from "@/components/admin/story/UpdateStory";
 import { StoryService } from "@/services/StoryService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";

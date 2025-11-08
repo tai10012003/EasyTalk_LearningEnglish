@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateExercise from "../../../components/admin/exercise/UpdateExercise";
+import UpdateExercise from "@/components/admin/exercise/UpdateExercise";
 import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";

@@ -1,5 +1,5 @@
 import React from "react";
-import AddUser from "../../../components/admin/user/AddUser";
+import AddUser from "@/components/admin/user/AddUser";
 import { UserService } from "@/services/UserService.jsx";
 import Swal from "sweetalert2";
 

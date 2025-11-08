@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AddExercise from "../../../components/admin/exercise/AddExercise";
+import AddExercise from "@/components/admin/exercise/AddExercise";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 import Swal from "sweetalert2";
 

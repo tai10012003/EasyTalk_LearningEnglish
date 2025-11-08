@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
-import { FlashCardService } from "../../services/FlashCardService";
+import { FlashCardService } from "@/services/FlashCardService";
 import FlashCardCard from "@/components/user/flashcard/FlashCardCard.jsx";
 import CreateFlashCard from "@/components/user/flashcard/CreateFlashCard.jsx";
 import UpdateFlashCardList from "@/components/user/flashcardList/UpdateFlashCardList.jsx";

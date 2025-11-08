@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import AddDictation from "../../../components/admin/dictation/AddDictation";
+import AddDictation from "@/components/admin/dictation/AddDictation";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 import Swal from "sweetalert2";
 

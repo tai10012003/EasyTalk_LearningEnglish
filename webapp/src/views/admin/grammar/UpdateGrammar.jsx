@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateLesson from "../../../components/admin/lesson/UpdateLesson";
+import UpdateLesson from "@/components/admin/lesson/UpdateLesson";
 import { GrammarService } from "@/services/GrammarService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";

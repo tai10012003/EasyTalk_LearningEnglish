@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import UpdateStage from "../../../components/admin/stage/UpdateStage";
+import UpdateStage from "@/components/admin/stage/UpdateStage";
 import { StageService } from "@/services/StageService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
