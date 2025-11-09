@@ -6,11 +6,12 @@ const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 const FormData = require('form-data');
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { PronunciationexerciseService, UserprogressService } = require("../services");
 const pronunciationexerciseService = new PronunciationexerciseService();
 const userprogressService = new UserprogressService();
 
-router.get("/api/pronunciation-exercises", verifyToken, async (req, res) => {
+router.get("/api/pronunciation-exercises", verifyToken, cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -53,7 +54,7 @@ router.get("/api/pronunciation-exercises/:id", verifyToken, async function (req,
     }
 });
 
-router.get("/api/pronunciation-exercises/slug/:slug", verifyToken, async function(req, res) {
+router.get("/api/pronunciation-exercises/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
     try {
         const slug = req.params.slug;
         const exercise = await pronunciationexerciseService.getPronunciationexerciseBySlug(slug);
@@ -195,11 +196,11 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const exercise = await pronunciationexerciseService.getPronunciationexerciseById(req.params.id);
         if (!exercise) {
-        return res.status(404).json({ message: "Pronunciation Exercise not found" });
+            return res.status(404).json({ message: "Pronunciation Exercise not found" });
         }
         res.json(exercise);
     } catch (err) {
@@ -231,7 +232,7 @@ router.put("/update/:id", async (req, res) => {
 router.delete("/delete/:id", async (req, res) => {
     try {
         const deletedExercise = await pronunciationexerciseService.deletePronunciationexercise(req.params.id);
-        if (!deletedExercise) {
+       if (!deletedExercise || deletedExercise.deletedCount == 0) {
             return res.status(404).json({ success: false, message: "Bài luyện tập phát âm không tìm thấy." });
         }
         res.json({ success: true, message: "Bài luyện tập phát âm đã xóa thành công !" });

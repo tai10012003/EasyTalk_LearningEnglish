@@ -2,10 +2,11 @@ const express = require("express");
 const router = express.Router();
 const { VocabularyexerciseService, UserprogressService } = require("./../services");
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const vocabularyexerciseService = new VocabularyexerciseService();
 const userprogressService = new UserprogressService();
 
-router.get("/api/vocabulary-exercises", verifyToken, async (req, res) => {
+router.get("/api/vocabulary-exercises", verifyToken, cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -13,10 +14,10 @@ router.get("/api/vocabulary-exercises", verifyToken, async (req, res) => {
         const { vocabularyExercises, totalExercises } = await vocabularyexerciseService.getVocabularyExerciseList(page, limit, role);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
-          success: true,
-          data: vocabularyExercises,
-          currentPage: page,
-          totalPages,
+            success: true,
+            data: vocabularyExercises,
+            currentPage: page,
+            totalPages,
         });
     } catch (error) {
         console.error("Error fetching vocabulary exercises:", error);
@@ -48,7 +49,7 @@ router.get("/api/vocabulary-exercises/:id", verifyToken, async function (req, re
     }
 });
 
-router.get("/api/vocabulary-exercises/slug/:slug", verifyToken, async function(req, res) {
+router.get("/api/vocabulary-exercises/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
     try {
         const slug = req.params.slug;
         const exercise = await vocabularyexerciseService.getVocabularyexerciseBySlug(slug);
@@ -95,7 +96,7 @@ router.post("/api/vocabulary-exercises/complete/:id", verifyToken, async (req, r
         const updatedUserProgress = await userprogressService.getUserProgressByUserId(userId);
         return res.json({
             success: true,
-            message: nextVocabularyExercise ? "Vocabulary exercise completed. Next vocabulary exercise unlocked." : "Vocabulary exercise completed. You have finished all vocabulary exercise.",
+            message: nextVocabularyExercise ? "Vocabulary exercise completed. Next vocabulary exercise unlocked." : "Vocabulary exercise completed. You have finished all vocabulary exercises.",
             userProgress: {
                 unlockedVocabularyExercises: updatedUserProgress.unlockedVocabularyExercises,
                 experiencePoints: updatedUserProgress.experiencePoints,
@@ -120,14 +121,14 @@ router.post("/add", async (req, res) => {
             display: req.body.display !== undefined ? req.body.display == "true" : true
         };
         const result = await vocabularyexerciseService.insertVocabularyExercise(vocabularyexercise);
-        res.status(201).json({ success: true, message: "Bài luyện tập từ vựng đã được thêm thành công !", result});
+        res.status(201).json({ success: true, message: "Bài luyện tập từ vựng đã được thêm thành công !", result });
     } catch (err) {
         console.error(err);
         return res.status(500).json({ success: false, message: "Error adding vocabulary exercise", error: err.message });
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const exercise = await vocabularyexerciseService.getVocabularyExerciseById(req.params.id);
         if (!exercise) {
@@ -163,7 +164,7 @@ router.put("/update/:id", async (req, res) => {
 router.delete("/delete/:id", async (req, res) => {
     try {
         const deletedExercise = await vocabularyexerciseService.deleteVocabularyExercise(req.params.id);
-        if (!deletedExercise) {
+        if (!deletedExercise || deletedExercise.deletedCount == 0) {
             return res.status(404).json({ success: false, message: "Bài luyện tập từ vựng không tìm thấy." });
         }
         res.json({ success: true, message: "Bài luyện tập từ vựng đã xóa thành công !" });

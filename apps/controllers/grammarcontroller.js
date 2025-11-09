@@ -26,7 +26,7 @@ router.get("/api/grammar-list", verifyToken, cacheMiddleware(300), async functio
   }
 });
 
-router.get("/api/grammar/:id", verifyToken, cacheMiddleware(600), async function (req, res) {
+router.get("/api/grammar/:id", verifyToken, async function (req, res) {
   try {
     const userId = req.user.id;
     const grammarId = req.params.id;
@@ -50,7 +50,7 @@ router.get("/api/grammar/:id", verifyToken, cacheMiddleware(600), async function
   }
 });
 
-router.get("/api/grammar/slug/:slug", verifyToken, cacheMiddleware(600), async function(req, res) {
+router.get("/api/grammar/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
   try {
     const slug = req.params.slug;
     const grammar = await grammarService.getGrammarBySlug(slug);

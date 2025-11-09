@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { DictationService, UserprogressService } = require("../services");
 const dictationService = new DictationService();
 const userprogressService = new UserprogressService();
 
-router.get("/api/dictation-exercises", verifyToken, async (req, res) => {
+router.get("/api/dictation-exercises", verifyToken, cacheMiddleware(300), async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const role = req.user.role || "user";
@@ -51,7 +52,7 @@ router.get("/api/dictationexercise/:id", verifyToken, async function (req, res) 
     }
 });
 
-router.get("/api/dictationexercise/slug/:slug", verifyToken, async function(req, res) {
+router.get("/api/dictationexercise/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
     try {
         const slug = req.params.slug;
         const dictationExercise = await dictationService.getDictationBySlug(slug);
@@ -65,22 +66,6 @@ router.get("/api/dictationexercise/slug/:slug", verifyToken, async function(req,
     }
 });
 
-router.post("/add", async function (req, res) {
-    try {
-        const dictationexercises = {
-            title: req.body.title,
-            description: req.body.description,
-            content: req.body.content,
-            slug: req.body.slug,
-            sort: parseInt(req.body.sort),
-            display: req.body.display !== undefined ? req.body.display == "true" : true
-        };
-        const result = await dictationService.insertDictation(dictationexercises);
-        res.status(201).json({ message: "Bài nghe chép chính tả đã được thêm thành công!", result });
-    } catch (error) {
-        res.status(500).json({ message: "Error adding dictation exercise", error });
-    }
-});
 
 router.post("/api/dictation-exercises/complete/:id", verifyToken, async (req, res) => {
     try {
@@ -94,7 +79,7 @@ router.post("/api/dictation-exercises/complete/:id", verifyToken, async (req, re
         if (!userProgress) {
             const firstPage = await dictationService.getDictationList(1, 1);
             const firstDictationExercise = (firstPage?.dictationExercises?.[0]) || null;
-            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, null, null, firstDictationExercise ? firstDictationExercise._id : null);
+            userProgress = await userprogressService.createUserProgress(userId, null, null, null, null, null, null, null, firstDictationExercise ? firstDictationExercise._id : null);
         }
         const isUnlocked = (userProgress.unlockedDictations || []).some(s => s.toString() == dictationId.toString());
         if (!isUnlocked) {
@@ -131,7 +116,24 @@ router.post("/api/dictation-exercises/complete/:id", verifyToken, async (req, re
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.post("/add", async function (req, res) {
+    try {
+        const dictationexercises = {
+            title: req.body.title,
+            description: req.body.description,
+            content: req.body.content,
+            slug: req.body.slug,
+            sort: parseInt(req.body.sort),
+            display: req.body.display !== undefined ? req.body.display == "true" : true
+        };
+        const result = await dictationService.insertDictation(dictationexercises);
+        res.status(201).json({ message: "Bài nghe chép chính tả đã được thêm thành công!", result });
+    } catch (error) {
+        res.status(500).json({ message: "Error adding dictation exercise", error });
+    }
+});
+
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const exercise = await dictationService.getDictation(req.params.id);
         if (!exercise) {

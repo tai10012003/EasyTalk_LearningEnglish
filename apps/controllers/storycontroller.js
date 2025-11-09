@@ -35,7 +35,7 @@ router.get("/api/story-list", verifyToken, cacheMiddleware(300), async (req, res
     }
 });
 
-router.get("/api/story/:id", verifyToken, cacheMiddleware(600), async (req, res) => {
+router.get("/api/story/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const storyId = req.params.id;
@@ -71,7 +71,7 @@ router.get("/api/story/:id", verifyToken, cacheMiddleware(600), async (req, res)
     }
 });
 
-router.get("/api/story/slug/:slug", verifyToken, cacheMiddleware(600), async function(req, res) {
+router.get("/api/story/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
     try {
         const slug = req.params.slug;
         const story = await storyService.getStoryBySlug(slug);

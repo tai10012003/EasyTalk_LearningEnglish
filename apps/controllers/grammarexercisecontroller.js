@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { GrammarexerciseService, UserprogressService } = require("./../services");
 const grammarexerciseService = new GrammarexerciseService();
 const userprogressService = new UserprogressService();
 
-router.get("/api/grammar-exercises", verifyToken, async (req, res) => {
+router.get("/api/grammar-exercises", verifyToken, cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -48,12 +49,12 @@ router.get("/api/grammar-exercises/:id", verifyToken, async function (req, res) 
     }
 });
 
-router.get("/api/grammar-exercises/slug/:slug", verifyToken, async function(req, res) {
+router.get("/api/grammar-exercises/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
     try {
         const slug = req.params.slug;
         const exercise = await grammarexerciseService.getGrammarexerciseBySlug(slug);
         if (!exercise) {
-        return res.status(404).json({ message: "Grammar exercise not found" });
+            return res.status(404).json({ message: "Grammar exercise not found" });
         }
         res.json(exercise);
     } catch (err) {
@@ -127,11 +128,11 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const exercise = await grammarexerciseService.getGrammarexerciseById(req.params.id);
         if (!exercise) {
-        return res.status(404).json({ message: "Grammar Exercise not found" });
+            return res.status(404).json({ message: "Grammar Exercise not found" });
         }
         res.json(exercise);
     } catch (err) {
@@ -163,7 +164,7 @@ router.put("/update/:id", async (req, res) => {
 router.delete("/delete/:id", async (req, res) => {
     try {
         const deletedExercise = await grammarexerciseService.deleteGrammarexercise(req.params.id);
-        if (!deletedExercise) {
+        if (!deletedExercise || deletedExercise.deletedCount == 0) {
             return res.status(404).json({ success: false, message: "Bài luyện tập ngữ pháp không tìm thấy." });
         }
         res.json({ success: true, message: "Bài luyện tập ngữ pháp đã xóa thành công !" });

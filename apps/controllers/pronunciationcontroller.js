@@ -26,7 +26,7 @@ router.get("/api/pronunciation-list", verifyToken, cacheMiddleware(300), async (
     }
 });
 
-router.get("/api/pronunciation/:id", verifyToken, cacheMiddleware(600), async (req, res) => {
+router.get("/api/pronunciation/:id", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
         const pronunciationId = req.params.id;
@@ -50,7 +50,7 @@ router.get("/api/pronunciation/:id", verifyToken, cacheMiddleware(600), async (r
     }
 });
 
-router.get("/api/pronunciation/slug/:slug", verifyToken, cacheMiddleware(600), async function (req, res) {
+router.get("/api/pronunciation/slug/:slug", verifyToken, cacheMiddleware(300), async function (req, res) {
     try {
         const slug = req.params.slug;
         const pronunciation = await pronunciationService.getPronunciationBySlug(slug);
