@@ -5,6 +5,7 @@ import PronunciationSentence from "@/components/user/pronunciation/Pronunciation
 import PronunciationQuiz from "@/components/user/pronunciation/PronunciationQuiz.jsx";
 import PronunciationComplete from "@/components/user/pronunciation/PronunciationComplete.jsx";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
 import Swal from "sweetalert2";
 
 function PronunciationDetail() {
@@ -20,6 +21,7 @@ function PronunciationDetail() {
     const contentRef = useRef(null);
     const [currentStep, setCurrentStep] = useState(0);
     const [totalSteps, setTotalSteps] = useState(1);
+    const enterTimeRef = useRef(Date.now());
 
     useEffect(() => {
         if (!navigator || !pronunciation || pronunciationCompleted) return;
@@ -140,6 +142,10 @@ function PronunciationDetail() {
                         try {
                             await PronunciationService.completePronunciation(pronunciation._id);
                             setPronunciationCompleted(true);
+                            const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+                            if (seconds >= 30) {
+                                await UserProgressService.recordStudyTime(seconds);
+                            }
                             Swal.fire({
                                 icon: "success",
                                 title: "Hoàn thành!",

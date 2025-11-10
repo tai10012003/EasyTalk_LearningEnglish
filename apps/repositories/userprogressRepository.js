@@ -121,6 +121,8 @@ class UserprogressRepository {
                     maxStreak: 1,
                     studyDates: 1,
                     unlockedFlashcardBadges: 1,
+                    studyTimes: 1,
+                    dailyStudyTimes: 1,
                     gateDetails: {
                         $map: {
                             input: "$gateDetails",
@@ -302,6 +304,22 @@ class UserprogressRepository {
             { $sort: { experiencePoints: -1 } },
             { $limit: limit }
         ]).toArray();
+    }
+
+    async addDailyStudyTime(userId, seconds) {
+        const hours = seconds / 3600;
+        const today = new Date().toISOString().split('T')[0];
+        return await this.collection.updateOne(
+            { user: new ObjectId(userId) },
+            {
+                $inc: {
+                    studyTimes: hours,
+                    [`dailyStudyTimes.${today}`]: hours
+                },
+                $set: { updatedAt: new Date() }
+            },
+            { upsert: true }
+        );
     }
 }
 

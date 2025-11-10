@@ -107,6 +107,21 @@ router.get("/badges", verifyToken, async (req, res) => {
     }
 });
 
+router.post("/study-time", verifyToken, async (req, res) => {
+    try {
+        const { seconds } = req.body;
+        const userId = req.user.id;
+        if (!seconds || seconds <= 0) {
+            return res.status(400).json({ success: false, message: "Invalid time" });
+        }
+        await userprogressService.recordStudyTime(userId, seconds);
+        res.json({ success: true });
+    } catch (err) {
+        console.error("Error recording study time:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
     try {
         const userProgressId = req.params.id;

@@ -55,6 +55,21 @@ export const UserProgressService = {
         }
     },
 
+    async recordStudyTime(seconds) {
+        if (seconds < 30) return;
+        try {
+            await AuthService.fetchWithAuth(`${API_URL}/userprogress/study-time`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ seconds }),
+            });
+        } catch (err) {
+            console.error("Lỗi ghi thời gian học:", err);
+        }
+    },
+
     async fetchUserProgressList(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;

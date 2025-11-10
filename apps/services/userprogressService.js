@@ -184,6 +184,8 @@ class UserprogressService {
             unlockedPronunciationExercises: initialPronunciationExercise ? [new ObjectId(initialPronunciationExercise)] : [],
             unlockedVocabularyExercises: initialVocabularyExercise ? [new ObjectId(initialVocabularyExercise)] : [],
             unlockedDictations: initialDictation ? [new ObjectId(initialDictation)] : [],
+            studyTimes: 0,
+            dailyStudyTimes: {},
             experiencePoints: 0,
             streak: 0,
             maxStreak: 0,
@@ -250,6 +252,13 @@ class UserprogressService {
         const result = await this.userprogressRepository.update(userProgress.user, updateOp);
         await this._invalidateCache();
         return result;
+    }
+
+    async recordStudyTime(userId, seconds) {
+        if (!seconds || seconds <= 0) return false;
+        const result = await this.userprogressRepository.addDailyStudyTime(userId, seconds);
+        await this._invalidateCache();
+        return result.modifiedCount > 0 || result.upsertedCount > 0;
     }
 
     async deleteUserProgressByUser(userId) {

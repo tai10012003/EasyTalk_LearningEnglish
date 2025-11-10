@@ -253,5 +253,5 @@ export const AuthService = {
 };
 
 if (localStorage.getItem("token")) {
-  AuthService.startTokenRefreshTimer();
+    AuthService.startTokenRefreshTimer();
 }

@@ -6,6 +6,7 @@ import StoryQuiz from "@/components/user/story/StoryQuiz.jsx";
 import StoryComplete from "@/components/user/story/StoryComplete.jsx";
 import StoryVocabularyQuiz from "@/components/user/story/StoryVocabularyQuiz.jsx";
 import { StoryService } from "@/services/StoryService.jsx";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
 import Swal from "sweetalert2";
 
 function StoryDetail() {
@@ -21,6 +22,7 @@ function StoryDetail() {
     const [totalSteps, setTotalSteps] = useState(1);
     const allowNavigationRef = useRef(false);
     const contentRefs = useRef([]);
+    const enterTimeRef = useRef(Date.now());
 
     useEffect(() => {
         if (!navigator || !story || storyCompleted) return;
@@ -204,6 +206,10 @@ function StoryDetail() {
                                 try {
                                     await StoryService.completeStory(story._id);
                                     setStoryCompleted(true);
+                                    const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+                                    if (seconds >= 30) {
+                                        await UserProgressService.recordStudyTime(seconds);
+                                    }
                                     Swal.fire({
                                         icon: "success",
                                         title: "Thành công",

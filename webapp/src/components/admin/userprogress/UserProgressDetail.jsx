@@ -1,9 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
 const UserProgressDetail = ({ userProgress }) => {
     const [modalData, setModalData] = useState(null);
     const [modalTitle, setModalTitle] = useState("");
+    const [studyHours, setStudyHours] = useState(0);
+	const [studyTimeText, setStudyTimeText] = useState("0 giờ 0 phút 0 giây");
+
+    useEffect(() => {
+		if (userProgress?.studyTimes !== undefined) {
+			const totalSeconds = Math.round(userProgress.studyTimes * 3600);
+			const h = Math.floor(totalSeconds / 3600);
+			const m = Math.floor((totalSeconds % 3600) / 60);
+			const s = totalSeconds % 60;
+			const hours = Number(userProgress.studyTimes.toFixed(2));
+			setStudyHours(hours);
+			setStudyTimeText(`${h} giờ ${m} phút ${s} giây`);
+		}
+	}, [userProgress?.studyTimes]);
 
     const handleOpenModal = (title, items) => {
         if (!items || items.length == 0) {
@@ -27,46 +41,35 @@ const UserProgressDetail = ({ userProgress }) => {
         <div className="admin-userprogress-detail-container">
             <h1 className="admin-userprogress-detail-title">Tiến trình người dùng</h1>
             <div className="admin-userprogress-detail-section">
-                <h3>📅 Số review flashcard mỗi ngày</h3>
-                <div className="admin-userprogress-detail-cards">
-                    {Object.entries(userProgress?.dailyFlashcardReviews || {}).length > 0 ? (
-                        Object.entries(userProgress.dailyFlashcardReviews).map(([date, count]) => (
-                            <div key={date} className="admin-userprogress-detail-mini-card">
-                                <div className="mini-card-date">{date}</div>
-                                <div className="mini-card-value">{count} lần</div>
-                            </div>
-                        ))
-                    ) : (
-                        <p>Chưa có dữ liệu review flashcard.</p>
-                    )}
-                </div>
-            </div>
+				<h3>Thời gian học tích lũy</h3>
+				<div className="admin-userprogress-detail-value">
+					{studyTimeText} (~{studyHours.toFixed(2)} giờ)
+				</div>
+			</div>
             <div className="admin-userprogress-detail-section">
-                <h3>🎯 Mục tiêu review flashcard hằng ngày</h3>
-                <div className="admin-userprogress-detail-value">
-                    {userProgress?.dailyFlashcardGoal || 0} flashcard/ngày
-                </div>
-            </div>
-            <div className="admin-userprogress-detail-section">
-                <h3>🏅 Danh hiệu flashcard đạt được theo tháng</h3>
+                <h3>Thời gian học mỗi ngày</h3>
                 <div className="admin-userprogress-detail-cards">
-                    {Object.entries(userProgress?.unlockedFlashcardBadges || {}).length > 0 ? (
-                        Object.entries(userProgress.unlockedFlashcardBadges).map(([month, badges]) => (
-                            <div key={month} className="admin-userprogress-detail-mini-card badge-card">
-                                <div className="mini-card-date">{month}</div>
-                                <div className="mini-card-badges">
-                                    {badges?.length > 0 ? (
-                                        badges.map((b, i) => (
-                                            <span key={i} className="badge-item">{b}</span>
-                                        ))
-                                    ) : (
-                                        <span className="badge-item">Chưa có danh hiệu</span>
-                                    )}
-                                </div>
-                            </div>
-                        ))
+                    {Object.entries(userProgress?.dailyStudyTimes || {}).length > 0 ? (
+                        Object.entries(userProgress.dailyStudyTimes)
+                            .sort(([a], [b]) => b.localeCompare(a))
+                            .map(([date, hours]) => {
+                                const totalSeconds = Math.round(hours * 3600);
+                                const h = Math.floor(totalSeconds / 3600);
+                                const m = Math.floor((totalSeconds % 3600) / 60);
+                                const s = totalSeconds % 60;
+                                const displayText = `${h} giờ ${m} phút ${s} giây`;
+                                const displayHours = hours.toFixed(2);
+                                return (
+                                    <div key={date} className="admin-userprogress-detail-mini-card">
+                                        <div className="mini-card-date">{date}</div>
+                                        <div className="mini-card-value">
+                                            {displayText} (~{displayHours} giờ)
+                                        </div>
+                                    </div>
+                                );
+                            })
                     ) : (
-                        <p>Chưa có danh hiệu flashcard nào.</p>
+                        <p>Người dùng chưa bắt đầu học ngày nào.</p>
                     )}
                 </div>
             </div>
@@ -158,6 +161,50 @@ const UserProgressDetail = ({ userProgress }) => {
                         ))
                     ) : (
                         <p>Người dùng chưa học ngày nào.</p>
+                    )}
+                </div>
+            </div>
+            <div className="admin-userprogress-detail-section">
+                <h3>📅 Số review flashcard mỗi ngày</h3>
+                <div className="admin-userprogress-detail-cards">
+                    {Object.entries(userProgress?.dailyFlashcardReviews || {}).length > 0 ? (
+                        Object.entries(userProgress.dailyFlashcardReviews).map(([date, count]) => (
+                            <div key={date} className="admin-userprogress-detail-mini-card">
+                                <div className="mini-card-date">{date}</div>
+                                <div className="mini-card-value">{count} lần</div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Chưa có dữ liệu review flashcard.</p>
+                    )}
+                </div>
+            </div>
+            <div className="admin-userprogress-detail-section">
+                <h3>🎯 Mục tiêu review flashcard hằng ngày</h3>
+                <div className="admin-userprogress-detail-value">
+                    {userProgress?.dailyFlashcardGoal || 0} flashcard/ngày
+                </div>
+            </div>
+            <div className="admin-userprogress-detail-section">
+                <h3>🏅 Danh hiệu flashcard đạt được theo tháng</h3>
+                <div className="admin-userprogress-detail-cards">
+                    {Object.entries(userProgress?.unlockedFlashcardBadges || {}).length > 0 ? (
+                        Object.entries(userProgress.unlockedFlashcardBadges).map(([month, badges]) => (
+                            <div key={month} className="admin-userprogress-detail-mini-card badge-card">
+                                <div className="mini-card-date">{month}</div>
+                                <div className="mini-card-badges">
+                                    {badges?.length > 0 ? (
+                                        badges.map((b, i) => (
+                                            <span key={i} className="badge-item">{b}</span>
+                                        ))
+                                    ) : (
+                                        <span className="badge-item">Chưa có danh hiệu</span>
+                                    )}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Chưa có danh hiệu flashcard nào.</p>
                     )}
                 </div>
             </div>
