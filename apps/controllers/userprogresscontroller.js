@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
-const { cacheMiddleware } = require("./../util/cacheMiddleware");
+// const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { UserprogressService } = require("./../services");
 const userprogressService = new UserprogressService();
 
-router.get("/api/userprogress-list", verifyToken, cacheMiddleware(300), async (req, res) => {
+router.get("/api/userprogress-list", verifyToken, async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
     try {

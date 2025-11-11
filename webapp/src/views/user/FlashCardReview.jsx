@@ -1,20 +1,26 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
+import { UNSAFE_NavigationContext } from "react-router-dom";
 import { useParams, useNavigate } from "react-router-dom";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
 import FlashCardReviewCard from "@/components/user/flashcard/FlashCardReviewCard.jsx";
 import Swal from "sweetalert2";
 
 const FlashCardReview = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { navigator } = React.useContext(UNSAFE_NavigationContext);
+    const allowNavigationRef = useRef(false);
+    const enterTimeRef = useRef(Date.now());
+    const allowExitRef = useRef(false);
     const [flashcards, setFlashcards] = useState([]);
     const [listName, setListName] = useState(""); 
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mode, setMode] = useState("flip");
     const [isOwner, setIsOwner] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-
+    
     useEffect(() => {
         document.title = "Ôn tập flashcard - EasyTalk";
         const load = async () => {
@@ -38,6 +44,53 @@ const FlashCardReview = () => {
         };
         load();
     }, [id]);
+
+    useEffect(() => {
+        if (!navigator || flashcards.length == 0) return;
+        const originalPush = navigator.push;
+        const originalReplace = navigator.replace;
+        const handleNavigation = async (originalMethod, args) => {
+            if (!allowNavigationRef.current && flashcards.length > 0 && !allowExitRef.current) {
+                const result = await Swal.fire({
+                    icon: "warning",
+                    title: "Cảnh báo",
+                    text: "Bạn đang luyện tập flashcard giữa chừng. Nếu rời trang, tiến độ sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    showCancelButton: true,
+                    confirmButtonText: "Rời đi",
+                    cancelButtonText: "Ở lại",
+                    confirmButtonColor: "#d33",
+                    cancelButtonColor: "#3085d6",
+                });
+                if (result.isConfirmed) {
+                    allowNavigationRef.current = true;
+                    allowExitRef.current = true;
+                    originalMethod.apply(navigator, args);
+                }
+            } else {
+                originalMethod.apply(navigator, args);
+            }
+        };
+        navigator.push = (...args) => handleNavigation(originalPush, args);
+        navigator.replace = (...args) => handleNavigation(originalReplace, args);
+        return () => {
+            navigator.push = originalPush;
+            navigator.replace = originalReplace;
+        };
+    }, [flashcards.length]);
+
+    useEffect(() => {
+        const handleBeforeUnload = (e) => {
+            if (flashcards.length > 0 && !allowExitRef.current) {
+                e.preventDefault();
+                e.returnValue = '';
+                return '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => {
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+        };
+    }, [flashcards.length]);
 
     const randomMode = () => {
         let modes = ["flip", "choice", "fill"];
@@ -113,11 +166,15 @@ const FlashCardReview = () => {
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
         });
-
         if (result.isConfirmed) {
             const updated = flashcards.filter((_, idx) => idx !== currentIndex);
             setFlashcards(updated);
             if (updated.length == 0) {
+                allowExitRef.current = true;
+                const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+                if (seconds >= 30) {
+                    await UserProgressService.recordStudyTime(seconds);
+                }
                 Swal.fire({
                     icon: "success",
                     title: "🎉 Hoàn thành!",
@@ -166,8 +223,12 @@ const FlashCardReview = () => {
             confirmButtonColor: "#d33",
             cancelButtonColor: "#3085d6",
         });
-
         if (result.isConfirmed) {
+            allowExitRef.current = true;
+            const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+            if (seconds >= 30) {
+                await UserProgressService.recordStudyTime(seconds);
+            }
             navigate(`/flashcards/flashcardlist/${id}`);
         }
     };

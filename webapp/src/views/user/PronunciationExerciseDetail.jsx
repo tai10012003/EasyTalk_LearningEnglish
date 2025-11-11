@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useParams, UNSAFE_NavigationContext } from 'react-router-dom';
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import PronunciationExerciseSidebar from "@/components/user/pronunciationexercise/PronunciationExerciseSidebar.jsx";
 import PronunciationExerciseCarousel from "@/components/user/pronunciationexercise/PronunciationExerciseCarousel.jsx";
@@ -27,6 +28,7 @@ const PronunciationExerciseDetail = () => {
     const [timer, setTimer] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
+    const enterTimeRef = useRef(Date.now());
 
     useEffect(() => {
         if (!navigator || !hasStarted || exerciseCompleted) return;
@@ -261,6 +263,10 @@ const PronunciationExerciseDetail = () => {
                                     try {
                                         await PronunciationExerciseService.completePronunciationExercise(exerciseId);
                                         setExerciseCompleted(true);
+                                        const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+                                        if (seconds >= 30) {
+                                            await UserProgressService.recordStudyTime(seconds);
+                                        }
                                         Swal.fire({
                                             icon: "success",
                                             title: "Hoàn thành!",

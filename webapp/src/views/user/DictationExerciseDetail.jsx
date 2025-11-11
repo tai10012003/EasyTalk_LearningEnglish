@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Swal from "sweetalert2";
 import { useParams, useNavigate, UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
@@ -6,6 +6,7 @@ import DictationControls from "@/components/user/dictationexercise/DictationCont
 import DictationComplete from "@/components/user/dictationexercise/DictationComplete.jsx";
 import DictationFullScript from "@/components/user/dictationexercise/DictationFullScript.jsx";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
 
 function DictationExerciseDetail() {
     const { slug } = useParams();
@@ -28,6 +29,7 @@ function DictationExerciseDetail() {
     const [hasStarted, setHasStarted] = useState(false);
     const [exerciseCompleted, setExerciseCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const enterTimeRef = useRef(Date.now());
 
     useEffect(() => {
         document.title = "Chi tiết bài nghe chép chính tả - EasyTalk";
@@ -234,6 +236,10 @@ function DictationExerciseDetail() {
                             try {
                                 await DictationExerciseService.completeDictationExercise(exerciseId);
                                 setExerciseCompleted(true);
+                                const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+                                if (seconds >= 30) {
+                                    await UserProgressService.recordStudyTime(seconds);
+                                }
                                 Swal.fire({
                                     icon: "success",
                                     title: "Hoàn thành!",

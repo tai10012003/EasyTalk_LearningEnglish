@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef, useContext } from 'react';
 import { useParams, UNSAFE_NavigationContext } from 'react-router-dom';
 import { StageService } from "@/services/StageService.jsx";
+import { UserProgressService } from "@/services/UserProgressService.jsx";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StageCarousel from "@/components/user/stage/StageCarousel.jsx";
 import StageResultScreen from "@/components/user/stage/StageResultScreen.jsx";
@@ -21,6 +22,7 @@ const Stage = () => {
     const [stageTitle, setStageTitle] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
+    const enterTimeRef = useRef(Date.now());
 
     useEffect(() => {
         document.title = "Chặng hành trình - EasyTalk";
@@ -72,6 +74,10 @@ const Stage = () => {
     }, []);
 
     const handleSubmitStage = useCallback(async () => {
+        const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
+        if (seconds >= 30) {
+            await UserProgressService.recordStudyTime(seconds);
+        }
         setIsCompleted(true);
         setShowResult(true);
         try {
