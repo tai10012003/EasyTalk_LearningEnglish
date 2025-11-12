@@ -30,6 +30,36 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
         loadData(currentPage);
     }, [currentPage, selectedRole]);
 
+    const formatLastActive = (lastActive, role) => {
+        if (role === "admin") {
+            return <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Online</span>;
+        }
+        if (!lastActive) return "Chưa hoạt động";
+        const now = new Date();
+        const last = new Date(lastActive);
+        const diffMs = now - last;
+        const diffSec = Math.floor(diffMs / 1000);
+        const diffMin = Math.floor(diffSec / 60);
+        const diffHour = Math.floor(diffMin / 60);
+        const diffDay = Math.floor(diffHour / 24);
+        if (diffSec < 30) {
+            return <span style={{ color: '#4CAF50', fontWeight: 'bold' }}>Online</span>;
+        }
+        if (diffSec < 60) {
+            return <span style={{ color: '#666', fontStyle: 'italic' }}>Vừa xong</span>;
+        }
+        if (diffMin < 60) {
+            return `${diffMin} phút trước`;
+        }
+        if (diffHour < 24) {
+            return `${diffHour} giờ trước`;
+        }
+        if (diffDay < 7) {
+            return `${diffDay} ngày trước`;
+        }
+        return `${Math.floor(diffDay / 7)} tuần trước`;
+    };
+
     const handleDeleteClick = (user) => {
         setModalUser(user);
         setConfirmEmail("");
@@ -136,7 +166,8 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
                                 <th>Username</th>
                                 <th>Email</th>
                                 <th>Vai trò</th>
-                                <th>Trạng thái</th>
+                                <th>Trạng thái hoạt động</th>
+                                <th>Trạng thái tài khoản</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
@@ -169,6 +200,9 @@ function UserList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) 
                                                 >
                                                     {user.role == "admin" ? "Admin" : "User"}
                                                 </span>
+                                            </td>
+                                            <td>
+                                                {formatLastActive(user.lastActive, user.role)}
                                             </td>
                                             <td>
                                                 <span

@@ -96,7 +96,7 @@ router.post("/refresh-token", async (req, res) => {
 router.post("/logout", verifyToken, async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    const result = await userService.logout(refreshToken);
+    const result = await userService.logout(refreshToken, req);
     const redis = getRedisClient();
     const userId = req.user.id;
     const keys = await redis.keys(`cache:${userId}:*`);

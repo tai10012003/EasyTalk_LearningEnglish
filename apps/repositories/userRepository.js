@@ -14,7 +14,21 @@ class UserRepository {
     }
 
     async findAll(filter = {}, skip = 0, limit = 12) {
-        const cursor = await this.collection.find(filter).skip(skip).limit(limit);
+        const cursor = await this.collection.aggregate([
+            { $match: filter },
+            { $skip: skip },
+            { $limit: limit },
+            {
+                $project: {
+                    username: 1,
+                    email: 1,
+                    role: 1,
+                    active: 1,
+                    createdAt: 1,
+                    lastActive: 1
+                }
+            }
+        ]);
         const users = await cursor.toArray();
         const total = await this.collection.countDocuments(filter);
         return { users, total };
@@ -30,6 +44,7 @@ class UserRepository {
 
     async insert(user) {
         user.createdAt = new Date();
+        user.lastActive = new Date();
         return await this.collection.insertOne(user);
     }
 

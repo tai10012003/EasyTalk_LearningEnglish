@@ -173,6 +173,7 @@ class UserService {
         const user = { username, email, password: hashedPassword, role, active: "active" };
         const result = await this.userRepository.insert(user);
         user._id = result.insertedId;
+        await userprogressService.createUserProgress(user._id);
         delete this.verificationCodes[email];
         return user;
     }
@@ -197,6 +198,7 @@ class UserService {
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(refreshToken, user._id.toString());
+        await this.userRepository.update(user._id.toString(), { lastActive: new Date() });
         const language = await usersettingService.getUserLanguage(user._id);
         return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
@@ -218,6 +220,7 @@ class UserService {
             });
             user = { _id: insertResult.insertedId, username: name || email.split("@")[0], email, role: "user", active: "active" };
             isNewUser = true;
+            await userprogressService.createUserProgress(user._id);
             const mailOptions = {
                 from: config.email.user,
                 to: email,
@@ -265,6 +268,7 @@ class UserService {
         const accessToken = this.generateAccessToken(user);
         const refreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(refreshToken, user._id.toString());
+        await this.userRepository.update(user._id.toString(), { lastActive: new Date() });
         const language = await usersettingService.getUserLanguage(user._id);
         return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
@@ -287,6 +291,7 @@ class UserService {
                 active: "active",
                 facebookId,
             });
+            // await userprogressService.createUserProgress(user._id);
             const mailOptions = {
                 from: config.email.user,
                 to: userEmail,
@@ -313,6 +318,7 @@ class UserService {
         const newAccessToken = this.generateAccessToken(user);
         const newRefreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(newRefreshToken, user._id.toString());
+        await this.userRepository.update(user._id.toString(), { lastActive: new Date() });
         return { token: newAccessToken, refreshToken: newRefreshToken, role: user.role };
     }
 
@@ -344,9 +350,12 @@ class UserService {
         }
     }
 
-    async logout(refreshToken) {
+    async logout(refreshToken, req = null) {
         if (refreshToken) {
             this.refreshTokens.delete(refreshToken);
+        }
+        if (req?.user?.id) {
+            await this.userRepository.update(req.user.id, { lastActive: new Date() });
         }
         return { message: "Đăng xuất thành công" };
     }
