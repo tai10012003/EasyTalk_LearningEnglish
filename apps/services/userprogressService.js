@@ -187,6 +187,7 @@ class UserprogressService {
             studyTimes: 0,
             dailyStudyTimes: {},
             experiencePoints: 0,
+            dailyExperiencePoints: {},
             streak: 0,
             maxStreak: 0,
             studyDates: [],
@@ -241,14 +242,18 @@ class UserprogressService {
             }
         }
         if (streak > maxStreak) maxStreak = streak;
-        const setFields = {
+        const updateOp = { $set: {}, $inc: {} };
+        const currentXP = await this.userprogressRepository.findByUserId(userProgress.user);
+        const xpDiff = (userProgress.experiencePoints || 0) - (currentXP?.experiencePoints || 0);
+        if (xpDiff > 0) {
+            updateOp.$inc.experiencePoints = xpDiff;
+        }
+        updateOp.$set = {
             ...normalizedData,
-            experiencePoints: userProgress.experiencePoints || 0,
             streak,
             maxStreak,
             studyDates
         };
-        const updateOp = { $set: setFields };
         const result = await this.userprogressRepository.update(userProgress.user, updateOp);
         await this._invalidateCache();
         return result;

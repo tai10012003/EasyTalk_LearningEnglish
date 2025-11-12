@@ -117,6 +117,7 @@ class UserprogressRepository {
                     dailyFlashcardGoal: 1,
                     dailyFlashcardReviews: 1,
                     experiencePoints: 1,
+                    dailyExperiencePoints: 1,
                     streak: 1,
                     maxStreak: 1,
                     studyDates: 1,
@@ -236,6 +237,11 @@ class UserprogressRepository {
     async update(userId, updateOperator, upsert = true) {
         if (!updateOperator.$set) updateOperator.$set = {};
         updateOperator.$set.updatedAt = new Date();
+        if (updateOperator.$inc && updateOperator.$inc.experiencePoints) {
+            const today = new Date().toISOString().split('T')[0];
+            const xpToAdd = updateOperator.$inc.experiencePoints;
+            updateOperator.$inc[`dailyExperiencePoints.${today}`] = xpToAdd;
+        }
         return await this.collection.updateOne(
             { user: new ObjectId(userId) },
             updateOperator,

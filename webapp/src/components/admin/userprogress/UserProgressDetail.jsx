@@ -145,6 +145,23 @@ const UserProgressDetail = ({ userProgress }) => {
                 </div>
             </div>
             <div className="admin-userprogress-detail-section">
+                <h3>Điểm kinh nghiệm mỗi ngày</h3>
+                <div className="admin-userprogress-detail-cards">
+                    {Object.entries(userProgress?.dailyExperiencePoints || {}).length > 0 ? (
+                        Object.entries(userProgress.dailyExperiencePoints)
+                            .sort(([a], [b]) => b.localeCompare(a))
+                            .map(([date, xp]) => (
+                                <div key={date} className="admin-userprogress-detail-mini-card">
+                                    <div className="mini-card-date">{date}</div>
+                                    <div className="mini-card-value">{xp} XP</div>
+                                </div>
+                            ))
+                    ) : (
+                        <p>Người dùng chưa nhận điểm kinh nghiệm ngày nào.</p>
+                    )}
+                </div>
+            </div>
+            <div className="admin-userprogress-detail-section">
                 <h3>🔥 Chuỗi ngày học liên tục</h3>
                 <div className="admin-userprogress-detail-value">
                     {userProgress?.streak || 0} ngày (cao nhất: {userProgress?.maxStreak || 0})
