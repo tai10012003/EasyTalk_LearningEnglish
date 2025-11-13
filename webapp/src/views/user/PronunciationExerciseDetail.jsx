@@ -28,7 +28,51 @@ const PronunciationExerciseDetail = () => {
     const [timer, setTimer] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
-    const enterTimeRef = useRef(Date.now());
+    const [activeTime, setActiveTime] = useState(0);
+    const lastInteractionRef = useRef(Date.now());
+    const intervalRef = useRef(null);
+    const hasRecordedRef = useRef(false);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, []);
+
+    const startActiveTimer = useCallback(() => {
+        if (intervalRef.current) return;
+        intervalRef.current = setInterval(() => {
+            const now = Date.now();
+            const inactiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+            if (inactiveSeconds < 60) {
+                setActiveTime(prev => prev + 1);
+            } else {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        const events = [
+            'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart',
+            'click', 'keydown', 'keyup', 'touchmove'
+        ];
+        events.forEach(event => {
+            window.addEventListener(event, handleUserInteraction, true);
+        });
+        startActiveTimer();
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, handleUserInteraction, true);
+            });
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
         if (!navigator || !hasStarted || exerciseCompleted) return;
@@ -218,6 +262,39 @@ const PronunciationExerciseDetail = () => {
         );
     }
 
+    const handleComplete = async () => {
+        try {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            const now = Date.now();
+            const lastActiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+            const finalActiveTime = activeTime + (lastActiveSeconds < 60 ? lastActiveSeconds : 0);
+            if (finalActiveTime >= 60 && !hasRecordedRef.current) {
+                await UserProgressService.recordStudyTime(finalActiveTime);
+                hasRecordedRef.current = true;
+            }
+            await PronunciationExerciseService.completePronunciationExercise(exerciseId);
+            setExerciseCompleted(true);
+            Swal.fire({
+                icon: "success",
+                title: "Hoàn thành!",
+                text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập phát âm. Bài luyện tập phát âm tiếp theo đã được mở khóa.",
+                confirmButtonText: "Quay lại danh sách bài luyện tập phát âm",
+            }).then(() => {
+                window.location.href = "/pronunciation-exercise";
+            });
+        } catch (err) {
+            console.error("Error completing pronunciation exercise:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+            });
+        }
+    };
+
     if (!hasStarted) {
         return (
             <div className="exercise-start-container">
@@ -259,31 +336,7 @@ const PronunciationExerciseDetail = () => {
                             <PronunciationExerciseResultScreen
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
-                                onComplete={async () => {
-                                    try {
-                                        await PronunciationExerciseService.completePronunciationExercise(exerciseId);
-                                        setExerciseCompleted(true);
-                                        const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
-                                        if (seconds >= 30) {
-                                            await UserProgressService.recordStudyTime(seconds);
-                                        }
-                                        Swal.fire({
-                                            icon: "success",
-                                            title: "Hoàn thành!",
-                                            text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập phát âm. Bài luyện tập phát âm tiếp theo đã được mở khóa.",
-                                            confirmButtonText: "Quay lại danh sách bài luyện tập phát âm",
-                                        }).then(() => {
-                                            window.location.href = "/pronunciation-exercise";
-                                        });
-                                    } catch (err) {
-                                        console.error("Error completing pronunciation exercise:", err);
-                                        Swal.fire({
-                                            icon: "error",
-                                            title: "Lỗi",
-                                            text: "Có lỗi xảy ra khi cập nhật tiến độ."
-                                        });
-                                    }
-                                }} 
+                                onComplete={handleComplete}
                             />
                         ) : (
                             <PronunciationExerciseCarousel
