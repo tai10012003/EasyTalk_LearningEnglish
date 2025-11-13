@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, UNSAFE_NavigationContext } from 'react-router-dom';
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StorySentence from "@/components/user/story/StorySentence.jsx";
@@ -22,7 +22,51 @@ function StoryDetail() {
     const [totalSteps, setTotalSteps] = useState(1);
     const allowNavigationRef = useRef(false);
     const contentRefs = useRef([]);
-    const enterTimeRef = useRef(Date.now());
+    const [activeTime, setActiveTime] = useState(0);
+    const lastInteractionRef = useRef(Date.now());
+    const intervalRef = useRef(null);
+    const hasRecordedRef = useRef(false);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, []);
+
+    const startActiveTimer = useCallback(() => {
+        if (intervalRef.current) return;
+        intervalRef.current = setInterval(() => {
+            const now = Date.now();
+            const inactiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+            if (inactiveSeconds < 60) {
+                setActiveTime(prev => prev + 1);
+            } else {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        const events = [
+            'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart',
+            'click', 'keydown', 'keyup', 'touchmove'
+        ];
+        events.forEach(event => {
+            window.addEventListener(event, handleUserInteraction, true);
+        });
+        startActiveTimer();
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, handleUserInteraction, true);
+            });
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
         if (!navigator || !story || storyCompleted) return;
@@ -167,6 +211,39 @@ function StoryDetail() {
         const step = displayedItems.length;
         setCurrentStep(step);
     };
+    
+    const handleComplete = async () => {
+        try {
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+            const now = Date.now();
+            const lastActiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+            const finalActiveTime = activeTime + (lastActiveSeconds < 60 ? lastActiveSeconds : 0);
+            if (finalActiveTime >= 60 && !hasRecordedRef.current) {
+                await UserProgressService.recordStudyTime(finalActiveTime);
+                hasRecordedRef.current = true;
+            }
+            await StoryService.completeStory(story._id);
+            setStoryCompleted(true);
+            Swal.fire({
+                icon: "success",
+                title: "Thành công",
+                text: "Chúc mừng! Bạn đã hoàn thành bài học câu chuyện. Bài học câu chuyện tiếp theo đã được mở khóa.",
+                confirmButtonText: "Quay lại danh sách bài học câu chuyện",
+            }).then(() => {
+                window.location.href = "/story";
+            });
+        } catch (err) {
+            console.error("Error completing story:", err);
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+            });
+        }
+    };
 
     if (isLoading) { return <LoadingScreen />; }
     if (!story) return <p className="no-stories">Đang tải bài học câu chuyện ...</p>;
@@ -202,31 +279,7 @@ function StoryDetail() {
                     {item.type == "complete" && (
                         <StoryComplete
                             quizResults={quizResults} 
-                            onComplete={async () => {
-                                try {
-                                    await StoryService.completeStory(story._id);
-                                    setStoryCompleted(true);
-                                    const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
-                                    if (seconds >= 30) {
-                                        await UserProgressService.recordStudyTime(seconds);
-                                    }
-                                    Swal.fire({
-                                        icon: "success",
-                                        title: "Thành công",
-                                        text: "Chúc mừng! Bạn đã hoàn thành bài học câu chuyện. Bài học câu chuyện tiếp theo đã được mở khóa.",
-                                        confirmButtonText: "Quay lại danh sách bài học câu chuyện",
-                                    }).then(() => {
-                                        window.location.href = "/story";
-                                    });
-                                } catch (err) {
-                                    console.error("Error completing story:", err);
-                                    Swal.fire({
-                                        icon: "error",
-                                        title: "Lỗi",
-                                        text: "Có lỗi xảy ra khi cập nhật tiến độ."
-                                    });
-                                }
-                            }} 
+                            onComplete={handleComplete}
                         />
                     )}
                 </div>

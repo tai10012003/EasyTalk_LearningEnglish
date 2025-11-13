@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 
-function PronunciationSentence({ content, onComplete, onStepChange  }) {
+function PronunciationSentence({ content, onComplete, onStepChange }) {
     const [steps, setSteps] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showButton, setShowButton] = useState(false);
@@ -28,15 +28,17 @@ function PronunciationSentence({ content, onComplete, onStepChange  }) {
     useEffect(() => {
         setShowButton(false);
         if (currentIndex < steps.length - 1) {
-            const timer = setTimeout(() => setShowButton(true), 5000);
+            const timer = setTimeout(() => {
+                setShowButton(true);
+            }, 5000);
             return () => clearTimeout(timer);
             // setShowButton(true)
         }
-    }, [currentIndex, steps.length, onComplete]);
+    }, [currentIndex, steps.length]);
 
     const handleNext = () => {
         if (currentIndex < steps.length - 1) {
-            setCurrentIndex(currentIndex + 1);
+            setCurrentIndex(prev => prev + 1);
             setTimeout(() => {
                 if (stepRefs.current[currentIndex + 1]) {
                     stepRefs.current[currentIndex + 1].scrollIntoView({ behavior: "smooth", block: "center" });
@@ -62,26 +64,26 @@ function PronunciationSentence({ content, onComplete, onStepChange  }) {
         <>
             {steps.slice(0, currentIndex + 1).map((step, idx) => (
                 <div
-                key={idx}
-                ref={el => (stepRefs.current[idx] = el)}
-                className="lesson-sentence shadow-sm p-4 my-4"
+                    key={idx}
+                    ref={el => (stepRefs.current[idx] = el)}
+                    className="lesson-sentence shadow-sm p-4 my-4"
                 >
-                <div dangerouslySetInnerHTML={{ __html: step }} />
-                {idx == currentIndex && (
-                    currentIndex < steps.length - 1 ? (
-                    showButton && (
-                        <button className="btn_1 mt-4" onClick={handleNext}>
-                        <i className="fas fa-arrow-right ms-2"></i> Tiếp tục
-                        </button>
-                    )
-                    ) : (
-                    !quizStarted && (
-                        <button className="btn_1 mt-4" onClick={handleQuizStart}>
-                        Làm bài quiz
-                        </button>
-                    )
-                    )
-                )}
+                    <div dangerouslySetInnerHTML={{ __html: step }} />
+                    {idx == currentIndex && (
+                        currentIndex < steps.length - 1 ? (
+                            showButton && (
+                                <button className="btn_1 mt-4" onClick={handleNext}>
+                                    <i className="fas fa-arrow-right ms-2"></i> Tiếp tục
+                                </button>
+                            )
+                        ) : (
+                            !quizStarted && (
+                                <button className="btn_1 mt-4" onClick={handleQuizStart}>
+                                    Làm bài quiz
+                                </button>
+                            )
+                        )
+                    )}
                 </div>
             ))}
         </>
