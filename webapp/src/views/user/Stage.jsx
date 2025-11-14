@@ -22,7 +22,51 @@ const Stage = () => {
     const [stageTitle, setStageTitle] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [hasStarted, setHasStarted] = useState(false);
-    const enterTimeRef = useRef(Date.now());
+    const [activeTime, setActiveTime] = useState(0);
+    const lastInteractionRef = useRef(Date.now());
+    const intervalRef = useRef(null);
+    const hasRecordedRef = useRef(false);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, []);
+
+    const startActiveTimer = useCallback(() => {
+        if (intervalRef.current) return;
+        intervalRef.current = setInterval(() => {
+            const now = Date.now();
+            const inactiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+            if (inactiveSeconds < 60) {
+                setActiveTime(prev => prev + 1);
+            } else {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        const events = [
+            'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart',
+            'click', 'keydown', 'keyup', 'touchmove'
+        ];
+        events.forEach(event => {
+            window.addEventListener(event, handleUserInteraction, true);
+        });
+        startActiveTimer();
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, handleUserInteraction, true);
+            });
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
         document.title = "Chặng hành trình - EasyTalk";
@@ -74,10 +118,15 @@ const Stage = () => {
     }, []);
 
     const handleSubmitStage = useCallback(async () => {
-        const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
-        if (seconds >= 30) {
-            await UserProgressService.recordStudyTime(seconds);
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
         }
+        const now = Date.now();
+        const lastActiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+        const finalActiveTime = activeTime + (lastActiveSeconds < 60 ? lastActiveSeconds : 0);
+        await UserProgressService.recordStudyTime(finalActiveTime);
+        hasRecordedRef.current = true;
         setIsCompleted(true);
         setShowResult(true);
         try {
@@ -85,7 +134,7 @@ const Stage = () => {
         } catch (err) {
             console.error("Error completing stage:", err);
         }
-    }, [id]);
+    }, [id, activeTime]);
 
     const handleShowHistory = useCallback(() => {
         setShowHistory(true);
@@ -95,23 +144,26 @@ const Stage = () => {
         setShowHistory(false);
     }, []);
 
-    const handleRestart = useCallback(() => {
-        setCorrectAnswers(0);
-        setCurrentQuestionIndex(0);
-        setIsCompleted(false);
-        setShowResult(false);
-        setShowHistory(false);
-        setHasStarted(false);
-        const resetResults = questions.map(q => ({
-            question: q.question,
-            userAnswer: "Chưa trả lời",
-            correctAnswer: q.correctAnswer,
-            isCorrect: false,
-            explanation: q.explanation,
-            questionType: q.type
-        }));
-        setQuestionResults(resetResults);
-    }, [questions]);
+    // const handleRestart = useCallback(() => {
+    //     setCorrectAnswers(0);
+    //     setCurrentQuestionIndex(0);
+    //     setIsCompleted(false);
+    //     setShowResult(false);
+    //     setShowHistory(false);
+    //     setHasStarted(false);
+    //     const resetResults = questions.map(q => ({
+    //         question: q.question,
+    //         userAnswer: "Chưa trả lời",
+    //         correctAnswer: q.correctAnswer,
+    //         isCorrect: false,
+    //         explanation: q.explanation,
+    //         questionType: q.type
+    //     }));
+    //     setQuestionResults(resetResults);
+    //     setActiveTime(0);
+    //     lastInteractionRef.current = Date.now();
+    //     hasRecordedRef.current = false;
+    // }, [questions]);
 
     const speakText = useCallback((text) => {
         if ('speechSynthesis' in window) {
@@ -192,7 +244,7 @@ const Stage = () => {
                             <StageResultScreen
                                 correctAnswers={correctAnswers}
                                 totalQuestions={questions.length}
-                                onRestart={handleRestart}
+                                // onRestart={handleRestart}
                                 onShowHistory={handleShowHistory}
                                 onExit={() => window.location.href = '/journey'}
                             />
