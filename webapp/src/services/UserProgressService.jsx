@@ -1,7 +1,7 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
-
 let hasShownAlert = false;
+
 export const UserProgressService = {
     async getUserStreak() {
         try {
@@ -67,6 +67,48 @@ export const UserProgressService = {
             });
         } catch (err) {
             console.error("Lỗi ghi thời gian học:", err);
+        }
+    },
+
+    async getLeaderboard(type = 'exp', period = 'all', limit = 50) {
+        try {
+            const query = new URLSearchParams({ type, period, limit: limit.toString() }).toString();
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/leaderboard?${query}`, {
+                method: "GET" 
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
+            }
+            const result = await res.json();
+            hasShownAlert = false;
+            return result.data || [];
+        } catch (err) {
+            console.error("Error fetching leaderboard:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời không tải được bảng xếp hạng",
+                    text: "Dữ liệu sẽ được hiển thị khi có kết nối.",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+            return [];
+        }
+    },
+
+    async getCurrentUserProgress() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/current`, {
+                method: "GET"
+            });
+            if (!res.ok) throw new Error("Cannot fetch current user");
+            return await res.json();
+        } catch (err) {
+            console.error("Error fetching current user progress:", err);
+            return null;
         }
     },
 

@@ -122,6 +122,31 @@ router.post("/study-time", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/leaderboard", verifyToken, async (req, res) => {
+    try {
+        const { type = 'exp', period = 'all', limit = 50 } = req.query;
+        const data = await userprogressService.getLeaderboard(type, period, parseInt(limit));
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error("Leaderboard error:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+router.get("/api/current", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const userProgress = await userprogressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            return res.status(404).json({ message: "Không tìm thấy tiến trình của người dùng." });
+        }
+        res.json(userProgress);
+    } catch (error) {
+        console.error("Lỗi khi lấy tiến trình user hiện tại:", error);
+        res.status(500).json({ message: "Lỗi server." });
+    }
+});
+
 router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
     try {
         const userProgressId = req.params.id;

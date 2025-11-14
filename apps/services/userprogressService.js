@@ -58,8 +58,14 @@ class UserprogressService {
         return await this.userprogressRepository.findUserProgressById(id);
     }
 
-    async getLeaderboard(limit = 10) {
-        return await this.userprogressRepository.getLeaderboard(limit);
+    async getLeaderboard(type = 'exp', period = 'all', limit = 50) {
+        if (type == 'exp') {
+            return await this.userprogressRepository.getLeaderboardByExp(period, limit);
+        } else if (type == 'time') {
+            return await this.userprogressRepository.getLeaderboardByStudyTime(period, limit);
+        } else if (type == 'streak') {
+            return await this.userprogressRepository.getLeaderboardByStreak(limit);
+        }
     }
 
     async getDailyFlashcardGoal(userId) {

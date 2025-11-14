@@ -289,29 +289,6 @@ class UserprogressRepository {
         return result.deletedCount > 0;
     }
 
-    async getLeaderboard(limit = 10) {
-        return await this.collection.aggregate([
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'userDetails'
-                }
-            },
-            { $unwind: "$userDetails" },
-            {
-                $group: {
-                    _id: "$user",
-                    experiencePoints: { $max: "$experiencePoints" },
-                    username: { $first: "$userDetails.username" }
-                }
-            },
-            { $sort: { experiencePoints: -1 } },
-            { $limit: limit }
-        ]).toArray();
-    }
-
     async addDailyStudyTime(userId, seconds) {
         const hours = seconds / 3600;
         const today = new Date().toISOString().split('T')[0];
@@ -326,6 +303,203 @@ class UserprogressRepository {
             },
             { upsert: true }
         );
+    }
+
+    async getLeaderboardByExp(period = 'all', limit = 50) {
+        let pipeline = [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } }
+        ];
+        if (period == 'all') {
+            pipeline.push({
+                $project: {
+                    username: "$userDetails.username",
+                    value: { $ifNull: ["$experiencePoints", 0] }
+                }
+            });
+        } else {
+            const dateKeys = this._getDateKeysForPeriod(period);
+            pipeline.push({
+                $project: {
+                    username: "$userDetails.username",
+                    dailyExperiencePoints: 1
+                }
+            });
+            pipeline.push({
+                $addFields: {
+                    value: {
+                        $sum: {
+                            $map: {
+                                input: { $objectToArray: "$dailyExperiencePoints" },
+                                as: "item",
+                                in: {
+                                    $cond: [
+                                        { $in: ["$$item.k", dateKeys] },
+                                        "$$item.v",
+                                        0
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pipeline.push(
+            { $sort: { value: -1 } },
+            { $limit: limit },
+            {
+                $project: {
+                    _id: 1,
+                    username: 1,
+                    value: { $round: ["$value", 0] }
+                }
+            }
+        );
+        const result = await this.collection.aggregate(pipeline).toArray();
+        return result.map((item, index) => ({
+            ...item,
+            rank: index + 1
+        }));
+    }
+
+    async getLeaderboardByStudyTime(period = 'all', limit = 50) {
+        let pipeline = [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } }
+        ];
+        if (period == 'all') {
+            pipeline.push({
+                $project: {
+                    username: "$userDetails.username",
+                    value: { $ifNull: ["$studyTimes", 0] }
+                }
+            });
+        } else {
+            const dateKeys = this._getDateKeysForPeriod(period);
+            pipeline.push({
+                $project: {
+                    username: "$userDetails.username",
+                    dailyStudyTimes: 1
+                }
+            });
+            pipeline.push({
+                $addFields: {
+                    value: {
+                        $sum: {
+                            $map: {
+                                input: { $objectToArray: "$dailyStudyTimes" },
+                                as: "item",
+                                in: {
+                                    $cond: [
+                                        { $in: ["$$item.k", dateKeys] },
+                                        "$$item.v",
+                                        0
+                                    ]
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        pipeline.push(
+            { $sort: { value: -1 } },
+            { $limit: limit },
+            {
+                $project: {
+                    _id: 1,
+                    username: 1,
+                    value: { $round: ["$value", 2] }
+                }
+            }
+        );
+        const result = await this.collection.aggregate(pipeline).toArray();
+        return result.map((item, index) => ({
+            ...item,
+            rank: index + 1
+        }));
+    }
+
+    async getLeaderboardByStreak(limit = 50) {
+        const pipeline = [
+            {
+                $lookup: {
+                    from: 'users',
+                    localField: 'user',
+                    foreignField: '_id',
+                    as: 'userDetails'
+                }
+            },
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },
+            {
+                $project: {
+                    username: "$userDetails.username",
+                    streak: "$streak",
+                    maxStreak: "$maxStreak"
+                }
+            },
+            { $sort: { streak: -1, maxStreak: -1 } },
+            { $limit: limit }
+        ];
+        const result = await this.collection.aggregate(pipeline).toArray();
+        return result.map((item, index) => ({
+            ...item,
+            rank: index + 1
+        }));
+    }
+
+    _getDateKeysForPeriod(period) {
+        const now = new Date();
+        const keys = [];
+        if (period == 'week') {
+            const dayOfWeek = now.getDay();
+            const diffToMonday = (dayOfWeek + 6) % 7;
+            const startOfWeek = new Date(now);
+            startOfWeek.setDate(now.getDate() - diffToMonday);
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(startOfWeek);
+                d.setDate(startOfWeek.getDate() + i);
+                keys.push(this._formatDate(d));
+            }
+        } else if (period == 'month') {
+            const year = now.getFullYear();
+            const month = now.getMonth();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                const date = new Date(year, month, day);
+                keys.push(this._formatDate(date));
+            }
+        } else if (period == 'year') {
+            const year = now.getFullYear();
+            const start = new Date(year, 0, 1);
+            const end = new Date(year, 11, 31);
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                keys.push(this._formatDate(new Date(d)));
+            }
+        }
+        return keys;
+    }
+
+    _formatDate(date) {
+        const y = date.getFullYear();
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const d = date.getDate().toString().padStart(2, '0');
+        return `${y}-${m}-${d}`;
     }
 }
 

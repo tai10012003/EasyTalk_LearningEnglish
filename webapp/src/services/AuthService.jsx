@@ -147,6 +147,32 @@ export const AuthService = {
         return response;
     },
 
+    getCurrentUser() {
+        try {
+            const userStr = localStorage.getItem("user");
+            if (!userStr) {
+                const token = localStorage.getItem("token");
+                if (!token) return null;
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    return {
+                        id: payload.id || payload.userId || payload.sub,
+                        username: payload.username,
+                        email: payload.email,
+                        role: localStorage.getItem("role") || payload.role
+                    };
+                } catch (e) {
+                    console.error("Error decoding token:", e);
+                    return null;
+                }
+            }
+            return JSON.parse(userStr);
+        } catch (error) {
+            console.error("Error getting current user:", error);
+            return null;
+        }
+    },
+
     async logout() {
         const refreshToken = localStorage.getItem("refreshToken");
         const role = localStorage.getItem("role");
