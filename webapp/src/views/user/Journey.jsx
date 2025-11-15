@@ -52,9 +52,7 @@ function Journey() {
                         <AchievementPanel achievements={achievements} dailyTasks={dailyTasks} />
                     </div>
                     <div className="col-sm-6 col-lg-6 col-xl-6">
-                        <div className="section_tittle">
-                            <h3>HÀNH TRÌNH HỌC TẬP CỦA BẠN</h3>
-                        </div>
+                        <h3 className="your_journey_title">HÀNH TRÌNH HỌC TẬP CỦA BẠN</h3>
                         <div className="row justify-content-center">
                             {journeys.length > 0 ? (
                                 journeys.map((j) => (

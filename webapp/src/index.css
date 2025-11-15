@@ -1315,6 +1315,16 @@ p {
   padding: 50px 0;
 }
 
+.your_journey_title {
+  font-size: 1.8rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .card-title {
   color: #681fbb;
   font-weight: 700;
@@ -1367,6 +1377,16 @@ p {
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
   border: 1px solid #721fdf;
   color: #333;
+}
+
+.your_gate_title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  text-align: center;
+  margin-bottom: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 .gate-card {
@@ -5297,6 +5317,361 @@ p {
   font-size: 0.9rem;
   color: #64748b;
   line-height: 1.5;
+}
+
+/* ===============================================
+   USER STATISTIC
+  =============================================== */
+
+.user-statistic-container {
+  margin: 0.7rem auto;
+  padding: 2rem;
+  background: #f8fafc;
+  border-radius: 18px;
+}
+
+.user-statistic-header {
+  text-align: center;
+}
+
+.user-statistic-title {
+  font-size: 1.9rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.user-statistic-subtitle {
+  color: #64748b;
+  font-size: 15px;
+}
+
+.user-statistic-info-container {
+  margin: 25px 0;
+}
+
+.user-statistic-info-title {
+  position: relative;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 30px;
+  text-align: left;
+}
+
+.user-statistic-info-title::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 0;
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 2px;
+}
+
+.user-statistic-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 1rem;
+  color: #333;
+}
+
+.user-statistic-info p {
+  margin: 0;
+  line-height: 1.8;
+}
+
+.user-statistic-info strong {
+  color: #4a90e2;
+  margin-right: 6px;
+}
+
+.user-statistic-tabs {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 0 8px;
+}
+
+.user-statistic-tab {
+  background: #e2e8f0;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user-statistic-tab:hover {
+  background: #cbd5e1;
+  transform: translateY(-2px);
+}
+
+.user-statistic-tab.active {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.35);
+  transform: translateY(-2px);
+}
+
+.user-statistic-toolbar {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-statistic-toolbar-item {
+  margin: 25px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.user-statistic-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 0 8px;
+}
+
+.user-statistic-chart-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.5px;
+  flex: 1;
+  min-width: 280px;
+}
+
+.user-statistic-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.user-statistic-select {
+  appearance: none;
+  background: #f8fafc url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2364748b' viewBox='0 0 16 16'%3E%3Cpath d='M8 11l-5-5h10l-5 5z'/%3E%3C/svg%3E") no-repeat right 12px center;
+  background-size: 12px;
+  border: 2px solid #667eea;
+  border-radius: 10px;
+  padding: 10px 36px 10px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  min-width: 160px;
+  transition: all 0.25s ease;
+}
+
+.user-statistic-select:focus {
+  outline: none;
+  border-color: #764ba2;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.user-statistic-export {
+  display: flex;
+  gap: 10px;
+}
+
+.user-statistic-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.user-statistic-btn.excel {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.3);
+}
+
+.user-statistic-btn.ppt {
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  color: white;
+  box-shadow: 0 4px 10px rgba(249, 115, 22, 0.3);
+}
+
+.user-statistic-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+.user-statistic-date-range {
+  text-align: end;
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 20px;
+}
+
+.user-statistic-chart {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 2rem;
+  margin-bottom: 2.5rem;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.6s ease-out 0.3s both;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+}
+
+.user-statistic-loading,
+.user-statistic-empty {
+  text-align: center;
+  padding: 80px 0;
+  color: #64748b;
+}
+
+.user-statistic-achievement-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+  margin: 2.5rem 0;
+}
+
+.user-statistic-card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  min-height: 90px;
+}
+
+.user-statistic-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+}
+
+.user-statistic-card.record {
+  background: linear-gradient(135deg, #f97316, #ef4444);
+  color: white;
+}
+
+.user-statistic-card.record-exp {
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  color: white;
+}
+
+.user-statistic-icon {
+  font-size: 2.2rem;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.1);
+}
+
+.user-statistic-icon.fire { background: rgba(249, 115, 22, 0.15); color: #f97316; }
+.user-statistic-icon.trophy { background: rgba(255, 255, 255, 0.3); color: #fff; }
+.user-statistic-icon.exp { background: rgba(251, 191, 36, 0.15); color: #f59e0b; }
+.user-statistic-icon.record-exp-icon { background: rgba(255, 255, 255, 0.3); color: #fff; }
+
+.user-statistic-label {
+  font-size: 0.95rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.user-statistic-card.record .user-statistic-label,
+.user-statistic-card.record-exp .user-statistic-label {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.user-statistic-value {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin-top: 0.25rem;
+}
+
+.user-statistic-card.record .user-statistic-value,
+.user-statistic-card.record-exp .user-statistic-value {
+  color: white;
+}
+
+.user-statistic-unlocked-container {
+  margin-top: 2rem;
+}
+
+.user-statistic-unlocked-title::before {
+  content: "";
+  font-size: 1.6rem;
+}
+
+.user-statistic-unlocked-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+}
+
+.user-statistic-unlocked-item {
+  background: white;
+  border-radius: 14px;
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.user-statistic-unlocked-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.user-statistic-unlocked-item i {
+  font-size: 1.8rem;
+  color: #667eea;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(102, 126, 234, 0.1);
+  border-radius: 50%;
+}
+
+.user-statistic-unlocked-label {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.user-statistic-unlocked-value {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-top: 0.25rem;
 }
 
 /* ===============================================

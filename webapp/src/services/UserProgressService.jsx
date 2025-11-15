@@ -101,14 +101,61 @@ export const UserProgressService = {
 
     async getCurrentUserProgress() {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/current`, {
+            const basicRes = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/current`, {
                 method: "GET"
             });
-            if (!res.ok) throw new Error("Cannot fetch current user");
-            return await res.json();
+            if (!basicRes.ok) throw new Error("Không thể lấy tiến trình cơ bản");
+            const basicProgress = await basicRes.json();
+            if (!basicProgress?._id) throw new Error("Không tìm thấy _id tiến trình");
+            const fullRes = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress/${basicProgress._id}`, {
+                method: "GET"
+            });
+            if (!fullRes.ok) {
+                const err = await fullRes.json().catch(() => ({}));
+                throw new Error(err.message || "Không thể lấy chi tiết tiến trình");
+            }
+            const progress = await fullRes.json();
+            hasShownAlert = false;
+            return progress;
         } catch (err) {
-            console.error("Error fetching current user progress:", err);
+            console.error("Error fetching full user progress:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời không tải được chi tiết",
+                    text: "Dữ liệu sẽ được hiển thị khi có kết nối.",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
             return null;
+        }
+    },
+
+    async getUserStatistics(type = "time", period = "week") {
+        try {
+            const query = new URLSearchParams({ type, period }).toString();
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/statistics?${query}`, {
+                method: "GET"
+            });
+            if (!res.ok) throw new Error("Cannot fetch statistics");
+            const result = await res.json();
+            hasShownAlert = false;
+            return result;
+        } catch (err) {
+            console.error("Error fetching statistics:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời không tải được thống kê",
+                    text: "Dữ liệu sẽ hiển thị khi có kết nối.",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+            return { data: [] };
         }
     },
 

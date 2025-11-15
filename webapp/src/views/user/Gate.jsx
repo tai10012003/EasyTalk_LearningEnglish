@@ -39,7 +39,7 @@ const Gate = () => {
                     completedGates: data.completedGates,
                     completedStages: data.completedStages,
                 });
-                setLeaderboard(data.leaderboard);
+                setLeaderboard(data?.leaderboard);
                 setDailyTasks([
                     "Hoàn thành 1 chặng",
                     "Học từ vựng mới: 5 từ",
@@ -62,9 +62,7 @@ const Gate = () => {
                         <AchievementPanel achievements={achievements} dailyTasks={dailyTasks} />
                     </div>
                     <div className="col-sm-6 col-lg-6 col-xl-6">
-                        <div className="section_tittle">
-                            <h4 className="journey-title">HÀNH TRÌNH: CƠ BẢN</h4>
-                        </div>
+                        <h3 className="your_gate_title">HÀNH TRÌNH: CƠ BẢN</h3>
                         {gates.map((gate) => (
                             <GateCard key={gate._id} gate={gate} />
                         ))}

@@ -179,7 +179,7 @@ class UserService {
     }
 
     generateAccessToken(user) {
-        return jwt.sign({ id: user._id, role: user.role, username: user.username }, config.jwt.secret, { expiresIn: "15m" });
+        return jwt.sign({ id: user._id, role: user.role, username: user.username, email: user.email }, config.jwt.secret, { expiresIn: "15m" });
     }
 
     generateRefreshToken(user) {

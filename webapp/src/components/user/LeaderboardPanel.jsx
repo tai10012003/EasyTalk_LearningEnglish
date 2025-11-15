@@ -12,7 +12,7 @@ function LeaderboardPanel({ leaderboard }) {
                 </tr>
             </thead>
             <tbody>
-                {leaderboard.map((entry, i) => (
+                {leaderboard?.map((entry, i) => (
                     <tr key={i}>
                         <td>{entry.username}</td>
                         <td>{entry.experiencePoints}</td>

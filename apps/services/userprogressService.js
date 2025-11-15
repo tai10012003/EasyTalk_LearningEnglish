@@ -68,6 +68,10 @@ class UserprogressService {
         }
     }
 
+    async getUserStatistics(userId, type = 'time', period = 'week') {
+        return await this.userprogressRepository.getUserStatistics(userId, type, period);
+    }
+
     async getDailyFlashcardGoal(userId) {
         return await this.userprogressRepository.getDailyGoal(userId);
     }

@@ -147,6 +147,18 @@ router.get("/api/current", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/statistics", verifyToken, async (req, res) => {
+    try {
+        const { type = 'time', period = 'week' } = req.query;
+        const userId = req.user.id;
+        const data = await userprogressService.getUserStatistics(userId, type, period);
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error("Statistics error:", err);
+        res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
 router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
     try {
         const userProgressId = req.params.id;

@@ -463,6 +463,36 @@ class UserprogressRepository {
         }));
     }
 
+    async getUserStatistics(userId, type = 'time', period = 'week') {
+        const userProgress = await this.findByUserId(userId);
+        if (!userProgress) return [];
+        const now = new Date();
+        let startDate;
+        if (period == 'week') {
+            const day = now.getDay();
+            const diff = now.getDate() - day + (day == 0 ? -6 : 1);
+            startDate = new Date(now);
+            startDate.setDate(diff);
+        } else if (period == 'month') {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        } else if (period == 'year') {
+            startDate = new Date(now.getFullYear(), 0, 1);
+        }
+        const dailyData = type == 'time' ? userProgress.dailyStudyTimes : userProgress.dailyExperiencePoints;
+        const result = [];
+        const current = new Date(startDate);
+        while (current <= now) {
+            const dateStr = current.toISOString().split('T')[0];
+            const value = dailyData?.[dateStr] || 0;
+            result.push({
+                date: dateStr,
+                value: type == 'time' ? parseFloat(value.toFixed(2)) : Math.round(value)
+            });
+            current.setDate(current.getDate() + 1);
+        }
+        return result;
+    }
+
     _getDateKeysForPeriod(period) {
         const now = new Date();
         const keys = [];
