@@ -3,7 +3,6 @@ const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const { FlashcardService } = require("./../services");
 const { UserprogressService } = require("./../services");
-const { cacheMiddleware } = require('../util/cacheMiddleware');
 const flashcardService = new FlashcardService();
 const userprogressService = new UserprogressService();
 const multer = require("multer");
@@ -14,7 +13,7 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-router.get("/api/flashcard-list", verifyToken, cacheMiddleware(300), async (req, res) => {
+router.get("/api/flashcard-list", verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
@@ -60,7 +59,7 @@ router.put("/flashcardlist/:id", verifyToken, async (req, res) => {
   }
 });
 
-router.get("/api/flashcardlist/:id", verifyToken, cacheMiddleware(300), async (req, res) => {
+router.get("/api/flashcardlist/:id", verifyToken, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;

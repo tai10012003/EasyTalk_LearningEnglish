@@ -59,10 +59,6 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-.admin-sidebar-logo {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-}
-
 .admin-logo-header {
   display: flex;
   align-items: center;
@@ -183,6 +179,39 @@
 
 .admin-sidebar-wrapper {
   padding: 10px 0;
+  max-height: calc(100vh - 100px);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.admin-sidebar-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-sidebar-wrapper::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.admin-sidebar-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.admin-sidebar-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.admin-wrapper.sidebar-collapsed .admin-sidebar-wrapper {
+  overflow-y: visible;
+  max-height: none;
+}
+
+.admin-sidebar-logo {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .admin-sidebar-content {
@@ -244,20 +273,6 @@
   transform: translateX(2px);
 }
 
-.admin-nav-item a:hover::before,
-.admin-nav-link:hover::before {
-  height: 60%;
-}
-
-.admin-nav-item.active a {
-  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.05) 100%);
-  color: #60a5fa;
-  font-weight: 500;
-}
-
-.admin-nav-item.active a::before {
-  height: 80%;
-}
 
 .admin-nav-item a i,
 .admin-nav-link i {
@@ -373,6 +388,7 @@
   color: rgba(255, 255, 255, 0.7);
   display: block;
   transition: all 0.3s ease;
+  margin: 5px 0;
 }
 
 .admin-nav-collapse li a:hover {
@@ -381,16 +397,33 @@
   padding-left: 52px;
 }
 
+.admin-nav-item.active > .admin-nav-link::before,
+.admin-nav-item.active > a::before {
+  height: 80%;
+}
+
+.admin-nav-collapse li.active a,
+.admin-nav-collapse li.active {
+  background: linear-gradient(90deg, rgba(59, 130, 246, 0.15) 0%, rgba(96, 165, 250, 0.05) 100%) !important;
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+.admin-nav-collapse li.active a::before {
+  content: '';
+  position: absolute;
+  left: 38px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 60%;
+  background: #60a5fa;
+  border-radius: 2px;
+}
+
 .admin-sub-item {
   position: relative;
   padding-left: 12px;
-}
-
-.admin-sub-item::before {
-  content: '•';
-  position: absolute;
-  left: 0;
-  color: #60a5fa;
 }
 
 /* === NAVBAR === */
