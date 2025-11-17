@@ -1,8 +1,9 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 
 const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
     const [flipped, setFlipped] = useState(false);
+    const mcQuestionRef = useRef(null);
     const [userAnswer, setUserAnswer] = useState("");
     const [status, setStatus] = useState(null);
     const [selected, setSelected] = useState(null);
@@ -56,19 +57,20 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
     };
 
     const mcQuestion = useMemo(() => {
-        if (!card || !card.word || !card.exampleSentence) return null;
-        if (allWords.length < 4) return null;
-        const wordPattern = new RegExp(
-            `\\b${card.word}(s|d|ed|ing)?\\b`, 
-            "gi"
-        );
+        if (!card || !allWords.length) return null;
+        if (mcQuestionRef.current && mcQuestionRef.current.cardId == card._id) {
+            return mcQuestionRef.current.data;
+        }
+        const wordPattern = new RegExp(`\\b${card.word}(s|d|ed|ing)?\\b`, "gi");
         const question = card.exampleSentence.replace(wordPattern, "______");
         const correctAnswer = card.word;
-        let wrongAnswers = allWords.filter((w) => w !== card.word);
-        wrongAnswers = wrongAnswers.sort(() => 0.5 - Math.random()).slice(0, 3);
-        if (wrongAnswers.length < 3) return null;
-        const choices = [correctAnswer, ...wrongAnswers].sort(() => 0.5 - Math.random());
-        return { question, choices, correctAnswer };
+        const distractors = allWords.filter(w => w !== card.word).sort(() => 0.5 - Math.random()).slice(0, 3);
+        if (distractors.length < 3) return null;
+        const allChoices = [correctAnswer, ...distractors];
+        const shuffled = [...allChoices].sort(() => 0.5 - Math.random());
+        const result = { question, choices: shuffled, correctAnswer };
+        mcQuestionRef.current = { cardId: card._id, data: result };
+        return result;
     }, [card, allWords]);
 
     const handleChoiceClick = (choice) => {

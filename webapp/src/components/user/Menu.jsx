@@ -202,6 +202,8 @@ function Menu() {
   const getNotificationIcon = (type) => {
     switch (type) {
       case 'success': return '✅';
+      case 'champion': return '🏆';
+      case 'achieve': return '🎖️';
       case 'warning': return '⚠️';
       case 'promo': return '🎁';
       case 'system': return '⚙️';

@@ -82,6 +82,8 @@ function NotificationList({ fetchData, deleteItem, title, dataKey }) {
         const badges = {
             info: { color: '#17a2b8', label: 'Thông tin' },
             success: { color: '#28a745', label: 'Thành công' },
+            champion: { color: '#b8860b', label: 'Vô địch' },
+            achieve: { color: '#b81307ff', label: 'Thành tựu' },
             warning: { color: '#ffc107', label: 'Cảnh báo', textColor: '#000' },
             promo: { color: '#e83e8c', label: 'Khuyến mãi' },
             system: { color: '#6c757d', label: 'Hệ thống' },

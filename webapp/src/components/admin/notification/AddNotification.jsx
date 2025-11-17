@@ -136,6 +136,8 @@ const AddNotification = ({ isOpen, onClose, onCreated }) => {
                             >
                                 <option value="info">📋 Thông tin (Info)</option>
                                 <option value="success">✅ Thành công (Success)</option>
+                                <option value="champion">🏆 Vô địch (Champion)</option>
+                                <option value="achieve">🎖️ Thành tựu (Achieve)</option>
                                 <option value="warning">⚠️ Cảnh báo (Warning)</option>
                                 <option value="promo">🎁 Khuyến mãi (Promo)</option>
                                 <option value="system">⚙️ Hệ thống (System)</option>

@@ -1,11 +1,16 @@
 import React, { useState } from "react";
 
+const getVietnamDate = (date) => {
+    const vnDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+    const y = vnDate.getFullYear();
+    const m = String(vnDate.getMonth() + 1).padStart(2, '0');
+    const d = String(vnDate.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
 const FlashCardGraph = ({ dailyReviews }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const today = new Date();
-    const numWeeks = 52;
-    const weeks = [];
-    const visibleDayLabels = ['T2', '', 'T4', '', 'T6', '', 'CN'];
 
     const dayOfWeek = today.getDay();
     const offsetToMonday = (dayOfWeek == 0 ? -6 : 1 - dayOfWeek);
@@ -16,15 +21,12 @@ const FlashCardGraph = ({ dailyReviews }) => {
     const monthPositions = [];
     let lastMonth = -1;
 
-    for (let week = 0; week < numWeeks; week++) {
+    for (let week = 0; week < 52; week++) {
         const weekStartDate = new Date(startDate);
         weekStartDate.setDate(startDate.getDate() + week * 7);
         const month = weekStartDate.getMonth();
         const year = weekStartDate.getFullYear();
-        const monthNames = [
-            'Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6',
-            'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'
-        ];
+        const monthNames = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
         if (month !== lastMonth) {
             const label = `${monthNames[month]}/${year.toString().slice(-2)}`;
             monthLabels.push(label);
@@ -33,6 +35,7 @@ const FlashCardGraph = ({ dailyReviews }) => {
         }
     }
 
+    const visibleDayLabels = ['T2', '', 'T4', '', 'T6', '', 'CN'];
     const labels = visibleDayLabels.map((label, idx) => (
         <div key={idx} className="flashcard-contrib-day-label">{label}</div>
     ));
@@ -47,17 +50,18 @@ const FlashCardGraph = ({ dailyReviews }) => {
         return `hsl(120, 70%, ${lightness}%)`;
     };
 
-    for (let week = 0; week < numWeeks; week++) {
+    const weeks = [];
+    for (let week = 0; week < 52; week++) {
         const weekCol = [];
         for (let row = 0; row < 7; row++) {
             const date = new Date(startDate);
             date.setDate(startDate.getDate() + week * 7 + row);
-            const dateStr = date.toISOString().split('T')[0];
+            const dateStr = getVietnamDate(date);
             const count = dailyReviews[dateStr] || 0;
             const color = getColor(count);
             weekCol.push(
                 <div
-                    key={row}
+                    key={`${week}-${row}`}
                     className="flashcard-contrib-square"
                     style={{ backgroundColor: color }}
                     title={`${dateStr}: ${count} lần ôn tập`}

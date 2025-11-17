@@ -1,6 +1,6 @@
-import React, { useEffect, useState, useRef } from "react";
-import { UNSAFE_NavigationContext } from "react-router-dom";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
@@ -12,15 +12,60 @@ const FlashCardReview = () => {
     const navigate = useNavigate();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const allowNavigationRef = useRef(false);
-    const enterTimeRef = useRef(Date.now());
-    const allowExitRef = useRef(false);
+    const [activeTime, setActiveTime] = useState(0);
+    const lastInteractionRef = useRef(Date.now());
+    const intervalRef = useRef(null);
+    const hasRecordedRef = useRef(false);
     const [flashcards, setFlashcards] = useState([]);
-    const [listName, setListName] = useState(""); 
+    const [listName, setListName] = useState("");
     const [currentIndex, setCurrentIndex] = useState(0);
     const [mode, setMode] = useState("flip");
     const [isOwner, setIsOwner] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    
+    const [showActionButtons, setShowActionButtons] = useState(false);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        console.log("Tương tác phát hiện → tiếp tục đếm thời gian học Flashcard");
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, []);
+
+    const startActiveTimer = useCallback(() => {
+        if (intervalRef.current) return;
+        intervalRef.current = setInterval(() => {
+            const now = Date.now();
+            const inactiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+            if (inactiveSeconds < 60) {
+                setActiveTime(prev => prev + 1);
+            } else {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        }, 1000);
+    }, []);
+
+    useEffect(() => {
+        const events = [
+            'mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart',
+            'click', 'keydown', 'keyup', 'touchmove'
+        ];
+        events.forEach(event => {
+            window.addEventListener(event, handleUserInteraction, true);
+        });
+        startActiveTimer();
+        return () => {
+            events.forEach(event => {
+                window.removeEventListener(event, handleUserInteraction, true);
+            });
+            if (intervalRef.current) {
+                clearInterval(intervalRef.current);
+                intervalRef.current = null;
+            }
+        };
+    }, [handleUserInteraction, startActiveTimer]);
+
     useEffect(() => {
         document.title = "Ôn tập flashcard - EasyTalk";
         const load = async () => {
@@ -28,7 +73,7 @@ const FlashCardReview = () => {
             try {
                 const data = await FlashCardService.fetchReview(id);
                 setFlashcards(data.flashcards);
-                setListName(data.flashcardList.name);  
+                setListName(data.flashcardList.name);
                 setIsOwner(data.isOwner || false);
                 setCurrentIndex(0);
                 randomMode();
@@ -39,8 +84,9 @@ const FlashCardReview = () => {
                     text: err.message,
                     confirmButtonText: "Quay lại",
                 }).then(() => navigate("/flashcards"));
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
         load();
     }, [id]);
@@ -50,7 +96,7 @@ const FlashCardReview = () => {
         const originalPush = navigator.push;
         const originalReplace = navigator.replace;
         const handleNavigation = async (originalMethod, args) => {
-            if (!allowNavigationRef.current && flashcards.length > 0 && !allowExitRef.current) {
+            if (!allowNavigationRef.current && flashcards.length > 0) {
                 const result = await Swal.fire({
                     icon: "warning",
                     title: "Cảnh báo",
@@ -63,7 +109,6 @@ const FlashCardReview = () => {
                 });
                 if (result.isConfirmed) {
                     allowNavigationRef.current = true;
-                    allowExitRef.current = true;
                     originalMethod.apply(navigator, args);
                 }
             } else {
@@ -76,11 +121,11 @@ const FlashCardReview = () => {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [flashcards.length]);
+    }, [navigator, flashcards.length]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
-            if (flashcards.length > 0 && !allowExitRef.current) {
+            if (flashcards.length > 0 && !allowNavigationRef.current) {
                 e.preventDefault();
                 e.returnValue = '';
                 return '';
@@ -100,11 +145,19 @@ const FlashCardReview = () => {
         setMode(modes[Math.floor(Math.random() * modes.length)]);
     };
 
+    const triggerButtonDelay = useCallback(() => {
+        setShowActionButtons(false);
+        setTimeout(() => {
+            setShowActionButtons(true);
+        }, 3000);
+    }, []);
+
     const handleNext = () => {
         if (flashcards.length == 0) return;
         const nextIdx = Math.floor(Math.random() * flashcards.length);
         setCurrentIndex(nextIdx);
         randomMode();
+        triggerButtonDelay();
     };
 
     const handleNextWeighted = () => {
@@ -126,6 +179,7 @@ const FlashCardReview = () => {
         }
         setCurrentIndex(idx);
         randomMode();
+        triggerButtonDelay();
     };
 
     const handleRate = async (difficulty) => {
@@ -170,20 +224,11 @@ const FlashCardReview = () => {
             const updated = flashcards.filter((_, idx) => idx !== currentIndex);
             setFlashcards(updated);
             if (updated.length == 0) {
-                allowExitRef.current = true;
-                const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
-                if (seconds >= 30) {
-                    await UserProgressService.recordStudyTime(seconds);
-                }
-                Swal.fire({
-                    icon: "success",
-                    title: "🎉 Hoàn thành!",
-                    text: "Bạn đã hoàn thành luyện tập!",
-                    confirmButtonText: "OK",
-                }).then(() => navigate(`/flashcards/flashcardlist/${id}`));
+                await finalizeAndExit();
             } else {
                 setCurrentIndex(0);
                 randomMode();
+                triggerButtonDelay();
                 Swal.fire({
                     icon: "success",
                     title: "Đã xóa từ vựng",
@@ -194,6 +239,12 @@ const FlashCardReview = () => {
             }
         }
     };
+
+    useEffect(() => {
+        if (flashcards.length > 0) {
+            triggerButtonDelay();
+        }
+    }, [flashcards.length, triggerButtonDelay]);
 
     const handleCheckAnswer = (answer, correct) => {
         if (answer.toLowerCase() == correct.toLowerCase()) {
@@ -212,6 +263,27 @@ const FlashCardReview = () => {
         }
     };
 
+    const finalizeAndExit = async () => {
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+            intervalRef.current = null;
+        }
+        const now = Date.now();
+        const lastActiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);
+        const finalActiveTime = activeTime + (lastActiveSeconds < 60 ? lastActiveSeconds : 0);
+        if (finalActiveTime >= 60 && !hasRecordedRef.current) {
+            await UserProgressService.recordStudyTime(finalActiveTime);
+            hasRecordedRef.current = true;
+        }
+        allowNavigationRef.current = true;
+        Swal.fire({
+            icon: "success",
+            title: "🎉 Hoàn thành!",
+            text: "Bạn đã hoàn thành luyện tập flashcard!",
+            confirmButtonText: "OK",
+        }).then(() => navigate(`/flashcards/flashcardlist/${id}`));
+    };
+
     const handleStop = async () => {
         const result = await Swal.fire({
             title: "Dừng học?",
@@ -224,12 +296,7 @@ const FlashCardReview = () => {
             cancelButtonColor: "#3085d6",
         });
         if (result.isConfirmed) {
-            allowExitRef.current = true;
-            const seconds = Math.round((Date.now() - enterTimeRef.current) / 1000);
-            if (seconds >= 30) {
-                await UserProgressService.recordStudyTime(seconds);
-            }
-            navigate(`/flashcards/flashcardlist/${id}`);
+            await finalizeAndExit();
         }
     };
 
@@ -250,28 +317,43 @@ const FlashCardReview = () => {
                 onCheckAnswer={handleCheckAnswer}
                 allWords={flashcards.map(c => c.word)}
             />
-            <div className="flashcard-review-actions">
-                {isOwner ? (
+            <div className="flashcard-review-actions" style={{ marginTop: "30px" }}>
+                {showActionButtons ? (
                     <>
-                        <button className="btn_1 easy" onClick={() => handleRate(1)}>
-                            <i className="fas fa-thumbs-up"></i> Dễ
-                        </button>
-                        <button className="btn_1 normal" onClick={() => handleRate(2)}>
-                            <i className="fas fa-minus"></i> Thường
-                        </button>
-                        <button className="btn_1 hard" onClick={() => handleRate(3)}>
-                            <i className="fas fa-thumbs-down"></i> Khó
-                        </button>
+                        {isOwner ? (
+                            <>
+                                <button className="btn_1 easy" onClick={() => handleRate(1)}>
+                                    <i className="fas fa-thumbs-up"></i> Dễ
+                                </button>
+                                <button className="btn_1 normal" onClick={() => handleRate(2)}>
+                                    <i className="fas fa-minus"></i> Thường
+                                </button>
+                                <button className="btn_1 hard" onClick={() => handleRate(3)}>
+                                    <i className="fas fa-thumbs-down"></i> Khó
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button className="btn_1 danger" onClick={handleRemove}>
+                                    <i className="fas fa-check-circle"></i> Đã nhớ từ vựng
+                                </button>
+                                <button className="btn_1 primary" onClick={handleNext}>
+                                    <i className="fas fa-arrow-right"></i> Tiếp theo
+                                </button>
+                            </>
+                        )}
                     </>
                 ) : (
-                    <>
-                        <button className="btn_1 danger" onClick={handleRemove}>
-                            <i className="fas fa-check-circle"></i> Đã nhớ từ vựng
-                        </button>
-                        <button className="btn_1 primary" onClick={handleNext}>
-                            <i className="fas fa-arrow-right"></i> Tiếp theo
-                        </button>
-                    </>
+                    <div style={{ 
+                        height: "60px", 
+                        display: "flex", 
+                        alignItems: "center", 
+                        justifyContent: "center",
+                        color: "#999",
+                        fontStyle: "italic"
+                    }}>
+                        Đang tải câu hỏi tiếp theo... (3s)
+                    </div>
                 )}
             </div>
         </div>
