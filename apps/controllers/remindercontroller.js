@@ -7,11 +7,13 @@ const reminderService = new ReminderService();
 router.get("/api/reminder-list", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;
-        const reminders = await reminderService.getRemindersByUserId(userId);
-        res.json({ reminders });
-    } catch (error) {
-        console.error("Error in fetching reminders:", error);
-        res.status(500).json({ message: "Có lỗi xảy ra khi lấy danh sách nhắc nhở", error: error.message });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const result = await reminderService.getReminders(userId, page, limit);
+        res.json(result);
+    } catch (err) {
+        console.error("Get reminders error:", err);
+        res.status(500).json({ message: "Lỗi server" });
     }
 });
 

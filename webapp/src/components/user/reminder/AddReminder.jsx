@@ -1,16 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ReminderService } from "@/services/ReminderService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const AddReminder = ({ isOpen, onClose, onCreated }) => {
-    const [email, setEmail] = useState("");
+    const [userEmail, setUserEmail] = useState("");
     const [reminderTime, setReminderTime] = useState("");
     const [frequency, setFrequency] = useState("Once");
     const [additionalInfo, setAdditionalInfo] = useState("");
     const [loading, setLoading] = useState(false);
 
+    useEffect(() => {
+        if (isOpen) {
+            const currentUser = AuthService.getCurrentUser();
+            setUserEmail(currentUser?.email);
+        }
+    }, [isOpen]);
+
     const resetForm = () => {
-        setEmail("");
         setReminderTime("");
         setFrequency("Once");
         setAdditionalInfo("");
@@ -18,10 +25,6 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email.trim()) {
-            Swal.fire({ icon: "warning", title: "Chú ý!", text: "Vui lòng nhập email!" });
-            return;
-        }
         if (!reminderTime) {
             Swal.fire({ icon: "warning", title: "Chú ý!", text: "Vui lòng chọn thời gian nhắc!" });
             return;
@@ -33,7 +36,7 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
         }
         setLoading(true);
         try {
-            const payload = { email, reminderTime, frequency, additionalInfo };
+            const payload = { email: userEmail, reminderTime, frequency, additionalInfo };
             const data = await ReminderService.addReminder(payload);
             await Swal.fire({ icon: "success", title: "Thành công!", text: "Nhắc nhở đã được thêm thành công!" });
             resetForm();
@@ -60,14 +63,9 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
                     <div className="custom-modal-body">
                         <div className="mb-3">
                             <label className="form-label">Email nhận thông báo:</label>
-                            <input
-                                type="email"
-                                className="form-control"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                placeholder="vd: you@example.com"
-                                required
-                            />
+                            <div className="form-control">
+                                {userEmail}
+                            </div>
                         </div>
                         <div className="mb-3">
                             <label className="form-label">Thời gian nhắc (local):</label>

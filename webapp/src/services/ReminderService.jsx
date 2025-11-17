@@ -5,16 +5,16 @@ const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
 
 export const ReminderService = {
-    async fetchReminders() {
+    async fetchReminders(page = 1, limit = 10) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/reminder/api/reminder-list`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/reminder/api/reminder-list?page=${page}&limit=${limit}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const data = await res.json();
             hasShownAlert = false;
             console.log("Reminders fetched successfully:", data);
-            return data.reminders;
+            return data;
         } catch (error) {
             console.error("Error fetching reminders:", error.message);
             if (!hasShownAlert) {
@@ -25,7 +25,11 @@ export const ReminderService = {
                     text: "Không thể tải danh sách nhắc nhở. Vui lòng kiểm tra kết nối server.",
                 });
             }
-            return [];
+            return {
+                reminders: [],
+                currentPage: 1,
+                totalPages: 1
+            };
         }
     },
 

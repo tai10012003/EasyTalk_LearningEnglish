@@ -9,40 +9,109 @@ import Swal from "sweetalert2";
 function Reminder() {
     const [reminders, setReminders] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
     const [showAdd, setShowAdd] = useState(false);
     const [showUpdate, setShowUpdate] = useState(false);
     const [selectedReminder, setSelectedReminder] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const limit = 6;
 
-    const loadReminders = async () => {
+    useEffect(() => {
+        document.title = "Nhắc nhở học tập - EasyTalk";
+        ReminderService.resetAlertFlag();
+        const fetchData = async () => {
+            setIsLoading(true);
+            try {
+                const data = await ReminderService.fetchReminders(currentPage, limit);
+                setReminders(data.reminders || []);
+                setCurrentPage(data.currentPage || 1);
+                setTotalPages(data.totalPages || 1);
+            } catch (err) {
+                console.error("Load reminders error:", err);
+                setReminders([]);
+                setCurrentPage(1);
+                setTotalPages(1);
+                Swal.fire({ icon: "error", title: "Lỗi", text: "Không thể tải nhắc nhở." });
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchData();
+    }, [currentPage]);
+
+    const handleCreated = () => {
+        setCurrentPage(1);
+        loadReminders(1);
+    };
+
+    const handleUpdated = () => loadReminders(currentPage);
+
+    const handleDeleted = () => {
+        if (reminders.length == 1 && currentPage > 1) {
+            setCurrentPage(currentPage - 1);
+        } else {
+            loadReminders(currentPage);
+        }
+    };
+
+    const loadReminders = async (page = 1) => {
         setIsLoading(true);
         try {
-            const data = await ReminderService.fetchReminders();
-            const list = Array.isArray(data) ? data : (data.reminders || data);
-            setReminders(list || []);
+            const data = await ReminderService.fetchReminders(page, limit);
+            setReminders(data.reminders || []);
+            setCurrentPage(data.currentPage || 1);
+            setTotalPages(data.totalPages || 1);
         } catch (err) {
             console.error("Load reminders error:", err);
+            setReminders([]);
+            setCurrentPage(1);
+            setTotalPages(1);
             Swal.fire({ icon: "error", title: "Lỗi", text: "Không thể tải nhắc nhở." });
         } finally {
             setIsLoading(false);
         }
     };
 
-    useEffect(() => {
-        loadReminders();
-    }, []);
-
-    const handleCreated = () => loadReminders();
-    const handleUpdated = () => loadReminders();
-    const handleDeleted = () => loadReminders();
-
     const openUpdate = (reminder) => {
         setSelectedReminder(reminder);
         setShowUpdate(true);
     };
 
-    if (isLoading) return <LoadingScreen />;
-    
+    const renderPagination = () => {
+        const pages = [];
+        if (currentPage > 1) {
+            pages.push(
+                <li className="page-item" key="prev">
+                    <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>
+                        Previous
+                    </button>
+                </li>
+            );
+        }
+        const startPage = Math.max(1, currentPage - 2);
+        const endPage = Math.min(totalPages, currentPage + 2);
+        for (let i = startPage; i <= endPage; i++) {
+            pages.push(
+                <li className={`page-item ${i === currentPage ? "active" : ""}`} key={i}>
+                    <button className="page-link" onClick={() => setCurrentPage(i)}>
+                        {i}
+                    </button>
+                </li>
+            );
+        }
+        if (currentPage < totalPages) {
+            pages.push(
+                <li className="page-item" key="next">
+                    <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>
+                        Next
+                    </button>
+                </li>
+            );
+        }
+        return pages;
+    };
+
     return (
         <>
             <div className="lesson-container">
@@ -60,7 +129,7 @@ function Reminder() {
                             <i className="fas fa-plus"></i> Thêm nhắc nhở
                         </button>
                     </div>
-                    { reminders.length > 0 ? (
+                    {reminders.length > 0 ? (
                         <div className="container">
                             <div className="row">
                                 {reminders.map((r) => (
@@ -73,7 +142,7 @@ function Reminder() {
                     )}
                     <nav aria-label="Page navigation">
                         <ul className="pagination justify-content-center" id="pagination-controls">
-                            {/* {renderPagination()} */}
+                            {renderPagination()}
                         </ul>
                     </nav>
                 </div>
@@ -120,6 +189,7 @@ function Reminder() {
                     </div>
                 </div>
             )}
+            {isLoading && <LoadingScreen />}
         </>
     );
 }

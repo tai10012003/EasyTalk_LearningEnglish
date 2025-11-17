@@ -3,6 +3,7 @@ const cron = require('node-cron');
 const config = require('../config/setting');
 const { ReminderRepository } = require('./../repositories');
 const NotificationService = require("./notificationService");
+const { getVietnamDate } = require('../util/dateFormat');
 
 class ReminderService {
     constructor() {
@@ -34,29 +35,35 @@ class ReminderService {
     validateReminderTime(reminderTime) {
         const now = new Date();
         const reminderDate = new Date(reminderTime);
-        if (reminderDate <= now) {
-            throw new Error("Thời gian nhắc nhở phải ở trong tương lai.");
+        const nowVN = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+        const reminderVN = new Date(reminderDate.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+        if (reminderVN <= nowVN) {
+            throw new Error("Thời gian nhắc nhở phải ở trong tương lai (giờ Việt Nam).");
         }
+    }
+
+    async getReminders(userId, page = 1, limit = 10) {
+        return await this.reminderRepository.findAll(userId, page, limit);
     }
 
     async createReminder(userId, email, reminderTime, frequency, additionalInfo) {
         this.validateReminderTime(reminderTime);
+        const vnDate = new Date(reminderTime);
+        const vnDateStr = getVietnamDate(vnDate);
+        const [y, m, d] = vnDateStr.split('-');
+        vnDate.setFullYear(parseInt(y), parseInt(m) - 1, parseInt(d));
         const reminder = {
             user: userId,
             email,
-            reminderTime,
-            frequency,
-            additionalInfo,
+            reminderTime: vnDate.toISOString(),
+            frequency: frequency,
+            additionalInfo: additionalInfo,
             status: "active",
         };
         const insertedId = await this.reminderRepository.createReminder(reminder);
         const savedReminder = { ...reminder, _id: insertedId };
         this.scheduleEmail(savedReminder);
         return insertedId;
-    }
-
-    async getRemindersByUserId(userId) {
-        return await this.reminderRepository.findRemindersByUserId(userId);
     }
 
     async getReminderById(reminderId) {
@@ -66,7 +73,14 @@ class ReminderService {
     async updateReminder(reminderId, updatedFields) {
         const reminder = await this.getReminderById(reminderId);
         if (!reminder) throw new Error("Reminder không tồn tại");
-        if (updatedFields.reminderTime) this.validateReminderTime(updatedFields.reminderTime);
+        if (updatedFields.reminderTime) {
+            this.validateReminderTime(updatedFields.reminderTime);
+            const vnDate = new Date(updatedFields.reminderTime);
+            const vnDateStr = getVietnamDate(vnDate);
+            const [y, m, d] = vnDateStr.split('-');
+            vnDate.setFullYear(parseInt(y), parseInt(m) - 1, parseInt(d));
+            updatedFields.reminderTime = vnDate.toISOString();
+        }
         const success = await this.reminderRepository.updateReminder(reminderId, updatedFields);
         if (success) {
             const updatedReminder = await this.getReminderById(reminderId);
@@ -83,17 +97,23 @@ class ReminderService {
 
     getCronExpression(reminder) {
         const date = new Date(reminder.reminderTime);
-        const min = date.getMinutes();
-        const hour = date.getHours();
+        const vnDateStr = getVietnamDate(date);
+        const [year, month, day] = vnDateStr.split('-').map(Number);
+        const vnDate = new Date(date);
+        vnDate.setFullYear(year, month - 1, day);
+        const min = vnDate.getMinutes();
+        const hour = vnDate.getHours();
+        const dom = vnDate.getDate();
+        const dow = vnDate.getDay();
         switch (reminder.frequency?.toLowerCase()) {
             case "daily":
                 return `${min} ${hour} * * *`;
             case "weekly":
-                return `${min} ${hour} * * 1`;
+                return `${min} ${hour} * * ${dow}`;
             case "monthly":
-                return `${min} ${hour} ${date.getDate()} * *`;
+                return `${min} ${hour} ${dom} * *`;
             default:
-                return `${min} ${hour} ${date.getDate()} ${date.getMonth() + 1} *`;
+                return `${min} ${hour} ${dom} ${month} *`;
         }
     }
 
@@ -102,8 +122,8 @@ class ReminderService {
             const cronExpression = this.getCronExpression(reminder);
             const job = cron.schedule(
                 cronExpression,
-                () => {
-                    this.sendEmail(
+                async () => {
+                    await this.sendEmail(
                         reminder.email,
                         reminder.reminderTime,
                         reminder.frequency,
@@ -116,7 +136,7 @@ class ReminderService {
                     ) {
                         job.stop();
                         this.cronJobs.delete(reminder._id.toString());
-                        this.reminderRepository.updateReminder(reminder._id, { status: "completed" });
+                        await this.reminderRepository.updateReminder(reminder._id, { status: "completed" });
                     }
                 },
                 {
@@ -125,7 +145,7 @@ class ReminderService {
                 }
             );
             this.cronJobs.set(reminder._id.toString(), job);
-            console.log(`⏰ Scheduled reminder: ${reminder._id} (${reminder.frequency})`);
+            console.log(`⏰ Scheduled reminder: ${reminder._id} → ${cronExpression} (VN Time) ${reminder.frequency})`);
         } catch (err) {
             console.error("Error scheduling reminder:", err);
         }
@@ -140,7 +160,15 @@ class ReminderService {
         }
     }
 
-    sendEmail(email, reminderTime, frequency, additionalInfo, userId = null) {
+    async sendEmail(email, reminderTime, frequency, additionalInfo, userId = null) {
+        const vnTime = new Date(reminderTime).toLocaleString("vi-VN", {
+            timeZone: "Asia/Ho_Chi_Minh",
+            hour: '2-digit',
+            minute: '2-digit',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric'
+        });
         const mailOptions = {
             from: config.email.user,
             to: email,
@@ -149,7 +177,7 @@ class ReminderService {
                 <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 10px; color: #333;">
                     <h2 style="color: #4CAF50; text-align: center;">⏰ Đã đến giờ học rồi!</h2>
                     <p>Xin chào bạn 👋,</p>
-                    <p>Bạn đã đặt lời nhắc học tập vào lúc <strong>${reminderTime}</strong> (<em>${frequency}</em>).</p>
+                    <p>Bạn đã đặt lời nhắc học tập vào lúc <strong>${vnTime}</strong> (<em>${frequency}</em>).</p>
                     <p style="margin-top: 10px;"><strong>Lời nhắn bạn đã để lại cho chính mình:</strong></p>
                     <blockquote style="border-left: 4px solid #4CAF50; padding-left: 10px; color: #555; font-style: italic;">
                         ${additionalInfo || "Không có lời nhắn nào, nhưng EasyTalk tin rằng bạn sẽ làm tốt hôm nay!"}
@@ -171,20 +199,20 @@ class ReminderService {
         this.transporter.sendMail(mailOptions, async (error, info) => {
             if (error) {
                 console.error("Lỗi gửi email:", error);
-            } else {
-                console.log("✅ Email đã gửi:", info.response);
-                if (userId) {
-                    try {
-                        await this.notificationService.createNotification(
-                            userId,
-                            "Email nhắc nhở đã gửi!",
-                            `Email nhắc nhở học tập vào lúc ${reminderTime} (${frequency}) đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.`,
-                            "system"
-                        );
-                        console.log(`🔔 Notification đã tạo cho user ${userId}`);
-                    } catch (err) {
-                        console.error("❌ Lỗi tạo notification:", err);
-                    }
+                return;
+            }
+            console.log("Email đã gửi:", info.response);
+            if (userId) {
+                try {
+                    await this.notificationService.createNotification(
+                        userId,
+                        "Email nhắc nhở đã gửi!",
+                        `Email nhắc nhở học tập vào lúc ${vnTime} (${frequency}) đã được gửi đến email của bạn. Vui lòng kiểm tra hộp thư.`,
+                        "system"
+                    );
+                    console.log(`🔔 Notification đã tạo cho user ${userId}`);
+                } catch (err) {
+                    console.error("❌ Lỗi tạo notification:", err);
                 }
             }
         });

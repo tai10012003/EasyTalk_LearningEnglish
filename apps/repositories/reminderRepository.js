@@ -18,8 +18,14 @@ class ReminderRepository {
         return result.insertedId;
     }
 
-    async findRemindersByUserId(userId) {
-        return await this.remindersCollection.find({ user: userId }).toArray();
+    async findAll(userId, page = 1, limit = 10) {
+        const skip = (page - 1) * limit;
+        const filter = { user: userId };
+        const [reminders, total] = await Promise.all([
+            this.remindersCollection.find(filter).sort({ reminderTime: -1 }).skip(skip).limit(limit).toArray(),
+            this.remindersCollection.countDocuments(filter)
+        ]);
+        return { reminders, total, currentPage: page, totalPages: Math.ceil(total / limit) };
     }
 
     async findReminderById(reminderId) {
