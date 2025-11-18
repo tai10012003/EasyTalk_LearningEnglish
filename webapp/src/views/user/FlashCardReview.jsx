@@ -22,8 +22,9 @@ const FlashCardReview = () => {
     const [mode, setMode] = useState("flip");
     const [isOwner, setIsOwner] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
-    const [showActionButtons, setShowActionButtons] = useState(false);
+    const [readyForActions, setReadyForActions] = useState(false);
     const pendingUpdatesRef = useRef([]);
+    const lastModeRef = useRef(null);
 
     const handleUserInteraction = useCallback(() => {
         lastInteractionRef.current = Date.now();
@@ -137,27 +138,32 @@ const FlashCardReview = () => {
         };
     }, [flashcards.length]);
 
+    useEffect(() => {
+        lastModeRef.current = null;
+    }, [flashcards.length]);
+
     const randomMode = () => {
         let modes = ["flip", "choice", "fill"];
         if (flashcards.length < 4) {
             modes = modes.filter(m => m !== "choice");
         }
-        setMode(modes[Math.floor(Math.random() * modes.length)]);
+        if (modes.length > 1 && lastModeRef.current && modes.includes(lastModeRef.current)) {
+            const filtered = modes.filter(m => m !== lastModeRef.current);
+            if (Math.random() < 0.8) {
+                modes = filtered;
+            }
+        }
+        const selectedMode = modes[Math.floor(Math.random() * modes.length)];
+        lastModeRef.current = selectedMode;
+        setMode(selectedMode);
     };
-
-    const triggerButtonDelay = useCallback(() => {
-        setShowActionButtons(false);
-        setTimeout(() => {
-            setShowActionButtons(true);
-        }, 3000);
-    }, []);
 
     const handleNext = () => {
         if (flashcards.length == 0) return;
         const nextIdx = Math.floor(Math.random() * flashcards.length);
         setCurrentIndex(nextIdx);
         randomMode();
-        triggerButtonDelay();
+        setReadyForActions(false)
     };
 
     const handleNextWeighted = () => {
@@ -179,7 +185,7 @@ const FlashCardReview = () => {
         }
         setCurrentIndex(idx);
         randomMode();
-        triggerButtonDelay();
+        setReadyForActions(false);
     };
 
     const handleRate = async (difficulty) => {
@@ -225,7 +231,7 @@ const FlashCardReview = () => {
             } else {
                 setCurrentIndex(0);
                 randomMode();
-                triggerButtonDelay();
+                setReadyForActions(false);
                 Swal.fire({
                     icon: "success",
                     title: "Đã xóa từ vựng",
@@ -237,11 +243,19 @@ const FlashCardReview = () => {
         }
     };
 
+    const handleAnswerReady = () => {
+        setReadyForActions(true);
+    };
+
     useEffect(() => {
-        if (flashcards.length > 0) {
-            triggerButtonDelay();
+        setReadyForActions(false);
+        if (mode == "flip") {
+            const timer = setTimeout(() => {
+                setReadyForActions(true);
+            }, 3000);
+            return () => clearTimeout(timer);
         }
-    }, [flashcards.length, triggerButtonDelay]);
+    }, [mode, currentIndex]);
 
     const handleCheckAnswer = (answer, correct) => {
         if (answer.toLowerCase() == correct.toLowerCase()) {
@@ -320,9 +334,10 @@ const FlashCardReview = () => {
                 mode={mode}
                 onCheckAnswer={handleCheckAnswer}
                 allWords={flashcards.map(c => c.word)}
+                onAnswerReady={handleAnswerReady}
             />
             <div className="flashcard-review-actions" style={{ marginTop: "30px" }}>
-                {showActionButtons ? (
+                {readyForActions ? (
                     <>
                         {isOwner ? (
                             <>
@@ -348,15 +363,15 @@ const FlashCardReview = () => {
                         )}
                     </>
                 ) : (
-                    <div style={{ 
-                        height: "60px", 
-                        display: "flex", 
-                        alignItems: "center", 
+                    <div style={{
+                        height: "60px",
+                        display: "flex",
+                        alignItems: "center",
                         justifyContent: "center",
                         color: "#999",
                         fontStyle: "italic"
                     }}>
-                        Đang tải câu hỏi tiếp theo... (3s)
+                        {mode == "flip" ? "Đang tải câu hỏi tiếp theo... (3s)" : "Vui lòng trả lời câu hỏi để tiếp tục"}
                     </div>
                 )}
             </div>

@@ -1,30 +1,44 @@
-import React, { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 
-const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
+const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [], onAnswerReady }) => {
     const [flipped, setFlipped] = useState(false);
-    const mcQuestionRef = useRef(null);
     const [userAnswer, setUserAnswer] = useState("");
     const [status, setStatus] = useState(null);
     const [selected, setSelected] = useState(null);
-    const [error, setError] = useState(""); 
+    const [mcQuestion, setMcQuestion] = useState(null);
+    const mcGeneratedRef = useRef(false);
 
     useEffect(() => {
         setSelected(null);
         setUserAnswer("");
         setFlipped(false);
         setStatus(null);
-        setError("");
-    }, [card, mode]);
+        mcGeneratedRef.current = false;
+        setMcQuestion(null);
+    }, [card?._id, mode]);
 
     useEffect(() => {
-        if (mode == "flip" && card?.word) {
-            if ("speechSynthesis" in window) {
-                const utterance = new SpeechSynthesisUtterance(card.word);
-                utterance.lang = "en-US";
-                window.speechSynthesis.cancel();
-                window.speechSynthesis.speak(utterance);
-            }
+        if (mode !== "choice" || !card || allWords.length < 4 || mcGeneratedRef.current) {
+            return;
+        }
+        mcGeneratedRef.current = true;
+        const wordPattern = new RegExp(`\\b${card.word}(s|d|ed|ing)?\\b`, "gi");
+        const question = card.exampleSentence.replace(wordPattern, "______");
+        const correctAnswer = card.word;
+        const shuffledWords = [...allWords].sort(() => 0.5 - Math.random());
+        const distractors = shuffledWords.filter(w => w !== card.word).slice(0, 3);
+        const allChoices = [correctAnswer, ...distractors];
+        const finalChoices = allChoices.sort(() => 0.5 - Math.random());
+        setMcQuestion({question, choices: finalChoices, correctAnswer});
+    }, [card?._id, mode, allWords]);
+
+    useEffect(() => {
+        if (mode == "flip" && card?.word && "speechSynthesis" in window) {
+            const utterance = new SpeechSynthesisUtterance(card.word);
+            utterance.lang = "en-US";
+            window.speechSynthesis.cancel();
+            window.speechSynthesis.speak(utterance);
         }
     }, [mode, card]);
 
@@ -49,34 +63,20 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [] }) => {
             setStatus("wrong");
         }
         onCheckAnswer(answer, card.word);
+        onAnswerReady();
     };
 
     const handleShowAnswer = () => {
         setUserAnswer(card.word);
         setStatus("show");
+        onAnswerReady();
     };
 
-    const mcQuestion = useMemo(() => {
-        if (!card || !allWords.length) return null;
-        if (mcQuestionRef.current && mcQuestionRef.current.cardId == card._id) {
-            return mcQuestionRef.current.data;
-        }
-        const wordPattern = new RegExp(`\\b${card.word}(s|d|ed|ing)?\\b`, "gi");
-        const question = card.exampleSentence.replace(wordPattern, "______");
-        const correctAnswer = card.word;
-        const distractors = allWords.filter(w => w !== card.word).sort(() => 0.5 - Math.random()).slice(0, 3);
-        if (distractors.length < 3) return null;
-        const allChoices = [correctAnswer, ...distractors];
-        const shuffled = [...allChoices].sort(() => 0.5 - Math.random());
-        const result = { question, choices: shuffled, correctAnswer };
-        mcQuestionRef.current = { cardId: card._id, data: result };
-        return result;
-    }, [card, allWords]);
-
     const handleChoiceClick = (choice) => {
-        if (selected || !mcQuestion) return;
+        if (selected) return;
         setSelected(choice);
         onCheckAnswer(choice, mcQuestion.correctAnswer);
+        onAnswerReady();
     };
 
     if (mode == "flip") {
