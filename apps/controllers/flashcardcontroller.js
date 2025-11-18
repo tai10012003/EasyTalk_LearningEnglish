@@ -1,4 +1,5 @@
 const express = require("express");
+const { ObjectId } = require("mongodb");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
 const { FlashcardService } = require("./../services");
@@ -100,16 +101,22 @@ router.put("/update-flashcard/:id", verifyToken, upload.single("image"), async (
   }
 });
 
-router.put("/update-difficulty/:id", verifyToken, async (req, res) => {
+router.put("/update-difficulties", verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    const { difficulty } = req.body;
-    if (!difficulty || ![1, 2, 3].includes(difficulty)) {
-      return res.status(400).json({ success: false, message: "Invalid difficulty level" });
+    const { updates } = req.body;
+    if (!Array.isArray(updates) || updates.length == 0) {
+      return res.status(400).json({ success: false, message: "Invalid updates" });
     }
-    await flashcardService.updateFlashcardDifficulty(req.params.id, difficulty, userId);
-    await userprogressService.incrementDailyFlashcardReview(userId);
-    res.json({ success: true, message: "Difficulty updated" });
+    const bulkOps = updates.map(update => ({
+      updateOne: {
+        filter: { _id: new ObjectId(update.cardId), user: new ObjectId(userId) },
+        update: { $set: { difficulty: update.difficulty } }
+      }
+    }));
+    const result = await flashcardService.updateFlashcardDifficulty(bulkOps);
+    await userprogressService.incrementDailyFlashcardReview(userId, updates.length);
+    res.json({ success: true, message: `Updated ${updates.length} flashcards`,updatedCount: result.modifiedCount });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

@@ -273,20 +273,8 @@ class FlashcardService {
         return updated;
     }
 
-    async updateFlashcardDifficulty(id, difficulty, userId) {
-        const existing = await this.flashcardRepository.findFlashcardById(id);
-        if (!existing || existing.user.toString() !== userId) {
-            throw new Error("Không được phép cập nhật độ khó flashcard này");
-        }
-        const updatedData = { difficulty };
-        const updated = await this.flashcardRepository.updateFlashcard(id, updatedData);
-        if (updated.matchedCount == 0) throw new Error("Flashcard không tồn tại");
-        // await this._invalidateCache();
-        const { expBonus } = await userprogressService.incrementDailyFlashcardReview(userId);
-        if (expBonus > 0) {
-            console.log(`Goal reward: +${expBonus} EXP for user ${userId}`);
-        }
-        return updated;
+    async updateFlashcardDifficulty(bulkOps) {
+        return await this.flashcardRepository.updateFlashcardbulkWrite(bulkOps);
     }
 
     async deleteFlashcard(id, userId) {

@@ -165,6 +165,10 @@ class FlashcardRepository {
         );
     }
 
+    async updateFlashcardbulkWrite(operations) {
+        return await this.flashcardsCollection.bulkWrite(operations);
+    }
+
     async deleteFlashcard(id) {
         return await this.flashcardsCollection.deleteOne({ _id: new ObjectId(id) });
     }

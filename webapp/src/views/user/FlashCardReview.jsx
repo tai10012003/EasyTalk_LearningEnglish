@@ -23,10 +23,10 @@ const FlashCardReview = () => {
     const [isOwner, setIsOwner] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [showActionButtons, setShowActionButtons] = useState(false);
+    const pendingUpdatesRef = useRef([]);
 
     const handleUserInteraction = useCallback(() => {
         lastInteractionRef.current = Date.now();
-        console.log("Tương tác phát hiện → tiếp tục đếm thời gian học Flashcard");
         if (!intervalRef.current) {
             startActiveTimer();
         }
@@ -183,30 +183,27 @@ const FlashCardReview = () => {
     };
 
     const handleRate = async (difficulty) => {
+        if (!isOwner) return;
         const card = flashcards[currentIndex];
-        try {
-            await FlashCardService.updateDifficulty(card._id, difficulty);
-            card.difficulty = difficulty;
-            let title = "";
-            switch (difficulty) {
-                case 1: title = "Tuyệt vời!"; break;
-                case 2: title = "Tốt!"; break;
-                case 3: title = "Cố lên!"; break;
-            }
-            Swal.fire({
-                icon: "success",
-                title,
-                timer: 1000,
-                showConfirmButton: false,
-            });
-            handleNextWeighted();
-        } catch (err) {
-            Swal.fire({
-                icon: "error",
-                title: "Lỗi",
-                text: "Không thể cập nhật độ khó.",
-            });
+        card.difficulty = difficulty;
+        setFlashcards([...flashcards]);
+        pendingUpdatesRef.current.push({
+            cardId: card._id,
+            difficulty
+        });
+        let title = "";
+        switch (difficulty) {
+            case 1: title = "Tuyệt vời!"; break;
+            case 2: title = "Tốt!"; break;
+            case 3: title = "Cố lên!"; break;
         }
+        Swal.fire({
+            icon: "success",
+            title,
+            timer: 800,
+            showConfirmButton: false,
+        });
+        handleNextWeighted();
     };
 
     const handleRemove = async () => {
@@ -267,6 +264,13 @@ const FlashCardReview = () => {
         if (intervalRef.current) {
             clearInterval(intervalRef.current);
             intervalRef.current = null;
+        }
+        if (isOwner && pendingUpdatesRef.current.length > 0) {
+            try {
+                await FlashCardService.updateDifficulties(pendingUpdatesRef.current);
+            } catch (err) {
+                console.error("Lỗi gửi batch update:", err);
+            }
         }
         const now = Date.now();
         const lastActiveSeconds = Math.floor((now - lastInteractionRef.current) / 1000);

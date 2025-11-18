@@ -186,15 +186,14 @@ export const FlashCardService = {
         }
     },
 
-    async updateDifficulty(id, difficulty) {
+    async updateDifficulties(updates) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/update-difficulty/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/update-difficulties`, {
                 method: "PUT",
-                body: JSON.stringify({ difficulty }),
+                body: JSON.stringify({ updates }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
-            return data;
+            return await res.json();
         } catch (error) {
             console.error("Error updating difficulty:", error.message);
             throw error;

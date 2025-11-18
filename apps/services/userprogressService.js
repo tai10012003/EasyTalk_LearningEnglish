@@ -95,23 +95,23 @@ class UserprogressService {
         return { monthYear, monthlyTotal, status };
     }
 
-    async incrementDailyFlashcardReview(userId) {
-        const todayStr = new Date().toISOString().split('T')[0];
+    async incrementDailyFlashcardReview(userId, count = 1) {
+        const todayStr = getVietnamDate();
         const userProgress = await this.getUserProgressByUserId(userId);
+        if (!userProgress) throw new Error("User progress not found");
         const goal = userProgress?.dailyFlashcardGoal || 20;
         const prevTodayCount = userProgress?.dailyFlashcardReviews?.[todayStr] || 0;
-        const todayCount = prevTodayCount + 1;
-        const updateOp = { $inc: { [`dailyFlashcardReviews.${todayStr}`]: 1 } };
+        const todayCount = prevTodayCount + count;
+        const updateOp = { $inc: { [`dailyFlashcardReviews.${todayStr}`]: count } };
         let expBonus = 0;
         const expFromGoal = this._calculateExpBonus(goal, prevTodayCount, todayCount);
         if (expFromGoal > 0) {
-            updateOp.$inc.experiencePoints = expFromGoal;
+            updateOp.$inc.experiencePoints = (updateOp.$inc.experiencePoints || 0) + expFromGoal;
             expBonus += expFromGoal;
         }
         const badgeResult = await this._handleBadgeUnlock(userId);
         if (badgeResult.totalXp > 0) {
-            updateOp.$inc.experiencePoints =
-                (updateOp.$inc.experiencePoints || 0) + badgeResult.totalXp;
+            updateOp.$inc.experiencePoints = (updateOp.$inc.experiencePoints || 0) + badgeResult.totalXp;
             expBonus += badgeResult.totalXp;
         }
         const result = await this.userprogressRepository.update(userId, updateOp, true);
