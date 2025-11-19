@@ -24,7 +24,7 @@ const FlashCardReview = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [readyForActions, setReadyForActions] = useState(false);
     const pendingUpdatesRef = useRef([]);
-    const lastModeRef = useRef(null);
+    const lastCombinationsRef = useRef([]);
 
     const handleUserInteraction = useCallback(() => {
         lastInteractionRef.current = Date.now();
@@ -139,31 +139,55 @@ const FlashCardReview = () => {
     }, [flashcards.length]);
 
     useEffect(() => {
-        lastModeRef.current = null;
+        lastCombinationsRef.current = [];
     }, [flashcards.length]);
 
-    const randomMode = () => {
+    const randomMode = (preferredCardId = null) => {
+        if (flashcards.length === 0) return;
         let modes = ["flip", "choice", "fill"];
         if (flashcards.length < 4) {
             modes = modes.filter(m => m !== "choice");
         }
-        if (modes.length > 1 && lastModeRef.current && modes.includes(lastModeRef.current)) {
-            const filtered = modes.filter(m => m !== lastModeRef.current);
-            if (Math.random() < 0.8) {
-                modes = filtered;
+        const banned = lastCombinationsRef.current.slice(0, 2);
+        let validPairs = [];
+        flashcards.forEach((card, idx) => {
+            modes.forEach(mode => {
+                const alreadyBanned = banned.some(
+                    b => b.cardId === card._id && b.mode === mode
+                );
+                if (!alreadyBanned) {
+                    validPairs.push({
+                        cardId: card._id,
+                        mode,
+                        cardIndex: idx
+                    });
+                }
+            });
+        });
+        if (preferredCardId) {
+            const preferred = validPairs.filter(p => p.cardId === preferredCardId);
+            if (preferred.length > 0) {
+                validPairs = preferred;
             }
         }
-        const selectedMode = modes[Math.floor(Math.random() * modes.length)];
-        lastModeRef.current = selectedMode;
-        setMode(selectedMode);
+        if (validPairs.length === 0) {
+            lastCombinationsRef.current = [];
+            validPairs = flashcards.flatMap((card, idx) =>
+                modes.map(mode => ({ cardId: card._id, mode, cardIndex: idx }))
+            );
+        }
+        const chosen = validPairs[Math.floor(Math.random() * validPairs.length)];
+        setCurrentIndex(chosen.cardIndex);
+        setMode(chosen.mode);
+        setReadyForActions(false);
+        lastCombinationsRef.current = [
+            { cardId: chosen.cardId, mode: chosen.mode },
+            ...lastCombinationsRef.current.slice(0, 2)
+        ].slice(0, 3);
     };
 
     const handleNext = () => {
-        if (flashcards.length == 0) return;
-        const nextIdx = Math.floor(Math.random() * flashcards.length);
-        setCurrentIndex(nextIdx);
         randomMode();
-        setReadyForActions(false)
     };
 
     const handleNextWeighted = () => {
@@ -183,9 +207,8 @@ const FlashCardReview = () => {
             r -= weights[idx];
             if (r <= 0) break;
         }
-        setCurrentIndex(idx);
-        randomMode();
-        setReadyForActions(false);
+        const selectedCardId = flashcards[idx]._id;
+        randomMode(selectedCardId);
     };
 
     const handleRate = async (difficulty) => {
