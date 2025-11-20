@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
+const { getVietnamDate } = require('../util/dateFormat');
 // const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { UserprogressService } = require("./../services");
 const userprogressService = new UserprogressService();
@@ -71,7 +72,7 @@ router.get("/daily-goal", verifyToken, async (req, res) => {
         const userId = req.user.id;
         const goal = await userprogressService.getDailyFlashcardGoal(userId);
         const userProgress = await userprogressService.getUserProgressByUserId(userId);
-        const todayStr = new Date().toISOString().split('T')[0];
+        const todayStr = getVietnamDate();
         const todayCount = userProgress?.dailyFlashcardReviews?.[todayStr] || 0;
         res.json({
             goal,
@@ -156,6 +157,17 @@ router.get("/statistics", verifyToken, async (req, res) => {
     } catch (err) {
         console.error("Statistics error:", err);
         res.status(500).json({ success: false, message: "Server error" });
+    }
+});
+
+router.get("/my-prizes", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const prizes = await userprogressService.getUserPrizesWithDetails(userId);
+        res.json({ success: true, prizes });
+    } catch (error) {
+        console.error("Error fetching user prizes:", error);
+        res.status(500).json({ success: false, message: "Error fetching prizes" });
     }
 });
 

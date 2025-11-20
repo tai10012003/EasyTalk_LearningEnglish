@@ -13,7 +13,8 @@ const GateRepository = require('./gateRepository');
 const StageRepository = require('./stageRepository');
 const ReminderRepository = require('./reminderRepository');
 const NotificationRepository = require('./notificationRepository');
-const UserSettingRepository = require("./usersettingRepository")
+const UserSettingRepository = require("./usersettingRepository");
+const PrizeRepository = require("./prizeRepository");
 
 module.exports = {
     UserRepository,
@@ -32,4 +33,5 @@ module.exports = {
     ReminderRepository,
     NotificationRepository,
     UserSettingRepository,
+    PrizeRepository,
 };

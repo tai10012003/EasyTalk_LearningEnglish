@@ -3,6 +3,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
 let isRefreshing = false;
 let refreshSubscribers = [];
+import { PrizeService } from "./PrizeService.jsx";
 
 function onRefreshed(token) {
   refreshSubscribers.forEach(callback => callback(token));
@@ -38,6 +39,7 @@ export const AuthService = {
             this.startTokenRefreshTimer();
             hasShownAlert = false;
             console.log("Login success:", data);
+            await PrizeService.checkAndUnlockPrizes();
             return data;
         } catch (error) {
             console.error("Error during login:", error.message);

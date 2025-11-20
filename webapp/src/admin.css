@@ -3513,6 +3513,440 @@
   }
 }
 
+/* === COMMON PRIZE === */
+.admin-prize-wrapper {
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: 'Public Sans', sans-serif;
+  color: #1e293b;
+}
+
+.admin-prize-title {
+  font-size: 25px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.admin-prize-add {
+  margin-bottom: 15px;
+  text-align: left;
+}
+
+.admin-prize-add-btn {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  color: #fff;
+  font-weight: 500;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.admin-prize-add-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.admin-prize-table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.admin-prize-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.admin-prize-table th,
+.admin-prize-table td {
+  padding: 12px 15px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+  vertical-align: middle;
+  font-size: 14px;
+  border-right: 1px solid #e2e8f0;
+}
+
+.admin-prize-table th:last-child,
+.admin-prize-table td:last-child {
+  border-right: none;
+}
+
+.admin-prize-table th {
+  background-color: #00408c;
+  font-weight: 700;
+  text-align: center;
+  color: #fff;
+}
+
+.admin-prize-table tbody tr:hover {
+  background-color: #f1f5f9;
+}
+
+.admin-prize-image {
+  width: 120px;
+  height: auto;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.admin-prize-btn-edit {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #facc15;
+  color: #1f2937;
+  transition: 0.2s;
+  margin-right: 10px;
+}
+
+.admin-prize-btn-edit:hover {
+  background-color: #fbbf24;
+}
+
+.admin-prize-btn-delete {
+  padding: 6px 12px;
+  margin: 10px 0;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  background-color: #ef4444;
+  color: #fff;
+  transition: 0.2s;
+}
+
+.admin-prize-btn-delete:hover {
+  background-color: #dc2626;
+}
+
+.admin-prize-pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px;
+  list-style: none;
+  padding: 0;
+  gap: 6px;
+}
+
+.admin-prize-page-item {
+  display: inline-block;
+}
+
+.admin-prize-page-link {
+  display: block;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background-color: #e2e8f0;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  outline: none;
+}
+
+.admin-prize-page-item.active .admin-prize-page-link {
+  background-color: #3b82f6;
+  color: #fff;
+}
+
+.admin-prize-page-link:hover {
+  background-color: #cbd5e1;
+}
+
+@media (max-width: 768px) {
+  .admin-prize-table {
+    min-width: 600px;
+  }
+  .admin-prize-add-btn {
+    width: 100%;
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-prize-table {
+    min-width: 100%;
+  }
+  .admin-prize-title {
+    font-size: 20px;
+  }
+  .admin-prize-actions button,
+  .admin-prize-actions a {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+}
+
+/* === ADD PRIZE === */
+.admin-prize-add-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-prize-add-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-prize-add-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-prize-add-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-prize-add-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-prize-add-group input[type="text"],
+.admin-prize-add-group input[type="number"],
+.admin-prize-add-group select,
+.admin-prize-add-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-prize-add-group input[type="text"]:focus,
+.admin-prize-add-group input[type="number"]:focus,
+.admin-prize-add-group select:focus,
+.admin-prize-add-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-prize-add-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.admin-prize-add-btn, .admin-prize-return-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.admin-prize-add-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-prize-add-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-prize-add-btn:active {
+  transform: translateY(0px);
+}
+
+.admin-prize-return-btn {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff
+}
+
+.admin-prize-return-btn:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
+/* === UPDATE PRIZE === */
+.admin-prize-update-container {
+  padding: 25px 30px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.admin-prize-update-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 25px;
+  color: #2c3e50;
+}
+
+.admin-prize-update-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.admin-prize-update-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-prize-update-group label {
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #34495e;
+}
+
+.admin-prize-update-group input[type="text"],
+.admin-prize-update-group input[type="number"],
+.admin-prize-update-group select,
+.admin-prize-update-group textarea {
+  padding: 10px 12px;
+  margin: 8px 0;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.3s ease, box-shadow 0.3s ease;
+}
+
+.admin-prize-update-group input[type="text"]:focus,
+.admin-prize-update-group input[type="number"]:focus,
+.admin-prize-update-group select:focus,
+.admin-prize-update-group textarea:focus {
+  border: 1px solid #3498db;
+  box-shadow: 0 0 6px rgba(52, 152, 219, 0.4);
+}
+
+.admin-prize-update-group textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-check.form-switch {
+  padding-left: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.form-check-input {
+  width: 52px;
+  height: 28px;
+  background-color: #e2e8f0;
+  border-radius: 50px;
+  border: none;
+  position: relative;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.form-check-input::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+  background: white;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.form-check-input:checked {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.form-check-input:checked::before {
+  transform: translateX(24px);
+  background: white;
+}
+
+.form-check-input:focus {
+  outline: none;
+}
+
+.form-check-label {
+  font-weight: 500;
+  color: #1e293b;
+  margin: 0;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.form-check-input:checked + .form-check-label {
+  color: #10b981;
+  font-weight: 600;
+}
+
+.form-check.form-switch:hover .form-check-input:not(:disabled) {
+  transform: scale(1.05);
+}
+
+.form-check.form-switch:hover .form-check-label {
+  color: #0f9d58;
+}
+
+.admin-prize-update-btn, .admin-prize-return-btn {
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+}
+
+.admin-prize-update-btn {
+  background: linear-gradient(135deg, #3498db, #2980b9);
+  color: white;
+}
+
+.admin-prize-update-btn:hover {
+  background: linear-gradient(135deg, #2980b9, #1f6391);
+  transform: translateY(-2px);
+}
+
+.admin-prize-update-btn:active {
+  transform: translateY(0px);
+}
+
+.admin-prize-return-btn {
+  background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+  color: #fff
+}
+
+.admin-prize-return-btn:hover {
+  background: linear-gradient(135deg, #7f8c8d, #6c7a7a);
+  transform: translateY(-2px);
+}
+
 /* === USERPROGRESS === */
 .admin-userprogress-wrapper {
   background-color: #f8fafc;

@@ -199,6 +199,7 @@ class UserService {
         const refreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(refreshToken, user._id.toString());
         await this.userRepository.update(user._id.toString(), { lastActive: new Date() });
+        await userprogressService.checkAndResetStreakOnLogin(user._id.toString());
         const language = await usersettingService.getUserLanguage(user._id);
         return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
@@ -269,6 +270,7 @@ class UserService {
         const refreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(refreshToken, user._id.toString());
         await this.userRepository.update(user._id.toString(), { lastActive: new Date() });
+        await userprogressService.checkAndResetStreakOnLogin(user._id.toString());
         const language = await usersettingService.getUserLanguage(user._id);
         return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
@@ -319,6 +321,7 @@ class UserService {
         const newRefreshToken = this.generateRefreshToken(user);
         this.refreshTokens.set(newRefreshToken, user._id.toString());
         await this.userRepository.update(user._id.toString(), { lastActive: new Date() });
+        await userprogressService.checkAndResetStreakOnLogin(user._id.toString());
         return { token: newAccessToken, refreshToken: newRefreshToken, role: user.role };
     }
 

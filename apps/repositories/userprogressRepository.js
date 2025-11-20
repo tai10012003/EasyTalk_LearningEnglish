@@ -1,6 +1,7 @@
 const { ObjectId } = require('mongodb');
 const DatabaseConnection = require('./../database/database');
 const config = require('../config/setting');
+const { getVietnamDate } = require('../util/dateFormat');
 
 class UserprogressRepository {
     client;
@@ -238,7 +239,7 @@ class UserprogressRepository {
         if (!updateOperator.$set) updateOperator.$set = {};
         updateOperator.$set.updatedAt = new Date();
         if (updateOperator.$inc && updateOperator.$inc.experiencePoints) {
-            const today = new Date().toISOString().split('T')[0];
+            const today = getVietnamDate();
             const xpToAdd = updateOperator.$inc.experiencePoints;
             updateOperator.$inc[`dailyExperiencePoints.${today}`] = xpToAdd;
         }
@@ -270,18 +271,40 @@ class UserprogressRepository {
 
     async getUnlockedBadgesForMonth(userId, monthYear) {
         const userProgress = await this.findByUserId(userId);
-        if (!userProgress?.unlockedFlashcardBadges) return [];
-        return userProgress.unlockedFlashcardBadges[monthYear] || [];
+        return userProgress?.unlockedFlashcardBadges?.[monthYear] || [];
     }
 
     async unlockBadge(userId, monthYear, badgeName) {
         return await this.collection.updateOne(
             { user: new ObjectId(userId) },
-            {
-                $addToSet: { [`unlockedFlashcardBadges.${monthYear}`]: badgeName }
-            },
+            { $addToSet: { [`unlockedFlashcardBadges.${monthYear}`]: badgeName } },
             { upsert: true }
         );
+    }
+
+    async unlockPrize(userId, prizeId, code, level, period = null) {
+        const updateData = {
+            prizeId: new ObjectId(prizeId),
+            code,
+            level,
+            unlockedAt: new Date()
+        };
+        if (period) updateData.period = period;
+        return await this.collection.updateOne(
+            { user: new ObjectId(userId) },
+            { $addToSet: { unlockedPrizes: updateData }, $set: { updatedAt: new Date() } },
+            { upsert: true }
+        );
+    }
+
+    async hasUnlockedPrize(userId, code) {
+        const userProgress = await this.findByUserId(userId);
+        return userProgress?.unlockedPrizes?.some(p => p.code === code) || false;
+    }
+
+    async getUserPrizes(userId) {
+        const userProgress = await this.findByUserId(userId);
+        return userProgress?.unlockedPrizes || [];
     }
 
     async deleteByUser(userId) {
@@ -291,7 +314,7 @@ class UserprogressRepository {
 
     async addDailyStudyTime(userId, seconds) {
         const hours = seconds / 3600;
-        const today = new Date().toISOString().split('T')[0];
+        const today = getVietnamDate();
         return await this.collection.updateOne(
             { user: new ObjectId(userId) },
             {
@@ -305,33 +328,18 @@ class UserprogressRepository {
         );
     }
 
-    async getLeaderboardByExp(period = 'all', limit = 50) {
+    async getLeaderboardByExp(period = 'all', limit = 50, periodKey = null) {
         let pipeline = [
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'userDetails'
-                }
-            },
+            { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userDetails' } },
             { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } }
         ];
-        if (period == 'all') {
+        if (period === 'all') {
             pipeline.push({
-                $project: {
-                    username: "$userDetails.username",
-                    value: { $ifNull: ["$experiencePoints", 0] }
-                }
+                $project: { username: "$userDetails.username", value: { $ifNull: ["$experiencePoints", 0] } }
             });
         } else {
-            const dateKeys = this._getDateKeysForPeriod(period);
-            pipeline.push({
-                $project: {
-                    username: "$userDetails.username",
-                    dailyExperiencePoints: 1
-                }
-            });
+            const dateKeys = periodKey ? this._getDateKeysForCustomWeek(periodKey) : this._getDateKeysForPeriod(period);
+            pipeline.push({ $project: { username: "$userDetails.username", dailyExperiencePoints: 1 } });
             pipeline.push({
                 $addFields: {
                     value: {
@@ -339,13 +347,7 @@ class UserprogressRepository {
                             $map: {
                                 input: { $objectToArray: "$dailyExperiencePoints" },
                                 as: "item",
-                                in: {
-                                    $cond: [
-                                        { $in: ["$$item.k", dateKeys] },
-                                        "$$item.v",
-                                        0
-                                    ]
-                                }
+                                in: { $cond: [{ $in: ["$$item.k", dateKeys] }, "$$item.v", 0] }
                             }
                         }
                     }
@@ -355,48 +357,24 @@ class UserprogressRepository {
         pipeline.push(
             { $sort: { value: -1 } },
             { $limit: limit },
-            {
-                $project: {
-                    _id: 1,
-                    username: 1,
-                    value: { $round: ["$value", 0] }
-                }
-            }
+            { $project: { _id: 1, username: 1, value: { $round: ["$value", 0] } } }
         );
         const result = await this.collection.aggregate(pipeline).toArray();
-        return result.map((item, index) => ({
-            ...item,
-            rank: index + 1
-        }));
+        return result.map((item, index) => ({ ...item, rank: index + 1 }));
     }
 
-    async getLeaderboardByStudyTime(period = 'all', limit = 50) {
+    async getLeaderboardByStudyTime(period = 'all', limit = 50, periodKey = null) {
         let pipeline = [
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'userDetails'
-                }
-            },
+            { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userDetails' } },
             { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } }
         ];
-        if (period == 'all') {
+        if (period === 'all') {
             pipeline.push({
-                $project: {
-                    username: "$userDetails.username",
-                    value: { $ifNull: ["$studyTimes", 0] }
-                }
+                $project: { username: "$userDetails.username", value: { $ifNull: ["$studyTimes", 0] } }
             });
         } else {
-            const dateKeys = this._getDateKeysForPeriod(period);
-            pipeline.push({
-                $project: {
-                    username: "$userDetails.username",
-                    dailyStudyTimes: 1
-                }
-            });
+            const dateKeys = periodKey ? this._getDateKeysForCustomWeek(periodKey): this._getDateKeysForPeriod(period);
+            pipeline.push({ $project: { username: "$userDetails.username", dailyStudyTimes: 1 } });
             pipeline.push({
                 $addFields: {
                     value: {
@@ -404,13 +382,7 @@ class UserprogressRepository {
                             $map: {
                                 input: { $objectToArray: "$dailyStudyTimes" },
                                 as: "item",
-                                in: {
-                                    $cond: [
-                                        { $in: ["$$item.k", dateKeys] },
-                                        "$$item.v",
-                                        0
-                                    ]
-                                }
+                                in: { $cond: [{ $in: ["$$item.k", dateKeys] }, "$$item.v", 0] }
                             }
                         }
                     }
@@ -420,47 +392,22 @@ class UserprogressRepository {
         pipeline.push(
             { $sort: { value: -1 } },
             { $limit: limit },
-            {
-                $project: {
-                    _id: 1,
-                    username: 1,
-                    value: { $round: ["$value", 2] }
-                }
-            }
+            { $project: { _id: 1, username: 1, value: { $round: ["$value", 2] } } }
         );
         const result = await this.collection.aggregate(pipeline).toArray();
-        return result.map((item, index) => ({
-            ...item,
-            rank: index + 1
-        }));
+        return result.map((item, index) => ({ ...item, rank: index + 1 }));
     }
 
     async getLeaderboardByStreak(limit = 50) {
         const pipeline = [
-            {
-                $lookup: {
-                    from: 'users',
-                    localField: 'user',
-                    foreignField: '_id',
-                    as: 'userDetails'
-                }
-            },
+            { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userDetails' } },
             { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },
-            {
-                $project: {
-                    username: "$userDetails.username",
-                    streak: "$streak",
-                    maxStreak: "$maxStreak"
-                }
-            },
+            { $project: { username: "$userDetails.username", streak: "$streak", maxStreak: "$maxStreak" } },
             { $sort: { streak: -1, maxStreak: -1 } },
             { $limit: limit }
         ];
         const result = await this.collection.aggregate(pipeline).toArray();
-        return result.map((item, index) => ({
-            ...item,
-            rank: index + 1
-        }));
+        return result.map((item, index) => ({ ...item, rank: index + 1 }));
     }
 
     async getUserStatistics(userId, type = 'time', period = 'week') {
@@ -468,25 +415,25 @@ class UserprogressRepository {
         if (!userProgress) return [];
         const now = new Date();
         let startDate;
-        if (period == 'week') {
+        if (period === 'week') {
             const day = now.getDay();
-            const diff = now.getDate() - day + (day == 0 ? -6 : 1);
+            const diff = now.getDate() - day + (day === 0 ? -6 : 1);
             startDate = new Date(now);
             startDate.setDate(diff);
-        } else if (period == 'month') {
+        } else if (period === 'month') {
             startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        } else if (period == 'year') {
+        } else if (period === 'year') {
             startDate = new Date(now.getFullYear(), 0, 1);
         }
-        const dailyData = type == 'time' ? userProgress.dailyStudyTimes : userProgress.dailyExperiencePoints;
+        const dailyData = type === 'time' ? userProgress.dailyStudyTimes : userProgress.dailyExperiencePoints;
         const result = [];
         const current = new Date(startDate);
         while (current <= now) {
-            const dateStr = current.toISOString().split('T')[0];
+            const dateStr = getVietnamDate(current);
             const value = dailyData?.[dateStr] || 0;
             result.push({
                 date: dateStr,
-                value: type == 'time' ? parseFloat(value.toFixed(2)) : Math.round(value)
+                value: type === 'time' ? parseFloat(value.toFixed(2)) : Math.round(value)
             });
             current.setDate(current.getDate() + 1);
         }
@@ -496,7 +443,7 @@ class UserprogressRepository {
     _getDateKeysForPeriod(period) {
         const now = new Date();
         const keys = [];
-        if (period == 'week') {
+        if (period === 'week') {
             const dayOfWeek = now.getDay();
             const diffToMonday = (dayOfWeek + 6) % 7;
             const startOfWeek = new Date(now);
@@ -504,32 +451,49 @@ class UserprogressRepository {
             for (let i = 0; i < 7; i++) {
                 const d = new Date(startOfWeek);
                 d.setDate(startOfWeek.getDate() + i);
-                keys.push(this._formatDate(d));
+                keys.push(getVietnamDate(d));
             }
-        } else if (period == 'month') {
+        } else if (period === 'month') {
             const year = now.getFullYear();
             const month = now.getMonth();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
             for (let day = 1; day <= daysInMonth; day++) {
                 const date = new Date(year, month, day);
-                keys.push(this._formatDate(date));
+                keys.push(getVietnamDate(date));
             }
-        } else if (period == 'year') {
+        } else if (period === 'year') {
             const year = now.getFullYear();
             const start = new Date(year, 0, 1);
             const end = new Date(year, 11, 31);
             for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-                keys.push(this._formatDate(new Date(d)));
+                keys.push(getVietnamDate(new Date(d)));
             }
         }
         return keys;
     }
 
-    _formatDate(date) {
-        const y = date.getFullYear();
-        const m = (date.getMonth() + 1).toString().padStart(2, '0');
-        const d = date.getDate().toString().padStart(2, '0');
-        return `${y}-${m}-${d}`;
+    _getDateKeysForCustomWeek(weekStr) {
+        const [year, week] = weekStr.split('-W').map(Number);
+        const start = this._getDateOfISOWeek(week, year);
+        const keys = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(start);
+            d.setDate(start.getDate() + i);
+            keys.push(getVietnamDate(d));
+        }
+        return keys;
+    }
+
+    _getDateOfISOWeek(w, y) {
+        const simple = new Date(y, 0, 1 + (w - 1) * 7);
+        const dow = simple.getDay();
+        const ISOweekStart = simple;
+        if (dow <= 4) {
+            ISOweekStart.setDate(simple.getDate() - dow + 1);
+        } else {
+            ISOweekStart.setDate(simple.getDate() + 8 - dow);
+        }
+        return ISOweekStart;
     }
 }
 

@@ -1,13 +1,18 @@
 const { ObjectId } = require('mongodb');
 const { getRedisClient } = require("../util/redisClient");
+const { getVietnamDate, getYesterdayVietnamDate } = require('../util/dateFormat');
+const { UserprogressRepository } = require('./../repositories');
 const GrammarService = require('./grammarService');
 const StoryService = require('./storyService');
 const PronunciationService = require('./pronunciationService');
-const GrammarexerciseService= require('./grammarexerciseService');
-const PronunciationexerciseService= require('./pronunciationexerciseService');
-const VocabularyexerciseService= require('./vocabularyexerciseService');
-const DictationService= require('./dictationService');
-const { UserprogressRepository } = require('./../repositories');
+const GrammarexerciseService = require('./grammarexerciseService');
+const PronunciationexerciseService = require('./pronunciationexerciseService');
+const VocabularyexerciseService = require('./vocabularyexerciseService');
+const DictationService = require('./dictationService');
+const PrizeService = require('./prizeService');
+const NotificationService = require("./notificationService");
+const prizeService = new PrizeService();
+// const cron = require('node-cron');
 
 const BADGES = [
     { name: "Tân binh chăm chỉ", threshold: 1000, xp: 300 },
@@ -20,7 +25,45 @@ const BADGES = [
 class UserprogressService {
     constructor() {
         this.userprogressRepository = new UserprogressRepository();
+        this.notificationService = new NotificationService();
+        // this._initCronJobs();
     }
+
+    // _initCronJobs() {
+    //     cron.schedule('1 0 * * 1', async () => {
+    //         console.log('[Cron] Trao giải quán quân tuần trước...');
+    //         const { userprogresses } = await this.getUserProgressList(1, 1000);
+    //         for (const p of userprogresses) {
+    //             try {
+    //                 await this.checkAndUnlockChampionPrizes(p.user.toString());
+    //             } catch (err) {
+    //                 console.error(`Lỗi user ${p.user}:`, err);
+    //             }
+    //         }
+    //     });
+    //     cron.schedule('1 0 1 * *', async () => {
+    //         console.log('[Cron] Trao giải quán quân tháng trước...');
+    //         const { userprogresses } = await this.getUserProgressList(1, 1000);
+    //         for (const p of userprogresses) {
+    //             try {
+    //                 await this.checkAndUnlockChampionPrizes(p.user.toString());
+    //             } catch (err) {
+    //                 console.error(`Lỗi user ${p.user}:`, err);
+    //             }
+    //         }
+    //     });
+    //     cron.schedule('1 0 1 1 *', async () => {
+    //         console.log('[Cron] Trao giải quán quân năm trước...');
+    //         const { userprogresses } = await this.getUserProgressList(1, 1000);
+    //         for (const p of userprogresses) {
+    //             try {
+    //                 await this.checkAndUnlockChampionPrizes(p.user.toString());
+    //             } catch (err) {
+    //                 console.error(`Lỗi user ${p.user}:`, err);
+    //             }
+    //         }
+    //     });
+    // }
 
     async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
         const redis = getRedisClient();
@@ -28,10 +71,7 @@ class UserprogressService {
         const ttl = 300;
         try {
             const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
-            }
+            if (cached) return JSON.parse(cached);
         } catch (err) {
             console.error("Cache get error:", err);
         }
@@ -40,14 +80,12 @@ class UserprogressService {
         if (search) {
             const db = this.userprogressRepository.db;
             const users = await db.collection("users").find({ username: { $regex: search, $options: "i" } }).project({ _id: 1 }).toArray();
-            const userIds = users.map((u) => u._id);
-            filter.user = { $in: userIds };
+            filter.user = { $in: users.map(u => u._id) };
         }
         const { userprogresses, total } = await this.userprogressRepository.findAll(filter, skip, limit);
         const result = { userprogresses, totalUserProgresses: total };
         try {
             await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
         } catch (err) {
             console.error("Cache set error:", err);
         }
@@ -59,13 +97,9 @@ class UserprogressService {
     }
 
     async getLeaderboard(type = 'exp', period = 'all', limit = 50) {
-        if (type == 'exp') {
-            return await this.userprogressRepository.getLeaderboardByExp(period, limit);
-        } else if (type == 'time') {
-            return await this.userprogressRepository.getLeaderboardByStudyTime(period, limit);
-        } else if (type == 'streak') {
-            return await this.userprogressRepository.getLeaderboardByStreak(limit);
-        }
+        if (type === 'exp') return await this.userprogressRepository.getLeaderboardByExp(period, limit);
+        if (type === 'time') return await this.userprogressRepository.getLeaderboardByStudyTime(period, limit);
+        if (type === 'streak') return await this.userprogressRepository.getLeaderboardByStreak(limit);
     }
 
     async getUserStatistics(userId, type = 'time', period = 'week') {
@@ -103,6 +137,22 @@ class UserprogressService {
         const prevTodayCount = userProgress?.dailyFlashcardReviews?.[todayStr] || 0;
         const todayCount = prevTodayCount + count;
         const updateOp = { $inc: { [`dailyFlashcardReviews.${todayStr}`]: count } };
+        let studyDates = (userProgress.studyDates || []).map(d => {
+            if (d instanceof Date) {
+                return getVietnamDate(d);
+            }
+            return typeof d === 'string' ? d : null;
+        }).filter(Boolean);
+        const hadToday = studyDates.includes(todayStr);
+        if (!hadToday) {
+            studyDates.push(todayStr);
+        }
+        const { currentStreak, maxStreak } = this._calculateStreak(studyDates, todayStr);
+        updateOp.$set = {
+            studyDates,
+            streak: currentStreak,
+            maxStreak
+        };
         let expBonus = 0;
         const expFromGoal = this._calculateExpBonus(goal, prevTodayCount, todayCount);
         if (expFromGoal > 0) {
@@ -115,13 +165,19 @@ class UserprogressService {
             expBonus += badgeResult.totalXp;
         }
         const result = await this.userprogressRepository.update(userId, updateOp, true);
+        const nonChampionResult = await this.checkAndUnlockNonChampionPrizes(userId);
         await this._invalidateCache();
         return {
             ...result,
             expBonus,
             todayCount,
+            goal,
+            streak: currentStreak,
+            maxStreak,
+            studyDates,
             monthlyTotal: badgeResult.monthlyTotal,
             unlockedBadges: badgeResult.unlockedBadges,
+            unlockedPrizes: nonChampionResult.newPrizes || []
         };
     }
 
@@ -172,13 +228,13 @@ class UserprogressService {
                 !initialVocabularyExercise ? vocabularyexerciseService.getVocabularyExerciseList(1, 1) : null,
                 !initialDictation ? dictationService.getDictationList(1, 1) : null
             ]);
-            if (!initialStory) initialStory = storyPage.stories[0]._id || null;
-            if (!initialGrammar) initialGrammar = grammarPage.grammars[0]._id || null;
-            if (!initialPronunciation) initialPronunciation = pronPage.pronunciations[0]._id || null;
-            if (!initialGrammarExercise) initialGrammarExercise = grammarExPage.grammarexercises[0]._id || null;
-            if (!initialPronunciationExercise) initialPronunciationExercise = pronunciationExPage.pronunciationexercises[0]._id || null;
-            if (!initialVocabularyExercise) initialVocabularyExercise = vocabularyExPage.vocabularyExercises[0]._id || null;
-            if (!initialDictation) initialDictation = dictationPage.dictationExercises[0]._id || null;
+            initialStory = initialStory || storyPage?.stories?.[0]?._id || null;
+            initialGrammar = initialGrammar || grammarPage?.grammars?.[0]?._id || null;
+            initialPronunciation = initialPronunciation || pronPage?.pronunciations?.[0]?._id || null;
+            initialGrammarExercise = initialGrammarExercise || grammarExPage?.grammarexercises?.[0]?._id || null;
+            initialPronunciationExercise = initialPronunciationExercise || pronunciationExPage?.pronunciationexercises?.[0]?._id || null;
+            initialVocabularyExercise = initialVocabularyExercise || vocabularyExPage?.vocabularyExercises?.[0]?._id || null;
+            initialDictation = initialDictation || dictationPage?.dictationExercises?.[0]?._id || null;
         }
         const userProgress = {
             user: new ObjectId(userId),
@@ -198,6 +254,7 @@ class UserprogressService {
             dailyStudyTimes: {},
             experiencePoints: 0,
             dailyExperiencePoints: {},
+            unlockedPrizes: [],
             streak: 0,
             maxStreak: 0,
             studyDates: [],
@@ -228,45 +285,98 @@ class UserprogressService {
         const normalizedData = Object.fromEntries(
             fields.map(field => [field, normalize(userProgress[field])])
         );
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        const todayStr = today.toLocaleDateString("en-CA", { timeZone: "Asia/Ho_Chi_Minh" });
-        if (!userProgress.studyDates) userProgress.studyDates = [];
-        let studyDates = userProgress.studyDates.map(d => {
-            if (d instanceof Date) return d.toISOString().split('T')[0];
-            return d;
-        });
+        const todayStr = getVietnamDate();
+        let studyDates = (userProgress.studyDates || []).map(d => d instanceof Date ? getVietnamDate(d) : d).filter(Boolean);
         if (!studyDates.includes(todayStr)) studyDates.push(todayStr);
-        studyDates.sort();
-        let streak = 1;
-        let maxStreak = userProgress.maxStreak || 1;
-        for (let i = 1; i < studyDates.length; i++) {
-            const diff = (new Date(studyDates[i]) - new Date(studyDates[i - 1])) / (1000 * 60 * 60 * 24);
-            if (diff == 1) {
-                streak++;
-            } else if (diff == 2) {
-                streak = 0;
-                studyDates = [];
-            } else if (diff > 2) {
-                streak = 1;
-            }
-        }
-        if (streak > maxStreak) maxStreak = streak;
+        const { currentStreak, maxStreak } = this._calculateStreak(studyDates, todayStr);
         const updateOp = { $set: {}, $inc: {} };
         const currentXP = await this.userprogressRepository.findByUserId(userProgress.user);
         const xpDiff = (userProgress.experiencePoints || 0) - (currentXP?.experiencePoints || 0);
-        if (xpDiff > 0) {
-            updateOp.$inc.experiencePoints = xpDiff;
-        }
-        updateOp.$set = {
-            ...normalizedData,
-            streak,
-            maxStreak,
-            studyDates
-        };
+        if (xpDiff > 0) updateOp.$inc.experiencePoints = xpDiff;
+        updateOp.$set = { ...normalizedData, streak: currentStreak, maxStreak, studyDates };
         const result = await this.userprogressRepository.update(userProgress.user, updateOp);
+        await this.checkAndUnlockNonChampionPrizes(userProgress.user);
         await this._invalidateCache();
         return result;
+    }
+
+    _calculateStreak(studyDates, todayStr = getVietnamDate()) {
+        if (!Array.isArray(studyDates) || studyDates.length === 0) {
+            return { currentStreak: 0, maxStreak: 0 };
+        }
+        const dates = [...new Set(studyDates)].map(d => d instanceof Date ? getVietnamDate(d) : d).filter(Boolean).sort().reverse();
+        let streak = 0;
+        let maxStreak = 0;
+        for (let i = 0; i < dates.length; i++) {
+            if (i === 0) {
+                streak = 1;
+            } else {
+                const currentDate = new Date(dates[i] + 'T00:00:00+07:00');
+                const prevDate = new Date(dates[i - 1] + 'T00:00:00+07:00');
+                const diffDays = (prevDate - currentDate) / (1000 * 60 * 60 * 24);
+                if (diffDays === 1 || diffDays === 2) {
+                    streak++;
+                } else {
+                    break;
+                }
+            }
+            maxStreak = Math.max(maxStreak, streak);
+        }
+        return { currentStreak: streak, maxStreak };
+    }
+
+    _calculatePerfectStreak(studyDates, todayStr = getVietnamDate()) {
+        if (!Array.isArray(studyDates) || studyDates.length === 0) {
+            return 0;
+        }
+        const dates = [...new Set(studyDates)].map(d => (d instanceof Date ? getVietnamDate(d) : d)).filter(Boolean).sort();
+        let perfectStreak = 0;
+        let expectedDate = null;
+        for (let i = dates.length - 1; i >= 0; i--) {
+            const dateStr = dates[i];
+            const date = new Date(dateStr + 'T00:00:00+07:00');
+            const timestamp = date.getTime();
+            if (expectedDate === null) {
+                perfectStreak = 1;
+                expectedDate = timestamp - 86400000;
+                continue;
+            }
+            const diffDays = Math.floor((expectedDate - timestamp) / 86400000);
+            if (diffDays === 0) {
+                perfectStreak++;
+                expectedDate -= 86400000;
+            } else {
+                break;
+            }
+        }
+        return perfectStreak;
+    }
+
+    async checkAndResetStreakOnLogin(userId) {
+        const userProgress = await this.getUserProgressByUserId(userId);
+        if (!userProgress) return null;
+        const todayStr = getVietnamDate();
+        const today = new Date(todayStr + 'T00:00:00+07:00');
+        const studyDates = [...new Set(
+            (userProgress.studyDates || []).map(d => d instanceof Date ? getVietnamDate(d) : d).filter(Boolean)
+        )];
+        if (studyDates.includes(todayStr)) {
+            return userProgress;
+        }
+        const pastDates = studyDates.filter(d => d !== todayStr).sort((a, b) => new Date(b) - new Date(a));
+        if (pastDates.length === 0) {
+            return userProgress;
+        }
+        const lastStudyDateStr = pastDates[0];
+        const lastStudyDate = new Date(lastStudyDateStr + 'T00:00:00+07:00');
+        const daysDiff = Math.floor((today - lastStudyDate) / (24 * 60 * 60 * 1000));
+        if (daysDiff >= 3) {
+            const updateOp = { $set: { streak: 0 } };
+            await this.userprogressRepository.update(userId, updateOp, true);
+            await this._invalidateCache();
+            return { ...userProgress, streak: 0 };
+        }
+        return userProgress;
     }
 
     async recordStudyTime(userId, seconds) {
@@ -274,6 +384,251 @@ class UserprogressService {
         const result = await this.userprogressRepository.addDailyStudyTime(userId, seconds);
         await this._invalidateCache();
         return result.modifiedCount > 0 || result.upsertedCount > 0;
+    }
+
+    async _sendPrizeNotification(userId, prize) {
+        let title = "";
+        let message = "";
+        let type = "achieve";
+        let link = "http://localhost:5173/statistic";
+        switch (prize.type) {
+            case "perfect_streak":
+                const streakDays = prize.requirement.streakDays;
+                const level = prize.level;
+                if (level === 10) {
+                    title = "365 NGÀY HOÀN HẢO – BẠN LÀ HUYỀN THOẠI!";
+                    message = `Chúc mừng bạn đã duy trì 365 ngày học liên tục không bỏ sót! Bạn chính thức là VUA CỦA SỰ KỶ LUẬT tại EasyTalk! Cả cộng đồng đang cúi đầu thán phục!`;
+                } else if (level >= 7) {
+                    title = `TUẦN HOÀN HẢO CẤP ${level} – BẠN LÀ SIÊU NHÂN!`;
+                    message = `Đã ${streakDays} ngày không bỏ lỡ một buổi học nào! Bạn đang viết nên một hành trình mà 99% người khác chỉ biết mơ ước!`;
+                } else if (level >= 4) {
+                    title = `TUẦN HOÀN HẢO CẤP ${level} – ĐẲNG CẤP ĐÃ LÊN TIẾNG!`;
+                    message = `${streakDays} ngày liên tục – bạn không chỉ học, bạn đang sống cùng tiếng Anh mỗi ngày!`;
+                } else {
+                    title = `TUẦN HOÀN HẢO CẤP ${level} – XUẤT SẮC!`;
+                    message = `Đã duy trì ${streakDays} ngày học không gián đoạn! Bạn đang tiến rất gần đến ngôi đền của những huyền thoại!`;
+                }
+                break;
+            case "knowledge_god":
+                const xpNeeded = prize.requirement.xp.toLocaleString('vi-VN');
+                if (prize.level === 10) {
+                    title = "VỊ THẦN KIẾN THỨC CẤP 10 – BẠN LÀ THẦN THOẠI!";
+                    message = `100.000 XP đã thuộc về bạn! Bạn không còn là học viên nữa – bạn là một hiện tượng của EasyTalk! Cả hệ thống đang rung chuyển vì sự chăm chỉ của bạn!`;
+                } else if (prize.level >= 7) {
+                    title = `VỊ THẦN KIẾN THỨC CẤP ${prize.level} – ĐỈNH CAO MỚI!`;
+                    message = `Đạt ${xpNeeded} XP – bạn đã vượt qua hàng ngàn người để đứng trong top những bộ óc xuất sắc nhất!`;
+                } else {
+                    title = `VỊ THẦN KIẾN THỨC CẤP ${prize.level} – ĐANG THĂNG HOA!`;
+                    message = `Chúc mừng đạt mốc ${xpNeeded} XP! Bạn đang tiến gần hơn đến ngôi vị tối thượng của tri thức!`;
+                }
+                break;
+            case "champion_week":
+                title = "QUÁN QUÂN TUẦN – BẠN LÀ SỐ 1!";
+                message = `XẾP HẠNG TUẦN QUA: Bạn đã vô địch trên bảng xếp hạng! Cúp vàng tuần này chính thức thuộc về bạn! Cộng đồng EasyTalk đang vỗ tay chúc mừng!`;
+                type = "champion";
+                break;
+            case "champion_month":
+                title = "QUÁN QUÂN THÁNG – VUA CỦA THÁNG!";
+                message = `THÁNG NÀY BẠN LÀ NGÔI SAO SÁNG NHẤT! Không ai vượt qua được bạn về sự chăm chỉ và hiệu quả! Cúp tháng chính thức có chủ!`;
+                type = "champion";
+                break;
+            case "champion_year":
+                title = "QUÁN QUÂN NĂM – HUYỀN THOẠI SỐNG!";
+                message = `CẢ NĂM QUA, BẠN LÀ NGƯỜI XUẤT SẮC NHẤT EASY TALK! Tên bạn sẽ được khắc vào ngôi đền danh vọng vĩnh viễn! Chúc mừng nhà vô địch của năm!`;
+                type = "champion";
+                break;
+        }
+        try {
+            await this.notificationService.createNotification(userId, title, message, type, link);
+        } catch (err) {
+            console.error("Lỗi gửi thông báo thành tựu:", err);
+        }
+    }
+
+    _getVnNow() {
+        return new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+    }
+
+    async checkAndUnlockNonChampionPrizes(userId) {
+        const userProgress = await this.getUserProgressByUserId(userId);
+        if (!userProgress) return { newPrizes: [], totalUnlocked: 0 };
+        const allPrizes = await prizeService.getAllPrizes();
+        const newlyUnlocked = [];
+        for (const prize of allPrizes) {
+            if (['champion_week', 'champion_month', 'champion_year'].includes(prize.type)) continue;
+            if (await this.userprogressRepository.hasUnlockedPrize(userId, prize.code)) continue;
+            let shouldUnlock = false;
+            switch (prize.type) {
+                case 'perfect_streak':
+                    shouldUnlock = await this._checkPerfectStreak(userProgress, prize);
+                    break;
+                case 'knowledge_god':
+                    shouldUnlock = await this._checkKnowledgeGod(userProgress, prize);
+                    break;
+            }
+            if (shouldUnlock) {
+                await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level);
+                newlyUnlocked.push(prize);
+                await this._sendPrizeNotification(userId, prize);
+            }
+        }
+        await this._invalidateCache();
+        return { newPrizes: newlyUnlocked, totalUnlocked: newlyUnlocked.length };
+    }
+
+    async checkAndUnlockChampionPrizes(userId) {
+        const userProgress = await this.getUserProgressByUserId(userId);
+        if (!userProgress) return { newPrizes: [], totalUnlocked: 0 };
+        const allPrizes = await prizeService.getAllPrizes();
+        const newlyUnlocked = [];
+        const now = this._getVnNow();
+        for (const prize of allPrizes) {
+            if (!['champion_week', 'champion_month', 'champion_year'].includes(prize.type)) continue;
+            if (await this.userprogressRepository.hasUnlockedPrize(userId, prize.code)) continue;
+            let shouldUnlock = false;
+            let period = null;
+            if (prize.type === 'champion_week' && now.getDay() === 1) {
+                period = this._getPreviousPeriod('week');
+                shouldUnlock = await this._checkChampionWeek(userId, prize, period);
+            }
+            if (prize.type === 'champion_month' && now.getDate() === 1) {
+                period = this._getPreviousPeriod('month');
+                shouldUnlock = await this._checkChampionMonth(userId, prize, period);
+            }
+            if (prize.type === 'champion_year' && now.getMonth() === 0 && now.getDate() === 1) {
+                period = this._getPreviousPeriod('year');
+                shouldUnlock = await this._checkChampionYear(userId, prize, period);
+            }
+            if (shouldUnlock) {
+                await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level, period);
+                newlyUnlocked.push(prize);
+                await this._sendPrizeNotification(userId, prize);
+            }
+        }
+        await this._invalidateCache();
+        return { newPrizes: newlyUnlocked, totalUnlocked: newlyUnlocked.length };
+    }
+
+    async _checkPerfectStreak(userProgress, prize) {
+        const perfectStreak = this._calculatePerfectStreak(
+            userProgress.studyDates,
+            getVietnamDate()
+        );
+        return perfectStreak >= prize.requirement.streakDays;
+    }
+    
+    async _checkKnowledgeGod(userProgress, prize) {
+        return (userProgress.experiencePoints || 0) >= prize.requirement.xp;
+    }
+
+    async _checkChampionWeek(userId, prize, periodKey) {
+        const [expLeaderboard, timeLeaderboard] = await Promise.all([
+            this.userprogressRepository.getLeaderboardByExp('week', 10, periodKey),
+            this.userprogressRepository.getLeaderboardByStudyTime('week', 10, periodKey)
+        ]);
+        if (!expLeaderboard.length && !timeLeaderboard.length) return false;
+        const topExpScore = expLeaderboard[0]?.value ?? 0;
+        const topTimeScore = timeLeaderboard[0]?.value ?? 0;
+        const topExpUsers = expLeaderboard.filter(u => u.value === topExpScore);
+        const topTimeUsers = timeLeaderboard.filter(u => u.value === topTimeScore);
+        const allTopUsers = [...new Set([...topExpUsers, ...topTimeUsers].map(u => u._id.toString()))];
+        const userProgress = await this.getUserProgressByUserId(userId);
+        return allTopUsers.includes(userProgress._id.toString());
+    }
+
+    async _checkChampionMonth(userId, prize, periodKey) {
+        const [expLeaderboard, timeLeaderboard] = await Promise.all([
+            this.userprogressRepository.getLeaderboardByExp('month', 10, periodKey),
+            this.userprogressRepository.getLeaderboardByStudyTime('month', 10, periodKey)
+        ]);
+        if (!expLeaderboard.length && !timeLeaderboard.length) return false;
+        const topExpScore = expLeaderboard[0]?.value ?? 0;
+        const topTimeScore = timeLeaderboard[0]?.value ?? 0;
+        const topExpUsers = expLeaderboard.filter(u => u.value === topExpScore);
+        const topTimeUsers = timeLeaderboard.filter(u => u.value === topTimeScore);
+        const allTopUsers = [...new Set([...topExpUsers, ...topTimeUsers].map(u => u._id.toString()))];
+        const userProgress = await this.getUserProgressByUserId(userId);
+        return allTopUsers.includes(userProgress._id.toString());
+    }
+
+    async _checkChampionYear(userId, prize, periodKey) {
+        const [expLeaderboard, timeLeaderboard] = await Promise.all([
+            this.userprogressRepository.getLeaderboardByExp('year', 10, periodKey),
+            this.userprogressRepository.getLeaderboardByStudyTime('year', 10, periodKey)
+        ]);
+        if (!expLeaderboard.length && !timeLeaderboard.length) return false;
+        const topExpScore = expLeaderboard[0]?.value ?? 0;
+        const topTimeScore = timeLeaderboard[0]?.value ?? 0;
+        const topExpUsers = expLeaderboard.filter(u => u.value === topExpScore);
+        const topTimeUsers = timeLeaderboard.filter(u => u.value === topTimeScore);
+        const allTopUsers = [...new Set([...topExpUsers, ...topTimeUsers].map(u => u._id.toString()))];
+        const userProgress = await this.getUserProgressByUserId(userId);
+        return allTopUsers.includes(userProgress._id.toString());
+    }
+
+    _getPreviousPeriod(type) {
+        const vnNow = this._getVnNow();
+        const year = vnNow.getFullYear();
+        const month = vnNow.getMonth();
+        if (type === 'week') {
+            const startOfYear = new Date(year, 0, 1);
+            const days = Math.floor((vnNow - startOfYear) / (24 * 60 * 60 * 1000));
+            const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+            const prevWeek = weekNumber - 1;
+            if (prevWeek > 0) return `${year}-W${String(prevWeek).padStart(2, '0')}`;
+            const prevYear = year - 1;
+            const lastWeekOfPrevYear = this._getWeekNumber(new Date(prevYear, 11, 31));
+            return `${prevYear}-W${String(lastWeekOfPrevYear).padStart(2, '0')}`;
+        }
+        if (type === 'month') {
+            const prevMonth = month === 0 ? 11 : month - 1;
+            const prevYear = month === 0 ? year - 1 : year;
+            return `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}`;
+        }
+        if (type === 'year') return `${year - 1}`;
+        return null;
+    }
+
+    _getWeekNumber(date) {
+        const startOfYear = new Date(date.getFullYear(), 0, 1);
+        const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+        return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+    }
+
+    async getUserPrizesWithDetails(userId) {
+        const unlockedPrizes = await this.userprogressRepository.getUserPrizes(userId);
+        const allPrizes = await prizeService.getAllPrizes();
+        return unlockedPrizes.map(up => {
+            const prizeDetail = allPrizes.find(p => p.code === up.code);
+            return {
+                ...up,
+                name: prizeDetail?.name,
+                type: prizeDetail?.type,
+                iconClass: prizeDetail?.iconClass,
+                requirement: prizeDetail?.requirement
+            };
+        });
+    }
+
+    async manuallyCheckChampionPrizesForAll() {
+        console.log('[Manual] Kiểm tra giải quán quân cho tất cả người dùng...');
+        const { userprogresses } = await this.getUserProgressList(1, 1000);
+        const results = [];
+        for (const p of userprogresses) {
+            try {
+                const result = await this.checkAndUnlockChampionPrizes(p.user.toString());
+                if (result.newPrizes.length > 0) {
+                    results.push({ userId: p.user.toString(), prizes: result.newPrizes });
+                }
+            } catch (err) {
+                console.error(`Lỗi user ${p.user}:`, err);
+            }
+        }
+        return results;
+    }
+
+    async manuallyCheckChampionPrizes(userId) {
+        return await this.checkAndUnlockChampionPrizes(userId);
     }
 
     async deleteUserProgressByUser(userId) {

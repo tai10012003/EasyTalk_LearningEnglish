@@ -214,4 +214,32 @@ export const UserProgressService = {
             throw err;
         }
     },
+
+    async getUserPrizes() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/my-prizes`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
+            }
+            const data = await res.json();
+            hasShownAlert = false;
+            return data.prizes || [];
+        } catch (err) {
+            console.error("Error fetching user prizes:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời không tải được giải thưởng của bạn",
+                    text: "Dữ liệu sẽ được hiển thị khi có kết nối.",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+            return [];
+        }
+    },
 };

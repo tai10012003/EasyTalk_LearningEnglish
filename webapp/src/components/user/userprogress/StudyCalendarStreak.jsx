@@ -46,18 +46,48 @@ function StudyCalendarStreak({ studyDates = [] }) {
                     <div key={`empty-${i}`} className="streak-day empty"></div>
                 ))}
                 {daysArray.map((day) => {
-                    const date = new Date(currentYear, currentMonth, day).toDateString();
-                    const studied = studiedSet.has(date);
-                    const isToday = date == today.toDateString();
+                    const dateObj = new Date(currentYear, currentMonth, day);
+                    const dateString = dateObj.toDateString();
+                    const studied = studiedSet.has(dateString);
+                    const isToday = dateString === today.toDateString();
+                    if (isToday) {
+                        return (
+                            <div
+                                key={day}
+                                className={`streak-day today ${studied ? "studied" : ""}`}
+                            >
+                                {day}
+                                {studied && <span className="streak-fire">🔥</span>}
+                            </div>
+                        );
+                    }
+                    if (dateObj < today) {
+                        const prev1Obj = new Date(dateObj);
+                        prev1Obj.setDate(dateObj.getDate() - 1);
+                        const prev2Obj = new Date(dateObj);
+                        prev2Obj.setDate(dateObj.getDate() - 2);
+                        const prev1Studied = studiedSet.has(prev1Obj.toDateString());
+                        const prev2Studied = studiedSet.has(prev2Obj.toDateString());
+                        const missed1Day = !studied && prev1Studied;
+                        const missed2Days = !studied && !prev1Studied && prev2Studied;
+                        return (
+                            <div
+                                key={day}
+                                className={`streak-day 
+                                ${studied ? "studied" : ""} 
+                                ${missed1Day ? "missed-1day" : ""} 
+                                ${missed2Days ? "missed-2days" : ""}`}
+                            >
+                                {day}
+                                {studied && <span className="streak-fire">🔥</span>}
+                                {missed1Day && <span className="streak-ice">❄️</span>}
+                                {missed2Days && <span className="streak-ice">❄️❄️</span>}
+                            </div>
+                        );
+                    }
                     return (
-                        <div
-                            key={day}
-                            className={`streak-day ${studied ? "studied" : ""} ${
-                                isToday ? "today" : ""
-                            }`}
-                        >
+                        <div key={day} className="streak-day">
                             {day}
-                            {studied && <span className="streak-fire">🔥</span>}
                         </div>
                     );
                 })}

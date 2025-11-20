@@ -96,6 +96,9 @@ app.use(notificationController);
 var usersettingController = require(__dirname + "/controllers/usersettingcontroller");
 app.use(usersettingController);
 
+var prizeController = require(__dirname + "/controllers/prizecontroller");
+app.use(prizeController);
+
 var userprogressController = require(__dirname + "/controllers/userprogresscontroller");
 app.use(userprogressController);
 

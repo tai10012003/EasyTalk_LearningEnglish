@@ -6,6 +6,7 @@ const FlashCardListCard = ({ flashcardLists, isMine }) => {
             <div
                 className="lesson-card"
                 onClick={() => window.location.href = `/flashcards/flashcardlist/${flashcardLists._id}`}
+                style={{ padding: '20px 0' }}
             >
                 <h5 className="lesson-title">{flashcardLists.name}</h5>
                 <div className="lesson-content">
