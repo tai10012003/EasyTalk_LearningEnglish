@@ -29,6 +29,9 @@ import User from "@/views/admin/user/User";
 import AddUser from "@/views/admin/user/AddUserPage";
 import UpdateUser from "@/views/admin/user/UpdateUserPage";
 import Notification from "@/views/admin/Notification";
+import Prize from "@/views/admin/prize/Prize";
+import AddPrize from "@/views/admin/prize/AddPrizePage";
+import UpdatePrize from "@/views/admin/prize/UpdatePrizePage";
 import UserProgress from "@/views/admin/userprogress/UserProgress";
 import UserProgressDetail from "@/views/admin/userprogress/UserProgressDetailPage"
 import NotFound from "@/views/admin/NotFound.jsx";
@@ -280,6 +283,30 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <Notification />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "prize",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <Prize />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "prize/add",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <AddPrize />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "prize/update/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <UpdatePrize />
             </PrivateRoute>
         ),
     },

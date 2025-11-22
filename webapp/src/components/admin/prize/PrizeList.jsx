@@ -1,0 +1,171 @@
+import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
+
+function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
+    const [prizes, setPrizes] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [loading, setLoading] = useState(false);
+
+    const loadData = async (page = 1) => {
+        setLoading(true);
+        try {
+            const data = await fetchData(page);
+            setPrizes(data[dataKey] || []);
+            setCurrentPage(data.currentPage);
+            setTotalPages(data.totalPages);
+        } catch (err) {
+            console.error(err);
+            setPrizes([]);
+            Swal.fire('Thất bại!', 'Tải dữ liệu thất bại!', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadData(currentPage);
+    }, [currentPage]);
+
+    const handleDelete = async (id, name) => {
+        Swal.fire({
+            title: 'Bạn có chắc?',
+            text: `Bạn có muốn xóa luyện tập "${name}" không?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Xác nhận',
+            cancelButtonText: 'Hủy',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    await deleteItem(id);
+                    Swal.fire('Thành công!', `Xóa luyện tập "${name}" thành công!`, 'success');
+                    loadData(currentPage);
+                } catch (err) {
+                    Swal.fire('Thất bại!', `Xóa luyện tập "${name}" thất bại!`, 'error');
+                }
+            }
+        });
+    };
+
+    const renderPagination = () => {
+        const pages = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pages.push(
+                <li
+                    key={i}
+                    className={`admin-prize-page-item ${i == currentPage ? "active" : ""}`}
+                >
+                    <button
+                        className="admin-prize-page-link"
+                        onClick={() => setCurrentPage(i)}
+                    >
+                        {i}
+                    </button>
+                </li>
+            );
+        }
+        return (
+            <ul className="admin-prize-pagination">
+                {currentPage > 1 && (
+                    <li className="admin-prize-page-item">
+                        <button
+                            className="admin-prize-page-link"
+                            onClick={() => setCurrentPage(currentPage - 1)}
+                        >
+                            &laquo;
+                        </button>
+                    </li>
+                )}
+                {pages}
+                {currentPage < totalPages && (
+                    <li className="admin-prize-page-item">
+                        <button
+                            className="admin-prize-page-link"
+                            onClick={() => setCurrentPage(currentPage + 1)}
+                        >
+                            &raquo;
+                        </button>
+                    </li>
+                )}
+            </ul>
+        );
+    };
+
+    return (
+        <div className="admin-prize-wrapper">
+            <h1 className="admin-prize-title">{title}</h1>
+            <div className="admin-prize-add">
+                <a href={addUrl} className="admin-prize-add-btn">
+                    + Thêm phần thưởng
+                </a>
+            </div>
+            {loading ? (
+                <p>Đang tải dữ liệu...</p>
+            ) : (
+                <div className="admin-prize-table-container">
+                    <table className="admin-prize-table">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Tiêu đề</th>
+                                <th>Loại</th>
+                                <th>Cấp độ</th>
+                                <th>Duy nhất</th>
+                                <th>Ngày tạo</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {prizes.length > 0 ? (
+                                prizes.map((prize, index) => {
+                                    const createdAt = new Date(prize.createdAt).toLocaleString(
+                                        "vi-VN",
+                                        {
+                                            day: "2-digit",
+                                            month: "2-digit",
+                                            year: "numeric",
+                                            hour: "2-digit",
+                                            minute: "2-digit",
+                                        }
+                                    );
+                                    return (
+                                        <tr key={prize._id}>
+                                            <td>{(currentPage - 1) * 12 + index + 1}</td>
+                                            <td>{prize.name}</td>
+                                            <td>{prize.type}</td>
+                                            <td>{prize.level}</td>
+                                            <td>{prize.isUnique ? "Có" : "Không"}</td>
+                                            <td>{createdAt}</td>
+                                            <td className="admin-prize-actions">
+                                                <a
+                                                    href={`${updateUrl}/${prize._id}`}
+                                                    className="admin-prize-btn-edit"
+                                                >
+                                                    Sửa
+                                                </a>
+                                                <button
+                                                    className="admin-prize-btn-delete"
+                                                    onClick={() => handleDelete(prize._id, prize.name)}
+                                                >
+                                                    Xóa
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            ) : (
+                                <tr>
+                                    <td colSpan={7}>Không có phần thưởng nào</td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                    {renderPagination()}
+                </div>
+            )}
+        </div>
+    );
+}
+
+export default PrizeList;

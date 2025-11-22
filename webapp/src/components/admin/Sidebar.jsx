@@ -214,6 +214,12 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
                                 <p>Quản lý thông báo</p>
                             </Link>
                         </li>
+                        <li className={`admin-nav-item ${isSingleMenuActive("/admin/prize") ? "active" : ""}`}>
+                            <Link to="/admin/prize">
+                                <i className="fas fa-trophy"></i>
+                                <p>Quản lý giải thưởng</p>
+                            </Link>
+                        </li>
                         <li className={`admin-nav-item ${isSingleMenuActive("/admin/userprogress") ? "active" : ""}`}>
                             <Link to="/admin/userprogress">
                                 <i className="fas fa-user"></i>
