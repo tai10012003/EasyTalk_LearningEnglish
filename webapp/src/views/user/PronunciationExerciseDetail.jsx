@@ -83,7 +83,7 @@ const PronunciationExerciseDetail = () => {
                 const result = await Swal.fire({
                     icon: "warning",
                     title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện tập. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    text: "Bạn đang làm bài luyện phát âm. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
                     showCancelButton: true,
                     confirmButtonText: "Rời đi",
                     cancelButtonText: "Ở lại",
@@ -204,7 +204,6 @@ const PronunciationExerciseDetail = () => {
         if (timer) {
             clearInterval(timer);
         }
-        setExerciseCompleted(true);
         setIsCompleted(true);
         setShowResult(true);
     }, [timer]);

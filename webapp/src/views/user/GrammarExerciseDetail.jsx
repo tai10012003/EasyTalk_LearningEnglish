@@ -84,7 +84,7 @@ const GrammarExerciseDetail = () => {
                 const result = await Swal.fire({
                     icon: "warning",
                     title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện tập. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    text: "Bạn đang làm bài luyện ngữ pháp. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
                     showCancelButton: true,
                     confirmButtonText: "Rời đi",
                     cancelButtonText: "Ở lại",
@@ -206,7 +206,6 @@ const GrammarExerciseDetail = () => {
         }
         setIsCompleted(true);
         setShowResult(true);
-        setExerciseCompleted(true);
     }, [timer]);
 
     const handleShowHistory = useCallback(() => {

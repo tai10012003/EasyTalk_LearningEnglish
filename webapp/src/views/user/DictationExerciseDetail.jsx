@@ -241,7 +241,6 @@ function DictationExerciseDetail() {
                 </p>
             );
             setShowActions(true);
-            setExerciseCompleted(true);
         }
     };
 

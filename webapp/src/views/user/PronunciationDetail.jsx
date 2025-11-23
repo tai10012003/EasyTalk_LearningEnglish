@@ -68,7 +68,7 @@ function PronunciationDetail() {
     }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
-        if (!navigator || !pronunciation || pronunciationCompleted) return;
+        if (!navigator || !displayContent || pronunciationCompleted) return;
         const originalPush = navigator.push;
         const originalReplace = navigator.replace;
         const handleNavigation = async (originalMethod, args) => {
@@ -97,7 +97,7 @@ function PronunciationDetail() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, pronunciation, displayContent, pronunciationCompleted]);
+    }, [navigator, displayContent, pronunciationCompleted]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {

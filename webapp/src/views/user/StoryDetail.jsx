@@ -69,7 +69,7 @@ function StoryDetail() {
     }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
-        if (!navigator || !story || storyCompleted) return;
+        if (!navigator || !displayedItems.length > 0 || storyCompleted) return;
         const originalPush = navigator.push;
         const originalReplace = navigator.replace;
         const handleNavigation = async (originalMethod, args) => {
@@ -98,7 +98,7 @@ function StoryDetail() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, story, displayedItems.length, storyCompleted]);
+    }, [navigator, displayedItems.length, storyCompleted]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {

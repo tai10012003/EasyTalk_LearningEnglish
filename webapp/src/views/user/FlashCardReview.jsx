@@ -23,6 +23,7 @@ const FlashCardReview = () => {
     const [isOwner, setIsOwner] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [readyForActions, setReadyForActions] = useState(false);
+    const [cardKey, setCardKey] = useState(0);
     const pendingUpdatesRef = useRef([]);
     const lastCombinationsRef = useRef([]);
 
@@ -126,7 +127,7 @@ const FlashCardReview = () => {
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
-            if (flashcards.length > 0 && !allowNavigationRef.current) {
+            if (flashcards.length > 0) {
                 e.preventDefault();
                 e.returnValue = '';
                 return '';
@@ -148,6 +149,8 @@ const FlashCardReview = () => {
         if (flashcards.length < 4) {
             modes = modes.filter(m => m !== "choice");
         }
+        const currentCardId = flashcards[currentIndex]?._id;
+        const currentMode = mode;
         const banned = lastCombinationsRef.current.slice(0, 2);
         let validPairs = [];
         flashcards.forEach((card, idx) => {
@@ -177,13 +180,16 @@ const FlashCardReview = () => {
             );
         }
         const chosen = validPairs[Math.floor(Math.random() * validPairs.length)];
+        if (currentCardId) {
+            lastCombinationsRef.current = [
+                { cardId: currentCardId, mode: currentMode },
+                ...lastCombinationsRef.current.slice(0, 2)
+            ].slice(0, 3);
+        }
         setCurrentIndex(chosen.cardIndex);
         setMode(chosen.mode);
         setReadyForActions(false);
-        lastCombinationsRef.current = [
-            { cardId: chosen.cardId, mode: chosen.mode },
-            ...lastCombinationsRef.current.slice(0, 2)
-        ].slice(0, 3);
+        setCardKey(prev => prev + 1);
     };
 
     const handleNext = () => {
@@ -248,20 +254,31 @@ const FlashCardReview = () => {
         });
         if (result.isConfirmed) {
             const updated = flashcards.filter((_, idx) => idx !== currentIndex);
-            setFlashcards(updated);
-            if (updated.length == 0) {
+            lastCombinationsRef.current = [];
+            if (updated.length === 0) {
+                setFlashcards(updated);
                 await finalizeAndExit();
             } else {
-                setCurrentIndex(0);
-                randomMode();
-                setReadyForActions(false);
+                setFlashcards(updated);
                 Swal.fire({
                     icon: "success",
                     title: "Đã xóa từ vựng",
-                    text: "Từ vựng đã được loại khỏi danh sách ôn tập.",
+                    text: `Còn ${updated.length} từ để ôn tiếp!`,
                     timer: 1500,
                     showConfirmButton: false,
                 });
+                setTimeout(() => {
+                    const randomIndex = Math.floor(Math.random() * updated.length);
+                    let modes = ["flip", "choice", "fill"];
+                    if (updated.length < 4) {
+                        modes = modes.filter(m => m !== "choice");
+                    }
+                    const randomModeChoice = modes[Math.floor(Math.random() * modes.length)];
+                    setCurrentIndex(randomIndex);
+                    setMode(randomModeChoice);
+                    setReadyForActions(false);
+                    setCardKey(prev => prev + 1);
+                }, 100);
             }
         }
     };
@@ -278,7 +295,7 @@ const FlashCardReview = () => {
             }, 3000);
             return () => clearTimeout(timer);
         }
-    }, [mode, currentIndex]);
+    }, [mode, currentIndex, cardKey]);
 
     const handleCheckAnswer = (answer, correct) => {
         if (answer.toLowerCase() == correct.toLowerCase()) {
@@ -352,13 +369,25 @@ const FlashCardReview = () => {
             <button className="btn_1" onClick={handleStop}>
                 <i className="fas fa-stop-circle mr-2"></i>Dừng học
             </button>
-            <FlashCardReviewCard
-                card={flashcards[currentIndex]}
-                mode={mode}
-                onCheckAnswer={handleCheckAnswer}
-                allWords={flashcards.map(c => c.word)}
-                onAnswerReady={handleAnswerReady}
-            />
+            {
+                flashcards.length > 0 && flashcards[currentIndex] ? (
+                    <FlashCardReviewCard
+                        key={cardKey}
+                        card={flashcards[currentIndex]}
+                        mode={mode}
+                        onCheckAnswer={handleCheckAnswer}
+                        allWords={flashcards.map(c => c.word)}
+                        onAnswerReady={handleAnswerReady}
+                    />
+                ) : flashcards.length === 0 ? (
+                    <div style={{ textAlign: "center", padding: "50px", fontSize: "1.2rem" }}>
+                        <p>Chúc mừng! Bạn đã hoàn thành toàn bộ flashcard!</p>
+                        <button className="btn_1" onClick={finalizeAndExit}>
+                            Hoàn thành
+                        </button>
+                    </div>
+                ) : null
+            }
             <div className="flashcard-review-actions" style={{ marginTop: "30px" }}>
                 {readyForActions ? (
                     <>
