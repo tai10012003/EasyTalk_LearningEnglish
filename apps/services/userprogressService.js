@@ -147,7 +147,8 @@ class UserprogressService {
         if (!hadToday) {
             studyDates.push(todayStr);
         }
-        const { currentStreak, maxStreak } = this._calculateStreak(studyDates, todayStr);
+        const { currentStreak, tempMaxStreak } = this._calculateStreak(studyDates, todayStr);
+        const maxStreak = Math.max(userProgress.maxStreak || 0, tempMaxStreak);
         updateOp.$set = {
             studyDates,
             streak: currentStreak,
@@ -288,9 +289,10 @@ class UserprogressService {
         const todayStr = getVietnamDate();
         let studyDates = (userProgress.studyDates || []).map(d => d instanceof Date ? getVietnamDate(d) : d).filter(Boolean);
         if (!studyDates.includes(todayStr)) studyDates.push(todayStr);
-        const { currentStreak, maxStreak } = this._calculateStreak(studyDates, todayStr);
         const updateOp = { $set: {}, $inc: {} };
         const currentXP = await this.userprogressRepository.findByUserId(userProgress.user);
+        const { currentStreak, tempMaxStreak } = this._calculateStreak(studyDates, todayStr);
+        const maxStreak = Math.max(currentXP?.maxStreak || 0, tempMaxStreak);
         const xpDiff = (userProgress.experiencePoints || 0) - (currentXP?.experiencePoints || 0);
         if (xpDiff > 0) updateOp.$inc.experiencePoints = xpDiff;
         updateOp.$set = { ...normalizedData, streak: currentStreak, maxStreak, studyDates };
@@ -306,7 +308,7 @@ class UserprogressService {
         }
         const dates = [...new Set(studyDates)].map(d => d instanceof Date ? getVietnamDate(d) : d).filter(Boolean).sort().reverse();
         let streak = 0;
-        let maxStreak = 0;
+        let tempMaxStreak = 0;
         for (let i = 0; i < dates.length; i++) {
             if (i === 0) {
                 streak = 1;
@@ -320,31 +322,30 @@ class UserprogressService {
                     break;
                 }
             }
-            maxStreak = Math.max(maxStreak, streak);
+            tempMaxStreak = Math.max(tempMaxStreak, streak);
         }
-        return { currentStreak: streak, maxStreak };
+        return { currentStreak: streak, tempMaxStreak };
     }
 
     _calculatePerfectStreak(studyDates, todayStr = getVietnamDate()) {
         if (!Array.isArray(studyDates) || studyDates.length === 0) {
             return 0;
         }
-        const dates = [...new Set(studyDates)].map(d => (d instanceof Date ? getVietnamDate(d) : d)).filter(Boolean).sort();
+        const dates = [...new Set(studyDates)].map(d => (d instanceof Date ? getVietnamDate(d) : d)).filter(Boolean).sort().reverse();
+        const today = new Date(todayStr + 'T00:00:00+07:00');
+        const yesterday = new Date(today.getTime() - 86400000);
+        const yesterdayStr = getVietnamDate(yesterday);
+        if (dates[0] !== todayStr && dates[0] !== yesterdayStr) {
+            return 0;
+        }
         let perfectStreak = 0;
-        let expectedDate = null;
-        for (let i = dates.length - 1; i >= 0; i--) {
-            const dateStr = dates[i];
-            const date = new Date(dateStr + 'T00:00:00+07:00');
-            const timestamp = date.getTime();
-            if (expectedDate === null) {
-                perfectStreak = 1;
-                expectedDate = timestamp - 86400000;
-                continue;
-            }
-            const diffDays = Math.floor((expectedDate - timestamp) / 86400000);
-            if (diffDays === 0) {
+        let expectedDateObj = new Date(dates[0] + 'T00:00:00+07:00');
+        for (let i = 0; i < dates.length; i++) {
+            const currentDateStr = dates[i];
+            const currentDateObj = new Date(currentDateStr + 'T00:00:00+07:00');
+            if (currentDateObj.getTime() === expectedDateObj.getTime()) {
                 perfectStreak++;
-                expectedDate -= 86400000;
+                expectedDateObj = new Date(expectedDateObj.getTime() - 86400000);
             } else {
                 break;
             }
@@ -386,7 +387,7 @@ class UserprogressService {
         return result.modifiedCount > 0 || result.upsertedCount > 0;
     }
 
-    async _sendPrizeNotification(userId, prize) {
+    async _sendPrizeNotification(userId, prize, championType = null) {
         let title = "";
         let message = "";
         let type = "achieve";
@@ -423,18 +424,42 @@ class UserprogressService {
                 }
                 break;
             case "champion_week":
-                title = "QUÁN QUÂN TUẦN – BẠN LÀ SỐ 1!";
-                message = `XẾP HẠNG TUẦN QUA: Bạn đã vô địch trên bảng xếp hạng! Cúp vàng tuần này chính thức thuộc về bạn! Cộng đồng EasyTalk đang vỗ tay chúc mừng!`;
+                if (championType === "exp") {
+                    title = "QUÁN QUÂN TUẦN – VUA ĐIỂM SỐ!";
+                    message = `TUẦN QUA BẠN LÀ NGƯỜI HỌC HIỆU QUẢ NHẤT! Với số điểm kinh nghiệm cao nhất, bạn chính thức là QUÁN QUÂN TUẦN về KIẾN THỨC! Cúp vàng thuộc về bạn!`;
+                } else if (championType === "time") {
+                    title = "QUÁN QUÂN TUẦN – VUA THỜI GIAN!";
+                    message = `TUẦN QUA BẠN LÀ NGƯỜI CHĂM CHỈ NHẤT! Với thời gian học dài nhất, bạn chính thức là QUÁN QUÂN TUẦN về SỰ KIÊN TRÌ! Cúp vàng thuộc về bạn!`;
+                } else if (championType === "both") {
+                    title = "QUÁN QUÂN TUẦN TUYỆT ĐỐI – BẠN LÀ HUYỀN THOẠI!";
+                    message = `BẠN ĐÃ LÀM NÊN LỊCH SỬ! Top 1 cả điểm số lẫn thời gian học – bạn không chỉ giỏi, bạn còn siêu chăm chỉ! CẢ HAI CÚP VÀNG TUẦN NÀY ĐỀU THUỘC VỀ BẠN!`;
+                }
                 type = "champion";
                 break;
             case "champion_month":
-                title = "QUÁN QUÂN THÁNG – VUA CỦA THÁNG!";
-                message = `THÁNG NÀY BẠN LÀ NGÔI SAO SÁNG NHẤT! Không ai vượt qua được bạn về sự chăm chỉ và hiệu quả! Cúp tháng chính thức có chủ!`;
+                if (championType === "exp") {
+                    title = "QUÁN QUÂN THÁNG – ĐẾ VƯƠNG KIẾN THỨC!";
+                    message = `THÁNG NÀY BẠN LÀ NGƯỜI XUẤT SẮC NHẤT về điểm kinh nghiệm! Không ai vượt qua được bạn về hiệu quả học tập! Cúp tháng vàng ròng đã có chủ!`;
+                } else if (championType === "time") {
+                    title = "QUÁN QUÂN THÁNG – ĐẾ VƯƠNG KIÊN TRÌ!";
+                    message = `THÁNG NÀY BẠN LÀ NGƯỜI CHĂM CHỈ NHẤT với thời gian học dài nhất! Sự kiên trì của bạn đã được đền đáp xứng đáng! Cúp tháng thuộc về bạn!`;
+                } else if (championType === "both") {
+                    title = "QUÁN QUÂN THÁNG TUYỆT ĐỐI – BẠN LÀ THẦN THOẠI!";
+                    message = `THÁNG NÀY BẠN LÀ SỐ 1 TUYỆT ĐỐI! Top 1 cả điểm số lẫn thời gian – bạn chính là hình mẫu hoàn hảo mà mọi học viên mơ ước! CẢ HAI CÚP THÁNG ĐỀU LÀ CỦA BẠN!`;
+                }
                 type = "champion";
                 break;
             case "champion_year":
-                title = "QUÁN QUÂN NĂM – HUYỀN THOẠI SỐNG!";
-                message = `CẢ NĂM QUA, BẠN LÀ NGƯỜI XUẤT SẮC NHẤT EASY TALK! Tên bạn sẽ được khắc vào ngôi đền danh vọng vĩnh viễn! Chúc mừng nhà vô địch của năm!`;
+                if (championType === "exp") {
+                    title = "QUÁN QUÂN NĂM – THẦN KIẾN THỨC!";
+                    message = `CẢ NĂM QUA, BẠN LÀ NGƯỜI HỌC HIỆU QUẢ NHẤT TOÀN HỆ THỐNG! Với tổng điểm kinh nghiệm cao nhất, tên bạn sẽ được khắc vào ngôi đền danh vọng vĩnh viễn!`;
+                } else if (championType === "time") {
+                    title = "QUÁN QUÂN NĂM – THẦN KIÊN TRÌ!";
+                    message = `CẢ NĂM QUA, BẠN LÀ NGƯỜI CHĂM CHỈ NHẤT TOÀN HỆ THỐNG! Với thời gian học dài nhất, bạn xứng đáng là biểu tượng của sự bền bỉ!`;
+                } else if (championType === "both") {
+                    title = "QUÁN QUÂN NĂM TUYỆT ĐỐI – BẠN LÀ HUYỀN THOẠI SỐNG!";
+                    message = `BẠN ĐÃ VIẾT NÊN LỊCH SỬ EASY TALK! Top 1 cả điểm số lẫn thời gian trong cả năm – bạn không chỉ giỏi, bạn là HOÀN HẢO! TÊN BẠN SẼ ĐƯỢC KHẮC VÀNG MÃI MÃI!`;
+                }
                 type = "champion";
                 break;
         }
@@ -469,7 +494,7 @@ class UserprogressService {
             if (shouldUnlock) {
                 await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level);
                 newlyUnlocked.push(prize);
-                await this._sendPrizeNotification(userId, prize);
+                await this._sendPrizeNotification(userId, prize, prize.championType);
             }
         }
         await this._invalidateCache();
@@ -502,7 +527,7 @@ class UserprogressService {
             if (shouldUnlock) {
                 await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level, period);
                 newlyUnlocked.push(prize);
-                await this._sendPrizeNotification(userId, prize);
+                await this._sendPrizeNotification(userId, prize, prize.championType);
             }
         }
         await this._invalidateCache();
@@ -523,47 +548,59 @@ class UserprogressService {
 
     async _checkChampionWeek(userId, prize, periodKey) {
         const [expLeaderboard, timeLeaderboard] = await Promise.all([
-            this.userprogressRepository.getLeaderboardByExp('week', 10, periodKey),
-            this.userprogressRepository.getLeaderboardByStudyTime('week', 10, periodKey)
+            this.userprogressRepository.getLeaderboardByExp('week', 50, periodKey),
+            this.userprogressRepository.getLeaderboardByStudyTime('week', 50, periodKey)
         ]);
         if (!expLeaderboard.length && !timeLeaderboard.length) return false;
         const topExpScore = expLeaderboard[0]?.value ?? 0;
         const topTimeScore = timeLeaderboard[0]?.value ?? 0;
-        const topExpUsers = expLeaderboard.filter(u => u.value === topExpScore);
-        const topTimeUsers = timeLeaderboard.filter(u => u.value === topTimeScore);
-        const allTopUsers = [...new Set([...topExpUsers, ...topTimeUsers].map(u => u._id.toString()))];
-        const userProgress = await this.getUserProgressByUserId(userId);
-        return allTopUsers.includes(userProgress._id.toString());
+        const topExpUserIds = expLeaderboard.filter(u => u.value === topExpScore).map(u => u._id.toString());
+        const topTimeUserIds = timeLeaderboard.filter(u => u.value === topTimeScore).map(u => u._id.toString());
+        const userIdStr = userId.toString();
+        const isTopExp = topExpUserIds.includes(userIdStr);
+        const isTopTime = topTimeUserIds.includes(userIdStr);
+        if (isTopExp && isTopTime) prize.championType = "both";
+        else if (isTopExp) prize.championType = "exp";
+        else if (isTopTime) prize.championType = "time";
+        return isTopExp || isTopTime;
     }
 
     async _checkChampionMonth(userId, prize, periodKey) {
         const [expLeaderboard, timeLeaderboard] = await Promise.all([
-            this.userprogressRepository.getLeaderboardByExp('month', 10, periodKey),
-            this.userprogressRepository.getLeaderboardByStudyTime('month', 10, periodKey)
+            this.userprogressRepository.getLeaderboardByExp('month', 50, periodKey),
+            this.userprogressRepository.getLeaderboardByStudyTime('month', 50, periodKey)
         ]);
         if (!expLeaderboard.length && !timeLeaderboard.length) return false;
         const topExpScore = expLeaderboard[0]?.value ?? 0;
         const topTimeScore = timeLeaderboard[0]?.value ?? 0;
-        const topExpUsers = expLeaderboard.filter(u => u.value === topExpScore);
-        const topTimeUsers = timeLeaderboard.filter(u => u.value === topTimeScore);
-        const allTopUsers = [...new Set([...topExpUsers, ...topTimeUsers].map(u => u._id.toString()))];
-        const userProgress = await this.getUserProgressByUserId(userId);
-        return allTopUsers.includes(userProgress._id.toString());
+        const topExpUserIds = expLeaderboard.filter(u => u.value === topExpScore).map(u => u._id.toString());
+        const topTimeUserIds = timeLeaderboard.filter(u => u.value === topTimeScore).map(u => u._id.toString());
+        const userIdStr = userId.toString();
+        const isTopExp = topExpUserIds.includes(userIdStr);
+        const isTopTime = topTimeUserIds.includes(userIdStr);
+        if (isTopExp && isTopTime) prize.championType = "both";
+        else if (isTopExp) prize.championType = "exp";
+        else if (isTopTime) prize.championType = "time";
+        return isTopExp || isTopTime;
     }
 
     async _checkChampionYear(userId, prize, periodKey) {
         const [expLeaderboard, timeLeaderboard] = await Promise.all([
-            this.userprogressRepository.getLeaderboardByExp('year', 10, periodKey),
-            this.userprogressRepository.getLeaderboardByStudyTime('year', 10, periodKey)
+            this.userprogressRepository.getLeaderboardByExp('year', 50, periodKey),
+            this.userprogressRepository.getLeaderboardByStudyTime('year', 50, periodKey)
         ]);
         if (!expLeaderboard.length && !timeLeaderboard.length) return false;
         const topExpScore = expLeaderboard[0]?.value ?? 0;
         const topTimeScore = timeLeaderboard[0]?.value ?? 0;
-        const topExpUsers = expLeaderboard.filter(u => u.value === topExpScore);
-        const topTimeUsers = timeLeaderboard.filter(u => u.value === topTimeScore);
-        const allTopUsers = [...new Set([...topExpUsers, ...topTimeUsers].map(u => u._id.toString()))];
-        const userProgress = await this.getUserProgressByUserId(userId);
-        return allTopUsers.includes(userProgress._id.toString());
+        const topExpUserIds = expLeaderboard.filter(u => u.value === topExpScore).map(u => u._id.toString());
+        const topTimeUserIds = timeLeaderboard.filter(u => u.value === topTimeScore).map(u => u._id.toString());
+        const userIdStr = userId.toString();
+        const isTopExp = topExpUserIds.includes(userIdStr);
+        const isTopTime = topTimeUserIds.includes(userIdStr);
+        if (isTopExp && isTopTime) prize.championType = "both";
+        else if (isTopExp) prize.championType = "exp";
+        else if (isTopTime) prize.championType = "time";
+        return isTopExp || isTopTime;
     }
 
     _getPreviousPeriod(type) {
