@@ -1637,6 +1637,334 @@ p {
 }
 
 /* ===============================================
+   ROAD MAP STYLES
+   =============================================== */
+.user-road-roadmap {
+  background: #f8f9ff;
+}
+
+.user-road-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  position: relative;
+}
+
+.user-road-title {
+  color: #fff;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 20px 0;
+  line-height: 1.6;
+}
+
+.user-road-subtitle {
+  font-size: 1.1rem;
+  color: #e0e0e0;
+  margin-bottom: 25px;
+}
+
+.user-road-progress {
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.user-progress-bar {
+  height: 14px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 7px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.user-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #a8ff78, #78ffd6);
+  border-radius: 7px;
+  transition: width 1s ease;
+}
+
+.user-progress-text {
+  color: #fff;
+  font-weight: bold;
+  font-size: 1.1rem;
+}
+
+.user-road-timeline {
+  position: relative;
+  padding: 40px 0;
+}
+
+.user-road-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  transform: translateX(-50%);
+  border-radius: 2px;
+}
+
+.user-timeline-item {
+  position: relative;
+  width: 100%;
+}
+
+.user-timeline-item.left .user-timeline-card {
+  margin-right: auto;
+  margin-left: 40px;
+}
+
+.user-timeline-item.right .user-timeline-card {
+  margin-left: auto;
+  margin-right: 40px;
+}
+
+.user-timeline-card {
+  width: 380px;
+  max-width: 100%;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+
+.user-timeline-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.user-card-inner {
+  padding: 20px;
+}
+
+.user-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.user-step-badge {
+  background: #667eea;
+  color: white;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+}
+
+.user-badge {
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: bold;
+}
+
+.user-badge.current { background: #ff6b6b; color: white; animation: pulse 2s infinite; }
+.user-badge.completed { background: #51cf66; color: white; }
+.user-badge.locked { background: #adb5bd; color: white; }
+
+.user-card-title {
+  margin: 20px 0 12px 0;
+  font-size: 1.35rem;
+  color: #333;
+  font-weight: 600;
+}
+
+.user-card-desc {
+  color: #666;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}
+
+.user-card-img {
+  width: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.user-card-footer {
+  text-align: center;
+}
+
+.user-btn {
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: 600;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+  font-size: 0.95rem;
+}
+
+.user-btn.start {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.user-btn.start:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+}
+
+.user-btn.review {
+  background: #51cf66;
+  color: white;
+}
+
+.user-btn.review:hover {
+  background: #40b358;
+}
+
+.user-btn.disabled {
+  background: #e9ecef;
+  color: #868e96;
+  cursor: not-allowed;
+}
+
+.user-timeline-dot {
+  position: absolute;
+  top: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 56px;
+  height: 56px;
+  background: white;
+  border: 5px solid #667eea;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  color: #667eea;
+  z-index: 10;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.user-timeline-item.unlocked .user-timeline-dot {
+  background: #51cf66;
+  border-color: #51cf66;
+  color: white;
+}
+
+.user-timeline-item.current .user-timeline-dot {
+  background: #667eea;
+  color: white;
+  animation: pulse 2s infinite;
+  transform: translateX(-50%) !important;
+  font-size: 1.8rem;
+}
+
+.user-floating-buttons {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 999;
+}
+
+.user-scroll-current-btn {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.8rem;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: bounce 3s infinite;
+}
+
+.user-scroll-current-btn:hover {
+  transform: translateY(-5px) scale(1.05);
+  box-shadow: 0 12px 30px rgba(255, 107, 107, 0.5);
+}
+
+.user-scroll-current-text {
+  position: absolute;
+  right: 75px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #333;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.user-scroll-current-btn:hover .user-scroll-current-text {
+  opacity: 1;
+}
+
+.user-scroll-hot-badge {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #ff4757;
+  color: white;
+  font-size: 0.65rem;
+  font-weight: bold;
+  padding: 4px 8px;
+  border-radius: 12px;
+  border: 2px solid white;
+  animation: pulse 2s infinite;
+}
+
+.user-scroll-top {
+  width: 50px;
+  height: 50px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  cursor: pointer;
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.user-scroll-top:hover {
+  background: #764ba2;
+  transform: translateY(-5px);
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-15px); }
+  60% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.7); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 71, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+/* ===============================================
    STORY STYLES
    =============================================== */
 
@@ -1665,6 +1993,7 @@ p {
 .hero-title .help-icon {
   margin-left: 10px;
 }
+
 .search-bar {
   display: flex;
   justify-content: center;
@@ -1723,7 +2052,7 @@ p {
 .lesson-card {
   background: linear-gradient(135deg, #ffffff, #f9f9f9);
   border-radius: 12px;
-  padding: 10px 0 20px 0;
+  padding: 20px;
   text-align: center;
   margin-bottom: 20px;
   transition: all 0.3s ease-in-out;
@@ -1739,6 +2068,7 @@ p {
   object-fit: cover;
   border-radius: 10px;
   margin-bottom: 15px;
+  margin-top: -15px;
 }
 
 .no-image {
@@ -7953,6 +8283,28 @@ p {
   .user-leaderboard-table td {
     padding: 1rem 0.75rem;
   }
+
+  .user-road-title {
+    font-size: 1.8rem;
+  }
+
+  .user-road-header {
+    padding: 35px 20px;
+  }
+
+  .user-timeline-card {
+    width: 360px;
+  }
+
+  .user-timeline-item.left .user-timeline-card,
+  .user-timeline-item.right .user-timeline-card {
+    margin-left: 30px !important;
+    margin-right: 30px !important;
+  }
+
+  .user-card-img {
+    height: 150px;
+  }
 }
 
 /* Existing 992px breakpoint with updates */
@@ -8755,6 +9107,68 @@ p {
     padding: 1.2rem 1.5rem;
     font-size: 1rem;
   }
+
+  .user-road-title {
+    font-size: 1.7rem;
+  }
+
+  .user-road-subtitle {
+    font-size: 1rem;
+  }
+
+  .user-road-header {
+    padding: 30px 15px;
+  }
+
+  .user-road-timeline::before {
+    left: 36px;
+  }
+
+  .user-timeline-item {
+    margin: 70px 0;
+  }
+
+  .user-timeline-item.left .user-timeline-card,
+  .user-timeline-item.right .user-timeline-card {
+    margin-left: 80px !important;
+    margin-right: 20px !important;
+    width: calc(100% - 100px);
+    max-width: 420px;
+  }
+
+  .user-timeline-dot {
+    left: 36px !important;
+    transform: translateX(-50%) !important;
+  }
+
+  .user-timeline-card {
+    width: 100%;
+  }
+
+  .user-card-img {
+    height: 140px;
+  }
+
+  .user-floating-buttons {
+    right: 15px;
+    bottom: 15px;
+    left: auto;
+  }
+
+  .user-scroll-current-btn {
+    width: 58px;
+    height: 58px;
+    font-size: 1.6rem;
+  }
+
+  .user-scroll-current-text {
+    display: none;
+  }
+
+  .user-scroll-top {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 @media (max-width: 576px) {
@@ -9187,6 +9601,80 @@ p {
     display: flex;
     flex-direction: column;
     gap: 0.3rem;
+  }
+
+  .user-road-title {
+    font-size: 1.5rem;
+  }
+
+  .user-road-subtitle {
+    font-size: 0.95rem;
+  }
+
+  .user-road-header {
+    padding: 25px 10px;
+  }
+
+  .user-road-progress {
+    max-width: 90%;
+  }
+
+  .user-timeline-item.left .user-timeline-card,
+  .user-timeline-item.right .user-timeline-card {
+    margin-left: 70px !important;
+    margin-right: 15px !important;
+    width: calc(100% - 85px);
+  }
+
+  .user-timeline-dot {
+    width: 50px;
+    height: 50px;
+    font-size: 1.4rem;
+    left: 33px !important;
+  }
+
+  .user-timeline-item.current .user-timeline-dot {
+    font-size: 1.6rem;
+  }
+
+  .user-card-inner {
+    padding: 16px;
+  }
+
+  .user-card-title {
+    font-size: 1.25rem;
+    margin: 12px 0 8px 0;
+  }
+
+  .user-card-desc {
+    font-size: 0.9rem;
+  }
+
+  .user-card-img {
+    height: 130px;
+  }
+
+  .user-btn {
+    padding: 9px 20px;
+    font-size: 0.9rem;
+  }
+
+  .user-scroll-current-btn {
+    width: 56px;
+    height: 56px;
+    font-size: 1.5rem;
+  }
+
+  .user-scroll-top {
+    width: 46px;
+    height: 46px;
+  }
+
+  .user-scroll-hot-badge {
+    font-size: 0.6rem;
+    padding: 3px 6px;
+    top: -6px;
+    right: -6px;
   }
 }
 

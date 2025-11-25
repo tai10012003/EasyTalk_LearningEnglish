@@ -1,34 +1,52 @@
 import React from 'react';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
-function StoryCard({ story, isLocked }) {
+const StoryCard = ({ item, index, isUnlocked, isCurrent }) => {
     return (
-        <div className="col-md-4 col-lg-4 mb-4">
-            <div className={`lesson-card ${isLocked ? "locked" : ""}`}>
-                {story.image ? (
-                    <img
-                        src={`${story.image}`}
-                        alt={story.title}
-                        className="lesson-image"
-                    />
-                    ) : (
-                    <div className="no-image">Không có sẵn ảnh</div>
-                )}
-
-                <div className="lesson-info">
-                    <h4 className="lesson-title-card">{story.title}</h4>
-                    <p className="lesson-category">Chủ đề: {story.category}</p>
-                    <p className="lesson-level">Mức độ: {story.level}</p>
-                    {isLocked ? (
-                        <button className="lesson-locked-btn" disabled>
-                        <i className="fas fa-lock me-2"></i>
-                        </button>
-                    ) : (
-                        <Link to={`/story/${story.slug}`} className="lesson-link">
-                        <i className="fas fa-book-open me-2"></i>Vào đọc
-                        </Link>
+        <div className={`user-timeline-item ${index % 2 === 0 ? 'left' : 'right'} ${isUnlocked ? 'unlocked' : ''} ${isCurrent ? 'current' : ''}`}>
+            <div className="user-timeline-card">
+                <div className="user-card-inner">
+                    <div className="user-card-header">
+                        <span className="user-step-badge">Bước {index + 1}</span>
+                        {isCurrent && isUnlocked && (
+                            <span className="user-badge current">Đọc ngay</span>
+                        )}
+                        {isUnlocked && !isCurrent && (
+                            <span className="user-badge completed">Đã hoàn thành</span>
+                        )}
+                        {!isUnlocked && (
+                            <span className="user-badge locked">Chưa mở khóa</span>
+                        )}
+                    </div>
+                    <h3 className="user-card-title">{item.title}</h3>
+                    <p className="user-card-desc">Chủ đề: {item.category}</p>
+                    <p className="user-card-desc">Mức độ: {item.level}</p>
+                    {item.images && (
+                        <img src={item.images} alt={item.title} className="user-card-img" />
                     )}
+                    <div className="user-card-footer">
+                        {isUnlocked && isCurrent ? (
+                            <Link to={`/story/${item.slug}`} className="user-btn start">
+                                <i className="fas fa-book-open me-2"></i> Bắt đầu đọc
+                            </Link>
+                        ) : isUnlocked ? (
+                            <Link to={`/story/${item.slug}`} className="user-btn review">
+                                <i className="fas fa-redo"></i> Ôn lại
+                            </Link>
+                        ) : (
+                            <button className="user-btn disabled" disabled>
+                                <i className="fas fa-lock"></i> Chưa mở khóa
+                            </button>
+                        )}
+                    </div>
                 </div>
+            </div>
+            <div className="user-timeline-dot">
+                {isUnlocked ? (
+                    isCurrent ? <i className="fas fa-play-circle"></i> : <i className="fas fa-check"></i>
+                ) : (
+                    <i className="fas fa-lock"></i>
+                )}
             </div>
         </div>
     );

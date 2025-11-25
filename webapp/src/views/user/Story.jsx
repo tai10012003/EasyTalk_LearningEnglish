@@ -1,22 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import StoryCard from "@/components/user/story/StoryCard.jsx";
+import { useNavigate } from "react-router-dom";
 import { StoryService } from "@/services/StoryService.jsx";
 
 function Story() {
     const [allStories, setAllStories] = useState([]);
-    const [stories, setStories] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedCategory, setSelectedCategory] = useState("");
-    const [selectedLevel, setSelectedLevel] = useState("");
-    const [searchKeyword, setSearchKeyword] = useState("");
     const [unlockedStories, setUnlockedStories] = useState([]);
+    const currentLessonRef = useRef(null);
     const navigate = useNavigate();
-    const pageLimit = 12;
 
     useEffect(() => {
         document.title = "Bài học câu chuyện - EasyTalk";
@@ -24,173 +18,102 @@ function Story() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await StoryService.fetchStories(1, 10000, {
-                    category: selectedCategory,
-                    level: selectedLevel,
-                    search: searchKeyword,
-                });
+                const allResp = await StoryService.fetchStories(1, 10000);
                 const all = allResp.data || [];
                 setAllStories(all);
-                const data = await StoryService.fetchStories(currentPage, pageLimit, {
-                    category: selectedCategory,
-                    level: selectedLevel,
-                    search: searchKeyword,
-                });
-                setStories(data.data || []);
-                setTotalPages(data.totalPages);
                 if (all.length > 0) {
                     try {
                         const detailResp = await StoryService.getStoryDetail(all[0]._id);
                         const userProg = detailResp?.userProgress || null;
-
-                        setUnlockedStories(
-                            Array.isArray(userProg?.unlockedStories) ? userProg.unlockedStories.map(s => s.toString()) : []
-                        );
+                        const unlockedIds = Array.isArray(userProg?.unlockedStories) ? userProg.unlockedStories.map(s => s.toString()) : [];
+                        setUnlockedStories(unlockedIds);
                     } catch (err) {
+                        console.error("Error fetching user progress:", err);
                         setUnlockedStories([]);
                     }
                 } else {
                     setUnlockedStories([]);
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching stories:", err);
                 setAllStories([]);
-                setStories([]);
-                setTotalPages(1);
                 setUnlockedStories([]);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [currentPage, selectedCategory, selectedLevel, searchKeyword, navigate]);
+    }, [navigate]);
 
-    const isStoryLocked = (storyId) => {
-        return !unlockedStories.includes(storyId.toString());
+    const isStoryUnlocked = (storyId) => {
+        return unlockedStories.includes(storyId.toString());
     };
 
-    const renderPagination = () => {
-        const pages = [];
-        if (currentPage > 1) {
-            pages.push(
-                <li className="page-item" key="prev">
-                    <button
-                        className="page-link"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                        &laquo; Previous
-                    </button>
-                </li>
-            );
-        }
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(
-                <li
-                    className={`page-item ${i == currentPage ? "active" : ""}`}
-                    key={i}
-                >
-                    <button className="page-link" onClick={() => setCurrentPage(i)}>
-                        {i}
-                    </button>
-                </li>
-            );
-        }
-        if (currentPage < totalPages) {
-            pages.push(
-                <li className="page-item" key="next">
-                    <button
-                        className="page-link"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                        Next &raquo;
-                    </button>
-                </li>
-            );
-        }
+    const findCurrentStoryIndex = () => {
+        if (unlockedStories.length === 0) return -1;
+        const lastUnlockedId = unlockedStories[unlockedStories.length - 1];
+        return allStories.findIndex(item => item._id.toString() === lastUnlockedId);
+    };
 
-        return pages;
+    const scrollToCurrentLesson = () => {
+        if (currentLessonRef.current) {
+            currentLessonRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+        }
     };
 
     return (
         <>
-            <div className="lesson-container">
-                <div className="hero-mini">
-                    <h3 className="hero-title">DANH SÁCH CÁC CÂU CHUYỆN HAY
-                        <i
-                            className="fas fa-question-circle help-icon"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setIsModalOpen(true)}
-                        ></i></h3>
-                    <div className="search-bar">
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Tìm kiếm câu chuyện..."
-                            value={searchKeyword}
-                            onChange={(e) => setSearchKeyword(e.target.value)}
-                        />
-                        <button
-                            className="search-button"
-                            onClick={() => {
-                            setCurrentPage(1);
-                        }}
-                        >
-                        <i className="fas fa-search me-2"></i>
-                        </button>
-                    </div>
-                </div>
-                <div className="container">
-                    <div className="filter-bar d-flex justify-content-center my-3">
-                        <select
-                            className="form-select mx-2"
-                            value={selectedCategory}
-                            onChange={(e) => {
-                                setCurrentPage(1);
-                                setSelectedCategory(e.target.value);
-                            }}
-                        >
-                            <option value="">-- Chọn Category --</option>
-                            <option value="Daily Life">Daily Life</option>
-                            <option value="Travel">Travel</option>
-                            <option value="Adventure">Adventure</option>
-                            <option value="Motivation">Motivation</option>
-                        </select>
-                        <select
-                            className="form-select mx-2"
-                            value={selectedLevel}
-                            onChange={(e) => {
-                                setCurrentPage(1);
-                                setSelectedLevel(e.target.value);
-                            }}
-                        >
-                            <option value="">-- Chọn Level --</option>
-                            <option value="A1">A1</option>
-                            <option value="A2">A2</option>
-                            <option value="B1">B1</option>
-                            <option value="B2">B2</option>
-                        </select>
-                    </div>
-                </div>
-                <div className="container">
-                    <div className="lesson-list">
-                        { stories.length > 0 ? (
-                        <div className="container">
-                            <div className="row">
-                                {stories.map((story) => (
-                                    <StoryCard key={story._id} story={story} isLocked={isStoryLocked(story._id)} />
-                                ))}
+            <div className="user-road-roadmap">
+                <div className="user-road-header">
+                    <div className="container">
+                        <h1 className="user-road-title">
+                            <i className="fas fa-book"></i> LỘ TRÌNH ĐỌC CÂU CHUYỆN TỪ A-Z
+                            <i
+                                className="fas fa-question-circle help-icon"
+                                style={{ cursor: "pointer", marginLeft: "10px" }}
+                                onClick={() => setIsModalOpen(true)}
+                            ></i>
+                        </h1>
+                        <p className="user-road-subtitle">
+                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {unlockedStories.length} / {allStories.length}
+                        </p>
+                        <div className="user-road-progress">
+                            <div className="user-progress-bar">
+                                <div className="user-progress-fill" style={{ width: `${allStories.length > 0 ? (unlockedStories.length / allStories.length) * 100 : 0}%` }}/>
                             </div>
+                            <span className="user-progress-text">
+                                {allStories.length > 0 ? Math.round((unlockedStories.length / allStories.length) * 100) : 0}% hoàn thành
+                            </span>
                         </div>
-                        ) : (
-                            <p className="text-center no-stories">Không có câu chuyện nào.</p>
-                        )}
                     </div>
-                    <nav aria-label="Page navigation">
-                        <ul className="pagination justify-content-center" id="pagination-controls">
-                            {renderPagination()}
-                        </ul>
-                    </nav>
-                </div>    
+                </div>
+                <div className="container">
+                    <div className="user-road-timeline">
+                        {allStories.map((item, index) => {
+                            const isUnlocked = isStoryUnlocked(item._id);
+                            const currentIndex = findCurrentStoryIndex();
+                            const isCurrent = index === currentIndex;
+                            return (
+                                <div key={item._id} ref={isCurrent ? currentLessonRef : null} >
+                                    <StoryCard item={item} index={index} isUnlocked={isUnlocked} isCurrent={isCurrent} />
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+                <div className="user-floating-buttons">
+                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title="Cuộn đến bài học hiện tại" >
+                        <i className="fas fa-play-circle"></i>
+                        <span className="user-scroll-current-text">Tiếp tục học</span>
+                        <span className="user-scroll-hot-badge">HOT</span>
+                    </button>
+                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title="Lên đầu trang" >
+                        <i className="fas fa-arrow-up"></i>
+                    </button>
+                </div>
             </div>
             {isModalOpen && (
                 <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>

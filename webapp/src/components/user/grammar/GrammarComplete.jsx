@@ -1,6 +1,6 @@
 import React from "react";
 
-function GrammarComplete( { onComplete } ) {
+function GrammarComplete({ onComplete }) {
     return (
         <div className="story-complete text-center p-5">
             <h2>🎉 Bạn đã hoàn thành bài học ngữ pháp!</h2>
