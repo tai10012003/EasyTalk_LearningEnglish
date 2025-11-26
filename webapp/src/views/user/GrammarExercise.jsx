@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarExerciseCard from "@/components/user/grammarexercise/GrammarExerciseCard.jsx";
+import { useNavigate } from "react-router-dom";
 import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 
 function GrammarExercise() {
     const [allGrammarExercises, setAllGrammarExercises] = useState([]);
-    const [exercises, setExercises] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [searchKeyword, setSearchKeyword] = useState("");
-    const [unlockedGrammarExercises, setUnlockedGrammarExercises] = useState([]); 
-    const pageLimit = 12;
+    const [unlockedGrammarExercises, setUnlockedGrammarExercises] = useState([]);
+    const currentLessonRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = "Bài luyện tập ngữ pháp - EasyTalk";
@@ -20,144 +18,101 @@ function GrammarExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await GrammarExerciseService.fetchGrammarExercise(1, 10000, {
-                    search: searchKeyword,
-                });
+                const allResp = await GrammarExerciseService.fetchGrammarExercise(1, 10000);
                 const all = allResp.data || [];
                 setAllGrammarExercises(all);
-                const data = await GrammarExerciseService.fetchGrammarExercise(currentPage, pageLimit, {
-                    search: searchKeyword,
-                });
-                setExercises(data.data || []);
-                setTotalPages(data.totalPages || 1);
                 if (all.length > 0) {
                     try {
                         const detailResp = await GrammarExerciseService.getGrammarExerciseDetail(all[0]._id);
                         const userProg = detailResp?.userProgress || null;
-                        setUnlockedGrammarExercises(
-                            Array.isArray(userProg?.unlockedGrammarExercises) ? userProg.unlockedGrammarExercises.map(s => s.toString()) : []
-                        );
+                        const unlockedIds = Array.isArray(userProg?.unlockedGrammarExercises) ? userProg.unlockedGrammarExercises.map(s => s.toString()) : [];
+                        setUnlockedGrammarExercises(unlockedIds);
                     } catch (err) {
+                        console.error("Error fetching user progress:", err);
                         setUnlockedGrammarExercises([]);
                     }
                 } else {
                     setUnlockedGrammarExercises([]);
                 }
             } catch (err) {
-                console.error(err);
+                console.error("Error fetching grammar exercises:", err);
                 setAllGrammarExercises([]);
-                setExercises([]);
-                setTotalPages(1);
                 setUnlockedGrammarExercises([]);
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [currentPage, searchKeyword]);
+    }, [navigate]);
 
-    const isGrammarExerciseLocked = (grammarexerciseId) => {
-        return !unlockedGrammarExercises.includes(grammarexerciseId.toString());
+    const isGrammarExerciseUnlocked = (grammarExerciseId) => {
+        return unlockedGrammarExercises.includes(grammarExerciseId.toString());
     };
 
-    const renderPagination = () => {
-        const pages = [];
-        if (currentPage > 1) {
-            pages.push(
-                <li className="page-item" key="prev">
-                    <button
-                        className="page-link"
-                        onClick={() => setCurrentPage(currentPage - 1)}
-                    >
-                        &laquo; Previous
-                    </button>
-                </li>
-            );
-        }
-        for (let i = 1; i <= totalPages; i++) {
-            pages.push(
-                <li
-                    className={`page-item ${i == currentPage ? "active" : ""}`}
-                    key={i}
-                >
-                    <button className="page-link" onClick={() => setCurrentPage(i)}>
-                        {i}
-                    </button>
-                </li>
-            );
-        }
-        if (currentPage < totalPages) {
-            pages.push(
-                <li className="page-item" key="next">
-                    <button
-                        className="page-link"
-                        onClick={() => setCurrentPage(currentPage + 1)}
-                    >
-                        Next &raquo;
-                    </button>
-                </li>
-            );
-        }
+    const findCurrentGrammarExerciseIndex = () => {
+        if (unlockedGrammarExercises.length === 0) return -1;
+        const lastUnlockedId = unlockedGrammarExercises[unlockedGrammarExercises.length - 1];
+        return allGrammarExercises.findIndex(item => item._id.toString() === lastUnlockedId);
+    };
 
-        return pages;
+    const scrollToCurrentLesson = () => {
+        if (currentLessonRef.current) {
+            currentLessonRef.current.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+            });
+        }
     };
 
     return (
         <>
-            <div className="lesson-container">
-                <div className="hero-mini">
-                    <h3 className="hero-title">
-                        DANH SÁCH BÀI LUYỆN TẬP NGỮ PHÁP
-                        <i
-                            className="fas fa-question-circle help-icon"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => setIsModalOpen(true)}
-                        ></i>
-                    </h3>
-                    <div className="search-bar">
-                        <input
-                            type="text"
-                            className="search-input"
-                            placeholder="Tìm kiếm bài luyện tập ngữ pháp..."
-                            value={searchKeyword}
-                            onChange={(e) => setSearchKeyword(e.target.value)}
-                        />
-                        <button
-                            className="search-button"
-                            onClick={() => setCurrentPage(1)}
-                        >
-                            <i className="fas fa-search me-2"></i>
-                        </button>
+            <div className="user-road-roadmap">
+                <div className="user-road-header">
+                    <div className="container">
+                        <h1 className="user-road-title">
+                            <i className="fas fa-pen me-2"></i> LỘ TRÌNH LUYỆN TẬP NGỮ PHÁP TỪ A-Z
+                            <i
+                                className="fas fa-question-circle help-icon"
+                                style={{ cursor: "pointer", marginLeft: "10px" }}
+                                onClick={() => setIsModalOpen(true)}
+                            ></i>
+                        </h1>
+                        <p className="user-road-subtitle">
+                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {unlockedGrammarExercises.length} / {allGrammarExercises.length}
+                        </p>
+                        <div className="user-road-progress">
+                            <div className="user-progress-bar">
+                                <div className="user-progress-fill" style={{ width: `${allGrammarExercises.length > 0 ? (unlockedGrammarExercises.length / allGrammarExercises.length) * 100 : 0}%` }}/>
+                            </div>
+                            <span className="user-progress-text">
+                                {allGrammarExercises.length > 0 ? Math.round((unlockedGrammarExercises.length / allGrammarExercises.length) * 100) : 0}% hoàn thành
+                            </span>
+                        </div>
                     </div>
                 </div>
                 <div className="container">
-                    <div className="lesson-list">
-                        { exercises.length > 0 ? (
-                            <div className="container">
-                                <div className="row">
-                                    {exercises.map((exercise) => (
-                                        <GrammarExerciseCard
-                                            key={exercise._id}
-                                            exercise={exercise}
-                                            isLocked={isGrammarExerciseLocked(exercise._id)}
-                                        />
-                                    ))}
+                    <div className="user-road-timeline">
+                        {allGrammarExercises.map((item, index) => {
+                            const isUnlocked = isGrammarExerciseUnlocked(item._id);
+                            const currentIndex = findCurrentGrammarExerciseIndex();
+                            const isCurrent = index === currentIndex;
+                            return (
+                                <div key={item._id} ref={isCurrent ? currentLessonRef : null} >
+                                    <GrammarExerciseCard item={item} index={index} isUnlocked={isUnlocked} isCurrent={isCurrent} />
                                 </div>
-                            </div>
-                        ) : (
-                            <p className="text-center no-stories">
-                                Không có bài luyện tập từ vựng nào.
-                            </p>
-                        )}
+                            );
+                        })}
                     </div>
-                    <nav aria-label="Page navigation">
-                        <ul
-                            className="pagination justify-content-center"
-                            id="pagination-controls"
-                        >
-                            {renderPagination()}
-                        </ul>
-                    </nav>
+                </div>
+                <div className="user-floating-buttons">
+                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title="Cuộn đến bài luyện tập hiện tại" >
+                        <i className="fas fa-play-circle"></i>
+                        <span className="user-scroll-current-text">Tiếp tục luyện tập</span>
+                        <span className="user-scroll-hot-badge">HOT</span>
+                    </button>
+                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title="Lên đầu trang" >
+                        <i className="fas fa-arrow-up"></i>
+                    </button>
                 </div>
             </div>
             {isModalOpen && (
