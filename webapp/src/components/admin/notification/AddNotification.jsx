@@ -139,6 +139,8 @@ const AddNotification = ({ isOpen, onClose, onCreated }) => {
                                 <option value="champion">🏆 Vô địch (Champion)</option>
                                 <option value="achieve">🎖️ Thành tựu (Achieve)</option>
                                 <option value="warning">⚠️ Cảnh báo (Warning)</option>
+                                <option value="danger">❌ Nguy hiểm (Danger)</option>
+                                <option value="streak_lost">💔 Mất streak (Streak Lost)</option>
                                 <option value="promo">🎁 Khuyến mãi (Promo)</option>
                                 <option value="system">⚙️ Hệ thống (System)</option>
                                 <option value="update">🔄 Cập nhật (Update)</option>
