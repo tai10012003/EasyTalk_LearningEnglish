@@ -1,29 +1,28 @@
 import React from "react";
 
 function JourneyCard({ id, title, progress }) {
-  return (
-    <section className="card journey-card">
-        <h5 className="card-title">{title}</h5>
-        <div className="progress-container">
-            <div className="progress-label">
-                Hoàn thành: <span>{progress.toFixed(2)}%</span>
-            </div>
-            <div className="progress">
-                <div
-                    className="progress-bar"
-                    role="progressbar"
-                    style={{ width: `${progress}%` }}
-                    aria-valuenow={progress}
-                    aria-valuemin="0"
-                    aria-valuemax="100"
-                ></div>
+    return (
+        <div className="user-journey-card">
+            <div className="user-journey-card-inner">
+                <div className="user-journey-icon">
+                    <i className="fas fa-route"></i>
+                </div>
+                <h3 className="user-journey-card-title">{title}</h3>
+                <div className="user-journey-progress">
+                    <div className="user-journey-progress-bar">
+                        <div
+                            className="user-journey-progress-fill"
+                            style={{ width: `${progress}%` }}
+                        />
+                    </div>
+                    <span className="user-journey-progress-text">{progress.toFixed(0)}% hoàn thành</span>
+                </div>
+                <a href={`/journey/detail/${id}`} className="user-journey-btn">
+                    <i className="fas fa-play"></i> Tiếp tục học
+                </a>
             </div>
         </div>
-        <a href={`/journey/detail/${id}`} className="btn btn-journey mt-3">
-            TIẾP TỤC
-        </a>
-    </section>
-  );
+    );
 }
 
 export default JourneyCard;

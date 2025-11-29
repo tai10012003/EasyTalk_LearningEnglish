@@ -1316,324 +1316,379 @@ p {
    JOURNEY, GATE AND STAGE STYLES
    =============================================== */
 
-.your_journey {
-  background: linear-gradient(135deg, #f1f5f9 0%, #ffffff 50%, #f1f5f9 100%);
+.user-journey-container {
   position: relative;
   padding: 50px 0;
 }
 
-.your_journey_title {
+.user-journey-header {
+  text-align: center;
+  margin-bottom: 60px;
+}
+
+.user-journey-title {
   font-size: 1.8rem;
   font-weight: 800;
-  text-align: center;
-  margin-bottom: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea, #764ba2);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
 }
 
-.card-title {
-  color: #681fbb;
-  font-weight: 700;
-  transition: color 0.3s ease;
-  margin-bottom: 1rem;
-  font-size: 1.2rem;
-  text-align: center;
+.user-journey-subtitle {
+  font-size: 1rem;
+  color: #666;
 }
 
-.card-title:hover {
-  color: #667eea;
-}
-
-.journey-card {
-  width: 70%;
-  margin: 0 auto 30px auto;
-  padding: 30px;
-  background-color: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.journey-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.3);
-  border-color: #69f0ae;
-}
-
-.btn-journey {
-  display: block;
-  text-decoration: none;
-  width: 50%;
-  font-size: 0.8rem;
-  margin: 30px auto 0;
-  padding: 8px;
-  background-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  color: #fff;
-  border-radius: 30px;
-  font-weight: bold;
-  text-align: center;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-.btn-journey:hover {
-  background: white;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border: 1px solid #721fdf;
-  color: #333;
-}
-
-.your_gate_title {
-  font-size: 1.6rem;
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 30px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.gate-card {
-  max-width: 600px;
-  width: 70%;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  padding: 20px;
-  border: 1px solid transparent;
-  margin: 0 auto 30px auto;
-  position: relative;
-  overflow: hidden;
-}
-
-.gate-card:before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  opacity: 0.08;
-}
-
-.gate-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
-  border-color: #39517c;
-}
-
-.gate-title {
-  font-weight: 700;
-  color: #333;
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.stage-list-container {
+.user-journey-list {
+  margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 30px;
 }
 
-.stage-card {
-  width: 50%;
-  background: #fff;
-  border-radius: 8px;
-  padding: 25px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  margin: 30px auto 10px auto;
-  border-left: 5px solid #519be4;
-  transition: background-color 0.3s ease;
+.user-journey-card {
+  background: white;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
 }
 
-.stage-card:hover {
-  transform: translateY(-4px);
-  border-color: #044efc;
+.user-journey-card:hover {
+  transform: translateY(-12px);
+  box-shadow: 0 25px 50px rgba(102, 126, 234, 0.2);
 }
 
-.stage-title {
-  font-size: 18px;
-  font-weight: 600;
+.user-journey-card-inner {
+  padding: 30px;
   text-align: center;
+}
+
+.user-journey-icon {
+  font-size: 3rem;
+  color: #667eea;
+  margin-bottom: 20px;
+}
+
+.user-journey-card-title {
+  font-size: 1.2rem;
+  font-weight: 700;
   color: #333;
+  margin-bottom: 20px;
+}
+
+.user-journey-progress {
+  margin: 20px 0;
+}
+
+.user-journey-progress-bar {
+  height: 14px;
+  background: #e0e7ff;
+  border-radius: 7px;
+  overflow: hidden;
   margin-bottom: 8px;
 }
 
-.progress-container {
-  width: 100%;
-  margin-top: 10px;
+.user-journey-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 7px;
+  transition: width 1.2s ease;
 }
 
-.progress-label {
+.user-journey-progress-text {
+  font-weight: bold;
+  color: #667eea;
+}
+
+.user-journey-btn {
+  display: inline-block;
+  padding: 10px 30px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: bold;
+  margin-top: 20px;
+  transition: all 0.3s ease;
+}
+
+.user-journey-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+}
+
+.user-gate-roadmap {
+  padding: 50px 0;
+}
+
+.user-gate-header {
+  text-align: center;
+  margin-bottom: -30px;
+}
+
+.user-gate-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 12px;
+}
+
+.user-gate-subtitle {
+  font-size: 1rem;
+  color: #555;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.user-gate-timeline {
+  position: relative;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.user-gate-timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 4px;
+  background: linear-gradient(to bottom, #667eea, #764ba2);
+  transform: translateX(-50%);
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.user-gate-item {
+  position: relative;
+  margin: 80px 0;
+}
+
+.user-gate-connector {
+  position: absolute;
+  top: 80px;
+  bottom: -80px;
+  left: 50%;
+  width: 3px;
+  transform: translateX(-50%);
+  z-index: 1;
+}
+
+.user-gate-card {
+  width: 460px;
+  max-width: 100%;
+  margin: 0 auto;
+  background: white;
+  border-radius: 24px;
+  padding: 32px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.12);
+  transition: all 0.4s ease;
+  position: relative;
+  z-index: 5;
+}
+
+.user-gate-card:hover {
+  box-shadow: 0 30px 70px rgba(102,126,234,0.25);
+}
+
+.user-gate-card.current {
+  border: 1px solid #ff4757;
+}
+
+.user-gate-card-header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.user-gate-card-header h3 {
+  font-size: 1.1rem;
+  color: #999;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.user-gate-card-header h4 {
+  font-size: 1.4rem;
+  color: #333;
+  margin: 0 0 15px 0;
+  font-weight: 700;
+}
+
+.user-gate-stage-count {
+  background: #667eea;
+  color: white;
+  padding: 6px 16px;
+  border-radius: 20px;
   font-size: 0.9rem;
   font-weight: bold;
-  text-align: center;
-  margin-bottom: 15px;
-  color: #333;
 }
 
-.progress {
-  height: 20px;
-  background-color: #e9ecef;
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
+.user-stage-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 40px;
 }
 
-.progress-bar {
-  background-image: linear-gradient(45deg, #69f0ae, #448aff);
-  transition: width 0.4s ease;
-  height: 100%;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.achievement-panel,
-.leaderboard-panel {
-  position: sticky;
-  top: 95px;
-  z-index: 100;
-}
-
-.achievement-panel {
-  background-color: #fff;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+.user-stage-card {
+  background: #f8f9ff;
+  border-radius: 18px;
   padding: 20px;
-  border-left: 2px solid;
-  border-right: 2px solid;
-  border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
-}
-
-.achievement-panel h4 {
-  font-weight: 700;
-  font-size: 20px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
   text-align: center;
-  margin: 30px 0 25px 0;
-  font-family: 'Poppins', sans-serif;
+  border: 3px solid #dadada;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
 }
 
-.achievement-list,
-.daily-tasks {
-  list-style-type: none;
-  padding: 0;
+.user-stage-card.unlocked {
+  background: white;
+  border-color: #667eea;
+  box-shadow: 0 12px 30px rgba(102,126,234,0.15);
 }
 
-.achievement-list li,
-.daily-tasks li {
-  font-size: 16px;
-  margin-bottom: 15px;
-  color: #000000;
-}
-
-.daily-tasks li {
-  background-color: #d9ecff;
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.upgrade-section {
-  text-align: center;
-  margin-top: 20px;
-}
-
-.upgrade-section h4 {
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  text-align: center;
-  margin: 30px 0 25px 0;
-  font-family: 'Poppins', sans-serif;
-}
-
-.upgrade-section p {
-  font-size: 16px;
-  color: #000000;
-  margin-bottom: 15px;
-}
-
-.btn-upgrade {
-  background-color: #8037d3;
-  border: none;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 20px;
-  transition: background-color 0.3s ease;
-}
-
-.btn-upgrade:hover {
-  background-color: #4f0b9c;
-}
-
-.leaderboard-panel {
-  /* height: calc(100vh - 50px); */
-  overflow-y: auto;
-  background-color: #fff;
-  padding: 10px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-left: 2px solid;
-  border-right: 2px solid;
-  border-image: linear-gradient(135deg, #667eea 0%, #764ba2 100%) 1;
-}
-
-.leaderboard-panel h4 {
-  font-size: 20px;
-  font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  color: transparent;
-  text-align: center;
-  margin: 30px 0 25px 0;
-  font-family: 'Poppins', sans-serif;
-}
-
-.leaderboard-table {
-  width: 100%;
-  text-align: center;
-}
-
-.leaderboard-table th,
-.leaderboard-table td {
-  padding: 10px;
-  border-bottom: 1px solid #e1e1e1;
-}
-
-.leaderboard-table th {
-  background-color: #eeeeee;
-}
-
-.leaderboard-table td {
-  font-size: 16px;
-  color: #000000;
-}
-
-.gate-card.locked {
-  opacity: 0.5;
-  pointer-events: none;
-  filter: grayscale(50%);
-}
-
-.stage-card.locked {
+.user-stage-card.locked {
   opacity: 0.6;
-  filter: grayscale(40%);
 }
 
-.stage-card .fa-lock {
-  font-size: 16px;
+.user-stage-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
   color: #999;
+}
+
+.user-stage-number {
+  font-weight: bold;
+}
+
+.user-stage-title {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.user-stage-action {
+  margin-top: 25px;
+}
+
+.user-stage-action i{
+  margin-right: 5px;
+}
+
+.user-stage-btn {
+  padding: 10px 24px;
+  border-radius: 25px;
+  font-weight: bold;
+  text-decoration: none;
+  display: inline-block;
+  transition: all 0.3s ease;
+  font-size: 0.95rem;
+}
+
+.user-stage-btn.start {
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: white;
+}
+
+.user-stage-btn.start:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(102,126,234,0.4);
+}
+
+.user-stage-btn.review {
+  background: #51cf66;
+  color: white;
+}
+
+.user-stage-btn.review:hover {
+  background: #40b358;
+}
+
+.user-stage-btn.locked {
+  background: #e9ecef;
+  color: #999;
+  cursor: not-allowed;
+}
+
+.user-gate-current-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  background: #ff4757;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+  z-index: 10;
+  animation: pulse 2s infinite;
+}
+
+.user-gate-completed-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  background: #51cf66;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(81, 207, 102, 0.4);
+  z-index: 10;
+}
+
+.user-gate-card.completed {
+  border: 1px solid #51cf66;
+}
+
+.user-gate-locked-badge {
+  position: absolute;
+  top: -10px;
+  right: 16px;
+  background: #95a5a6;
+  color: white;
+  font-size: 0.8rem;
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 20px;
+  box-shadow: 0 4px 15px rgba(149, 165, 166, 0.4);
+  z-index: 10;
+}
+
+.user-gate-card.locked {
+  border: 2px dashed #bdc3c7;
+}
+
+.user-gate-empty {
+  text-align: center;
+  color: #999;
+  font-style: italic;
+}
+
+.user-gate-empty p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+  70% { box-shadow: 0 0 0 20px rgba(255,107,107,0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+}
+
+@media (max-width: 768px) {
+  .user-gate-timeline::before { left: 40px; }
+  .user-gate-card { width: 100%; margin: 0 20px; }
 }
 
 /* ===============================================
