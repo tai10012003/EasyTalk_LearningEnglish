@@ -69,7 +69,7 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
             question: "",
             correctAnswer: "",
             explanation: "",
-            options: formData.type == "multiple-choice" ? ["", "", "", ""] : [],
+            options: formData.type == "multiple-choice" || formData.type === "arrange-words" ? ["", "", "", ""] : [],
         };
         setFormData((prev) => ({
             ...prev,
@@ -110,7 +110,16 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
                 question.question = "";
                 question.correctAnswer = "";
                 question.explanation = "";
-                question.options = value == "multiple-choice" ? ["", "", "", ""] : [];
+                if (value === "multiple-choice" || value === "arrange-words") {
+                    if (!question.options || question.options.length === 0) {
+                        question.options = ["", "", "", ""];
+                    }
+                    if (value == "multiple-choice" && question.options.length > 4) {
+                        question.options = question.options.slice(0, 4);
+                    }
+                } else {
+                    question.options = [];
+                }
             } else {
                 question[field] = value;
             }
@@ -146,6 +155,17 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
                     return;
                 }
             }
+            if (q.type == "arrange-words") {
+                const filledWords = q.options.filter(opt => opt.trim() !== "");
+                if (filledWords.length < 3) {
+                    Swal.fire({
+                    icon: "warning",
+                    title: "Thiếu từ",
+                    text: "Câu hỏi sắp xếp cần ít nhất 3 từ/cụm từ!",
+                    });
+                    return;
+                }
+            }
         }
         const dataToSubmit = {
             title: formData.title,
@@ -165,6 +185,7 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
     : [
         { value: "multiple-choice", label: "Trắc nghiệm" },
         { value: "fill-in-the-blank", label: "Điền vào chỗ trống" },
+        { value: "arrange-words", label: "Sắp xếp từ thành câu" },
         { value: "translation", label: "Dịch nghĩa" },
     ];
 
@@ -239,6 +260,8 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
                                         ? "Trắc nghiệm"
                                         : q.type == "fill-in-the-blank"
                                         ? "Điền vào chỗ trống"
+                                        : q.type == "arrange-words"
+                                        ? "Sắp xếp từ thành câu"
                                         : q.type == "translation"
                                         ? "Dịch nghĩa"
                                         : q.type == "pronunciation"
@@ -286,21 +309,65 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
                                     ))}
                                 </select>
                             </div>
-                            {q.type == "multiple-choice" && (
+                            {(q.type === "arrange-words" || q.type === "multiple-choice") && (
                                 <div className="admin-exercise-add-group">
-                                    <label>Lựa chọn:</label>
+                                    <label>{q.type === "arrange-words" ? "Các từ/cụm từ cần sắp xếp (mỗi ô là 1 từ/cụm):" : "Lựa chọn:"}</label>
                                     {q.options.map((opt, oIndex) => (
-                                        <input
-                                            key={oIndex}
-                                            type="text"
-                                            placeholder={`Lựa chọn ${oIndex + 1}`}
-                                            value={opt}
-                                            onChange={(e) =>
-                                            handleOptionChange(index, oIndex, e.target.value)
-                                            }
-                                            className="form-control"
-                                        />
+                                        <div key={oIndex} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                                            <input
+                                                type="text"
+                                                placeholder={q.type === "arrange-words" ? `Từ/cụm ${oIndex + 1}` : `Lựa chọn ${oIndex + 1}`}
+                                                value={opt}
+                                                onChange={(e) => handleOptionChange(index, oIndex, e.target.value)}
+                                                className="form-control"
+                                                style={{ flex: 1 }}
+                                            />
+                                            {q.type === "arrange-words" && oIndex > 1 && (
+                                                <button
+                                                    type="button"
+                                                    className="admin-exercise-add-btn-delete-words"
+                                                    onClick={async () => {
+                                                        const result = await Swal.fire({
+                                                            title: "Xóa từ này?",
+                                                            text: `Bạn có muốn xóa từ: "${opt || `(trống)`}" không?`,
+                                                            icon: "warning",
+                                                            showCancelButton: true,
+                                                            confirmButtonText: "Xóa",
+                                                            cancelButtonText: "Hủy",
+                                                        });
+                                                        if (result.isConfirmed) {
+                                                            const updated = [...formData.questions];
+                                                            updated[index].options = updated[index].options.filter((_, i) => i !== oIndex);
+                                                            setFormData(prev => ({ ...prev, questions: updated }));
+                                                            Swal.fire({
+                                                                icon: "success",
+                                                                title: "Đã xóa!",
+                                                                text: "Từ đã được xóa thành công.",
+                                                                timer: 1500,
+                                                                showConfirmButton: false,
+                                                            });
+                                                        }
+                                                    }}
+                                                    title="Xóa từ này"
+                                                >
+                                                    Xóa
+                                                </button>
+                                            )}
+                                        </div>
                                     ))}
+                                    {q.type === "arrange-words" && (
+                                        <button
+                                            type="button"
+                                            className="admin-exercise-add-btn-words"
+                                            onClick={() => {
+                                                const updated = [...formData.questions];
+                                                updated[index].options.push("");
+                                                setFormData(prev => ({ ...prev, questions: updated }));
+                                            }}
+                                        >
+                                            + Thêm từ
+                                        </button>
+                                    )}
                                 </div>
                             )}
                             {q.type == "pronunciation" && (

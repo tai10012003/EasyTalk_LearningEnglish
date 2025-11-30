@@ -2199,7 +2199,7 @@
 .admin-exercise-add-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 5px;
 }
 
 .admin-exercise-add-group {
@@ -2209,7 +2209,7 @@
 
 .admin-exercise-add-group label {
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 10px 0 5px 0;
   color: #34495e;
 }
 
@@ -2262,6 +2262,33 @@
   box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
 }
 
+.admin-exercise-add-btn-delete-words {
+  background: #e74c3c;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.admin-exercise-add-btn-words {
+  width: 30%;
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  margin: 10px 0;
+}
+
 .admin-exercise-add-question {
   border: 1px solid #e0e0e0;
   padding: 20px;
@@ -2275,7 +2302,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .admin-exercise-add-question-header h5 {
@@ -2371,7 +2398,7 @@
 .admin-exercise-update-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 5px;
 }
 
 .admin-exercise-update-group {
@@ -2381,7 +2408,7 @@
 
 .admin-exercise-update-group label {
   font-weight: 600;
-  margin-bottom: 8px;
+  margin: 10px 0 5px 0;
   color: #34495e;
 }
 
@@ -2434,6 +2461,33 @@
   box-shadow: 0 0 6px rgba(74, 144, 226, 0.4);
 }
 
+.admin-exercise-update-btn-delete-words {
+  background: #e74c3c;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.admin-exercise-update-btn-words {
+  width: 30%;
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  margin: 10px 0;
+}
+
 .admin-exercise-update-question {
   border: 1px solid #e0e0e0;
   padding: 20px;
@@ -2447,7 +2501,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 10px;
 }
 
 .admin-exercise-update-question-header h5 {
@@ -4184,6 +4238,8 @@
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
   gap: 15px;
+  max-height: 220px;
+  overflow-y: auto; 
 }
 
 .admin-userprogress-detail-mini-card {
