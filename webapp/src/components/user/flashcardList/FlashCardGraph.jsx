@@ -51,6 +51,7 @@ const FlashCardGraph = ({ dailyReviews }) => {
     };
 
     const weeks = [];
+    const todayStr = getVietnamDate(new Date());
     for (let week = 0; week < 52; week++) {
         const weekCol = [];
         for (let row = 0; row < 7; row++) {
@@ -62,9 +63,9 @@ const FlashCardGraph = ({ dailyReviews }) => {
             weekCol.push(
                 <div
                     key={`${week}-${row}`}
-                    className="flashcard-contrib-square"
+                    className={`flashcard-contrib-square ${dateStr === todayStr ? 'today' : ''}`}
                     style={{ backgroundColor: color }}
-                    title={`${dateStr}: ${count} lần ôn tập`}
+                    title={`${dateStr}: ${count} lần ôn tập ${dateStr === todayStr ? ' (Hôm nay)' : ''}`}
                 />
             );
         }
@@ -108,6 +109,10 @@ const FlashCardGraph = ({ dailyReviews }) => {
                 <span>Ít</span>
                 <div className="flashcard-contrib-legend-samples">{legendSamples}</div>
                 <span>Nhiều</span>
+            </div>
+            <div className="flashcard-contrib-legend-today">
+                <div className="flashcard-contrib-legend-today-sample"></div>
+                <span>Hôm nay</span>
             </div>
             <a onClick={() => setIsModalOpen(true)} className="flashcard-contrib-footer">Tìm hiểu cách chúng tôi tính đóng góp</a>
             {isModalOpen && (

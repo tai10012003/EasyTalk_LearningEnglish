@@ -554,7 +554,7 @@ class UserprogressService {
             to: userEmail,
             subject: subject,
             html: `
-                <div style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px; border-radius: 10px; color: #333; max-width: 600px; margin: 0 auto;">
+                <div>
                     <h2 style="color: #4CAF50; text-align: center;">${heading}</h2>
                     ${content}
                     <hr style="margin: 25px 0; border: none; border-top: 1px solid #ddd;">
@@ -712,28 +712,40 @@ class UserprogressService {
         const userProgress = await this.getUserProgressByUserId(userId);
         if (!userProgress) return { newPrizes: [], totalUnlocked: 0 };
         const allPrizes = await prizeService.getAllPrizes();
+        const championPrizes = allPrizes.filter(p =>
+            ['champion_week', 'champion_month', 'champion_year'].includes(p.type)
+        );
         const newlyUnlocked = [];
         const now = this._getVnNow();
-        for (const prize of allPrizes) {
-            if (!['champion_week', 'champion_month', 'champion_year'].includes(prize.type)) continue;
-            if (await this.userprogressRepository.hasUnlockedPrize(userId, prize.code)) continue;
-            let shouldUnlock = false;
-            let period = null;
-            if (prize.type === 'champion_week' && now.getDay() === 1) {
-                period = this._getPreviousPeriod('week');
-                shouldUnlock = await this._checkChampionWeek(userId, prize, period);
+        for (const prize of championPrizes) {
+            const alreadyUnlocked = userProgress.unlockedPrizes?.some(up => up.code === prize.code && up.period);
+            if (alreadyUnlocked) continue;
+            let periodToCheck = null;
+            let shouldCheck = false;
+            if (prize.type === 'champion_week') {
+                periodToCheck = this._getLastCompletedWeekPeriod(now);
+                shouldCheck = true;
             }
-            if (prize.type === 'champion_month' && now.getDate() === 1) {
-                period = this._getPreviousPeriod('month');
-                shouldUnlock = await this._checkChampionMonth(userId, prize, period);
+            else if (prize.type === 'champion_month') {
+                periodToCheck = this._getLastCompletedMonthPeriod(now);
+                shouldCheck = true;
             }
-            if (prize.type === 'champion_year' && now.getMonth() === 0 && now.getDate() === 1) {
-                period = this._getPreviousPeriod('year');
-                shouldUnlock = await this._checkChampionYear(userId, prize, period);
+            else if (prize.type === 'champion_year') {
+                periodToCheck = this._getLastCompletedYearPeriod(now);
+                shouldCheck = true;
             }
-            if (shouldUnlock) {
-                await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level, period);
-                newlyUnlocked.push(prize);
+            if (!shouldCheck || !periodToCheck) continue;
+            let isChampion = false;
+            if (prize.type === 'champion_week') {
+                isChampion = await this._checkChampionWeek(userId, prize, periodToCheck);
+            } else if (prize.type === 'champion_month') {
+                isChampion = await this._checkChampionMonth(userId, prize, periodToCheck);
+            } else if (prize.type === 'champion_year') {
+                isChampion = await this._checkChampionYear(userId, prize, periodToCheck);
+            }
+            if (isChampion) {
+                await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level, periodToCheck);
+                newlyUnlocked.push({ ...prize, period: periodToCheck });
                 await this._sendPrizeNotification(userId, prize, prize.championType);
             }
         }
@@ -810,33 +822,41 @@ class UserprogressService {
         return isTopExp || isTopTime;
     }
 
-    _getPreviousPeriod(type) {
-        const vnNow = this._getVnNow();
-        const year = vnNow.getFullYear();
-        const month = vnNow.getMonth();
-        if (type === 'week') {
-            const startOfYear = new Date(year, 0, 1);
-            const days = Math.floor((vnNow - startOfYear) / (24 * 60 * 60 * 1000));
-            const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-            const prevWeek = weekNumber - 1;
-            if (prevWeek > 0) return `${year}-W${String(prevWeek).padStart(2, '0')}`;
-            const prevYear = year - 1;
-            const lastWeekOfPrevYear = this._getWeekNumber(new Date(prevYear, 11, 31));
-            return `${prevYear}-W${String(lastWeekOfPrevYear).padStart(2, '0')}`;
-        }
-        if (type === 'month') {
-            const prevMonth = month === 0 ? 11 : month - 1;
-            const prevYear = month === 0 ? year - 1 : year;
-            return `${prevYear}-${String(prevMonth + 1).padStart(2, '0')}`;
-        }
-        if (type === 'year') return `${year - 1}`;
-        return null;
-    }
-
     _getWeekNumber(date) {
         const startOfYear = new Date(date.getFullYear(), 0, 1);
         const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
         return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+    }
+
+    _getLastCompletedWeekPeriod(now) {
+        const year = now.getFullYear();
+        const startOfYear = new Date(year, 0, 1);
+        const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
+        const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
+        if (weekNumber > 1) {
+            return `${year}-W${String(weekNumber - 1).padStart(2, '0')}`;
+        } else {
+            const lastDayPrevYear = new Date(year - 1, 11, 31);
+            const lastWeek = this._getWeekNumber(lastDayPrevYear);
+            return `${year - 1}-W${String(lastWeek).padStart(2, '0')}`;
+        }
+    }
+
+    _getLastCompletedMonthPeriod(now) {
+        const year = now.getFullYear();
+        const month = now.getMonth();
+        if (month == 0) {
+            return `${year - 1}-12`;
+        }
+        return `${year}-${String(month).padStart(2, '0')}`
+    }
+
+    _getLastCompletedYearPeriod(now) {
+        const year = now.getFullYear();
+        if (now.getMonth() == 0 && now.getDate() == 1) {
+            return `${year - 1}`;
+        }
+        return null;
     }
 
     async getUserPrizesWithDetails(userId) {

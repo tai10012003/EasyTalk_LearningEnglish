@@ -12,9 +12,9 @@ const parseJwt = (token) => {
 };
 
 const isTokenExpired = (token) => {
-  const decoded = parseJwt(token);
-  if (!decoded || !decoded.exp) return true;
-  return decoded.exp * 1000 < Date.now();
+    const decoded = parseJwt(token);
+    if (!decoded || !decoded.exp) return true;
+    return decoded.exp * 1000 < Date.now();
 };
 
 function Navbar() {

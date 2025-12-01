@@ -331,15 +331,29 @@ class UserprogressRepository {
     async getLeaderboardByExp(period = 'all', limit = 50, periodKey = null) {
         let pipeline = [
             { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userDetails' } },
-            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } }
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },
+            { $addFields: { username: "$userDetails.username", userId: "$user" }}
         ];
+        let dateKeys = [];
+        if (periodKey) {
+            if (periodKey.includes('-W')) {
+                dateKeys = this._getDateKeysForCustomWeek(periodKey);
+            } else if (/^\d{4}-\d{2}$/.test(periodKey)) {
+                const [y, m] = periodKey.split('-').map(Number);
+                const daysInMonth = new Date(y, m, 0).getDate();
+                for (let d = 1; d <= daysInMonth; d++) {
+                    dateKeys.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+                }
+            }
+        } else {
+            dateKeys = this._getDateKeysForPeriod(period);
+        }
         if (period === 'all') {
             pipeline.push({
-                $project: { username: "$userDetails.username", value: { $ifNull: ["$experiencePoints", 0] } }
+                $project: { _id: "$userId", username: 1, value: { $ifNull: ["$experiencePoints", 0] }}
             });
         } else {
-            const dateKeys = periodKey ? this._getDateKeysForCustomWeek(periodKey) : this._getDateKeysForPeriod(period);
-            pipeline.push({ $project: { username: "$userDetails.username", dailyExperiencePoints: 1 } });
+            pipeline.push({ $project: { username: 1, userId: 1, dailyExperiencePoints: 1 } });
             pipeline.push({
                 $addFields: {
                     value: {
@@ -353,11 +367,11 @@ class UserprogressRepository {
                     }
                 }
             });
+            pipeline.push({ $project: { _id: "$userId", username: 1, value: { $round: ["$value", 0] }}});
         }
         pipeline.push(
             { $sort: { value: -1 } },
-            { $limit: limit },
-            { $project: { _id: 1, username: 1, value: { $round: ["$value", 0] } } }
+            { $limit: limit }
         );
         const result = await this.collection.aggregate(pipeline).toArray();
         return result.map((item, index) => ({ ...item, rank: index + 1 }));
@@ -366,15 +380,29 @@ class UserprogressRepository {
     async getLeaderboardByStudyTime(period = 'all', limit = 50, periodKey = null) {
         let pipeline = [
             { $lookup: { from: 'users', localField: 'user', foreignField: '_id', as: 'userDetails' } },
-            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } }
+            { $unwind: { path: "$userDetails", preserveNullAndEmptyArrays: true } },
+            { $addFields: { username: "$userDetails.username", userId: "$user" }}
         ];
+        let dateKeys = [];
+        if (periodKey) {
+            if (periodKey.includes('-W')) {
+                dateKeys = this._getDateKeysForCustomWeek(periodKey);
+            } else if (/^\d{4}-\d{2}$/.test(periodKey)) {
+                const [y, m] = periodKey.split('-').map(Number);
+                const daysInMonth = new Date(y, m, 0).getDate();
+                for (let d = 1; d <= daysInMonth; d++) {
+                    dateKeys.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+                }
+            }
+        } else {
+            dateKeys = this._getDateKeysForPeriod(period);
+        }
         if (period === 'all') {
             pipeline.push({
-                $project: { username: "$userDetails.username", value: { $ifNull: ["$studyTimes", 0] } }
+                $project: { _id: "$userId", username: 1,value: { $ifNull: ["$studyTimes", 0] }}
             });
         } else {
-            const dateKeys = periodKey ? this._getDateKeysForCustomWeek(periodKey): this._getDateKeysForPeriod(period);
-            pipeline.push({ $project: { username: "$userDetails.username", dailyStudyTimes: 1 } });
+            pipeline.push({ $project: { username: 1, userId: 1, dailyStudyTimes: 1 } });
             pipeline.push({
                 $addFields: {
                     value: {
@@ -388,11 +416,11 @@ class UserprogressRepository {
                     }
                 }
             });
+            pipeline.push({$project: { _id: "$userId", username: 1, value: { $round: ["$value", 2] }}});
         }
         pipeline.push(
             { $sort: { value: -1 } },
-            { $limit: limit },
-            { $project: { _id: 1, username: 1, value: { $round: ["$value", 2] } } }
+            { $limit: limit }
         );
         const result = await this.collection.aggregate(pipeline).toArray();
         return result.map((item, index) => ({ ...item, rank: index + 1 }));
