@@ -171,6 +171,17 @@ router.get("/my-prizes", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/champion-stats", verifyToken, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const stats = await userprogressService.getChampionStats(userId);
+        res.json({ success: true, stats });
+    } catch (error) {
+        console.error("Error fetching champion stats:", error);
+        res.status(500).json({ success: false, message: "Lỗi lấy thống kê quán quân" });
+    }
+});
+
 router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
     try {
         const userProgressId = req.params.id;

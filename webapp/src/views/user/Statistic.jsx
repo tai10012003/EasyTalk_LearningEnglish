@@ -29,6 +29,7 @@ const Statistic = () => {
     const [unlockedDictation, setUnlockedDictation] = useState(0);
     const [allPrizes, setAllPrizes] = useState([]);
     const [userPrizes, setUserPrizes] = useState([]);
+    const [championStats, setChampionStats] = useState({ week: 0, month: 0, year: 0, total: 0 });
     const [prizesLoading, setPrizesLoading] = useState(true);
 
     const periods = [
@@ -108,9 +109,19 @@ const Statistic = () => {
         }
     };
 
+    const fetchChampionStats = async () => {
+        try {
+            const stats = await UserProgressService.getChampionStats();
+            setChampionStats(stats);
+        } catch (err) {
+            setChampionStats({ week: 0, month: 0, year: 0, total: 0 });
+        }
+    };
+
     useEffect(() => {
         fetchStats();
         fetchPrizes();
+        fetchChampionStats();
     }, [activeChart, period]);
 
     const getUsername = () => {
@@ -888,7 +899,7 @@ const Statistic = () => {
                                         </div>
                                         <p className="user-statistic-prize-tooltip-note champion-note">
                                             <i className="fas fa-star"></i> 
-                                            Mỗi giải chỉ đạt được 1 lần duy nhất trong đời! Cạnh tranh gay gắt để giành danh hiệu cao quý này!
+                                            Mỗi giải đạt được đều danh giá và phần thưởng xứng đáng! Cạnh tranh gay gắt để giành danh hiệu cao quý này!
                                         </p>
                                     </div>
                                 </div>
@@ -905,6 +916,7 @@ const Statistic = () => {
                                             <div className="user-statistic-prize-champion-icon">
                                                 <i className={prize.iconClass}></i>
                                             </div>
+                                            <div className="user-statistic-prize-champion-count">{championStats.week}</div>
                                             <div className="user-statistic-prize-champion-name">{prize.name}</div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-champion-badge">
@@ -926,6 +938,7 @@ const Statistic = () => {
                                                 <i className={prize.iconClass}></i>
                                             </div>
                                             <div className="user-statistic-prize-champion-name">{prize.name}</div>
+                                            <div className="user-statistic-prize-champion-count">{championStats.month}</div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-champion-badge">
                                                     <i className="fas fa-check-circle"></i>
@@ -946,6 +959,7 @@ const Statistic = () => {
                                                 <i className={prize.iconClass}></i>
                                             </div>
                                             <div className="user-statistic-prize-champion-name">{prize.name}</div>
+                                            <div className="user-statistic-prize-champion-count">{championStats.year}</div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-champion-badge">
                                                     <i className="fas fa-check-circle"></i>

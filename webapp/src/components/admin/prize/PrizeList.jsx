@@ -111,7 +111,6 @@ function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                 <th>Tiêu đề</th>
                                 <th>Loại</th>
                                 <th>Cấp độ</th>
-                                <th>Duy nhất</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
@@ -135,7 +134,6 @@ function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                             <td>{prize.name}</td>
                                             <td>{prize.type}</td>
                                             <td>{prize.level}</td>
-                                            <td>{prize.isUnique ? "Có" : "Không"}</td>
                                             <td>{createdAt}</td>
                                             <td className="admin-prize-actions">
                                                 <a

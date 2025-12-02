@@ -9,7 +9,6 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
         type: "",
         level: "",
         requirement: { xp: "", streak: "", rank: "" },
-        isUnique: false,
         iconClass: "fas fa-trophy text-warning"
     });
 
@@ -59,7 +58,6 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
             type: formData.type,
             level: Number(formData.level),
             requirement,
-            isUnique: formData.isUnique,
             iconClass: formData.iconClass
         };
         onSubmit(dataToSubmit);
@@ -201,22 +199,6 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
                     </small>
                 </div>
                 {renderRequirementField()}
-                <div className="admin-prize-add-group">
-                    <label>Giải thưởng duy nhất (chỉ đạt 1 lần):</label>
-                    <div className="form-check form-switch">
-                        <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="isUnique"
-                            name="isUnique"
-                            checked={formData.isUnique}
-                            onChange={handleChange}
-                        />
-                        <label className="form-check-label" htmlFor="isUnique">
-                            {formData.isUnique ? "Có (Quán quân – chỉ đạt 1 lần)" : "Không (có thể đạt nhiều cấp)"}
-                        </label>
-                    </div>
-                </div>
                 <button
                         type="submit"
                         className="btn btn-primary admin-prize-add-btn"

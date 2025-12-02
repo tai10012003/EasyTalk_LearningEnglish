@@ -10,7 +10,6 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
         type: "",
         level: "",
         iconClass: "",
-        isUnique: false,
         requirement: { xp: "", streak: "", rank: "" }
     });
 
@@ -22,7 +21,6 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                 type: initialData.type || "",
                 level: initialData.level?.toString() || "",
                 iconClass: initialData.iconClass || "",
-                isUnique: initialData.isUnique || false,
                 requirement: {
                     xp: initialData.requirement?.xp || "",
                     streak: initialData.requirement?.streak || "",
@@ -67,7 +65,6 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
             type: formData.type,
             level: Number(formData.level),
             iconClass: formData.iconClass,
-            isUnique: formData.isUnique,
             requirement: cleanedRequirement
         };
         onSubmit(dataToSubmit, initialData._id);
@@ -210,22 +207,6 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                     </small>
                 </div>
                 {renderRequirementField()}
-                <div className="admin-prize-update-group">
-                    <label>Giải thưởng duy nhất (chỉ đạt 1 lần):</label>
-                    <div className="form-check form-switch">
-                        <input
-                            className="form-check-input"
-                            type="checkbox"
-                            id="isUnique"
-                            name="isUnique"
-                            checked={formData.isUnique}
-                            onChange={handleChange}
-                        />
-                        <label className="form-check-label" htmlFor="isUnique">
-                            {formData.isUnique ? "Có (Quán quân)" : "Không (có thể đạt nhiều cấp)"}
-                        </label>
-                    </div>
-                </div>
                 {initialData?.updatedAt && (
                     <div className="admin-prize-update-group">
                         <label>Cập nhật gần nhất:</label>

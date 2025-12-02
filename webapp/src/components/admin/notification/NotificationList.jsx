@@ -168,7 +168,6 @@ function NotificationList({ fetchData, deleteItem, title, dataKey }) {
                                 <th>Nội dung</th>
                                 <th>Loại</th>
                                 <th>Người nhận</th>
-                                <th>Link</th>
                                 <th>Ngày tạo</th>
                                 <th>Hành động</th>
                             </tr>
@@ -205,20 +204,6 @@ function NotificationList({ fetchData, deleteItem, title, dataKey }) {
                                                     )
                                                     : <span style={{ color: '#28a745', fontWeight: '500' }}>🌐 Tất cả</span>
                                                 }
-                                            </td>
-                                            <td>
-                                                {notification.link ? (
-                                                    <a 
-                                                        href={notification.link} 
-                                                        target="_blank" 
-                                                        rel="noopener noreferrer"
-                                                        style={{ color: '#007bff', textDecoration: 'underline' }}
-                                                    >
-                                                        Xem link
-                                                    </a>
-                                                ) : (
-                                                    <span style={{ color: '#999' }}>-</span>
-                                                )}
                                             </td>
                                             <td>{createdAt}</td>
                                             <td className="admin-notification-actions">

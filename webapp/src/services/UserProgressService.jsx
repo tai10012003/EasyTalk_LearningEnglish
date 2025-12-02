@@ -242,4 +242,18 @@ export const UserProgressService = {
             return [];
         }
     },
+
+    async getChampionStats() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/champion-stats`, {
+                method: "GET",
+            });
+            if (!res.ok) throw new Error("Không thể lấy thống kê quán quân");
+            const data = await res.json();
+            return data.stats;
+        } catch (err) {
+            console.error("Error fetching champion stats:", err);
+            return { week: 0, month: 0, year: 0, total: 0 };
+        }
+    },
 };

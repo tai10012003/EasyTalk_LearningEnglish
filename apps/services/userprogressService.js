@@ -431,11 +431,11 @@ class UserprogressService {
                         let title = "STREAK ĐÃ BỊ RESET VỀ 0!";
                         let message = "";
                         if (lostStreak >= 30) {
-                            message = `Thật đáng tiếc! Bạn đã mất chuỗi ${lostStreak} ngày học tập kiên trì. Đây là một mất mát lớn, nhưng đừng để nó đánh gục bạn! Kỷ lục ${maxStreak} ngày của bạn vẫn còn đó - hãy bắt đầu lại và phá vỡ chính mình! 🔥`;
+                            message = `Thật đáng tiếc! Bạn đã mất chuỗi ${lostStreak} ngày học tập kiên trì do nghỉ 2 ngày liên tiếp. Đây là một mất mát lớn, nhưng đừng để nó đánh gục bạn! Kỷ lục ${maxStreak} ngày của bạn vẫn còn đó - hãy bắt đầu lại và phá vỡ chính mình! 🔥`;
                         } else if (lostStreak >= 7) {
-                            message = `Rất tiếc! Chuỗi ${lostStreak} ngày của bạn đã kết thúc do nghỉ quá 2 ngày liên tiếp. Nhưng đừng bỏ cuộc! Hãy học ngay hôm nay để bắt đầu một chuỗi mới mạnh mẽ hơn. Bạn đã làm được ${lostStreak} ngày, lần này bạn có thể làm tốt hơn! 💪`;
+                            message = `Rất tiếc! Chuỗi ${lostStreak} ngày của bạn đã kết thúc do nghỉ 2 ngày liên tiếp. Nhưng đừng bỏ cuộc! Hãy học ngay hôm nay để bắt đầu một chuỗi mới mạnh mẽ hơn. Bạn đã làm được ${lostStreak} ngày, lần này bạn có thể làm tốt hơn! 💪`;
                         } else {
-                            message = `Streak ${lostStreak} ngày của bạn đã bị reset do nghỉ học quá lâu. Đừng lo lắng! Mọi hành trình đều bắt đầu từ bước đầu tiên. Hãy học ngay hôm nay để khởi đầu chuỗi streak mới! 🚀`;
+                            message = `Streak ${lostStreak} ngày của bạn đã kết thúc do nghỉ 2 ngày liên tiếp. Đừng lo lắng! Mọi hành trình đều bắt đầu từ bước đầu tiên. Hãy học ngay hôm nay để khởi đầu chuỗi streak mới! 🚀`;
                         }
                         await this.notificationService.createNotification(userId, title, message, "streak_lost", "http://localhost:5173/streak");
                         const user = await this.userprogressRepository.db.collection("users").findOne({ _id: new ObjectId(userId) });
@@ -493,7 +493,7 @@ class UserprogressService {
                 content = `
                     <p>Xin chào bạn 👋,</p>
                     <p style="color: #dc3545; font-weight: bold; font-size: 16px;">
-                        Thật đáng tiếc! Bạn đã mất chuỗi <strong style="font-size: 20px;">${lostStreak} ngày</strong> học tập kiên trì.
+                        Thật đáng tiếc! Bạn đã mất chuỗi <strong style="font-size: 20px;">${lostStreak} ngày</strong> học tập kiên trì do nghỉ 2 ngày liên tiếp.
                     </p>
                     <div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 5px;">
                         <p style="margin: 0; color: #721c24;">
@@ -510,7 +510,7 @@ class UserprogressService {
                 content = `
                     <p>Xin chào bạn 👋,</p>
                     <p style="color: #dc3545; font-weight: bold; font-size: 16px;">
-                        Rất tiếc! Chuỗi <strong>${lostStreak} ngày</strong> của bạn đã kết thúc do nghỉ quá 2 ngày liên tiếp.
+                        Rất tiếc! Chuỗi <strong>${lostStreak} ngày</strong> của bạn đã kết thúc do nghỉ 2 ngày liên tiếp.
                     </p>
                     <div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0; border-radius: 5px;">
                         <p style="margin: 0; color: #721c24;">
@@ -527,7 +527,7 @@ class UserprogressService {
                 content = `
                     <p>Xin chào bạn 👋,</p>
                     <p style="color: #dc3545; font-weight: bold; font-size: 16px;">
-                        Streak <strong>${lostStreak} ngày</strong> của bạn đã bị reset do nghỉ học quá lâu.
+                        Streak <strong>${lostStreak} ngày</strong> của bạn đã kết thúc do nghỉ 2 ngày liên tiếp.
                     </p>
                     <div style="background-color: #d1ecf1; border-left: 4px solid #17a2b8; padding: 15px; margin: 20px 0; border-radius: 5px;">
                         <p style="margin: 0; color: #0c5460;">
@@ -874,8 +874,21 @@ class UserprogressService {
         });
     }
 
+    async getChampionStats(userId) {
+        const userProgress = await this.getUserProgressByUserId(userId);
+        if (!userProgress?.unlockedPrizes || userProgress.unlockedPrizes.length === 0) {
+            return { week: 0, month: 0, year: 0,total: 0 };
+        }
+        let week = 0, month = 0, year = 0;
+        userProgress.unlockedPrizes.forEach(p => {
+            if (p.code.includes('CHAMPION_WEEK')) week++;
+            else if (p.code.includes('CHAMPION_MONTH')) month++;
+            else if (p.code.includes('CHAMPION_YEAR')) year++;
+        });
+        return { week, month, year, total: week + month + year};
+    }
+
     async manuallyCheckChampionPrizesForAll() {
-        console.log('[Manual] Kiểm tra giải quán quân cho tất cả người dùng...');
         const { userprogresses } = await this.getUserProgressList(1, 1000);
         const results = [];
         for (const p of userprogresses) {

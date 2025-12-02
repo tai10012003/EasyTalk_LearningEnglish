@@ -6,7 +6,6 @@ class Prize {
     level;
     requirement;
     iconClass;
-    isUnique;
 }
 
 module.exports = Prize;
