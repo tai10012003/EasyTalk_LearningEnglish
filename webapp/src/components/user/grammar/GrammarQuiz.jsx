@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { isAnswerCorrect } from '@/utils/englishTextNormalizer';
 import Swal from "sweetalert2";
 
 function GrammarQuiz({ quizzes, onComplete }) {
@@ -40,17 +41,12 @@ function GrammarQuiz({ quizzes, onComplete }) {
     if (onComplete) onComplete();
   };
 
-  const normalizeString = (str) => {
-    return str.toLowerCase().replace(/[^a-z0-9]/g, "");
-  };
-
   return (
     <div className="lesson-quiz-container">
       <h4>Bài tập ngữ pháp</h4>
       {shuffledQuizzes.map((quiz, idx) => (
         <div key={idx} className="mb-4">
           <p className="lesson-quiz-question">{idx + 1}. {quiz.question}</p>
-
           {quiz.type == "multiple-choice" ? (
             <ul className="lesson-quiz-options">
               {quiz.options.map((opt, i) => (
@@ -78,7 +74,7 @@ function GrammarQuiz({ quizzes, onComplete }) {
               type="text"
               className={`lesson-quiz-fill ${
                 checked
-                ? normalizeString(answers[idx]) == normalizeString(quiz.correctAnswer)
+                ? isAnswerCorrect(answers[idx], quiz.correctAnswer)
                 ? "correct"
                 : "wrong"
                 : ""
@@ -88,11 +84,10 @@ function GrammarQuiz({ quizzes, onComplete }) {
               onChange={(e) => handleChange(idx, e.target.value)}
             />
           )}
-
           {checked && quiz.explanation && (
             <div
               className={`lesson-quiz-explanation ${
-                normalizeString(answers[idx]) == normalizeString(quiz.correctAnswer)
+                isAnswerCorrect(answers[idx], quiz.correctAnswer)
                 ? "correct"
                 : "incorrect"
               }`}
@@ -102,13 +97,11 @@ function GrammarQuiz({ quizzes, onComplete }) {
           )}
         </div>
       ))}
-
       {!checked && !finished && (
         <button className="btn_1 mt_4" onClick={handleCheck}>
           <i className="fas fa-check"></i> Kiểm tra
         </button>
       )}
-
       {checked && !finished && (
         <button className="btn_1 mt_4" onClick={handleFinish}>
           Hoàn thành

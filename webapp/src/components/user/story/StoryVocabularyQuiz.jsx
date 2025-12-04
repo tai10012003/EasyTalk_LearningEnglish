@@ -15,17 +15,17 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                 vocabulary.map(async (word) => {
                     try {
                         const res = await fetch(
-                            `https://api.dictionaryapi.dev/api/v2/entries/en/${word}`
+                            `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(word)}`
                         );
                         const data = await res.json();
-                        if (Array.isArray(data) && data[0]?.meanings?.length > 0) {
-                            results[word] = data[0].meanings[0].definitions[0].definition;
+                        if (data && data[0] && data[0][0] && data[0][0][0]) {
+                            results[word] = data[0][0][0];
                         } else {
-                            results[word] = "(Không tìm được nghĩa)";
+                            results[word] = "(Không dịch được)";
                         }
                     } catch (err) {
-                        console.error("Dictionary API error:", err);
-                        results[word] = "(Không tìm được nghĩa)";
+                        console.error("Google Translate API error:", err);
+                        results[word] = "(Không dịch được)";
                     }
                 })
             );
