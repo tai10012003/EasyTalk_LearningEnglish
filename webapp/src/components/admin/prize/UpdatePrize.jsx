@@ -10,7 +10,8 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
         type: "",
         level: "",
         iconClass: "",
-        requirement: { xp: "", streak: "", rank: "" }
+        diamondAwards: "",
+        requirement: { xp: "", streakDays: "", rank: "" }
     });
 
     useEffect(() => {
@@ -21,9 +22,10 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                 type: initialData.type || "",
                 level: initialData.level?.toString() || "",
                 iconClass: initialData.iconClass || "",
+                diamondAwards: initialData.diamondAwards?.toString() || "",
                 requirement: {
                     xp: initialData.requirement?.xp || "",
-                    streak: initialData.requirement?.streak || "",
+                    streakDays: initialData.requirement?.streakDays || "",
                     rank: initialData.requirement?.rank || ""
                 }
             });
@@ -52,12 +54,17 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
         const cleanedRequirement = {};
-        if (["knowledge_god", "xp_master"].includes(formData.type)) {
+        if (["knowledge_god"].includes(formData.type)) {
             cleanedRequirement.xp = Number(formData.requirement.xp);
-        } else if (["perfect_week", "perfect_streak"].includes(formData.type)) {
-            cleanedRequirement.streak = Number(formData.requirement.streak);
+        } else if (["perfect_streak"].includes(formData.type)) {
+            cleanedRequirement.streakDays = Number(formData.requirement.streakDays);
         } else if (formData.type.includes("champion")) {
             cleanedRequirement.rank = 1;
+        }
+        const diamondAwards = formData.diamondAwards ? Number(formData.diamondAwards) : 0;
+        if (diamondAwards < 0) {
+            Swal.fire("Lỗi", "Số kim cương không được âm!", "error");
+            return;
         }
         const dataToSubmit = {
             code: formData.code,
@@ -65,6 +72,7 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
             type: formData.type,
             level: Number(formData.level),
             iconClass: formData.iconClass,
+            diamondAwards,
             requirement: cleanedRequirement
         };
         onSubmit(dataToSubmit, initialData._id);
@@ -89,15 +97,15 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                 </div>
             );
         }
-        if (type.includes("perfect_week") || type.includes("perfect_streak")) {
+        if (type.includes("perfect_streak")) {
             return (
                 <div className="admin-prize-update-group">
                     <label htmlFor="requirement-streak">Số ngày streak liên tiếp:</label>
                     <input
                         type="number"
                         id="requirement-streak"
-                        name="requirement.streak"
-                        value={formData.requirement.streak}
+                        name="requirement.streakDays"
+                        value={formData.requirement.streakDays}
                         onChange={handleChange}
                         required
                         className="form-control"
@@ -168,7 +176,7 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                     >
                         <option value="">-- Chọn loại --</option>
                         <option value="knowledge_god">Vị Thần Kiến Thức (XP)</option>
-                        <option value="perfect_week">Tuần Hoàn Hảo (Streak)</option>
+                        <option value="perfect_streak">Tuần Hoàn Hảo (Streak)</option>
                         <option value="champion_week">Quán Quân Tuần</option>
                         <option value="champion_month">Quán Quân Tháng</option>
                         <option value="champion_year">Quán Quân Năm</option>
@@ -189,6 +197,24 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                             <option key={l} value={l}>Cấp {l}</option>
                         ))}
                     </select>
+                </div>
+                <div className="admin-prize-update-group">
+                    <label htmlFor="diamondAwards">
+                        Số kim cương thưởng:
+                    </label>
+                    <input
+                        type="number"
+                        id="diamondAwards"
+                        name="diamondAwards"
+                        value={formData.diamondAwards}
+                        onChange={handleChange}
+                        min="0"
+                        className="form-control"
+                        placeholder="VD: 10000 (cấp 10), để 0 nếu không thưởng"
+                    />
+                    <small className="text-success font-medium">
+                        Để trống hoặc 0 = không thưởng kim cương
+                    </small>
                 </div>
                 <div className="admin-prize-update-group">
                     <label htmlFor="iconClass">Icon (Font Awesome):</label>

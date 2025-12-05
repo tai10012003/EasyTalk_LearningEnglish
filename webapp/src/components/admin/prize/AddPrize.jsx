@@ -8,7 +8,8 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
         name: "",
         type: "",
         level: "",
-        requirement: { xp: "", streak: "", rank: "" },
+        requirement: { xp: "", streakDays: "", rank: "" },
+        diamondAwards: "",
         iconClass: "fas fa-trophy text-warning"
     });
 
@@ -42,15 +43,20 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
             }
             requirement = { xp: Number(formData.requirement.xp) };
         } 
-        else if (formData.type === "perfect_week") {
-            if (!formData.requirement.streak || formData.requirement.streak < 1) {
+        else if (formData.type === "perfect_streak") {
+            if (!formData.requirement.streakDays || formData.requirement.streakDays < 1) {
                 alert("Vui lòng nhập số ngày streak yêu cầu!");
                 return;
             }
-            requirement = { streak: Number(formData.requirement.streak) };
+            requirement = { streakDays: Number(formData.requirement.streakDays) };
         }
         else if (formData.type.includes("champion")) {
             requirement = { rank: 1 };
+        }
+        const diamondAwards = formData.diamondAwards ? Number(formData.diamondAwards) : 0;
+        if (diamondAwards < 0) {
+            alert("Số kim cương không được âm!");
+            return;
         }
         const dataToSubmit = {
             code: formData.code.trim().toUpperCase(),
@@ -58,13 +64,14 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
             type: formData.type,
             level: Number(formData.level),
             requirement,
+            diamondAwards,
             iconClass: formData.iconClass
         };
         onSubmit(dataToSubmit);
     };
 
     const prizeTypes = [
-        { value: "perfect_week", label: "Tuần Hoàn Hảo (Streak)" },
+        { value: "perfect_streak", label: "Tuần Hoàn Hảo (Streak)" },
         { value: "knowledge_god", label: "Vị Thần Kiến Thức (XP)" },
         { value: "champion_week", label: "Quán Quân Tuần" },
         { value: "champion_month", label: "Quán Quân Tháng" },
@@ -91,15 +98,15 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
                 </div>
             );
         }
-        if (type === "perfect_week") {
+        if (type === "perfect_streak") {
             return (
                 <div className="admin-prize-add-group">
                     <label htmlFor="requirement-streak">Số ngày streak liên tiếp:</label>
                     <input
                         type="number"
                         id="requirement-streak"
-                        name="requirement.streak"
-                        value={formData.requirement.streak}
+                        name="requirement.streakDays"
+                        value={formData.requirement.streakDays}
                         onChange={handleChange}
                         required
                         min="1"
@@ -182,6 +189,19 @@ const AddPrize = ({ onSubmit, title, returnUrl }) => {
                             <option key={l} value={l}>Cấp {l}</option>
                         ))}
                     </select>
+                </div>
+                <div className="admin-prize-add-group">
+                    <label>Số kim cương thưởng:</label>
+                    <input
+                        type="number"
+                        id="diamondAwards"
+                        name="diamondAwards"
+                        value={formData.diamondAwards}
+                        onChange={handleChange}
+                        className="form-control"
+                        placeholder="VD: 10000 (cấp 10), để 0 nếu không thưởng"
+                    />
+                    <small className="text-success">Để 0 = không thưởng kim cương</small>
                 </div>
                 <div className="admin-prize-add-group">
                     <label>Icon (Font Awesome):</label>

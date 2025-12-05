@@ -37,6 +37,7 @@ function Menu() {
   });
   const [streakData, setStreakData] = useState({ streak: 0 });
   const [leaderData, setLeaderData] = useState({ experiencePoints: 0 });
+  const [diamondData, setDiamondData] = useState({ diamonds: 0 });
   const [notifications, setNotifications] = useState([]);
   const [showNotificationDropdown, setShowNotificationDropdown] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -128,6 +129,13 @@ function Menu() {
         });
       })
       .catch((err) => console.error("Error fetching experience points:", err));
+    UserProgressService.getUserDiamonds()
+      .then((data) => {
+        setDiamondData({
+          diamonds: data.diamonds || 0,
+        });
+      })
+      .catch((err) => console.error("Error fetching diamonds:", err));
   };
 
   const fetchNotifications = async () => {
@@ -320,11 +328,16 @@ function Menu() {
           </div>
           {isLoggedIn && (
             <div className="top-bar-right d-flex align-items-center">
+              <div className="kc me-4">
+                <Link to="/shop" className="text-decoration-none" style={{ textDecoration: 'none' }}>
+                  💎 <strong>KC: {diamondData.diamonds}</strong>
+                </Link>
+              </div>
               <div className="xp me-4">
                 ⭐ <strong>XP: {leaderData.experiencePoints}</strong>
               </div>
               <div className="streak me-4">
-                <Link to="/streak" className="text-decoration-none text-dark" style={{ textDecoration: 'none' }}>
+                <Link to="/streak" className="text-decoration-none" style={{ textDecoration: 'none' }}>
                   🔥 <strong>{streakData.streak} {t("menu.day")}</strong>
                 </Link>
               </div>

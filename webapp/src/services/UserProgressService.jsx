@@ -55,6 +55,32 @@ export const UserProgressService = {
         }
     },
 
+    async getUserDiamonds() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/diamonds`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const errorData = await res.json();
+                throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+            }
+            const data = await res.json();
+            hasShownAlert = false;
+            return data;
+        } catch (err) {
+            console.error("Error fetching diamonds data:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
+            }
+            throw err;
+        }
+    },
+
     async recordStudyTime(seconds) {
         if (seconds < 30) return;
         try {

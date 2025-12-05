@@ -54,6 +54,15 @@ router.get("/experiencepoint", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/diamonds", verifyToken, async (req, res) => {
+    try {
+        const diamonds = await userprogressService.getDiamonds(req.user.id);
+        res.json({ success: true, diamonds });
+    } catch (err) {
+        res.status(500).json({ success: false });
+    }
+});
+
 router.get("/dailyreviews", verifyToken, async (req, res) => {
     try {
         const userId = req.user.id;

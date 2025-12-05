@@ -798,6 +798,9 @@ const Statistic = () => {
                                                 <div className="user-statistic-prize-requirement">
                                                     {prize.requirement.streakDays} ngày
                                                 </div>
+                                                <div className="user-statistic-prize-awards">
+                                                    Nhận: {prize.diamondAwards} KC
+                                                </div>
                                             </div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-badge">
@@ -855,6 +858,9 @@ const Statistic = () => {
                                                 <div className="user-statistic-prize-requirement">
                                                     {prize.requirement.xp.toLocaleString()} KN
                                                 </div>
+                                                <div className="user-statistic-prize-awards">
+                                                    Nhận: {prize.diamondAwards} KC
+                                                </div>
                                             </div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-badge">
@@ -876,10 +882,11 @@ const Statistic = () => {
                                         <p>Giành vị trí Top 1 trên bảng xếp hạng vào cuối kỳ. Có 3 loại giải thưởng:</p>
                                         <div className="user-statistic-prize-tooltip-champion-section">
                                             <div className="user-statistic-prize-tooltip-champion-item">
-                                                <i className="fas fa-crown"></i>
+                                                <i className="fas fa-star"></i>
                                                 <div>
                                                     <strong>Quán Quân Tuần:</strong>
                                                     <p>Đạt rank 1 vào cuối tuần (Chủ nhật) trên bảng xếp hạng KN hoặc Thời gian học</p>
+                                                    <p>Nhận 100 kim cương</p>
                                                 </div>
                                             </div>
                                             <div className="user-statistic-prize-tooltip-champion-item">
@@ -887,18 +894,19 @@ const Statistic = () => {
                                                 <div>
                                                     <strong>Quán Quân Tháng:</strong>
                                                     <p>Đạt rank 1 vào cuối tháng trên bảng xếp hạng KN hoặc Thời gian học</p>
+                                                    <p>Nhận 500 kim cương</p>
                                                 </div>
                                             </div>
                                             <div className="user-statistic-prize-tooltip-champion-item">
-                                                <i className="fas fa-trophy-alt"></i>
+                                                <i className="fas fa-crown"></i>
                                                 <div>
                                                     <strong>Quán Quân Năm:</strong>
                                                     <p>Đạt rank 1 vào cuối năm trên bảng xếp hạng KN hoặc Thời gian học</p>
+                                                    <p>Nhận 6500 kim cương</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <p className="user-statistic-prize-tooltip-note champion-note">
-                                            <i className="fas fa-star"></i> 
                                             Mỗi giải đạt được đều danh giá và phần thưởng xứng đáng! Cạnh tranh gay gắt để giành danh hiệu cao quý này!
                                         </p>
                                     </div>
@@ -916,8 +924,11 @@ const Statistic = () => {
                                             <div className="user-statistic-prize-champion-icon">
                                                 <i className={prize.iconClass}></i>
                                             </div>
-                                            <div className="user-statistic-prize-champion-count">{championStats.week}</div>
                                             <div className="user-statistic-prize-champion-name">{prize.name}</div>
+                                            <div className="user-statistic-prize-champion-count">{championStats.week}</div>
+                                            <div className="user-statistic-prize-awards">
+                                                Nhận: {prize.diamondAwards} KC
+                                            </div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-champion-badge">
                                                     <i className="fas fa-check-circle"></i>
@@ -939,6 +950,9 @@ const Statistic = () => {
                                             </div>
                                             <div className="user-statistic-prize-champion-name">{prize.name}</div>
                                             <div className="user-statistic-prize-champion-count">{championStats.month}</div>
+                                            <div className="user-statistic-prize-awards">
+                                                Nhận: {prize.diamondAwards} KC
+                                            </div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-champion-badge">
                                                     <i className="fas fa-check-circle"></i>
@@ -960,6 +974,9 @@ const Statistic = () => {
                                             </div>
                                             <div className="user-statistic-prize-champion-name">{prize.name}</div>
                                             <div className="user-statistic-prize-champion-count">{championStats.year}</div>
+                                            <div className="user-statistic-prize-awards">
+                                                Nhận: {prize.diamondAwards} KC
+                                            </div>
                                             {unlocked && (
                                                 <div className="user-statistic-prize-champion-badge">
                                                     <i className="fas fa-check-circle"></i>

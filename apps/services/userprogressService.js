@@ -265,6 +265,7 @@ class UserprogressService {
             experiencePoints: 0,
             dailyExperiencePoints: {},
             unlockedPrizes: [],
+            diamonds: 0,
             streak: 0,
             maxStreak: 0,
             studyDates: [],
@@ -702,6 +703,11 @@ class UserprogressService {
                 await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level);
                 newlyUnlocked.push(prize);
                 await this._sendPrizeNotification(userId, prize, prize.championType);
+                const diamondsReward = prize.diamondAwards || 0;
+                if (diamondsReward > 0) {
+                    await this.addDiamonds(userId, diamondsReward);
+                    await this.notificationService.createNotification(userId, "NHẬN KIM CƯƠNG THÀNH TỰU!", `Chúc mừng bạn nhận ${diamondsReward} kim cương từ thành tựu "${prize.name}"!`, "achieve", "/shop");
+                }
             }
         }
         await this._invalidateCache();
@@ -747,6 +753,11 @@ class UserprogressService {
                 await this.userprogressRepository.unlockPrize(userId, prize._id, prize.code, prize.level, periodToCheck);
                 newlyUnlocked.push({ ...prize, period: periodToCheck });
                 await this._sendPrizeNotification(userId, prize, prize.championType);
+                const diamondsReward = prize.diamondAwards || 0;
+                if (diamondsReward > 0) {
+                    await this.addDiamonds(userId, diamondsReward);
+                    await this.notificationService.createNotification(userId, "NHẬN KIM CƯƠNG QUÁN QUÂN!", `Chúc mừng bạn nhận ${diamondsReward} kim cương từ danh hiệu ${prize.name || 'Quán quân'}!`, "achieve", "/shop");
+                }
             }
         }
         await this._invalidateCache();
@@ -902,6 +913,20 @@ class UserprogressService {
             }
         }
         return results;
+    }
+
+    async addDiamonds(userId, amount) {
+        if (amount <= 0) return false;
+        const result = await this.userprogressRepository.update(userId, {
+            $inc: { diamonds: amount }
+        });
+        await this._invalidateCache();
+        return result.modifiedCount > 0 || result.upsertedCount > 0;
+    }
+
+    async getDiamonds(userId) {
+        const progress = await this.getUserProgressByUserId(userId);
+        return progress?.diamonds || 0;
     }
 
     async manuallyCheckChampionPrizes(userId) {
