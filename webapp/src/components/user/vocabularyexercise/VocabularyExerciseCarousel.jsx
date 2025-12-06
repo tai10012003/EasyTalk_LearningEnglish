@@ -18,7 +18,27 @@ const VocabularyExerciseCarousel = ({
     const [hoveredWord, setHoveredWord] = useState(null);
     const [translation, setTranslation] = useState('');
     const [translationLoading, setTranslationLoading] = useState(false);
-    const currentQuestion = questions[currentQuestionIndex];
+
+    const shuffleArray = useCallback((array) => {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }, []);
+
+    const [shuffledQuestionsData, setShuffledQuestionsData] = useState([]);
+
+    useEffect(() => {
+        const shuffledData = questions.map((question) => ({
+            ...question,
+            shuffledOptions: question.type === "multiple-choice" || question.type === "arrange-words" ? shuffleArray(question.options.filter(o => o.trim() !== "")) : question.options
+        }));
+        setShuffledQuestionsData(shuffledData);
+    }, [questions, shuffleArray]);
+
+    const currentQuestion = shuffledQuestionsData[currentQuestionIndex];
 
     const isEnglishQuestion = (text) => {
         if (!text) return false;
@@ -111,9 +131,9 @@ const VocabularyExerciseCarousel = ({
 
     const renderArrangeWords = () => {
         if (!currentQuestion || currentQuestion.type !== "arrange-words") return null;
-        const words = currentQuestion.options.filter(w => w.trim() !== "");
+        const words = currentQuestion.shuffledOptions || [];
         const savedAnswer = userAnswers[currentQuestionIndex];
-        const savedSelected = savedAnswer ? savedAnswer.split(" ") : [];
+        const savedSelected = savedAnswer ? savedAnswer.split(" ").filter(Boolean) : [];
         if (!arrangeState[currentQuestionIndex]) {
             setArrangeState(prev => ({
                 ...prev,
@@ -128,7 +148,6 @@ const VocabularyExerciseCarousel = ({
             available: words.filter(w => !savedSelected.includes(w))
         };
         const correctWords = currentQuestion.correctAnswer.trim().split(" ");
-        const userWords = state.selected;
         const isWordCorrectAtPosition = (word, index) => {
             if (index >= correctWords.length) return false;
             return word.toLowerCase() === correctWords[index].toLowerCase().replace(/[.,?!]/g, '');
@@ -180,40 +199,37 @@ const VocabularyExerciseCarousel = ({
     };
 
     const renderMultipleChoice = () => {
+        const shuffledOptions = currentQuestion?.shuffledOptions || [];
         return (
             <div className="exercise-question-form">
-                {currentQuestion.options
-                .filter(option => option.trim() !== "")
-                .map((option, optIndex) => (
-                    <div key={optIndex} className="exercise-form-check">
-                        <input
-                            className="exercise-form-check-input"
-                            type="radio"
-                            name={`exercise-answer-${currentQuestionIndex}`}
-                            value={option}
-                            id={`exercise-option-${optIndex}-${currentQuestionIndex}`}
-                            onChange={() => handleAnswerChange(option)}
-                            checked={userAnswers[currentQuestionIndex] == option}
-                            disabled={isQuestionAnswered}
-                        />
-                        <label
-                            className={`exercise-form-check-label ${
-                                isQuestionAnswered && questionResult.userAnswer == option
-                                    ? questionResult.isCorrect 
-                                        ? 'exercise-correct-answer' 
-                                        : 'exercise-incorrect-answer'
-                                    : ''
-                            } ${
-                                isQuestionAnswered && questionResult.correctAnswer == option
-                                    ? 'exercise-correct-answer'
-                                    : ''
-                            }`}
-                            htmlFor={`exercise-option-${optIndex}-${currentQuestionIndex}`}
-                        >
-                            {option}
-                        </label>
-                    </div>
-                ))}
+                {shuffledOptions.map((option, optIndex) => {
+                    const isUserAnswer = isQuestionAnswered && questionResult?.userAnswer == option;
+                    const isCorrectAnswer = isQuestionAnswered && questionResult?.correctAnswer == option;
+                    return (
+                        <div key={optIndex} className="exercise-form-check">
+                            <input
+                                className="exercise-form-check-input"
+                                type="radio"
+                                name={`exercise-answer-${currentQuestionIndex}`}
+                                value={option}
+                                id={`exercise-option-${optIndex}-${currentQuestionIndex}`}
+                                onChange={() => handleAnswerChange(option)}
+                                checked={userAnswers[currentQuestionIndex] == option}
+                                disabled={isQuestionAnswered}
+                            />
+                            <label
+                                className={`exercise-form-check-label ${
+                                    isUserAnswer && !questionResult.isCorrect ? 'exercise-incorrect-answer' : ''
+                                } ${
+                                    isCorrectAnswer ? 'exercise-correct-answer' : ''
+                                }`}
+                                htmlFor={`exercise-option-${optIndex}-${currentQuestionIndex}`}
+                            >
+                                {option}
+                            </label>
+                        </div>
+                    );
+                })}
             </div>
         );
     };
@@ -257,6 +273,7 @@ const VocabularyExerciseCarousel = ({
     };
 
     const shouldShowSpeaker = isEnglishQuestion(currentQuestion?.question);
+    if (!currentQuestion) return null;
 
     return (
         <div className="exercise-carousel-container">
@@ -291,7 +308,7 @@ const VocabularyExerciseCarousel = ({
                         );
                     })}
                 </h5>
-                <form className="exercise-question-form-container mt-4">
+                <div className="exercise-question-form-container mt-4">
                     {renderQuestionContent()}
                     {isQuestionAnswered && questionResult && (
                         <div className="exercise-explanation mt-4">
@@ -317,7 +334,7 @@ const VocabularyExerciseCarousel = ({
                             Kiểm tra
                         </button>
                     )}
-                </form>
+                </div>
                 <hr />
                 <div className="d-flex justify-content-between mt-3">
                     <button

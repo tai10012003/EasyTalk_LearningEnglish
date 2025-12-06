@@ -1,6 +1,15 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { isAnswerCorrect } from '@/utils/englishTextNormalizer'
 import Swal from "sweetalert2";
+
+const shuffleArray = (array) => {
+    const arr = [...array];
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+};
 
 const StageCarousel = ({
     questions,
@@ -18,7 +27,26 @@ const StageCarousel = ({
     const [hoveredWord, setHoveredWord] = useState(null);
     const [translation, setTranslation] = useState('');
     const [translationLoading, setTranslationLoading] = useState(false);
+    const [shuffledOptionsMap, setShuffledOptionsMap] = useState({});
+
+    useEffect(() => {
+        const newShuffledMap = {};
+        questions.forEach((question, index) => {
+            if (!shuffledOptionsMap[index]) {
+                if (question.type === "multiple-choice" || question.type === "arrange-words") {
+                    newShuffledMap[index] = shuffleArray(question.options.filter(o => o.trim() !== ""));
+                } else {
+                    newShuffledMap[index] = question.options;
+                }
+            }
+        });
+        if (Object.keys(newShuffledMap).length > 0) {
+            setShuffledOptionsMap(prev => ({ ...prev, ...newShuffledMap }));
+        }
+    }, [questions]);
+
     const currentQuestion = questions[currentQuestionIndex];
+    const currentShuffledOptions = shuffledOptionsMap[currentQuestionIndex] || currentQuestion?.options || [];
 
     const isEnglishQuestion = (text) => {
         if (!text) return false;
@@ -99,9 +127,9 @@ const StageCarousel = ({
 
     const renderArrangeWords = () => {
         if (!currentQuestion || currentQuestion.type !== "arrange-words") return null;
-        const words = currentQuestion.options.filter(w => w.trim() !== "");
+        const words = currentShuffledOptions;
         const savedAnswer = userAnswers[currentQuestionIndex];
-        const savedSelected = savedAnswer ? savedAnswer.split(" ") : [];
+        const savedSelected = savedAnswer ? savedAnswer.split(" ").filter(Boolean) : [];
         if (!arrangeState[currentQuestionIndex]) {
             setArrangeState(prev => ({
                 ...prev,
@@ -116,7 +144,6 @@ const StageCarousel = ({
             available: words.filter(w => !savedSelected.includes(w))
         };
         const correctWords = currentQuestion.correctAnswer.trim().split(" ");
-        const userWords = state.selected;
         const isWordCorrectAtPosition = (word, index) => {
             if (index >= correctWords.length) return false;
             return word.toLowerCase() === correctWords[index].toLowerCase().replace(/[.,?!]/g, '');
@@ -169,9 +196,10 @@ const StageCarousel = ({
 
     const renderMultipleChoice = () => (
         <div className="exercise-question-form">
-            {currentQuestion.options
-                .filter(option => option.trim() !== "")
-                .map((option, optIndex) => (
+            {currentShuffledOptions.map((option, optIndex) => {
+                const isUserAnswer = isQuestionAnswered && questionResult?.userAnswer == option;
+                const isCorrectAnswer = isQuestionAnswered && questionResult?.correctAnswer == option;
+                return (
                     <div key={optIndex} className="exercise-form-check">
                         <input
                             className="exercise-form-check-input"
@@ -185,22 +213,17 @@ const StageCarousel = ({
                         />
                         <label
                             className={`exercise-form-check-label ${
-                                isQuestionAnswered && questionResult.userAnswer == option
-                                    ? questionResult.isCorrect 
-                                        ? 'exercise-correct-answer' 
-                                        : 'exercise-incorrect-answer'
-                                    : ''
+                                isUserAnswer && !questionResult.isCorrect ? 'exercise-incorrect-answer' : ''
                             } ${
-                                isQuestionAnswered && questionResult.correctAnswer == option
-                                    ? 'exercise-correct-answer'
-                                    : ''
+                                isCorrectAnswer ? 'exercise-correct-answer' : ''
                             }`}
                             htmlFor={`exercise-option-${optIndex}-${currentQuestionIndex}`}
                         >
                             {option}
                         </label>
                     </div>
-                ))}
+                );
+            })}
         </div>
     );
 
@@ -242,6 +265,7 @@ const StageCarousel = ({
     };
 
     const shouldShowSpeaker = isEnglishQuestion(currentQuestion?.question);
+    if (!currentQuestion) return null;
 
     return (
         <div className="exercise-carousel-container">
@@ -276,7 +300,7 @@ const StageCarousel = ({
                         );
                     })}
                 </h5>
-                <form className="exercise-question-form-container mt-4">
+                <div className="exercise-question-form-container mt-4">
                     {renderQuestionContent()}
                     {isQuestionAnswered && questionResult && (
                         <div className="exercise-explanation mt-4">
@@ -302,7 +326,7 @@ const StageCarousel = ({
                             Kiểm tra
                         </button>
                     )}
-                </form>
+                </div>
                 {isQuestionAnswered && !isCompleted && (
                     <div className="d-flex justify-content-end mt-3">
                         {currentQuestionIndex == questions.length - 1 ? (
