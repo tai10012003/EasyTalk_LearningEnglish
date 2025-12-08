@@ -20,6 +20,7 @@ function StoryDetail() {
     const [quizResults, setQuizResults] = useState([]);
     const [currentStep, setCurrentStep] = useState(0);
     const [totalSteps, setTotalSteps] = useState(1);
+    const [hasStartedAudio, setHasStartedAudio] = useState(false);
     const allowNavigationRef = useRef(false);
     const contentRefs = useRef([]);
     const [activeTime, setActiveTime] = useState(0);
@@ -127,6 +128,12 @@ function StoryDetail() {
                     const total = res.content.length + quizCount + 1 + 1;
                     setCurrentStep(1);
                     setTotalSteps(total);
+                    setTimeout(() => {
+                        const firstRef = contentRefs.current[0];
+                        if (firstRef) {
+                            firstRef.scrollIntoView({ behavior: "smooth", block: "center" });
+                        }
+                    }, 100); 
                 }, 2000);
             } catch (error) {
                 console.error("Error fetching story:", error);
@@ -161,13 +168,25 @@ function StoryDetail() {
         } 
         // Nếu câu cuối cùng (hoặc quiz cuối cùng) → hiển thị VocabularyQuiz 1 lần
         else if (!vocabQuizShown &&
+            displayedItems[displayedItems.length - 1]?.type !== "vocabQuiz" &&
             ((lastItem.type == "sentence" && displayedItems.filter(i => i.type == "sentence").length == content.length) ||
             (lastItem.type == "quiz" && displayedItems.filter(i => i.type == "sentence").length == content.length))
         ) {
             // Gom tất cả từ vựng từ các câu
+            const totalSentences = content.length;
+            let vocabQuizCount;
+            if (totalSentences <= 10) {
+                vocabQuizCount = 8;
+            } else if (totalSentences <= 13) {
+                vocabQuizCount = 10;
+            } else {
+                vocabQuizCount = 12;
+            }
             const allVocabulary = content.flatMap(c => c.vocabulary || []);
-            const quizWords = getRandomWords(allVocabulary, 5);
-            setDisplayedItems([...displayedItems, { type: "vocabQuiz", data: quizWords }]);
+            vocabQuizCount = Math.min(vocabQuizCount, allVocabulary.length);
+            vocabQuizCount = Math.max(5, vocabQuizCount); // ít nhất 5 từ
+            const quizWords = getRandomWords(allVocabulary, vocabQuizCount);
+            setDisplayedItems(prev => [...prev, { type: "vocabQuiz", data: quizWords }]);
             setVocabQuizShown(true);
             setShowQuizOnly(true);
         }
@@ -273,7 +292,7 @@ function StoryDetail() {
                         display: showQuizOnly && item.type != "vocabQuiz" ? "none" : "block"
                     }}
                 >
-                    {item.type == "sentence" && <StorySentence sentence={item.data} onNext={() => handleNext(idx)} />}
+                    {item.type == "sentence" && <StorySentence sentence={item.data} onNext={() => handleNext(idx)} hasStartedAudio={hasStartedAudio} setHasStartedAudio={setHasStartedAudio} />}
                     {item.type == "quiz" && <StoryQuiz quiz={item.data} onNext={(result) => handleNext(idx, result)} />}
                     {item.type == "vocabQuiz" && <StoryVocabularyQuiz vocabulary={item.data} onNext={(result) => handleNext(idx, result)} />}
                     {item.type == "complete" && (

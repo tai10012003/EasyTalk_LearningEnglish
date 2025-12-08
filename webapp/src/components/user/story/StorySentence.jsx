@@ -1,12 +1,11 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 
-function StorySentence({ sentence, onNext, onStepChange }) {
+function StorySentence({ sentence, onNext, onStepChange, hasStartedAudio, setHasStartedAudio }) {
     const [showVietnamese, setShowVietnamese] = useState(false);
     const [hasContinued, setHasContinued] = useState(false);
     const [canContinue, setCanContinue] = useState(false);
     const [definitions, setDefinitions] = useState({});
     const [currentWordIndex, setCurrentWordIndex] = useState(-1);
-    const firstRender = useRef(true);
 
     const en = sentence.en;
     const vi = sentence.vi;
@@ -15,10 +14,12 @@ function StorySentence({ sentence, onNext, onStepChange }) {
 
     useEffect(() => {
         if (!en || !("speechSynthesis" in window)) return;
-
+        if (!hasStartedAudio) {
+            return;
+        }
         speechSynthesis.cancel();
         setCurrentWordIndex(-1);
-
+        setCanContinue(false);
         const utterance = new SpeechSynthesisUtterance(en);
         utterance.lang = "en-US";
         utterance.onboundary = (event) => {
@@ -38,16 +39,15 @@ function StorySentence({ sentence, onNext, onStepChange }) {
             setCurrentWordIndex(-1);
             setCanContinue(true);
         };
-        if (!firstRender.current) {
-            setCanContinue(false);
-        }
         speechSynthesis.speak(utterance);
-        firstRender.current = false;
-
-    }, [en]);
+    }, [en, hasStartedAudio]);
 
     const handleSpeak = () => {
         if (!en || !("speechSynthesis" in window)) return;
+        if (!hasStartedAudio) {
+            setHasStartedAudio(true);
+            setCanContinue(false);
+        }   
         speechSynthesis.cancel();
         setCurrentWordIndex(-1);
         const utterance = new SpeechSynthesisUtterance(en);
@@ -114,7 +114,7 @@ function StorySentence({ sentence, onNext, onStepChange }) {
     return (
         <div className="story-sentence shadow-sm p-4 my-4">
             <div className="sentence-row d-flex align-items-center mb-2">
-                <button className="btn-speak me-2" onClick={handleSpeak}>
+                <button className="btn-speak me-2" onClick={handleSpeak} title="Nghe lại">
                     🔊
                 </button>
                 <span
@@ -135,11 +135,9 @@ function StorySentence({ sentence, onNext, onStepChange }) {
                     ))}
                 </span>
             </div>
-
             {showVietnamese && (
                 <p className="sentence-vi text-success mt-2">{vi}</p>
             )}
-
             {vocabulary && vocabulary.length > 0 && (
                 <div className="mt-4">
                     <strong className="d-block mb-2">Từ vựng:</strong>
@@ -152,9 +150,13 @@ function StorySentence({ sentence, onNext, onStepChange }) {
                     </div>
                 </div>
             )}
-
             <div className="mt-4">
-                {!hasContinued && canContinue && (
+                {!hasStartedAudio && (
+                    <button className="btn_1 btn-lg" onClick={handleSpeak}>
+                        🎧 Bắt đầu nghe câu chuyện
+                    </button>
+                )}
+                {hasStartedAudio && !hasContinued && canContinue && (
                     <button className="btn_1" onClick={handleNextClick}>
                         <i className="fas fa-arrow-right ms-2"></i>Tiếp tục
                     </button>

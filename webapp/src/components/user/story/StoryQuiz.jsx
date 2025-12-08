@@ -1,10 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import confetti from "canvas-confetti";
 
 function StoryQuiz({ quiz, onNext }) {
     const [selected, setSelected] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [hasContinued, setHasContinued] = useState(false);
+
+    const shuffleArray = useCallback((array) => {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }, []);
+
+    const shuffledOptions = useMemo(() => shuffleArray(quiz.options), [quiz.options, shuffleArray]);
 
     const handleAnswer = (option) => {
         setSelected(option);
@@ -31,8 +42,8 @@ function StoryQuiz({ quiz, onNext }) {
         <div className="story-quiz shadow-lg p-4 my-4">
             <h5 className="quiz-question mb-3">{quiz.question}</h5>
             <ul className="quiz-options list-unstyled">
-                {quiz.options.map((opt, idx) => (
-                    <li key={idx}>
+                {shuffledOptions.map((opt) => (
+                    <li key={opt}>
                         <button
                             className={`quiz-option ${
                                 isAnswered && opt == quiz.answer
@@ -49,7 +60,6 @@ function StoryQuiz({ quiz, onNext }) {
                     </li>
                 ))}
             </ul>
-
             {isAnswered && (
                 <div className="quiz-feedback mt-3">
                     <p
