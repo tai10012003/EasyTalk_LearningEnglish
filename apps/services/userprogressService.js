@@ -724,23 +724,17 @@ class UserprogressService {
         const newlyUnlocked = [];
         const now = this._getVnNow();
         for (const prize of championPrizes) {
-            const alreadyUnlocked = userProgress.unlockedPrizes?.some(up => up.code === prize.code && up.period);
-            if (alreadyUnlocked) continue;
             let periodToCheck = null;
-            let shouldCheck = false;
             if (prize.type === 'champion_week') {
                 periodToCheck = this._getLastCompletedWeekPeriod(now);
-                shouldCheck = true;
-            }
-            else if (prize.type === 'champion_month') {
+            } else if (prize.type === 'champion_month') {
                 periodToCheck = this._getLastCompletedMonthPeriod(now);
-                shouldCheck = true;
-            }
-            else if (prize.type === 'champion_year') {
+            } else if (prize.type === 'champion_year') {
                 periodToCheck = this._getLastCompletedYearPeriod(now);
-                shouldCheck = true;
             }
-            if (!shouldCheck || !periodToCheck) continue;
+            if (!periodToCheck) continue;
+            const alreadyUnlocked = userProgress.unlockedPrizes?.some(up => up.code === prize.code && up.period === periodToCheck);
+            if (alreadyUnlocked) continue;
             let isChampion = false;
             if (prize.type === 'champion_week') {
                 isChampion = await this._checkChampionWeek(userId, prize, periodToCheck);

@@ -164,45 +164,46 @@ class UserprogressRepository {
                             in: {
                                 _id: "$$stage._id",
                                 name: {
-                                    $concat: [
-                                        "$$stage.title",
-                                        " - ",
-                                        {
-                                            $arrayElemAt: [
-                                                {
-                                                    $map: {
-                                                        input: {
-                                                            $filter: {
-                                                                input: "$gateForStages",
-                                                                cond: { $eq: ["$$this._id", "$$stage.gate"] }
-                                                            }
-                                                        },
-                                                        as: "g",
-                                                        in: "$$g.title"
-                                                    }
-                                                },
-                                                0
-                                            ]
+                                    $let: {
+                                        vars: {
+                                            currentGate: {
+                                                $arrayElemAt: [
+                                                    {
+                                                        $filter: {
+                                                            input: "$gateForStages",
+                                                            cond: { $eq: ["$$this._id", "$$stage.gate"] }
+                                                        }
+                                                    },
+                                                    0
+                                                ]
+                                            }
                                         },
-                                        " - ",
-                                        {
-                                            $arrayElemAt: [
+                                        in: {
+                                            $concat: [
+                                                "$$stage.title",
+                                                " - ",
+                                                { $ifNull: ["$$currentGate.title", "Cổng không tên"] },
+                                                " - ",
                                                 {
-                                                    $map: {
-                                                        input: {
-                                                            $filter: {
-                                                                input: "$journeyForStages",
-                                                                cond: { $eq: ["$$this._id", { $arrayElemAt: ["$gateForStages.journey", 0] }] }
+                                                    $arrayElemAt: [
+                                                        {
+                                                            $map: {
+                                                                input: {
+                                                                    $filter: {
+                                                                        input: "$journeyForStages",
+                                                                        cond: { $eq: ["$$this._id", "$$currentGate.journey"] }
+                                                                    }
+                                                                },
+                                                                as: "j",
+                                                                in: "$$j.title"
                                                             }
                                                         },
-                                                        as: "j",
-                                                        in: "$$j.title"
-                                                    }
-                                                },
-                                                0
+                                                        0
+                                                    ]
+                                                }
                                             ]
                                         }
-                                    ]
+                                    }
                                 }
                             }
                         }
