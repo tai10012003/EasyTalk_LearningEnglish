@@ -191,6 +191,19 @@ router.get("/champion-stats", verifyToken, async (req, res) => {
     }
 });
 
+router.get("/api/userprogress/by-user/:userId", verifyToken, async (req, res) => {
+    try {
+        const progress = await userprogressService.getDetailUserProgressByUserId(req.params.userId);
+        if (!progress) {
+            return res.status(404).json({ message: "Không tìm thấy tiến trình người dùng" });
+        }
+        res.json(progress);
+    } catch (error) {
+        console.error("Lỗi:", error);
+        res.status(500).json({ message: "Lỗi server" });
+    }
+});
+
 router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
     try {
         const userProgressId = req.params.id;

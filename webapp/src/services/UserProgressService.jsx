@@ -159,6 +159,23 @@ export const UserProgressService = {
         }
     },
 
+    async getUserProgressByUserId(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress/by-user/${userId}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const err = new Error(`HTTP error! Status: ${res.status}`);
+                err.status = res.status;
+                throw err;
+            }
+            return await res.json();
+        } catch (error) {
+            console.error("Error fetching user progress by user ID:", error);
+            throw error;
+        }
+    },
+
     async getUserStatistics(type = "time", period = "week") {
         try {
             const query = new URLSearchParams({ type, period }).toString();

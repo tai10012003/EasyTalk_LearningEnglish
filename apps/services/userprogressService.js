@@ -105,6 +105,10 @@ class UserprogressService {
         return await this.userprogressRepository.findUserProgressById(id);
     }
 
+    async getDetailUserProgressByUserId(userId) {
+        return await this.userprogressRepository.findDetailUserProgressByUserId(userId);
+    }
+
     async getLeaderboard(type = 'exp', period = 'all', limit = 50) {
         if (type === 'exp') return await this.userprogressRepository.getLeaderboardByExp(period, limit);
         if (type === 'time') return await this.userprogressRepository.getLeaderboardByStudyTime(period, limit);
