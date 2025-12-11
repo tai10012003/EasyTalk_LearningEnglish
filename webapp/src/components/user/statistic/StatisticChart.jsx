@@ -2,7 +2,9 @@ import React from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
 
-const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, formatDateString, getCurrentDatePlotLine, onChartTypeChange, onPeriodChange, onExportExcel, onExportPpt, periods }) => {
+const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, formatDateString, getCurrentDatePlotLine, onChartTypeChange, onPeriodChange, onExportExcel, onExportPpt, periods, username = null }) => {
+    const isOwnStats = !username;
+    const title = isOwnStats ? "Thống kê biểu đồ của bạn" : `Thống kê biểu đồ của ${username}`;
     const chartOptions = {
         chart: {
             type: activeChart == "time" ? "areaspline" : "column",
@@ -138,7 +140,7 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
 
     return (
         <div className="user-statistic-chart-container">
-            <h3 className="user-statistic-info-title">Thống kê biểu đồ của bạn</h3>
+            <h3 className="user-statistic-info-title">{title}</h3>
             <div className="user-statistic-toolbar">
                 <div className="user-statistic-left">
                     <div className="user-statistic-tabs">
@@ -178,14 +180,16 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
                                         </option>
                                     ))}
                                 </select>
-                                <div className="user-statistic-export">
-                                    <button className="user-statistic-btn excel" onClick={onExportExcel}>
-                                        <i className="fas fa-file-excel"></i> Excel
-                                    </button>
-                                    <button className="user-statistic-btn ppt" onClick={onExportPpt}>
-                                        <i className="fas fa-file-powerpoint"></i> PowerPoint
-                                    </button>
-                                </div>
+                                {isOwnStats && onExportExcel && onExportPpt && (
+                                    <div className="user-statistic-export">
+                                        <button className="user-statistic-btn excel" onClick={onExportExcel}>
+                                            <i className="fas fa-file-excel"></i> Excel
+                                        </button>
+                                        <button className="user-statistic-btn ppt" onClick={onExportPpt}>
+                                            <i className="fas fa-file-powerpoint"></i> PowerPoint
+                                        </button>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

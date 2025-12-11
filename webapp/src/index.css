@@ -6189,6 +6189,7 @@ p {
 .user-statistic-follow-button-wrapper {
   width: 100%;
   display: flex;
+  gap: 30px;
   justify-content: center;
 }
 
@@ -6239,6 +6240,17 @@ p {
   cursor: pointer;
   transform: translateY(-3px);
   box-shadow: 0 10px 25px rgba(255, 107, 107, 0.4);
+}
+
+.user-statistic-follow-btn.warning {
+  background: linear-gradient(135deg, #070707 0%, #595959 100%);
+  color: white;
+  border: none;
+}
+
+.user-statistic-follow-btn.warning:hover {
+  cursor: pointer;
+  transform: translateY(-3px);
 }
 
 .user-statistic-follow-btn:active {
