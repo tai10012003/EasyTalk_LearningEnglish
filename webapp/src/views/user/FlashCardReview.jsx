@@ -226,18 +226,18 @@ const FlashCardReview = () => {
             cardId: card._id,
             difficulty
         });
-        let title = "";
-        switch (difficulty) {
-            case 1: title = "Tuyệt vời!"; break;
-            case 2: title = "Tốt!"; break;
-            case 3: title = "Cố lên!"; break;
-        }
-        Swal.fire({
-            icon: "success",
-            title,
-            timer: 800,
-            showConfirmButton: false,
-        });
+        // let title = "";
+        // switch (difficulty) {
+        //     case 1: title = "Tuyệt vời!"; break;
+        //     case 2: title = "Tốt!"; break;
+        //     case 3: title = "Cố lên!"; break;
+        // }
+        // Swal.fire({
+        //     icon: "success",
+        //     title,
+        //     timer: 800,
+        //     showConfirmButton: false,
+        // });
         handleNextWeighted();
     };
 
