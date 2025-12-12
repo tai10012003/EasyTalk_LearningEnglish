@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { ObjectId } = require('mongodb');
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { JourneyService, GateService, StageService } = require("../services");
 const journeyService = new JourneyService();
 const gateService = new GateService();
 const stageService = new StageService();
 
-router.get("/api/gate-list", async (req, res) => {
+router.get("/api/gate-list", cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
@@ -46,7 +47,6 @@ router.put("/update/:id", async (req, res) => {
     const { title, journeyId: newJourneyId } = req.body;
     try {
         const currentGate = await gateService.getGateById(gateId);
-
         if (!currentGate) {
             return res.status(404).json({ error: "Cổng không tìm thấy." });
         }

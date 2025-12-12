@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { JourneyService, GateService, UserprogressService } = require("../services");
 const journeyService = new JourneyService();
 const gateService = new GateService();
 const userprogressService = new UserprogressService();
 
-router.get("/api", verifyToken, async (req, res) => {
+router.get("/api", verifyToken, cacheMiddleware(300), async (req, res) => {
     try {
         const userId = req.user.id;
         const journeys = await journeyService.getAllJourneysWithDetails();
@@ -62,7 +63,7 @@ router.get("/api", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/gate/:id", verifyToken, async (req, res) => {
+router.get("/api/gate/:id", verifyToken, cacheMiddleware(600), async (req, res) => {
     try {
         const journeyId = req.params.id;
         const userId = req.user.id;
@@ -94,7 +95,7 @@ router.get("/api/gate/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/journey-list", async (req, res) => {
+router.get("/api/journey-list", cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;

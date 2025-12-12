@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 const { ObjectId } = require("mongodb");
 const verifyToken = require("./../util/VerifyToken");
+const { cacheMiddleware } = require("./../util/cacheMiddleware");
 const { JourneyService, GateService, StageService, UserprogressService } = require("../services");
 const journeyService = new JourneyService();
 const gateService = new GateService();
 const stageService = new StageService();
 const userprogressService = new UserprogressService();
 
-router.get("/api/stage/detail/:id", verifyToken, async (req, res) => {
+router.get("/api/stage/detail/:id", verifyToken, cacheMiddleware(600), async (req, res) => {
     try {
         const userId = req.user.id;
         const stageId = req.params.id;
@@ -78,14 +79,12 @@ router.post("/api/stage/complete/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.get("/api/stages", async (req, res) => {
+router.get("/api/stages", cacheMiddleware(300), async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-
         const { stages, totalStages } = await stageService.getStageList(page, limit);
         const totalPages = Math.ceil(totalStages / limit);
-
         res.json({
             success: true,
             data: stages,
@@ -121,7 +120,7 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.get("/api/:id", async function (req, res) {
+router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     try {
         const stage = await stageService.getStageById(req.params.id);
         const gateData = await gateService.getGateList();
