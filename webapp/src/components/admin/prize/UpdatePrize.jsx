@@ -252,7 +252,7 @@ const UpdatePrize = ({ onSubmit, title, initialData, returnUrl }) => {
                         className="btn btn-secondary admin-prize-return-btn"
                         onClick={() => navigate(returnUrl)}
                     >
-                        Quay lại
+                        <i className="fas fa-arrow-left"></i> Quay lại
                     </button>
             </form>
         </div>

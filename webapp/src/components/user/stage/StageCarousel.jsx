@@ -323,7 +323,7 @@ const StageCarousel = ({
                             className="exercise-submit-answer mt-4 mb-4"
                             onClick={handleSubmitAnswer}
                         >
-                            Kiểm tra
+                            <i className="fas fa-check me-2"></i> Kiểm tra
                         </button>
                     )}
                 </div>

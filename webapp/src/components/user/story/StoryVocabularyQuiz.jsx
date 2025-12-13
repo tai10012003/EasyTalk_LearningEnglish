@@ -114,7 +114,7 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                         onClick={handleSubmit}
                         disabled={Object.keys(options).length == 0}
                     >
-                        <i className="fas fa-check me-2"></i>Kiểm tra
+                        <i className="fas fa-check me-2"></i> Kiểm tra
                     </button>
                 ) : (
                     <button className="btn_1 mt-4" onClick={handleContinue}>

@@ -469,7 +469,7 @@ const AddExercise = ({ onSubmit, title, returnUrl, isPronunciationPage = false, 
                     className="mt-3 admin-exercise-return-btn btn btn-secondary"
                     onClick={() => navigate(`${returnUrl}`)}
                 >
-                    Quay lại
+                    <i className="fas fa-arrow-left"></i> Quay lại
                 </button>
             </form>
         </div>

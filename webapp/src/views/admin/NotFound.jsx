@@ -15,7 +15,7 @@ function NotFound() {
                     Liên kết bạn truy cập không khả dụng trong hệ thống quản trị.
                 </p>
                 <Link to="/admin/dashboard" className="admin-notfound-button">
-                    Quay lại Dashboard
+                    <i className="fas fa-arrow-left"></i> Quay lại Dashboard
                 </Link>
             </div>
         </div>

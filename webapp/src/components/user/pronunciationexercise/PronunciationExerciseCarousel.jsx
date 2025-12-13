@@ -211,7 +211,7 @@ const PronunciationExerciseCarousel = ({
                                         className="exercise-submit-answer mt-4 mb-4"
                                         onClick={handleMultipleChoiceSubmit}
                                     >
-                                        Kiểm tra
+                                        <i className="fas fa-check me-2"></i> Kiểm tra
                                     </button>
                                 )}
                             </div>
@@ -331,14 +331,25 @@ const PronunciationExerciseCarousel = ({
                         </div>
                     )}
                 </form>
-
-                <div className="d-flex justify-content-between mt-4" >
-                    <button className="btn_2" style={{ marginRight: '20px' }} onClick={handlePrev} disabled={currentQuestionIndex == 0}>
-                        Quay lại
-                    </button>
-                    <button className="btn_2" onClick={handleNext} disabled={currentQuestionIndex == questions.length - 1}>
-                        Tiếp theo
-                    </button>
+                <div className="d-flex justify-content-between mt-4">
+                    {currentQuestionIndex > 0 && (
+                        <button 
+                            className="btn_2" 
+                            style={{ marginRight: '20px' }} 
+                            onClick={handlePrev}
+                        >
+                            <i className="fas fa-arrow-left"></i> Quay lại
+                        </button>
+                    )}
+                    {currentQuestionIndex < questions.length - 1 && (
+                        <button 
+                            className="btn_2" 
+                            onClick={handleNext}
+                            style={{ marginLeft: currentQuestionIndex === 0 ? 'auto' : '0' }}
+                        >
+                            <i className="fas fa-arrow-right"></i> Tiếp theo
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

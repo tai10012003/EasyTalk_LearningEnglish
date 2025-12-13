@@ -85,7 +85,7 @@ const ChangePasswordForm = ({ onSubmit }) => {
                     className="change-password-btn-secondary"
                     onClick={() => (window.location.href = "/")}
                 >
-                    Quay lại trang chủ
+                    <i className="fas fa-arrow-left"></i> Quay lại trang chủ
                 </button>
             </form>
         </div>

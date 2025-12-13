@@ -331,29 +331,32 @@ const GrammarExerciseCarousel = ({
                             className="exercise-submit-answer mt-4 mb-4"
                             onClick={handleSubmitAnswer}
                         >
-                            Kiểm tra
+                            <i className="fas fa-check me-2"></i> Kiểm tra
                         </button>
                     )}
                 </div>
                 <hr />
                 <div className="d-flex justify-content-between mt-3">
-                    <button
-                        className="btn_2"
-                        style={{ marginRight: '20px', marginTop: '20px' }}
-                        type="button"
-                        onClick={handlePrevQuestion}
-                        disabled={currentQuestionIndex == 0}
-                    >
-                        Quay lại
-                    </button>
-                    <button
-                        className="btn_2"
-                        type="button"
-                        onClick={handleNextQuestion}
-                        disabled={currentQuestionIndex == questions.length - 1}
-                    >
-                        Tiếp theo
-                    </button>
+                    {currentQuestionIndex > 0 && (
+                        <button
+                            className="btn_2"
+                            style={{ marginRight: '20px', marginTop: '20px' }}
+                            type="button"
+                            onClick={handlePrevQuestion}
+                        >
+                            <i className="fas fa-arrow-left"></i> Quay lại
+                        </button>
+                    )}
+                    {currentQuestionIndex < questions.length - 1 && (
+                        <button
+                            className="btn_2"
+                            type="button"
+                            onClick={handleNextQuestion}
+                            style={{ marginLeft: currentQuestionIndex === 0 ? 'auto' : '0' }}
+                        >
+                            <i className="fas fa-arrow-right"></i> Tiếp theo
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

@@ -66,7 +66,7 @@ const VocabularyExerciseSidebar = ({
                             style={{ width: '100%' }}
                             onClick={handleSubmitClick}
                         >
-                            Nộp bài
+                            <i class="fas fa-paper-plane"></i> Nộp bài
                         </button>
                     )}
                     {!allQuestionsAnswered && (

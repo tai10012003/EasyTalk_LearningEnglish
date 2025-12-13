@@ -319,7 +319,7 @@ const PronunciationExerciseDetail = () => {
                             setHasStarted(true);
                         }}
                     >
-                        Bắt đầu
+                        <i className="fas fa-play"></i> Bắt đầu
                     </button>
                 </div>
             </div>

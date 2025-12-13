@@ -541,7 +541,7 @@ const UpdateStory = ({ onSubmit, title, returnUrl, initialData, existingItems = 
                     className="btn btn-secondary mt-3"
                     onClick={() => navigate(returnUrl)}
                 >
-                    Quay lại
+                    <i className="fas fa-arrow-left"></i> Quay lại
                 </button>
             </form>
         </div>

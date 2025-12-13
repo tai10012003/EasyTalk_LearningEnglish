@@ -101,7 +101,7 @@ const AddUser = ({ onSubmit, title, returnUrl }) => {
                     className="mt-3 admin-user-return-btn btn btn-secondary"
                     onClick={() => navigate(`${returnUrl}`)}
                 >
-                    Quay lại
+                    <i className="fas fa-arrow-left"></i> Quay lại
                 </button>
             </form>
         </div>
