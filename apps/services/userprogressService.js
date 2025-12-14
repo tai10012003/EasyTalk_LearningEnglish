@@ -927,6 +927,36 @@ class UserprogressService {
         return progress?.diamonds || 0;
     }
 
+    async followUser(currentUserId, targetUserId) {
+        await this.userprogressRepository.followUser(currentUserId, targetUserId);
+        await this._invalidateCache();
+    }
+
+    async unfollowUser(currentUserId, targetUserId) {
+        await this.userprogressRepository.unfollowUser(currentUserId, targetUserId);
+        await this._invalidateCache();
+    }
+
+    async isFollowing(currentUserId, targetUserId) {
+        return await this.userprogressRepository.isFollowing(currentUserId, targetUserId);
+    }
+
+    async getFollowersCount(userId) {
+        return await this.userprogressRepository.getFollowersCount(userId);
+    }
+
+    async getFollowingCount(userId) {
+        return await this.userprogressRepository.getFollowingCount(userId);
+    }
+
+    async getFollowersList(userId) {
+        return await this.userprogressRepository.getFollowersList(userId);
+    }
+
+    async getFollowingList(userId) {
+        return await this.userprogressRepository.getFollowingList(userId);
+    }
+
     async manuallyCheckChampionPrizes(userId) {
         return await this.checkAndUnlockChampionPrizes(userId);
     }

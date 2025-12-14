@@ -204,6 +204,105 @@ router.get("/api/userprogress/by-user/:userId", verifyToken, async (req, res) =>
     }
 });
 
+router.post("/follow/:targetUserId", verifyToken, async (req, res) => {
+    try {
+        const followerId = req.user.id;
+        const targetId = req.params.targetUserId;
+        if (followerId === targetId) {
+            return res.status(400).json({ success: false, message: "Không thể tự theo dõi!" });
+        }
+        const alreadyFollowing = await userprogressService.isFollowing(followerId, targetId);
+        if (alreadyFollowing) {
+            return res.json({ success: true, message: "Đã theo dõi rồi!", alreadyFollowing: true });
+        }
+        await userprogressService.followUser(followerId, targetId);
+        res.json({ success: true, message: "Đã theo dõi thành công!" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Lỗi server" });
+    }
+});
+
+router.post("/unfollow/:targetUserId", verifyToken, async (req, res) => {
+    try {
+        const followerId = req.user.id;
+        const targetId = req.params.targetUserId;
+        const isFollow = await userprogressService.isFollowing(followerId, targetId);
+        if (!isFollow) {
+            return res.json({ success: true, message: "Chưa theo dõi để hủy!", alreadyUnfollowed: true });
+        }
+        await userprogressService.unfollowUser(followerId, targetId);
+        res.json({ success: true, message: "Đã hủy theo dõi!" });
+    } catch (err) {
+        res.status(500).json({ success: false, message: "Lỗi server" });
+    }
+});
+
+router.get("/is-following/:targetUserId", verifyToken, async (req, res) => {
+    try {
+        const followerId = req.user.id;
+        const targetId = req.params.targetUserId;
+        const isFollow = await userprogressService.isFollowing(followerId, targetId);
+        res.json({ isFollow });
+    } catch (err) {
+        res.json({ isFollow: false });
+    }
+});
+
+router.get("/followers-count/:userId", verifyToken, async (req, res) => {
+    try {
+        const count = await userprogressService.getFollowersCount(req.params.userId);
+        res.json({ count });
+    } catch (err) {
+        res.json({ count: 0 });
+    }
+});
+
+router.get("/following-count/:userId", verifyToken, async (req, res) => {
+    try {
+        const count = await userprogressService.getFollowingCount(req.params.userId);
+        res.json({ count });
+    } catch (err) {
+        res.json({ count: 0 });
+    }
+});
+
+router.get("/follow-stats/:userId", verifyToken, async (req, res) => {
+    try {
+        const currentUserId = req.user.id;
+        const targetId = req.params.userId;
+        const [isFollow, followersCount, followingCount] = await Promise.all([
+            userprogressService.isFollowing(currentUserId, targetId),
+            userprogressService.getFollowersCount(targetId),
+            userprogressService.getFollowingCount(targetId)
+        ]);
+        res.json({isFollowing: isFollow, followersCount, followingCount});
+    } catch (err) {
+        res.status(500).json({ error: "Lỗi server" });
+    }
+});
+
+router.get("/followers-list/:userId", verifyToken, async (req, res) => {
+    try {
+        const targetUserId = req.params.userId;
+        const users = await userprogressService.getFollowersList(targetUserId);
+        res.json({ users });
+    } catch (err) {
+        console.error("Error fetching followers list:", err);
+        res.status(500).json({ users: [] });
+    }
+});
+
+router.get("/following-list/:userId", verifyToken, async (req, res) => {
+    try {
+        const targetUserId = req.params.userId;
+        const users = await userprogressService.getFollowingList(targetUserId);
+        res.json({ users });
+    } catch (err) {
+        console.error("Error fetching following list:", err);
+        res.status(500).json({ users: [] });
+    }
+});
+
 router.get("/api/userprogress/:id", verifyToken, async (req, res) => {
     try {
         const userProgressId = req.params.id;

@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import StatisticChart from "@/components/user/statistic/StatisticChart";
 import StatisticAchievements from "@/components/user/statistic/StatisticAchievements";
 import StatisticPrizes from "@/components/user/statistic/StatisticPrizes";
+import FollowListModal from "@/components/user/FollowListModal";
 
 const Statistic = () => {
     const [activeChart, setActiveChart] = useState("time");
@@ -20,16 +21,21 @@ const Statistic = () => {
     const [maxDailyExp, setMaxDailyExp] = useState(0);
     const [unlockedGates, setUnlockedGates] = useState(0);
     const [unlockedStages, setUnlockedStages] = useState(0);
+    const [unlockedStory, setUnlockedStory] = useState(0);
     const [unlockedGrammar, setUnlockedGrammar] = useState(0);
     const [unlockedPronunciation, setUnlockedPronunciation] = useState(0);
     const [unlockedVocab, setUnlockedVocab] = useState(0);
     const [unlockedGrammarPractice, setUnlockedGrammarPractice] = useState(0);
     const [unlockedPronunciationPractice, setUnlockedPronunciationPractice] = useState(0);
     const [unlockedDictation, setUnlockedDictation] = useState(0);
+    const [followersCount, setFollowersCount] = useState(0);
+    const [followingCount, setFollowingCount] = useState(0);
+    const [followModal, setFollowModal] = useState({ open: false, type: "followers", userId: null });
     const [allPrizes, setAllPrizes] = useState([]);
     const [userPrizes, setUserPrizes] = useState([]);
     const [championStats, setChampionStats] = useState({ week: 0, month: 0, year: 0, total: 0 });
     const [prizesLoading, setPrizesLoading] = useState(true);
+    const currentUserId = AuthService.getCurrentUser()?.id;
 
     const periods = [
         { key: "week", label: "Tuần này" },
@@ -52,6 +58,14 @@ const Statistic = () => {
         return `${y}-${m}-${d}`;
     };
 
+    const openFollowModal = (type) => {
+        setFollowModal({ open: true, type, userId: currentUserId });
+    };
+
+    const closeFollowModal = () => {
+        setFollowModal({ open: false, type: "followers", userId: null });
+    };
+
     const fetchStats = async () => {
         document.title = "Thống Kê Tiến Trình Học Tập - EasyTalk";
         setLoading(true);
@@ -71,6 +85,7 @@ const Statistic = () => {
             setMaxDailyExp(Math.round(maxExp));
             setUnlockedGates(progress?.gateDetails?.length || 0);
             setUnlockedStages(progress?.stageDetails?.length || 0);
+            setUnlockedStory(progress?.storyDetails?.length || 0);
             setUnlockedGrammar(progress?.grammarDetails?.length || 0);
             setUnlockedPronunciation(progress?.pronunciationDetails?.length || 0);
             setUnlockedVocab(progress?.vocabularyExerciseDetails?.length || 0);
@@ -91,6 +106,21 @@ const Statistic = () => {
             setLoading(false);
         }
     };
+
+    const fetchMyFollowStats = async () => {
+        if (!currentUserId) return;
+        try {
+            const stats = await UserProgressService.getFollowStats(currentUserId);
+            setFollowersCount(stats.followersCount || 0);
+            setFollowingCount(stats.followingCount || 0);
+        } catch (err) {
+            console.error("Lỗi tải follow stats:", err);
+        }
+    };
+
+    useEffect(() => {
+        fetchMyFollowStats();
+    }, []);
 
     const fetchPrizes = async () => {
         setPrizesLoading(true);
@@ -428,13 +458,29 @@ const Statistic = () => {
                 </div>
             ) : (
                 currentUser && (
-                    <div className="user-statistic-info-container">
-                        <h3 className="user-statistic-info-title">Thông tin cá nhân của bạn</h3>
-                        <div className="user-statistic-info">
-                            <p><strong>Username:</strong> {getUsername()}</p>
-                            <p><strong>Email:</strong> {getEmail()}</p>
+                    <>
+                        <div className="user-statistic-info-container">
+                            <h3 className="user-statistic-info-title">Thông tin cá nhân của bạn</h3>
+                            <div className="user-statistic-info">
+                                <p><strong>Username:</strong> {getUsername()}</p>
+                                <p><strong>Email:</strong> {getEmail()}</p>
+                            </div>
                         </div>
-                    </div>
+                        <div className="user-statistic-follow-stats">
+                            <div className="user-statistic-follow-item"
+                                onClick={() => openFollowModal("followers")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                <strong>{followersCount}</strong> người theo dõi
+                            </div>
+                            <div className="user-statistic-follow-item"
+                                onClick={() => openFollowModal("following")}
+                                style={{ cursor: "pointer" }}
+                            >
+                                <strong>{followingCount}</strong> người đang theo dõi
+                            </div>
+                        </div>
+                    </>
                 )
             )}
             <StatisticChart
@@ -458,6 +504,7 @@ const Statistic = () => {
                 maxDailyExp={maxDailyExp}
                 unlockedGates={unlockedGates}
                 unlockedStages={unlockedStages}
+                unlockedStory={unlockedStory}
                 unlockedGrammar={unlockedGrammar}
                 unlockedPronunciation={unlockedPronunciation}
                 unlockedVocab={unlockedVocab}
@@ -473,6 +520,14 @@ const Statistic = () => {
                 isPrizeUnlocked={isPrizeUnlocked}
                 getPrizesByType={getPrizesByType}
             />
+            {followModal.open && (
+                <FollowListModal
+                    userId={followModal.userId}
+                    type={followModal.type}
+                    onClose={closeFollowModal}
+                    onFollowChanged={fetchMyFollowStats}
+                />
+            )}
         </div>
     );
 };

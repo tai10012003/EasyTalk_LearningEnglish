@@ -457,6 +457,64 @@ class UserprogressRepository {
         return userProgress?.unlockedPrizes || [];
     }
 
+    async getFollowersCount(userId) {
+        const progress = await this.findByUserId(userId);
+        return progress?.followers?.length || 0;
+    }
+
+    async getFollowingCount(userId) {
+        const progress = await this.findByUserId(userId);
+        return progress?.following?.length || 0;
+    }
+
+    async followUser(followerUserId, targetUserId) {
+        if (followerUserId === targetUserId) throw new Error("Không thể tự theo dõi");
+        await this.collection.updateOne(
+            { user: new ObjectId(followerUserId) },
+            { $addToSet: { following: new ObjectId(targetUserId) } }
+        );
+        await this.collection.updateOne(
+            { user: new ObjectId(targetUserId) },
+            { $addToSet: { followers: new ObjectId(followerUserId) } }
+        );
+    }
+
+    async unfollowUser(followerUserId, targetUserId) {
+        await this.collection.updateOne(
+            { user: new ObjectId(followerUserId) },
+            { $pull: { following: new ObjectId(targetUserId) } }
+        );
+        await this.collection.updateOne(
+            { user: new ObjectId(targetUserId) },
+            { $pull: { followers: new ObjectId(followerUserId) } }
+        );
+    }
+
+    async isFollowing(followerUserId, targetUserId) {
+        const progress = await this.findByUserId(followerUserId);
+        return progress?.following?.some(id => id.toString() === targetUserId) || false;
+    }
+
+    async getFollowersList(userId) {
+        const progress = await this.findDetailUserProgressByUserId(userId);
+        if (!progress || !progress.followers || progress.followers.length === 0) {
+            return [];
+        }
+        const followerIds = progress.followers.map(id => new ObjectId(id));
+        const users = await this.db.collection("users").find({ _id: { $in: followerIds } }).project({ username: 1, email: 1, avatar: 1 }).toArray();
+        return users;
+    }
+
+    async getFollowingList(userId) {
+        const progress = await this.findDetailUserProgressByUserId(userId);
+        if (!progress || !progress.following || progress.following.length === 0) {
+            return [];
+        }
+        const followingIds = progress.following.map(id => new ObjectId(id));
+        const users = await this.db.collection("users").find({ _id: { $in: followingIds } }).project({ username: 1, email: 1, avatar: 1 }).toArray();
+        return users;
+    }
+
     async deleteByUser(userId) {
         const result = await this.collection.deleteOne({ user: new ObjectId(userId) });
         return result.deletedCount > 0;

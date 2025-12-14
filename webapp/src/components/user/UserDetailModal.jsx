@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
-const API_URL = import.meta.env.VITE_API_URL;
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import { PrizeService } from "@/services/PrizeService.jsx";
 import { AuthService } from '@/services/AuthService.jsx';
 import StatisticChart from "@/components/user/statistic/StatisticChart";
 import StatisticAchievements from "@/components/user/statistic/StatisticAchievements";
 import StatisticPrizes from "@/components/user/statistic/StatisticPrizes";
+import FollowListModal from "@/components/user/FollowListModal";
 import Swal from "sweetalert2";
 
 const UserDetailModal = ({ userId, username, onClose }) => {
@@ -30,6 +30,20 @@ const UserDetailModal = ({ userId, username, onClose }) => {
     const [userPrizes, setUserPrizes] = useState([]);
     const [championStats, setChampionStats] = useState({ week: 0, month: 0, year: 0, total: 0 });
     const [prizesLoading, setPrizesLoading] = useState(true);
+    const [isFollowing, setIsFollowing] = useState(false);
+    const [followersCount, setFollowersCount] = useState(0);
+    const [followingCount, setFollowingCount] = useState(0);
+    const [followModal, setFollowModal] = useState({ open: false, type: "followers" });
+    const [showReportModal, setShowReportModal] = useState(false);
+    const [reportReasons, setReportReasons] = useState({
+        spam: false,
+        cheating: false,
+        harassment: false,
+        inappropriate: false,
+        other: false,
+    });
+    const [otherReasonText, setOtherReasonText] = useState("");
+    const currentUserId = AuthService.getCurrentUser()?.id;
 
     const periods = [
         { key: "week", label: "Tuần này" },
@@ -87,6 +101,7 @@ const UserDetailModal = ({ userId, username, onClose }) => {
                 value: value || 0
             }));
             setChartData(chartDataArray);
+            await fetchFollowStats();
         } catch (err) {
             console.error("Lỗi tải thông tin người dùng:", err);
             Swal.fire({
@@ -123,12 +138,114 @@ const UserDetailModal = ({ userId, username, onClose }) => {
         }
     };
 
+    const fetchFollowStats = async () => {
+        if (!userId || !currentUserId) return;
+        try {
+            const stats = await UserProgressService.getFollowStats(userId);
+            setIsFollowing(stats.isFollowing);
+            setFollowersCount(stats.followersCount);
+            setFollowingCount(stats.followingCount);
+        } catch (err) {
+            console.error("Lỗi tải follow stats:", err);
+        }
+    };
+
+    const handleFollowToggle = async () => {
+        if (currentUserId === userId) {
+            Swal.fire("Oops!", "Bạn không thể theo dõi chính mình!", "info");
+            return;
+        }
+        try {
+            let result;
+            if (isFollowing) {
+                result = await Swal.fire({
+                    title: "Hủy theo dõi?",
+                    text: `Bạn có chắc muốn hủy theo dõi ${username}?`,
+                    icon: "question",
+                    showCancelButton: true,
+                    confirmButtonText: "Hủy theo dõi",
+                    cancelButtonText: "Giữ lại",
+                    confirmButtonColor: "#d33"
+                });
+
+                if (result.isConfirmed) {
+                    const response = await UserProgressService.unfollowUser(userId);
+                    if (response.alreadyUnfollowed) {
+                        Swal.fire("Thông báo", "Bạn đã hủy theo dõi từ trước rồi!", "info");
+                    } else {
+                        setIsFollowing(false);
+                        setFollowersCount(prev => prev - 1);
+                        Swal.fire("Đã hủy!", `Bạn đã hủy theo dõi ${username}`, "success");
+                    }
+                }
+            } else {
+                const response = await UserProgressService.followUser(userId);
+                if (response.alreadyFollowing) {
+                    Swal.fire("Thông báo", `Bạn đã theo dõi ${username} từ trước rồi!`, "info");
+                    setIsFollowing(true);
+                } else {
+                    setIsFollowing(true);
+                    setFollowersCount(prev => prev + 1);
+                    Swal.fire("Thành công!", `Bạn đã theo dõi ${username}! Cùng cố lên nào!`, "success");
+                }
+            }
+        } catch (err) {
+            Swal.fire("Lỗi", "Không thể thực hiện thao tác", "error");
+        }
+    };
+
     useEffect(() => {
         if (userId) {
             fetchUserStats();
             fetchPrizes();
         }
     }, [userId]);
+
+    const openFollowModal = (type) => {
+        setFollowModal({ open: true, type });
+    };
+
+    const closeFollowModal = () => {
+        setFollowModal({ open: false, type: "followers" });
+    };
+
+    const handleReportReasonChange = (reason) => {
+        setReportReasons(prev => ({
+            ...prev,
+            [reason]: !prev[reason]
+        }));
+    };
+
+    const handleSubmitReport = async () => {
+        const selected = Object.keys(reportReasons).filter(key => reportReasons[key]);
+        if (selected.length === 0) {
+            Swal.fire("Thiếu thông tin", "Vui lòng chọn ít nhất một lý do báo cáo", "warning");
+            return;
+        }
+        if (reportReasons.other && !otherReasonText.trim()) {
+            Swal.fire("Thiếu chi tiết", "Vui lòng nhập nội dung khi chọn 'Lý do khác'", "warning");
+            return;
+        }
+        const reportData = {
+            reporter: currentUserId,
+            reported: userId,
+            reasons: selected,
+            otherReason: reportReasons.other ? otherReasonText.trim() : null,
+            status: "pending",
+            createdAt: new Date().toISOString()
+        };
+        console.log("Gửi báo cáo:", reportData);
+        Swal.fire("Gửi báo cáo thành công!", "Cảm ơn bạn đã góp phần giữ môi trường học tập trong sạch! Hệ thống sẽ kiểm tra và xử lý trong vòng 24 giờ!", "success");
+        setShowReportModal(false);
+        setReportReasons({
+            spam: false,
+            cheating: false,
+            harassment: false,
+            inappropriate: false,
+            other: false,
+        });
+        setOtherReasonText("");
+    };
 
     const getUsername = () => {
         return username;
@@ -218,6 +335,39 @@ const UserDetailModal = ({ userId, username, onClose }) => {
                                     <p><strong>Email:</strong> {getEmail()}</p>
                                 </div>
                             </div>
+                            <div className="user-statistic-follow-stats">
+                                <div
+                                    className="user-statistic-follow-item"
+                                    onClick={() => openFollowModal("followers")}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <strong>{followersCount}</strong> người theo dõi
+                                </div>
+                                <div
+                                    className="user-statistic-follow-item"
+                                    onClick={() => openFollowModal("following")}
+                                    style={{ cursor: "pointer" }}
+                                >
+                                    <strong>{followingCount}</strong> người đang theo dõi
+                                </div>
+                            </div>
+                            {currentUserId !== userId && (
+                                <div className="user-statistic-follow-button-wrapper">
+                                    <button 
+                                        className={`user-statistic-follow-btn ${isFollowing ? "danger" : "primary"}`}
+                                        onClick={handleFollowToggle}
+                                    >
+                                        {isFollowing ? "Hủy theo dõi" : "Theo dõi"}
+                                    </button>
+
+                                    <button
+                                        className="user-statistic-follow-btn warning"
+                                        onClick={() => setShowReportModal(true)}
+                                    >
+                                        Báo cáo
+                                    </button>
+                                </div>
+                            )}
                             <StatisticChart
                                 activeChart={activeChart}
                                 period={period}
@@ -256,6 +406,143 @@ const UserDetailModal = ({ userId, username, onClose }) => {
                                 getPrizesByType={getPrizesByType}
                                 username={username}
                             />
+                            {followModal.open && (
+                                <FollowListModal
+                                    userId={userId}
+                                    type={followModal.type}
+                                    onClose={closeFollowModal}
+                                    onFollowChanged={fetchFollowStats}
+                                />
+                            )}
+                            {showReportModal && (
+                                <div className="user-statistic-modal-overlay" onClick={() => setShowReportModal(false)}>
+                                    <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
+                                        <div className="user-statistic-modal-header bg-red-600">
+                                            <h5>Báo cáo người dùng: {username}</h5>
+                                            <button
+                                                className="user-statistic-modal-close"
+                                                onClick={() => setShowReportModal(false)}
+                                            >
+                                                <i className="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                        <div className="user-statistic-modal-body" style={{ padding: "24px" }}>
+                                            <p style={{ fontSize: "16px", color: "#374151", marginBottom: "20px", lineHeight: "1.6" }}>
+                                                Bạn phát hiện hành vi không phù hợp?<br />
+                                                Vui lòng chọn lý do để chúng tôi xử lý nhanh chóng:
+                                            </p>
+                                            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                                                <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", fontSize: "15px" }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={reportReasons.spam}
+                                                        onChange={() => handleReportReasonChange("spam")}
+                                                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                                    />
+                                                    <span>Quảng cáo hoặc spam không liên quan đến việc học</span>
+                                                </label>
+                                                <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", fontSize: "15px" }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={reportReasons.cheating}
+                                                        onChange={() => handleReportReasonChange("cheating")}
+                                                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                                    />
+                                                    <span>Gian lận điểm số, dùng tool hack EXP/streak</span>
+                                                </label>
+                                                <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", fontSize: "15px" }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={reportReasons.harassment}
+                                                        onChange={() => handleReportReasonChange("harassment")}
+                                                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                                    />
+                                                    <span>Ngôn ngữ xúc phạm, quấy rối người học khác</span>
+                                                </label>
+                                                <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", fontSize: "15px" }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={reportReasons.inappropriate}
+                                                        onChange={() => handleReportReasonChange("inappropriate")}
+                                                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                                    />
+                                                    <span>Nội dung không phù hợp với môi trường học tập (18+, bạo lực...)</span>
+                                                </label>
+                                                <label style={{ display: "flex", alignItems: "center", gap: "12px", cursor: "pointer", fontSize: "15px" }}>
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={reportReasons.other}
+                                                        onChange={() => handleReportReasonChange("other")}
+                                                        style={{ width: "18px", height: "18px", cursor: "pointer" }}
+                                                    />
+                                                    <span>Lý do khác</span>
+                                                </label>
+                                            </div>
+                                            {reportReasons.other && (
+                                                <div style={{ marginTop: "20px" }}>
+                                                    <textarea
+                                                        placeholder="Mô tả chi tiết hành vi vi phạm (ví dụ: dùng bot tăng điểm, gửi link lừa đảo...)"
+                                                        value={otherReasonText}
+                                                        onChange={e => setOtherReasonText(e.target.value)}
+                                                        style={{
+                                                            width: "100%",
+                                                            padding: "14px",
+                                                            borderRadius: "10px",
+                                                            border: "2px solid #e5e7eb",
+                                                            fontSize: "15px",
+                                                            resize: "vertical",
+                                                            minHeight: "100px",
+                                                            fontFamily: "inherit",
+                                                            outline: "none"
+                                                        }}
+                                                    />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="user-statistic-modal-footer" style={{ padding: "20px 24px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+                                            <button
+                                                className="user-statistic-btn secondary"
+                                                style={{
+                                                    padding: "10px 20px",
+                                                    borderRadius: "8px",
+                                                    border: "1px solid #ccc",
+                                                    backgroundColor: "#f8f9fa",
+                                                    cursor: "pointer",
+                                                    fontWeight: "500"
+                                                }}
+                                                onClick={() => {
+                                                    setShowReportModal(false);
+                                                    setReportReasons({
+                                                        spam: false,
+                                                        cheating: false,
+                                                        harassment: false,
+                                                        inappropriate: false,
+                                                        other: false,
+                                                    });
+                                                    setOtherReasonText("");
+                                                }}
+                                            >
+                                                Hủy
+                                            </button>
+                                            <button
+                                                className="user-statistic-btn danger"
+                                                style={{
+                                                    padding: "10px 28px",
+                                                    borderRadius: "8px",
+                                                    border: "none",
+                                                    backgroundColor: "#e74c3c",
+                                                    color: "white",
+                                                    cursor: "pointer",
+                                                    fontWeight: "600"
+                                                }}
+                                                onClick={handleSubmitReport}
+                                            >
+                                                Gửi báo cáo
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </>
                     )}
                 </div>

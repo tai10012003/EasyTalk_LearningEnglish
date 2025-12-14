@@ -299,4 +299,140 @@ export const UserProgressService = {
             return { week: 0, month: 0, year: 0, total: 0 };
         }
     },
+
+    async followUser(targetUserId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/follow/${targetUserId}`, {
+                method: "POST"
+            });
+            if (!res.ok) throw new Error("Không thể theo dõi");
+            return await res.json();
+        } catch (err) {
+            console.error("Lỗi theo dõi:", err);
+            throw err;
+        }
+    },
+
+    async unfollowUser(targetUserId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/unfollow/${targetUserId}`,{
+                method: "POST"
+            });
+            if (!res.ok) throw new Error("Không thể hủy theo dõi");
+            return await res.json();
+        } catch (err) {
+            console.error("Lỗi hủy theo dõi:", err);
+            throw err;
+        }
+    },
+
+    async isFollowing(targetUserId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/is-following/${targetUserId}`, {
+                method: "GET"
+            });
+            if (!res.ok) return false;
+            const data = await res.json();
+            return data.isFollowing || false;
+        } catch (err) {
+            console.error("Lỗi kiểm tra follow:", err);
+            return false;
+        }
+    },
+
+    async getFollowersCount(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/followers-count/${userId}`, {
+                method: "GET"
+            });
+            if (!res.ok) return 0;
+            const data = await res.json();
+            return data.count || 0;
+        } catch (err) {
+            console.error("Lỗi lấy số người theo dõi:", err);
+            return 0;
+        }
+    },
+
+    async getFollowingCount(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/following-count/${userId}`, {
+                method: "GET"
+            });
+            if (!res.ok) return 0;
+            const data = await res.json();
+            return data.count || 0;
+        } catch (err) {
+            console.error("Lỗi lấy số người đang theo dõi:", err);
+            return 0;
+        }
+    },
+
+    async getFollowStats(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/follow-stats/${userId}`,{
+                method: "GET"
+            });
+            if (!res.ok) throw new Error("Không thể lấy follow stats");
+            const data = await res.json();
+            return {
+                isFollowing: data.isFollowing || false,
+                followersCount: data.followersCount || 0,
+                followingCount: data.followingCount || 0,
+            };
+        } catch (err) {
+            console.error("Lỗi lấy follow stats:", err);
+            return {
+                isFollowing: false,
+                followersCount: 0,
+                followingCount: 0,
+            };
+        }
+    },
+
+    async getFollowersList(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/followers-list/${userId}`);
+            if (!res.ok) throw new Error("Không thể tải danh sách người theo dõi");
+            const data = await res.json();
+            hasShownAlert = false;
+            return data.users || [];
+        } catch (err) {
+            console.error("Error fetching followers list:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời không tải được danh sách",
+                    text: "Vui lòng thử lại sau",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+            return [];
+        }
+    },
+
+    async getFollowingList(userId) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/following-list/${userId}`);
+            if (!res.ok) throw new Error("Không thể tải danh sách đang theo dõi");
+            const data = await res.json();
+            hasShownAlert = false;
+            return data.users || [];
+        } catch (err) {
+            console.error("Error fetching following list:", err);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời không tải được danh sách",
+                    text: "Vui lòng thử lại sau",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+            return [];
+        }
+    },
 };
