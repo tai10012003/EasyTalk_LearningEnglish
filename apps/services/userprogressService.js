@@ -831,24 +831,28 @@ class UserprogressService {
         return isTopExp || isTopTime;
     }
 
-    _getWeekNumber(date) {
-        const startOfYear = new Date(date.getFullYear(), 0, 1);
-        const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
-        return Math.ceil((days + startOfYear.getDay() + 1) / 7);
-    }
+    // _getWeekNumber(date) {
+    //     const startOfYear = new Date(date.getFullYear(), 0, 1);
+    //     const days = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000));
+    //     return Math.ceil((days + startOfYear.getDay() + 1) / 7);
+    // }
 
     _getLastCompletedWeekPeriod(now) {
-        const year = now.getFullYear();
-        const startOfYear = new Date(year, 0, 1);
-        const days = Math.floor((now - startOfYear) / (24 * 60 * 60 * 1000));
-        const weekNumber = Math.ceil((days + startOfYear.getDay() + 1) / 7);
-        if (weekNumber > 1) {
-            return `${year}-W${String(weekNumber - 1).padStart(2, '0')}`;
+        const vnDate = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
+        const year = vnDate.getFullYear();
+        const month = vnDate.getMonth();
+        const date = vnDate.getDate();
+        const dayOfWeek = vnDate.getDay();
+        let representativeDate = new Date(year, month, date);
+        if (dayOfWeek === 0) {
+            representativeDate.setDate(date - 7 - 3);
         } else {
-            const lastDayPrevYear = new Date(year - 1, 11, 31);
-            const lastWeek = this._getWeekNumber(lastDayPrevYear);
-            return `${year - 1}-W${String(lastWeek).padStart(2, '0')}`;
+            representativeDate.setDate(date - dayOfWeek - 3);
         }
+        const startOfYear = new Date(representativeDate.getFullYear(), 0, 1);
+        const daysSinceStartOfYear = Math.floor((representativeDate - startOfYear) / (24 * 60 * 60 * 1000));
+        const weekNumber = Math.floor(daysSinceStartOfYear / 7) + 1;
+        return `${representativeDate.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
     }
 
     _getLastCompletedMonthPeriod(now) {
@@ -862,7 +866,8 @@ class UserprogressService {
 
     _getLastCompletedYearPeriod(now) {
         const year = now.getFullYear();
-        if (now.getMonth() == 0 && now.getDate() == 1) {
+        const month = now.getMonth();
+        if (month === 0) {
             return `${year - 1}`;
         }
         return null;
