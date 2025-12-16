@@ -3362,6 +3362,10 @@ p {
   box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
 }
 
+#dictation-checkButton i {
+  margin-right: 5px;
+}
+
 #dictation-checkButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
@@ -3380,6 +3384,11 @@ p {
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(201, 112, 10, 0.3);
 }
+
+#dictation-skipButton i {
+  margin-right: 7px;
+}
+
 #dictation-skipButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
@@ -3441,6 +3450,237 @@ p {
 #dictation-currentSentenceDisplay {
   font-style: italic;
   color: #34495e;
+}
+
+.dictation-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.dictation-modal-content {
+  background: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dictation-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.dictation-modal-header h3 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+}
+
+.dictation-modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dictation-modal-close:hover {
+  color: #333;
+}
+
+.dictation-modal-body {
+  padding: 20px;
+}
+
+.dictation-setting-item {
+  margin-bottom: 20px;
+}
+
+.dictation-setting-item label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #333;
+}
+
+.dictation-setting-item select {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  cursor: pointer;
+}
+
+.dictation-setting-item select:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.dictation-modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #e0e0e0;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.dictation-modal-save {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.dictation-modal-save:hover {
+  background-color: #45a049;
+}
+
+#dictation-settings-button {
+  background-color: #2196F3;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+#dictation-settings-button:hover {
+  background-color: #0b7dda;
+}
+
+.dictation-meaning-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background: #f9f9f9;
+  padding: 15px;
+}
+
+.dictation-card-title {
+  font-weight: 600;
+  font-size: 16px;
+  color: #333;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dictation-card-title i {
+  color: #4CAF50;
+}
+
+.dictation-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dictation-english-sentence {
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #4CAF50;
+}
+
+.dictation-sentence-words {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  line-height: 1.8;
+}
+
+.dictation-word {
+  position: relative;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+}
+
+.dictation-word:hover {
+  background-color: #e8f5e9;
+}
+
+.dictation-word-tooltip {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: white;
+  padding: 12px;
+  border-radius: 6px;
+  min-width: 200px;
+  max-width: 300px;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  margin-bottom: 8px;
+}
+
+.dictation-word-tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #333;
+}
+
+.dictation-tooltip-word {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.dictation-tooltip-pos {
+  font-size: 12px;
+  color: #81C784;
+  font-style: italic;
+  margin-bottom: 6px;
+}
+
+.dictation-tooltip-definition {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.dictation-vietnamese-translation {
+  background: white;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 3px solid #2196F3;
+  color: #555;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dictation-vietnamese-translation i {
+  color: #2196F3;
 }
 
 .full-script-container {

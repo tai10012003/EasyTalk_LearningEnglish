@@ -22,6 +22,7 @@ function DictationExerciseDetail() {
     const [userInput, setUserInput] = useState("");
     const [result, setResult] = useState("");
     const [currentSentenceDisplay, setCurrentSentenceDisplay] = useState("");
+    const [repeatCount, setRepeatCount] = useState(3);
     const [showNext, setShowNext] = useState(false);
     const [showActions, setShowActions] = useState(false);
     const [showScript, setShowScript] = useState(false);
@@ -84,11 +85,7 @@ function DictationExerciseDetail() {
                 if (data.success) {
                     setExerciseId(data.data._id);
                     setTitle(data.data.title);
-                    const sentencesArr = data.data.content
-                        .split(". ")
-                        .map((s) => s.trim())
-                        .filter((s) => s.length > 0)
-                        .map((s) => (s.endsWith(".") ? s : s + "."));
+                    const sentencesArr = data.data.content.split(". ").map((s) => s.trim()).filter((s) => s.length > 0).map((s) => (s.endsWith(".") ? s : s + "."));
                     setSentences(sentencesArr);
                     setFullScript(sentencesArr.join("<br>"));
                     setCurrentIndex(0);
@@ -107,9 +104,9 @@ function DictationExerciseDetail() {
 
     useEffect(() => {
         if (sentences.length > 0) {
-            playSentence(3, sentences[currentIndex]);
+            playSentence(repeatCount, sentences[currentIndex]);
         }
-    }, [currentIndex, sentences, playSpeed]);
+    }, [currentIndex, sentences, playSpeed, repeatCount]);
 
     const playSentence = (repeats = 1, sentenceText) => {
         speechSynthesis.cancel();
@@ -277,9 +274,6 @@ function DictationExerciseDetail() {
         }
     }
 
-    const retryExercise = () => window.location.reload();
-    const goBackToList = () => navigate("/dictation-exercise");
-
     if (isLoading) return <LoadingScreen />;
 
     return (
@@ -302,6 +296,9 @@ function DictationExerciseDetail() {
                             result={result}
                             currentSentenceDisplay={currentSentenceDisplay}
                             showNext={showNext}
+                            repeatCount={repeatCount}
+                            setRepeatCount={setRepeatCount}
+                            currentSentence={sentences[currentIndex]}
                         />
                     </div>
                 </>    
