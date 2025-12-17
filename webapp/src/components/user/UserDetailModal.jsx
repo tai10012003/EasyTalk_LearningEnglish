@@ -95,12 +95,6 @@ const UserDetailModal = ({ userId, username, onClose }) => {
             setUnlockedGrammarPractice(progress?.grammarExerciseDetails?.length || 0);
             setUnlockedPronunciationPractice(progress?.pronunciationExerciseDetails?.length || 0);
             setUnlockedDictation(progress?.dictationExerciseDetails?.length || 0);
-            const data = activeChart === "time" ? progress?.dailyStudyTimes || {}: dailyExp;
-            const chartDataArray = Object.entries(data).map(([date, value]) => ({
-                date,
-                value: value || 0
-            }));
-            setChartData(chartDataArray);
             await fetchFollowStats();
         } catch (err) {
             console.error("Lỗi tải thông tin người dùng:", err);
@@ -200,6 +194,19 @@ const UserDetailModal = ({ userId, username, onClose }) => {
             fetchPrizes();
         }
     }, [userId]);
+
+    useEffect(() => {
+        if (!currentUser) return;
+        const dailyExp = currentUser.dailyExperiencePoints || {};
+        const dailyTime = currentUser.dailyStudyTimes || {};
+        const sourceData = activeChart === "time" ? dailyTime : dailyExp;
+        const chartDataArray = Object.entries(sourceData).map(([date, value]) => ({
+            date,
+            value: activeChart === "time" ? Number((value || 0).toFixed(4)) : (value || 0)
+        }));
+        chartDataArray.sort((a, b) => a.date.localeCompare(b.date));
+        setChartData(chartDataArray);
+    }, [currentUser, activeChart]);
 
     const openFollowModal = (type) => {
         setFollowModal({ open: true, type });

@@ -49,7 +49,7 @@ function GrammarQuiz({ quizzes, onComplete }) {
           <p className="lesson-quiz-question">{idx + 1}. {quiz.question}</p>
           {quiz.type == "multiple-choice" ? (
             <ul className="lesson-quiz-options">
-              {quiz.options.map((opt, i) => (
+              {quiz.options.filter(opt => opt && opt.trim() !== "").map((opt, i) => (
                 <li
                   key={i}
                   className={`lesson-quiz-option ${
