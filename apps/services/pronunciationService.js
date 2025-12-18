@@ -66,6 +66,8 @@ class PronunciationService {
         const newPronunciation = {
             title: pronunciation.title,
             description: pronunciation.description,
+            category: pronunciation.category,
+            level: pronunciation.level,
             content: pronunciation.content,
             images: imageUrl,
             quizzes: [],
@@ -112,6 +114,8 @@ class PronunciationService {
             title: pronunciation.title.trim(),
             description: pronunciation.description.trim(),
             content: pronunciation.content.trim(),
+            category: pronunciation.category.trim(),
+            level: pronunciation.level.trim(),
             images: imageUrl,
             quizzes: formattedQuestions,
             slug: pronunciation.slug,

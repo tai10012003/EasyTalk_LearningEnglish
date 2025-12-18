@@ -65,6 +65,8 @@ class GrammarService {
         const newGrammar = {
             title: grammar.title,
             description: grammar.description,
+            category: grammar.category,
+            level: grammar.level,
             content: grammar.content,
             images: imageUrl,
             quizzes: [],
@@ -111,6 +113,8 @@ class GrammarService {
             title: grammar.title.trim(),
             description: grammar.description.trim(),
             content: grammar.content.trim(),
+            category: grammar.category.trim(),
+            level: grammar.level.trim(),
             images: imageUrl,
             quizzes: formattedQuestions,
             slug: grammar.slug,

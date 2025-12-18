@@ -9,10 +9,12 @@ class GrammarQuestion {
 }
 
 class Grammar {
-    constructor({ _id = null, title, description, content, images = "", quizzes = [], slug = "", sort = 0, display = true, createdAt = new Date() }) {
+    constructor({ _id = null, title, description, content, category, level, images = "", quizzes = [], slug = "", sort = 0, display = true, createdAt = new Date() }) {
         this._id = _id;
         this.title = title;
         this.description = description;
+        this.category = category;
+        this.level = level;
         this.content = content;
         this.images = images;
         this.quizzes = quizzes.map(q => new GrammarQuestion(q));

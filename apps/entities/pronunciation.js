@@ -10,6 +10,8 @@ class pronunciations {
     _id;
     title;
     description;
+    category;
+    level;
     content;
     images;
     quizzes = [];

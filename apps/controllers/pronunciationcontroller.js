@@ -127,6 +127,8 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
         const pronunciation = {
             title: req.body.title,
             description: req.body.description,
+            category: req.body.category,
+            level: req.body.level,
             content: req.body.content,
             images: req.body.images || null,
             quizzes: quizzes,
@@ -172,6 +174,8 @@ router.put("/api/update/:id", upload.single("image"), async function (req, res) 
         const pronunciation = {
             title: req.body.title,
             description: req.body.description,
+            category: req.body.category,
+            level: req.body.level,
             content: req.body.content,
             quizzes: quizzes,
             images: existingPronunciation.images || req.body.images || "",
