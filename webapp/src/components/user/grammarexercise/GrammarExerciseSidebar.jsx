@@ -66,7 +66,7 @@ const GrammarExerciseSidebar = ({
                             style={{ width: '100%' }}
                             onClick={handleSubmitClick}
                         >
-                            <i class="fas fa-paper-plane"></i> Nộp bài
+                            <i className="fas fa-paper-plane"></i> Nộp bài
                         </button>
                     )}
                     {!allQuestionsAnswered && (

@@ -63,7 +63,7 @@ const PronunciationExerciseSidebar = ({
                         style ={{ width: '100%' }}
                         onClick={handleSubmitClick}
                     >
-                        <i class="fas fa-paper-plane"></i> Nộp bài
+                        <i className="fas fa-paper-plane"></i> Nộp bài
                     </button>
                     
                     <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>

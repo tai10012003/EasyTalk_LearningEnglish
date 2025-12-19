@@ -80,17 +80,31 @@ function DictationControls({
     }, [showNext, currentSentence]);
 
     const fetchVietnameseTranslation = async (sentence) => {
+        if (!sentence || sentence.trim() === "") {
+            setVietnameseTranslation("Không có nội dung để dịch");
+            return;
+        }
         try {
+            let cleanedSentence = sentence.replace(/\?/g, "? ").replace(/\!/g, "! ").replace(/\./g, ". ").replace(/\,/g, ", ").replace(/\;/g, "; ").replace(/\:/g, ": ").replace(/\s+/g, " ").trim();
+            if (cleanedSentence.length > 400) {
+                cleanedSentence = cleanedSentence.substring(0, 400) + "...";
+            }
             const response = await fetch(
-                `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(sentence)}`
+                `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=vi&dt=t&q=${encodeURIComponent(cleanedSentence)}`
             );
+            if (!response.ok) {
+                throw new Error("Translation API error");
+            }
             const data = await response.json();
             if (data && data[0] && data[0][0] && data[0][0][0]) {
-                setVietnameseTranslation(data[0][0][0]);
+                const translatedText = data[0].map(item => item[0]).join("").trim();
+                setVietnameseTranslation(translatedText || "Không thể dịch câu này");
+            } else {
+                setVietnameseTranslation("Không thể dịch câu này");
             }
         } catch (error) {
             console.error("Error fetching translation:", error);
-            setVietnameseTranslation("Không thể dịch câu này");
+            setVietnameseTranslation("Lỗi dịch (kiểm tra kết nối mạng)");
         }
     };
 
@@ -260,7 +274,7 @@ function DictationControls({
                             cursor: canSkip ? 'pointer' : 'not-allowed'
                         }}
                     >
-                        <i class="fa-solid fa-forward-step"></i>
+                        <i className="fa-solid fa-forward-step"></i>
                         {canSkip ? 'Bỏ qua' : `Bỏ qua (${skipTimer}s)`}
                     </button>
                 </>
