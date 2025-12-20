@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarCard from "@/components/user/grammar/GrammarCard.jsx";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +11,28 @@ function Grammar() {
     const [unlockedGrammars, setUnlockedGrammars] = useState([]);
     const currentLessonRef = useRef(null);
     const navigate = useNavigate();
+
+    const levels = [
+        { key: "A1", name: "GIAI ĐOẠN 1: CƠ BẢN - A1 (Người mới bắt đầu)", color: "#4CAF50" },
+        { key: "A2", name: "GIAI ĐOẠN 2: SƠ CẤP - A2 (Sơ cấp)", color: "#8BC34A" },
+        { key: "B1", name: "GIAI ĐOẠN 3: TRUNG CẤP - B1 (Trung cấp)", color: "#FFC107" },
+        { key: "B2", name: "GIAI ĐOẠN 4: TRUNG CẤP CAO - B2 (Thượng cấp)", color: "#FF9800" },
+        { key: "C1", name: "GIAI ĐOẠN 5: CAO CẤP - C1 (Nâng cao)", color: "#F44336" },
+    ];
+
+    const groupedGrammars = useMemo(() => {
+        const grouped = {};
+        levels.forEach(l => (grouped[l.key] = {}));
+        allGrammars.forEach((item, index) => {
+            let levelKey = item.level || "A1";
+            let category = item.category || "Module 1: Nền tảng căn bản";
+            if (!grouped[levelKey][category]) {
+                grouped[levelKey][category] = [];
+            }
+            grouped[levelKey][category].push({ ...item, originalIndex: index });
+        });
+        return grouped;
+    }, [allGrammars]);
 
     useEffect(() => {
         document.title = "Bài học ngữ pháp - EasyTalk";
@@ -49,11 +71,11 @@ function Grammar() {
         return unlockedGrammars.includes(grammarId.toString());
     };
 
-    const findCurrentGrammarIndex = () => {
-        if (unlockedGrammars.length === 0) return -1;
+    const currentIndex = useMemo(() => {
+        if (unlockedGrammars.length === 0 || allGrammars.length === 0) return -1;
         const lastUnlockedId = unlockedGrammars[unlockedGrammars.length - 1];
         return allGrammars.findIndex(item => item._id.toString() === lastUnlockedId);
-    };
+    }, [unlockedGrammars, allGrammars]);
 
     const scrollToCurrentLesson = () => {
         if (currentLessonRef.current) {
@@ -92,25 +114,48 @@ function Grammar() {
                 </div>
                 <div className="container">
                     <div className="user-road-timeline">
-                        {allGrammars.map((item, index) => {
-                            const isUnlocked = isGrammarUnlocked(item._id);
-                            const currentIndex = findCurrentGrammarIndex();
-                            const isCurrent = index === currentIndex;
+                        {levels.map((level) => {
+                            const categories = groupedGrammars[level.key];
+                            if (!categories || Object.keys(categories).length === 0) return null;
                             return (
-                                <div key={item._id} ref={isCurrent ? currentLessonRef : null} >
-                                    <GrammarCard item={item} index={index} isUnlocked={isUnlocked} isCurrent={isCurrent} />
+                                <div key={level.key} className="user-level-section">
+                                    <div className="user-level-header" style={{ backgroundColor: level.color }}>
+                                        <h3>{level.name}</h3>
+                                    </div>
+                                    {Object.keys(categories).map((categoryName) => {
+                                        const items = categories[categoryName];
+                                        return (
+                                            <div key={categoryName} className="user-module-section">
+                                                <div className="user-module-header">
+                                                    <h3>{categoryName}</h3>
+                                                </div>
+                                                <div className="user-module-cards">
+                                                    {items.map((item) => {
+                                                        const isUnlocked = isGrammarUnlocked(item._id);
+                                                        const isCurrent = item.originalIndex === currentIndex;
+                                                        return (
+                                                            <div key={item._id} ref={isCurrent ? currentLessonRef : null}
+                                                            >
+                                                                <GrammarCard item={item} index={item.originalIndex} isUnlocked={isUnlocked} isCurrent={isCurrent} />
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             );
                         })}
                     </div>
                 </div>
                 <div className="user-floating-buttons">
-                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title="Cuộn đến bài học hiện tại" >
+                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title="Cuộn đến bài học hiện tại">
                         <i className="fas fa-play-circle"></i>
                         <span className="user-scroll-current-text">Tiếp tục học</span>
                         <span className="user-scroll-hot-badge">HOT</span>
                     </button>
-                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title="Lên đầu trang" >
+                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title="Lên đầu trang">
                         <i className="fas fa-arrow-up"></i>
                     </button>
                 </div>
