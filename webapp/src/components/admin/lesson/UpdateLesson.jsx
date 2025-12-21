@@ -2,12 +2,14 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
-const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems = [] }) => {
+const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems = [], modulesByLevel }) => {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
         title: "",
         description: "",
         content: "",
+        level: "",
+        category: "",
         type: "",
         image: null,
         quizzes: [],
@@ -22,6 +24,8 @@ const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems =
                 title: initialData.title || "",
                 description: initialData.description || "",
                 content: initialData.content || "",
+                level: initialData.level || "",
+                category: initialData.category || "",
                 type: initialData.type || "",
                 image: null,
                 quizzes: initialData.quizzes || [],
@@ -164,6 +168,8 @@ const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems =
         dataToSubmit.append("title", formData.title);
         dataToSubmit.append("description", formData.description);
         dataToSubmit.append("content", formData.content);
+        dataToSubmit.append("level", formData.level);
+        dataToSubmit.append("category", formData.category);
         dataToSubmit.append("type", formData.type);
         if (formData.image) {
             dataToSubmit.append("image", formData.image);
@@ -205,6 +211,47 @@ const UpdateLesson = ({ onSubmit, title, initialData, returnUrl, existingItems =
                         required
                         className="form-control"
                     ></textarea>
+                </div>
+                <div className="admin-lesson-update-group">
+                    <label>Cấp độ:</label>
+                    <select
+                        name="level"
+                        value={formData.level}
+                        onChange={handleChange}
+                        required
+                        className="form-control"
+                    >
+                        <option value="">-- Chọn cấp độ --</option>
+                        <option value="A1">A1</option>
+                        <option value="A2">A2</option>
+                        <option value="B1">B1</option>
+                        <option value="B2">B2</option>
+                        <option value="C1">C1</option>
+                    </select>
+                </div>
+                <div className="admin-lesson-update-group">
+                    <label>Loại ngữ pháp / phát âm:</label>
+                    <select
+                        name="category"
+                        value={formData.category}
+                        onChange={handleChange}
+                        required
+                        className="form-select"
+                        disabled={!formData.level}
+                    >
+                        <option value="">-- Chọn module --</option>
+                        {formData.level && modulesByLevel?.[formData.level] ? (
+                            modulesByLevel[formData.level].map((mod) => (
+                                <option key={mod.value} value={mod.value}>
+                                    {mod.label}
+                                </option>
+                            ))
+                        ) : (
+                            <option value="" disabled>
+                                Vui lòng chọn cấp độ trước
+                            </option>
+                        )}
+                    </select>
                 </div>
                 <div className="admin-lesson-update-group">
                     <label htmlFor="admin-update-lesson-content">Nội dung:</label>

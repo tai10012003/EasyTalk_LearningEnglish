@@ -113,7 +113,7 @@ function StorySentence({ sentence, onNext, onStepChange, hasStartedAudio, setHas
 
     return (
         <div className="story-sentence shadow-sm p-4 my-4">
-            <div className="sentence-row d-flex align-items-center mb-2">
+            <div className="sentence-row d-flex align-items-center mb-2" style = {{cursor: "pointer"}}>
                 <button className="btn-speak me-2" onClick={handleSpeak} title="Nghe lại">
                     🔊
                 </button>
