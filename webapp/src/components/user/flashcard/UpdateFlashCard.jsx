@@ -119,13 +119,15 @@ const UpdateFlashCard = ({ isOpen, onClose, flashcard, onUpdated }) => {
               <label className="form-label">
                 <i className="bi bi-card-image"></i> Hình ảnh:
               </label>
-              {flashcard.image && (
-                <img
-                  src={`data:image/jpeg;base64,${flashcard.image}`}
-                  alt={flashcard.word}
-                  style={{ width: "130px", height: "auto", borderRadius: "5px", marginBottom: "10px" }}
-                />
-              )}
+              <div>
+                {flashcard.image && (
+                  <img
+                    src={`${flashcard.image}`}
+                    alt={flashcard.word}
+                    style={{ width: "180px", height: "auto", borderRadius: "5px", margin: "10px 0" }}
+                  />
+                )}
+              </div>
               <input
                 type="file"
                 className="form-control"

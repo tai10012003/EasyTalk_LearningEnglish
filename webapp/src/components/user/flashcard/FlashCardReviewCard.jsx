@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
 
-const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [], onAnswerReady }) => {
+const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
+    // Receive props: onCheckAnswer
     const [flipped, setFlipped] = useState(false);
     const [userAnswer, setUserAnswer] = useState("");
     const [status, setStatus] = useState(null);
@@ -62,7 +63,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [], onAnswe
         } else {
             setStatus("wrong");
         }
-        onCheckAnswer(answer, card.word);
+        // onCheckAnswer(answer, card.word);
         onAnswerReady();
     };
 
@@ -75,7 +76,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [], onAnswe
     const handleChoiceClick = (choice) => {
         if (selected) return;
         setSelected(choice);
-        onCheckAnswer(choice, mcQuestion.correctAnswer);
+        // onCheckAnswer(choice, mcQuestion.correctAnswer);
         onAnswerReady();
     };
 
@@ -170,7 +171,7 @@ const FlashCardReviewCard = ({ card, mode, onCheckAnswer, allWords = [], onAnswe
                 />
                 {status == "wrong" && (
                     <p className="flashcard-correct-answer" style={{ marginTop: "20px" }}>
-                        ✅ Đáp án đúng là: <strong>{card.word}</strong>
+                        Bạn đã trả lời sai !! ✅ Đáp án đúng là: <strong>{card.word}</strong>
                     </p>
                 )}
                 {status == null && (

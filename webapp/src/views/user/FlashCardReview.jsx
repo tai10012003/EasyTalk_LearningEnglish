@@ -297,22 +297,22 @@ const FlashCardReview = () => {
         }
     }, [mode, currentIndex, cardKey]);
 
-    const handleCheckAnswer = (answer, correct) => {
-        if (answer.toLowerCase() == correct.toLowerCase()) {
-            Swal.fire({
-                icon: "success",
-                title: "Chính xác!",
-                timer: 1200,
-                showConfirmButton: false,
-            });
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Sai rồi!",
-                text: `Đáp án đúng là: ${correct}`,
-            });
-        }
-    };
+    // const handleCheckAnswer = (answer, correct) => {
+    //     if (answer.toLowerCase() == correct.toLowerCase()) {
+    //         Swal.fire({
+    //             icon: "success",
+    //             title: "Chính xác!",
+    //             timer: 1200,
+    //             showConfirmButton: false,
+    //         });
+    //     } else {
+    //         Swal.fire({
+    //             icon: "error",
+    //             title: "Sai rồi!",
+    //             text: `Đáp án đúng là: ${correct}`,
+    //         });
+    //     }
+    // };
 
     const finalizeAndExit = async () => {
         if (intervalRef.current) {
@@ -375,7 +375,7 @@ const FlashCardReview = () => {
                         key={cardKey}
                         card={flashcards[currentIndex]}
                         mode={mode}
-                        onCheckAnswer={handleCheckAnswer}
+                        // onCheckAnswer={handleCheckAnswer}
                         allWords={flashcards.map(c => c.word)}
                         onAnswerReady={handleAnswerReady}
                     />
