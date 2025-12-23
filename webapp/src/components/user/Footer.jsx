@@ -86,7 +86,7 @@ function Footer() {
           <div className="row">
             <div className="col-lg-12">
               <p className="footer-text">
-                &copy; {new Date().getFullYear()} Mọi quyền được bảo lưu | Mẫu này được tạo bởi{' '}
+                &copy; {new Date().getFullYear()} {t("footer.copyright")} {' '}
                 <i className="ti-heart" aria-hidden="true"></i>{' '}
                 <a href="https://www.facebook.com/phamduc.tai.2002/" target="_blank" rel="noopener noreferrer">
                   Duc Tai

@@ -322,7 +322,7 @@ function Menu() {
           <div className="top-bar-center">
             <div className="marquee">
               <span>
-                {t("menu.marquee")}
+                {t("header.topbar.marquee")}
               </span>
             </div>
           </div>
@@ -338,7 +338,7 @@ function Menu() {
               </div>
               <div className="streak me-4">
                 <Link to="/streak" className="text-decoration-none" style={{ textDecoration: 'none' }}>
-                  🔥 <strong>{streakData.streak} {t("menu.day")}</strong>
+                  🔥 <strong>{streakData.streak} {t("header.topbar.day")}</strong>
                 </Link>
               </div>
               <div className="notification-wrapper">
@@ -357,13 +357,13 @@ function Menu() {
                 {showNotificationDropdown && (
                   <div className="notification-dropdown">
                     <div className="notification-header">
-                      <h6>{t("menu.yournotification")}</h6>
+                      <h6>{t("header.topbar.notification.yournotification")}</h6>
                       {unreadCount > 0 && (
                         <button 
                           className="mark-all-read-btn"
                           onClick={handleMarkAllAsRead}
                         >
-                          {t("menu.markallread")}
+                          {t("header.topbar.notification.markallread")}
                         </button>
                       )}
                     </div>
@@ -462,7 +462,7 @@ function Menu() {
                         end
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-home me-2"></i>{t("menu.home")}
+                        <i className="fas fa-home me-2"></i>{t("header.menu.home")}
                       </NavLink>
                     </li>
                     {/* <li className="nav-item">
@@ -480,7 +480,7 @@ function Menu() {
                         to="/journey"
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-road me-2"></i>{t("menu.journey")}
+                        <i className="fas fa-road me-2"></i>{t("header.menu.journey")}
                       </NavLink>
                     </li>
                     <li className={`nav-item dropdown ${showLessons ? 'show' : ''}`}>
@@ -490,7 +490,7 @@ function Menu() {
                         role="button"
                         aria-expanded={showLessons}
                       >
-                        <i className="fas fa-book-open me-2"></i>{t("menu.lessons")}
+                        <i className="fas fa-book-open me-2"></i>{t("header.menu.lessons")}
                       </a>
                       <div
                         className={`dropdown-menu ${showLessons ? 'show' : ''}`}
@@ -501,28 +501,28 @@ function Menu() {
                           to="/story"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-book me-2"></i>{t("menu.story")}
+                          <i className="fas fa-book me-2"></i>{t("header.menu.submenu_lesson.story")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/grammar"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-language me-2"></i>{t("menu.grammar")}
+                          <i className="fas fa-language me-2"></i>{t("header.menu.submenu_lesson.grammar")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/flashcards"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-clone me-2"></i>{t("menu.flashcards")}
+                          <i className="fas fa-clone me-2"></i>{t("header.menu.submenu_lesson.flashcards")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/pronunciation"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-microphone me-2"></i>{t("menu.pronunciation")}
+                          <i className="fas fa-microphone me-2"></i>{t("header.menu.submenu_lesson.pronunciation")}
                         </NavLink>
                       </div>
                     </li>
@@ -533,7 +533,7 @@ function Menu() {
                         role="button"
                         aria-expanded={showPractice}
                       >
-                        <i className="fas fa-dumbbell me-2"></i>{t("menu.practice")}
+                        <i className="fas fa-dumbbell me-2"></i>{t("header.menu.practice")}
                       </a>
                       <div
                         className={`dropdown-menu ${showPractice ? 'show' : ''}`}
@@ -544,28 +544,28 @@ function Menu() {
                           to="/grammar-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-pen me-2"></i>{t("menu.grammar_exercise")}
+                          <i className="fas fa-pen me-2"></i>{t("header.menu.submenu_practice.grammar_exercise")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/vocabulary-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-spell-check me-2"></i>{t("menu.vocabulary_exercise")}
+                          <i className="fas fa-spell-check me-2"></i>{t("header.menu.submenu_practice.vocabulary_exercise")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/pronunciation-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-volume-up me-2"></i>{t("menu.pronunciation_exercise")}
+                          <i className="fas fa-volume-up me-2"></i>{t("header.menu.submenu_practice.pronunciation_exercise")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/dictation-exercise"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-headphones me-2"></i>{t("menu.dictation_exercise")}
+                          <i className="fas fa-headphones me-2"></i>{t("header.menu.submenu_practice.dictation_exercise")}
                         </NavLink>
                         {/* <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
@@ -579,21 +579,21 @@ function Menu() {
                           to="/chat"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-comments me-2"></i>{t("menu.chat")}
+                          <i className="fas fa-comments me-2"></i>{t("header.menu.submenu_practice.chat")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/reading"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fas fa-book me-2"></i>{t("menu.reading")}
+                          <i className="fas fas fa-book me-2"></i>{t("header.menu.submenu_practice.reading")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/writing"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-keyboard me-2"></i>{t("menu.writing")}
+                          <i className="fas fa-keyboard me-2"></i>{t("header.menu.submenu_practice.writing")}
                         </NavLink>
                       </div>
                     </li>
@@ -612,7 +612,7 @@ function Menu() {
                         to="/leaderboard"
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-trophy me-2"></i>{t("menu.leaderboard")}
+                        <i className="fas fa-trophy me-2"></i>{t("header.menu.leaderboard")}
                       </NavLink>
                     </li>
                     <li className="nav-item">
@@ -621,7 +621,7 @@ function Menu() {
                         to="/statistic"
                         onClick={handleLinkClick}
                       >
-                        <i className="fas fa-chart-line me-2"></i>{t("menu.statistics")}
+                        <i className="fas fa-chart-line me-2"></i>{t("header.menu.statistics")}
                       </NavLink>
                     </li>
                     {/* <li className="nav-item">
@@ -665,7 +665,7 @@ function Menu() {
                             to="/reminder"
                             onClick={handleLinkClick}
                           >
-                            <i className="fas fa-bell me-2"></i>NHẮC NHỞ HỌC TẬP
+                            <i className="fas fa-bell me-2"></i>{t("header.menu.submenu_loggedIn.study_reminders")}
                           </NavLink>
                           {/* <NavLink
                             className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
@@ -679,7 +679,7 @@ function Menu() {
                             to="/setting"
                             onClick={handleLinkClick}
                           >
-                            <i className="fas fa-cog me-2"></i>CÀI ĐẶT
+                            <i className="fas fa-cog me-2"></i>{t("header.menu.submenu_loggedIn.setting")}
                           </NavLink>
                           <a
                             className="dropdown-item"
@@ -690,7 +690,7 @@ function Menu() {
                               handleLinkClick();
                             }}
                           >
-                            <i className="fas fa-sign-out-alt me-2"></i>ĐĂNG XUẤT
+                            <i className="fas fa-sign-out-alt me-2"></i>{t("header.menu.submenu_loggedIn.logout")}
                           </a>
                         </div>
                       )}

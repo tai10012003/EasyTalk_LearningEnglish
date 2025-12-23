@@ -1,27 +1,42 @@
 {
-  "menu": {
-    "marquee": "Welcome to EasyTalk! – Conquer English with you every day – Learn easily, speak confidently 🚀",
-    "day": "day",
-    "yournotification": "Your Notification",
-    "markallread" : "Mark all read",
-    "home": "HOME",
-    "journey": "JOURNEY",
-    "lessons": "LESSONS",
-    "story": "STORY",
-    "grammar": "GRAMMAR",
-    "flashcards": "FLASHCARDS",
-    "pronunciation": "PRONUNCIATION",
-    "practice": "PRACTICE",
-    "grammar_exercise": "GRAMMAR",
-    "vocabulary_exercise": "VOCABULARY",
-    "pronunciation_exercise": "PRONUNCIATION",
-    "dictation_exercise": "DICTATION",
-    "chat": "CHAT WITH AI",
-    "reading": "READING",
-    "writing": "WRITING WITH AI",
-    "leaderboard": "LEADERBOARD",
-    "statistics": "STATISTICS",
-    "login": "Login"
+  "header": {
+    "topbar": {
+      "marquee": "Welcome to EasyTalk! – Conquer English with you every day – Learn easily, speak confidently 🚀",
+      "day": "day",
+      "notification": {
+        "yournotification": "Your Notification",
+        "markallread" : "Mark all read"
+      }
+    },
+    "menu": {
+      "home": "HOME",
+      "journey": "JOURNEY",
+      "lessons": "LESSONS",
+      "submenu_lesson": {
+        "story": "STORY",
+        "grammar": "GRAMMAR",
+        "flashcards": "FLASHCARDS",
+        "pronunciation": "PRONUNCIATION"
+      },
+      "practice": "PRACTICE",
+      "submenu_practice": {
+        "grammar_exercise": "GRAMMAR",
+        "vocabulary_exercise": "VOCABULARY",
+        "pronunciation_exercise": "PRONUNCIATION",
+        "dictation_exercise": "DICTATION",
+        "chat": "CHAT WITH AI",
+        "reading": "READING",
+        "writing": "WRITING WITH AI"
+      },
+      "leaderboard": "LEADERBOARD",
+      "statistics": "STATISTICS",
+      "login": "Login",
+      "submenu_loggedIn": {
+        "study_reminders": "STUDY REMINDERS",
+        "setting": "SETTINGS",
+        "logout": "LOGOUT"
+      }
+    }
   },
   "footer": {
     "description": "By joining EasyTalk, users will enjoy seamless communication. Whether learning or practicing, this platform guides learners easily through each stage, ensuring smooth progress and significant improvement.",
@@ -31,17 +46,127 @@
     "contact_us": "Contact Us",
     "address": "Address",
     "phone": "Phone",
-    "email": "Email"
+    "email": "Email",
+    "copyright": "All rights reserved | This template is created by"
+  },
+  "home": {
+    "banner": {
+      "explore": "Explore the world of English with us",
+      "title": "IMPROVE YOUR ENGLISH SKILLS",
+      "description": "Whether you're a beginner or looking to improve your skills, our journey is designed for all levels and will help you confidently use English every day. Start logging in and experience it now!!",
+      "description_loggedIn": "Whether you're a beginner or looking to improve your skills, our journey is designed for all levels and will help you confidently use English every day. Start experiencing our English learning features!!",
+      "start": "LET'S GET STARTED!!"
+    }
   },
   "setting": {
-    "generalSettings": "General Settings",
-    "generalDesc": "Customize your language, timezone and date format.",
-    "dateFormat": "Date Format",
-    "language": "Language",
-    "timezone": "Timezone",
-    "saveChanges": "Save Changes",
-    "successSave": "Saved successfully!",
-    "errorSave": "Cannot save settings, please try again.",
-    "loading": "Loading settings..."
+    "title": "Account Settings",
+    "description": "Manage your account, interface, and study notification settings.",
+    "sidebar": {
+      "personal": "Personal Information",
+      "interface": "Interface Configuration",
+      "generalSettings": "General Settings",
+      "security": "Security & Login",
+      "notifications": "Notifications & Study Reminders"
+    },
+    "personal": {
+      "title": "Personal Information",
+      "description": "Manage your personal information.",
+      "username": "Username",
+      "email": "Email",
+      "status": "Status",
+      "role": "Role",
+      "active": "Active",
+      "locked": "Locked",
+      "admin": "Administrator",
+      "user": "User",
+      "saveChanges": "Save Changes",
+      "successTitle": "Success!",
+      "successSave": "Personal information updated successfully!",
+      "errorTitle": "Failed!",
+      "errorSave": "Error updating information!",
+      "errorLoad": "Cannot load user information!",
+      "loading": "Loading personal information..."
+    },
+    "interface": {
+      "title": "Interface Configuration",
+      "description": "Customize your learning interface to your preference.",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "font": "Font",
+      "fontSize": "Font Size",
+      "saveChanges": "Save Changes",
+      "successTitle": "Saved successfully!",
+      "successSave": "Your interface configuration has been updated!",
+      "loading": "Loading interface settings..."
+    },
+    "general": {
+      "title": "General Settings",
+      "description": "Customize your language, timezone and date format.",
+      "dateFormat": "Date Format",
+      "language": "Language",
+      "timezone": "Timezone",
+      "saveChanges": "Save Changes",
+      "successTitle": "Saved successfully!",
+      "successSave": "Your general configuration has been updated.",
+      "errorTitle": "Failed!",
+      "errorSave": "Cannot save settings, please try again.",
+      "loading": "Loading general settings..."
+    },
+    "security": {
+      "title1": "Change Password",
+      "description1": "Update your password for better account protection.",
+      "button1": "Change Password",
+      "title2": "Two-Factor Authentication (2FA)",
+      "description2": "Protect your account by requiring a verification code when logging in.",
+      "title3": "Quick Sign-in with Google",
+      "description3": "Enable quick and secure account login with Google.",
+      "title4": "Logged-in Devices",
+      "description4": "Check and manage devices logged into your account.",
+      "title5": "Log out of all devices",
+      "description5": "Log out of your account on all logged-in devices.",
+      "button5": "Log out all",
+      "logoutAllTitle": "Confirm Logout?",
+      "logoutAllText": "You will be logged out of all other devices.",
+      "logoutAllSuccessTitle": "Logged out of all devices!",
+      "logoutAllSuccessText": "Please log in again to continue.",
+      "saveChanges": "Save Changes",
+      "successTitle": "Saved successfully!",
+      "successSave": "Your security settings have been updated.",
+      "errorTitle": "Failed!",
+      "errorSave": "Unable to update security settings, please try again.",
+      "loading": "Loading security settings..."
+    },
+    "notifications": {
+      "title": "Notifications & Study Reminders",
+      "description": "Manage how you receive notifications from the system, including email, push, promotions and study reminders.",
+      "title1": "Email",
+      "description1": "Receive notifications via email",
+      "title2": "Push Notifications",
+      "description2": "Receive push notifications on your browser",
+      "title3": "Study Reminders",
+      "description3": "Send reminders when it's time to study",
+      "title4": "Information",
+      "description4": "News and general announcements",
+      "title5" : "Promotions",
+      "description5": "Receive promotions & discount codes",
+      "title6": "Success",
+      "description6": "Notifications about successful actions",
+      "title7": "Warning",
+      "description7": "Warning notifications about account or system issues",
+      "title8": "System",
+      "description8": "System updates and maintenance",
+      "title9": "Updates",
+      "description9": "Notifications when new features are available",
+      "saveChanges": "Save Changes",
+      "resetDefault": "Reset to Default",
+      "successTitle": "Saved successfully!",
+      "successSave": "Your notification settings have been updated.",
+      "errorTitle": "Failed!",
+      "errorSave": "Unable to update notification settings, please try again.",
+      "resetTitle": "Reset to default!",
+      "resetText": "Notification options have been reset.",
+      "loading": "Loading notification settings..."
+    }
   }
 }

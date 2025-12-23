@@ -1,27 +1,42 @@
 {
-  "menu": {
-    "marquee": "Chào mừng bạn đến EasyTalk! – Cùng bạn chinh phục tiếng Anh mỗi ngày – Học dễ dàng, nói tự tin 🚀",
-    "day": "ngày",
-    "yournotification": "Thông báo của bạn",
-    "markallread" : "Đánh dấu tất cả đã đọc",
-    "home": "TRANG CHỦ",
-    "journey": "HÀNH TRÌNH",
-    "lessons": "BÀI HỌC",
-    "story": "CÂU CHUYỆN",
-    "grammar": "NGỮ PHÁP",
-    "flashcards": "TỪ VỰNG FLASHCARD",
-    "pronunciation": "PHÁT ÂM",
-    "practice": "LUYỆN TẬP",
-    "grammar_exercise": "NGỮ PHÁP",
-    "vocabulary_exercise": "TỪ VỰNG",
-    "pronunciation_exercise": "PHÁT ÂM",
-    "dictation_exercise": "NGHE CHÉP CHÍNH TẢ",
-    "chat": "GIAO TIẾP VỚI AI",
-    "reading": "LUYỆN ĐỌC",
-    "writing": "LUYỆN VIẾT VỚI AI",
-    "leaderboard": "BẢNG XẾP HẠNG",
-    "statistics": "THỐNG KÊ",
-    "login": "Đăng nhập"
+  "header": {
+    "topbar": {
+      "marquee": "Chào mừng bạn đến EasyTalk! – Cùng bạn chinh phục tiếng Anh mỗi ngày – Học dễ dàng, nói tự tin 🚀",
+      "day": "ngày",
+      "notification": {
+        "yournotification": "Thông báo của bạn",
+        "markallread" : "Đánh dấu tất cả đã đọc"
+      }
+    },
+    "menu": {
+      "home": "TRANG CHỦ",
+      "journey": "HÀNH TRÌNH",
+      "lessons": "BÀI HỌC",
+      "submenu_lesson": {
+        "story": "CÂU CHUYỆN",
+        "grammar": "NGỮ PHÁP",
+        "flashcards": "TỪ VỰNG FLASHCARD",
+        "pronunciation": "PHÁT ÂM"
+      },
+      "practice": "LUYỆN TẬP",
+      "submenu_practice": {
+        "grammar_exercise": "NGỮ PHÁP",
+        "vocabulary_exercise": "TỪ VỰNG",
+        "pronunciation_exercise": "PHÁT ÂM",
+        "dictation_exercise": "NGHE CHÉP CHÍNH TẢ",
+        "chat": "GIAO TIẾP VỚI AI",
+        "reading": "LUYỆN ĐỌC",
+        "writing": "LUYỆN VIẾT VỚI AI"
+      },
+      "leaderboard": "BẢNG XẾP HẠNG",
+      "statistics": "THỐNG KÊ",
+      "login": "Đăng nhập",
+      "submenu_loggedIn": {
+        "study_reminders": "NHẮC NHỞ HỌC TẬP",
+        "setting": "CÀI ĐẶT",
+        "logout": "ĐĂNG XUẤT"
+      }
+    }
   },
   "footer": {
     "description": "Khi tham gia EasyTalk, người dùng sẽ có trải nghiệm giao tiếp liền mạch. Cho dù đang học hay đang thực hành, nền tảng này sẽ hướng dẫn người học dễ dàng qua từng giai đoạn, đảm bảo tiến trình suôn sẻ và cải thiện đáng kể.",
@@ -31,17 +46,127 @@
     "contact_us": "Liên Hệ Chúng Tôi",
     "address": "Địa chỉ",
     "phone": "Số điện thoại",
-    "email": "Email"
+    "email": "Email",
+    "copyright": "Mọi quyền được bảo lưu | Mẫu này được tạo bởi"
+  },
+  "home": {
+    "banner": {
+      "explore": "Khám phá thế giới tiếng Anh cùng chúng tôi",
+      "title": "CẢI THIỆN KỸ NĂNG TIẾNG ANH CỦA BẠN",
+      "description": "Cho dù bạn là người mới bắt đầu hay muốn cải thiện kỹ năng của mình, hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày. Hãy bắt đầu đăng nhập tài khoản của bạn và trải nghiệm nhé !!",
+      "description_loggedIn": "Cho dù bạn là người mới bắt đầu hay muốn cải thiện kỹ năng của mình, hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày. Hãy bắt đầu trải nghiệm các tính năng học tiếng Anh của chúng tôi !!",
+      "start": "BẮT ĐẦU NÀO !!"
+    }
   },
   "setting": {
-    "generalSettings": "Cài đặt chung",
-    "generalDesc": "Tùy chỉnh ngôn ngữ, múi giờ và định dạng ngày để phù hợp với bạn.",
-    "dateFormat": "Định dạng ngày",
-    "language": "Ngôn ngữ",
-    "timezone": "Múi giờ học viên",
-    "saveChanges": "Lưu thay đổi",
-    "successSave": "Đã lưu thành công!",
-    "errorSave": "Không thể lưu cài đặt, vui lòng thử lại.",
-    "loading": "Đang tải cài đặt chung..."
+    "title": "Cài đặt tài khoản",
+    "description": "Quản lý cài đặt tài khoản, giao diện và thông báo học tập của bạn.",
+    "sidebar": {
+      "personal": "Thông tin cá nhân",
+      "interface": "Cấu hình giao diện",
+      "generalSettings": "Cài đặt chung",
+      "security": "Bảo mật & đăng nhập",
+      "notifications": "Thông báo & nhắc học"
+    },
+    "personal": {
+      "title": "Thông tin cá nhân",
+      "description": "Quản lý thông tin cá nhân của bạn.",
+      "username": "Tên người dùng",
+      "email": "Email",
+      "status": "Trạng thái",
+      "active": "Hoạt động",
+      "locked": "Bị khóa",
+      "role": "Vai trò",
+      "admin": "Quản trị viên",
+      "user": "Người dùng",
+      "saveChanges": "Lưu thay đổi",
+      "successTitle": "Thành công!",
+      "successSave": "Cập nhật thông tin cá nhân thành công!",
+      "errorTitle": "Thất bại!",
+      "errorSave": "Có lỗi khi cập nhật thông tin!",
+      "errorLoad": "Không thể tải thông tin người dùng!",
+      "loading": "Đang tải thông tin cá nhân..."
+    },
+    "interface": {
+      "title": "Cấu hình giao diện",
+      "description": "Tùy chỉnh giao diện học tập của bạn theo sở thích.",
+      "theme": "Chủ đề",
+      "light": "Sáng",
+      "dark": "Tối",
+      "font": "Font chữ",
+      "fontSize": "Cỡ chữ",
+      "saveChanges": "Lưu thay đổi",
+      "successTitle": "Đã lưu thành công!",
+      "successSave": "Cấu hình giao diện của bạn đã được cập nhật.",
+      "loading": "Đang tải cài đặt giao diện..."
+    },
+    "general": {
+      "title": "Cài đặt chung",
+      "description": "Tùy chỉnh ngôn ngữ, múi giờ và định dạng ngày để phù hợp với bạn.",
+      "dateFormat": "Định dạng ngày",
+      "language": "Ngôn ngữ",
+      "timezone": "Múi giờ học viên",
+      "saveChanges": "Lưu thay đổi",
+      "successTitle": "Đã lưu thành công!",
+      "successSave": "Cấu hình chung của bạn đã được cập nhật.",
+      "errorTitle": "Thất bại!",
+      "errorSave": "Không thể lưu cài đặt, vui lòng thử lại.",
+      "loading": "Đang tải cài đặt chung..."
+    },
+    "security": {
+      "title1": "Đổi mật khẩu",
+      "description1": "Cập nhật mật khẩu của bạn để bảo vệ tài khoản tốt hơn.",
+      "button1": "Đổi mật khẩu",
+      "title2": "Xác thực hai bước (2FA)",
+      "description2": "Bảo vệ tài khoản bằng cách yêu cầu mã xác minh khi đăng nhập.",
+      "title3": "Đăng nhập nhanh bằng Google",
+      "description3": "Cho phép đăng nhập tài khoản bằng Google nhanh chóng và an toàn.",
+      "title4": "Thiết bị đang đăng nhập",
+      "description4": "Kiểm tra và quản lý các thiết bị đang đăng nhập tài khoản của bạn.",
+      "title5": "Đăng xuất khỏi tất cả thiết bị",
+      "description5": "Thoát tài khoản trên mọi thiết bị đang đăng nhập.",
+      "button5": "Đăng xuất tất cả",
+      "logoutAllTitle": "Xác nhận đăng xuất?",
+      "logoutAllText": "Bạn sẽ đăng xuất khỏi tất cả thiết bị khác.",
+      "logoutAllSuccessTitle": "Đã đăng xuất khỏi tất cả thiết bị!",
+      "logoutAllSuccessText": "Vui lòng đăng nhập lại để tiếp tục.",
+      "saveChanges": "Lưu thay đổi",
+      "successTitle": "Đã lưu thành công!",
+      "successSave": "Cài đặt bảo mật của bạn đã được cập nhật.",
+      "errorTitle": "Thất bại!",
+      "errorSave": "Không thể cập nhật cài đặt bảo mật, vui lòng thử lại.",
+      "loading": "Đang tải cài đặt bảo mật..."
+    },
+    "notifications": {
+      "title": "Cấu hình thông báo",
+      "description": "Quản lý cách bạn nhận thông báo từ hệ thống, bao gồm email, đẩy, khuyến mãi và nhắc nhở học tập.",
+      "title1": "Email",
+      "description1": "Nhận thông báo qua email",
+      "title2": "Thông báo đẩy",
+      "description2": "Nhận thông báo đẩy trên trình duyệt",
+      "title3": "Nhắc học tập",
+      "description3": "Gửi nhắc nhở khi đến giờ học",
+      "title4": "Thông tin",
+      "description4": "Tin tức và thông báo chung",
+      "title5" : "Khuyến mãi",
+      "description5": "Nhận ưu đãi & mã giảm giá",
+      "title6": "Thành công",
+      "description6": "Thông báo về hành động thành công",
+      "title7": "Cảnh báo",
+      "description7": "Thông báo cảnh báo về tài khoản hoặc hệ thống",
+      "title8": "Hệ thống",
+      "description8": "Cập nhật và bảo trì hệ thống",
+      "title9": "Cập nhật",
+      "description9": "Thông báo khi có tính năng mới",
+      "saveChanges": "Lưu thay đổi",
+      "resetDefault": "Khôi phục mặc định",
+      "successTitle": "Đã lưu thành công!",
+      "successSave": "Cài đặt thông báo của bạn đã được cập nhật.",
+      "errorTitle": "Thất bại!",
+      "errorSave": "Không thể cập nhật cài đặt thông báo, vui lòng thử lại.",
+      "resetTitle": "Đã khôi phục mặc định!",
+      "resetText": "Các tùy chọn thông báo đã được đặt lại.",
+      "loading": "Đang tải cài đặt thông báo..."
+    }
   }
 }
