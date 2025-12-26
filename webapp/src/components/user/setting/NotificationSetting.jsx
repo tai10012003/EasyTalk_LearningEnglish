@@ -1,21 +1,23 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import { UserSettingService } from "@/services/UserSettingService.jsx";
 
 const NotificationSetting = () => {
+    const { t, i18n } = useTranslation();
     const [notifications, setNotifications] = useState({});
     const [loading, setLoading] = useState(true);
 
     const notificationTypes = [
-        { id: "email", label: "Email", desc: "Nhận thông báo qua email", icon: "fa-envelope", color: "#007bff" },
-        { id: "push", label: "Push Notification", desc: "Thông báo đẩy trên trình duyệt", icon: "fa-bell", color: "#17a2b8" },
-        { id: "reminder", label: "Nhắc học tập", desc: "Gửi nhắc nhở khi đến giờ học", icon: "fa-clock", color: "#f97316" },
-        { id: "info", label: "Thông tin", desc: "Tin tức và thông báo chung", icon: "fa-info-circle", color: "#17a2b8" },
-        { id: "promo", label: "Khuyến mãi", desc: "Nhận ưu đãi & mã giảm giá", icon: "fa-gift", color: "#e83e8c" },
-        { id: "success", label: "Thành công", desc: "Thông báo về hành động thành công", icon: "fa-check-circle", color: "#28a745" },
-        { id: "warning", label: "Cảnh báo", desc: "Thông báo cảnh báo về tài khoản hoặc hệ thống", icon: "fa-exclamation-triangle", color: "#ffc107" },
-        { id: "system", label: "Hệ thống", desc: "Cập nhật và bảo trì hệ thống", icon: "fa-cogs", color: "#6c757d" },
-        { id: "update", label: "Cập nhật", desc: "Thông báo khi có tính năng mới", icon: "fa-sync-alt", color: "#007bff" },
+        { id: "email", label: t("setting.notifications.title1"), desc: t("setting.notifications.description1"), icon: "fa-envelope", color: "#007bff" },
+        { id: "push", label: t("setting.notifications.title2"), desc: t("setting.notifications.description2"), icon: "fa-bell", color: "#17a2b8" },
+        { id: "reminder", label: t("setting.notifications.title3"), desc: t("setting.notifications.description3"), icon: "fa-clock", color: "#f97316" },
+        { id: "info", label: t("setting.notifications.title4"), desc: t("setting.notifications.description4"), icon: "fa-info-circle", color: "#17a2b8" },
+        { id: "promo", label: t("setting.notifications.title5"), desc: t("setting.notifications.description5"), icon: "fa-gift", color: "#e83e8c" },
+        { id: "success", label: t("setting.notifications.title6"), desc: t("setting.notifications.description6"), icon: "fa-check-circle", color: "#28a745" },
+        { id: "warning", label: t("setting.notifications.title7"), desc: t("setting.notifications.description7"), icon: "fa-exclamation-triangle", color: "#ffc107" },
+        { id: "system", label: t("setting.notifications.title8"), desc: t("setting.notifications.description8"), icon: "fa-cogs", color: "#6c757d" },
+        { id: "update", label: t("setting.notifications.title9"), desc: t("setting.notifications.description9"), icon: "fa-sync-alt", color: "#007bff" },
     ];
 
     useEffect(() => {
@@ -51,8 +53,8 @@ const NotificationSetting = () => {
             await UserSettingService.updateUserSettingsSection("notifications", notifications);
             Swal.fire({
                 icon: "success",
-                title: "Đã lưu thành công!",
-                text: "Cấu hình thông báo của bạn đã được cập nhật.",
+                title: t("setting.notifications.successTitle"),
+                text: t("setting.notifications.successSave"),
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -60,8 +62,8 @@ const NotificationSetting = () => {
             console.error("Lỗi khi lưu cài đặt thông báo:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi!",
-                text: "Không thể lưu cài đặt thông báo.",
+                title: t("setting.notifications.errorTitle"),
+                text: t("setting.notifications.errorSave"),
             });
         }
     };
@@ -74,22 +76,22 @@ const NotificationSetting = () => {
         setNotifications(defaultSettings);
         Swal.fire({
             icon: "info",
-            title: "Đã khôi phục mặc định!",
-            text: "Các tùy chọn thông báo đã được đặt lại.",
+            title: t("setting.notifications.resetTitle"),
+            text: t("setting.notifications.resetText"),
             timer: 1500,
             showConfirmButton: false
         });
     };
 
     if (loading) {
-        return <div className="setting-loading">Đang tải cài đặt thông báo...</div>;
+        return <div className="setting-loading">{t("setting.notifications.loading")}</div>;
     }
 
     return (
         <div className="setting-notification-container">
-            <h3 className="setting-notification-title">Cấu hình thông báo</h3>
+            <h3 className="setting-notification-title">{t("setting.notifications.title")}</h3>
             <p className="setting-notification-desc">
-                Quản lý cách bạn nhận thông báo từ hệ thống, bao gồm email, đẩy, khuyến mãi và nhắc nhở học tập.
+                {t("setting.notifications.description")}
             </p>
             <div className="setting-notification-list">
                 {notificationTypes.map((item) => (
@@ -117,10 +119,10 @@ const NotificationSetting = () => {
             </div>
             <div className="setting-notification-footer">
                 <button className="setting-notification-btn-save" onClick={handleSave}>
-                    <i className="fas fa-save"></i> Lưu thay đổi
+                    <i className="fas fa-save"></i> {t("setting.notifications.saveChanges")}
                 </button>
                 <button className="setting-notification-btn-reset" onClick={handleReset}>
-                    <i className="fas fa-undo"></i> Khôi phục mặc định
+                    <i className="fas fa-undo"></i> {t("setting.notifications.resetDefault")}
                 </button>
             </div>
         </div>

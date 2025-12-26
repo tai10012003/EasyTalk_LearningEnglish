@@ -1,14 +1,16 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const Sidebar = ({ onSelect }) => {
     const [activeTab, setActiveTab] = useState("personal");
+    const { t } = useTranslation();
 
     const settingsMenu = [
-        { id: "personal", icon: "fa-user", label: "Thông tin cá nhân" },
-        { id: "interface", icon: "fa-palette", label: "Cấu hình giao diện" },
-        { id: "general", icon: "fa-cog", label: "Cài đặt chung" },
-        { id: "security", icon: "fa-lock", label: "Bảo mật & đăng nhập" },
-        { id: "notifications", icon: "fa-bell", label: "Thông báo & nhắc học" },
+        { id: "personal", icon: "fa-user", label: t("setting.sidebar.personal") },
+        { id: "interface", icon: "fa-palette", label: t("setting.sidebar.interface") },
+        { id: "general", icon: "fa-cog", label: t("setting.sidebar.generalSettings") },
+        { id: "security", icon: "fa-lock", label: t("setting.sidebar.security") },
+        { id: "notifications", icon: "fa-bell", label: t("setting.sidebar.notifications") },
     ];
 
     const handleClick = (id) => {
@@ -18,9 +20,9 @@ const Sidebar = ({ onSelect }) => {
 
     return (
         <div className="setting-sidebar">
-            <h2 className="setting-title">Cài đặt tài khoản</h2>
+            <h2 className="setting-title">{t("setting.title")}</h2>
             <p className="setting-desc">
-                Quản lý cài đặt tài khoản, giao diện và thông báo học tập của bạn.
+                {t("setting.description")}
             </p>
             <ul className="setting-menu">
                 {settingsMenu.map((item) => (

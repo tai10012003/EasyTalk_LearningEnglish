@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import { AuthService } from "@/services/AuthService.jsx";
 import { UserService } from "@/services/UserService.jsx";
 
 const PersonalInfo = () => {
+    const { t, i18n } = useTranslation();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({ username: "", email: "" });
@@ -27,8 +29,8 @@ const PersonalInfo = () => {
                 console.error("Error fetching user:", err);
                 Swal.fire({
                     icon: "error",
-                    title: "Lỗi",
-                    text: "Không thể tải thông tin người dùng!",
+                    title: t("setting.personal.errorTitle"),
+                    text: t("setting.personal.errorLoad"),
                 });
             } finally {
                 setLoading(false);
@@ -59,8 +61,8 @@ const PersonalInfo = () => {
             await UserService.updateProfile(formData);
             await Swal.fire({
                 icon: "success",
-                title: "Thành công!",
-                text: "Cập nhật thông tin cá nhân thành công!",
+                title: t("setting.personal.successTitle"),
+                text: t("setting.personal.successSave"),
             });
             setUser((prev) => ({
                 ...prev,
@@ -72,8 +74,8 @@ const PersonalInfo = () => {
             console.error("Error updating user:", err);
             await Swal.fire({
                 icon: "error",
-                title: "Thất bại!",
-                text: "Có lỗi khi cập nhật thông tin!",
+                title: t("setting.personal.errorTitle"),
+                text: t("setting.personal.errorSave"),
             });
         }
     };
@@ -83,13 +85,13 @@ const PersonalInfo = () => {
 
     return (
         <div className="setting-content">
-            <h3 className="setting-section-title">Thông tin cá nhân</h3>
+            <h3 className="setting-section-title">{t("setting.personal.title")}</h3>
             <p className="setting-section-desc">
-                Quản lý thông tin cá nhân của bạn.
+                {t("setting.personal.description")}
             </p>
             <form className="setting-info-card" onSubmit={handleSubmit}>
                 <div className="setting-info-row">
-                    <label>Tên người dùng</label>
+                    <label>{t("setting.personal.username")}</label>
                     <input
                         type="text"
                         name="username"
@@ -100,7 +102,7 @@ const PersonalInfo = () => {
                     />
                 </div>
                 <div className="setting-info-row">
-                    <label>Email</label>
+                    <label>{t("setting.personal.email")}</label>
                     <input
                         type="email"
                         name="email"
@@ -111,15 +113,15 @@ const PersonalInfo = () => {
                     />
                 </div>
                 <div className="setting-info-row">
-                    <label>Vai trò</label>
+                    <label>{t("setting.personal.role")}</label>
                     <div className={`setting-info-role ${user.role == "admin" ? "admin" : "user"}`}>
-                        {user.role == "admin" ? "Quản trị viên" : "Người dùng"}
+                        {user.role == "admin" ? t("setting.personal.admin") : t("setting.personal.user")}
                     </div>
                 </div>
                 <div className="setting-info-row">
-                    <label>Trạng thái</label>
+                    <label>{t("setting.personal.status")}</label>
                     <div className={`setting-status ${user.active ? "active" : "locked"}`}>
-                        {user.active ? "Hoạt động" : "Bị khóa"}
+                        {user.active ? t("setting.personal.active") : t("setting.personal.locked")}
                     </div>
                 </div>
                 <div className="setting-info-row">
@@ -132,7 +134,7 @@ const PersonalInfo = () => {
                             cursor: isChanged ? "pointer" : "not-allowed",
                         }}
                     >
-                        <i className="fas fa-save"></i> Lưu thay đổi
+                        <i className="fas fa-save"></i> {t("setting.personal.saveChanges")}
                     </button>
                 </div>
             </form>

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 import { UserSettingService } from "@/services/UserSettingService.jsx";
 
 const InterfaceSetting = () => {
+    const { t } = useTranslation();
     const [theme, setTheme] = useState("light");
     const [font, setFont] = useState("Inter");
     const [fontSize, setFontSize] = useState(13);
@@ -39,8 +41,8 @@ const InterfaceSetting = () => {
             await UserSettingService.updateUserSettingsSection("interface", payload);
             Swal.fire({
                 icon: "success",
-                title: "Đã lưu thành công!",
-                text: "Cấu hình giao diện của bạn đã được cập nhật.",
+                title: t("setting.interface.successTitle"),
+                text: t("setting.interface.successSave"),
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -50,19 +52,19 @@ const InterfaceSetting = () => {
     };
 
     if (loading) {
-        return <div className="setting-loading">Đang tải cài đặt...</div>;
+        return <div className="setting-loading">{t("setting.interface.loading")}</div>;
     }
 
     return (
         <div className="setting-content">
-            <h3 className="setting-section-title">Cấu hình giao diện</h3>
+            <h3 className="setting-section-title">{t("setting.interface.title")}</h3>
             <p className="setting-section-desc">
-                Tùy chỉnh giao diện học tập của bạn theo sở thích.
+                {t("setting.interface.description")}
             </p>
             <div className="setting-interface-card">
                 <div className="setting-interface-row">
                     <label className="setting-interface-label">
-                        <i className="fas fa-adjust"></i> Chủ đề
+                        <i className="fas fa-adjust"></i> {t("setting.interface.theme")}
                     </label>
                     <div className="setting-interface-theme">
                         <label
@@ -78,7 +80,7 @@ const InterfaceSetting = () => {
                                 onChange={(e) => setTheme(e.target.value)}
                             />
                             <i className="fas fa-sun"></i>
-                            <span>Sáng</span>
+                            <span>{t("setting.interface.light")}</span>
                         </label>
                         <label
                             className={`setting-interface-theme-option ${
@@ -93,13 +95,13 @@ const InterfaceSetting = () => {
                                 onChange={(e) => setTheme(e.target.value)}
                             />
                             <i className="fas fa-moon"></i>
-                            <span>Tối</span>
+                            <span>{t("setting.interface.dark")}</span>
                         </label>
                     </div>
                 </div>
                 <div className="setting-interface-row">
                     <label className="setting-interface-label">
-                        <i className="fas fa-font"></i> Font chữ
+                        <i className="fas fa-font"></i> {t("setting.interface.font")}
                     </label>
                     <select
                         className="setting-interface-select"
@@ -115,7 +117,7 @@ const InterfaceSetting = () => {
                 </div>
                 <div className="setting-interface-row">
                     <label className="setting-interface-label">
-                        <i className="fas fa-text-height"></i> Cỡ chữ
+                        <i className="fas fa-text-height"></i> {t("setting.interface.fontSize")}
                     </label>
                     <select
                         className="setting-interface-select"
@@ -131,7 +133,7 @@ const InterfaceSetting = () => {
                 </div>
                 <div className="setting-interface-action">
                     <button className="setting-btn" onClick={handleSave}>
-                        <i className="fas fa-save"></i> Lưu thay đổi
+                        <i className="fas fa-save"></i> {t("setting.interface.saveChanges")}
                     </button>
                 </div>
             </div>

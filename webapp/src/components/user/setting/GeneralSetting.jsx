@@ -55,8 +55,8 @@ const GeneralSetting = () => {
             dispatch(setLanguage(selectedLanguage));
             Swal.fire({
                 icon: "success",
-                title: t("setting.successSave"),
-                text: t("setting.generalDesc"),
+                title: t("setting.general.successTitle"),
+                text: t("setting.general.successSave"),
                 timer: 2000,
                 showConfirmButton: false,
             });
@@ -70,16 +70,16 @@ const GeneralSetting = () => {
         }
     };
 
-    if (loading) return <div>{t("setting.loading") ?? "Đang tải cài đặt..."}</div>;
+    if (loading) return <div>{t("setting.loading")}</div>;
 
     return (
         <div className="setting-content">
-            <h3 className="setting-section-title">{t("setting.generalSettings")}</h3>
-            <p className="setting-section-desc">{t("setting.generalDesc")}</p>
+            <h3 className="setting-section-title">{t("setting.general.title")}</h3>
+            <p className="setting-section-desc">{t("setting.general.description")}</p>
             <div className="setting-general-card">
                 <div className="setting-general-row">
                     <label className="setting-general-label">
-                        <i className="fas fa-calendar-alt"></i> {t("setting.dateFormat")}
+                        <i className="fas fa-calendar-alt"></i> {t("setting.general.dateFormat")}
                     </label>
                     <select
                         className="setting-general-select"
@@ -93,7 +93,7 @@ const GeneralSetting = () => {
                 </div>
                 <div className="setting-general-row">
                     <label className="setting-general-label">
-                        <i className="fas fa-language"></i> {t("setting.language")}
+                        <i className="fas fa-language"></i> {t("setting.general.language")}
                     </label>
                     <div className="setting-general-language">
                         {languages.map((lang) => (
@@ -116,7 +116,7 @@ const GeneralSetting = () => {
                 </div>
                 <div className="setting-general-row">
                     <label className="setting-general-label">
-                        <i className="fas fa-clock"></i> {t("setting.timezone")}
+                        <i className="fas fa-clock"></i> {t("setting.general.timezone")}
                     </label>
                     <select
                         className="setting-general-select"
@@ -130,7 +130,7 @@ const GeneralSetting = () => {
                 </div>
                 <div className="setting-general-action">
                     <button className="setting-btn" onClick={handleSave}>
-                        <i className="fas fa-save"></i> {t("setting.saveChanges")}
+                        <i className="fas fa-save"></i> {t("setting.general.saveChanges")}
                     </button>
                 </div>
             </div>

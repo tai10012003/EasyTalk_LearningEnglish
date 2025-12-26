@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { UserSettingService } from "@/services/UserSettingService.jsx";
 
 const SecuritySetting = () => {
     const navigate = useNavigate();
+    const { t, i18n } = useTranslation();
     const [twoFAEnabled, setTwoFAEnabled] = useState(false);
     const [googleLogin, setGoogleLogin] = useState(true);
     const [loading, setLoading] = useState(true);
@@ -40,8 +42,8 @@ const SecuritySetting = () => {
             await UserSettingService.updateUserSettingsSection("security", payload);
             Swal.fire({
                 icon: "success",
-                title: "Đã lưu thành công!",
-                text: "Cấu hình bảo mật của bạn đã được cập nhật.",
+                title: t("setting.security.successTitle"),
+                text: t("setting.security.successSave"),
                 timer: 2000,
                 showConfirmButton: false
             });
@@ -52,25 +54,25 @@ const SecuritySetting = () => {
 
     const handleLogoutAll = async () => {
         Swal.fire({
-            title: "Xác nhận đăng xuất?",
-            text: "Bạn sẽ đăng xuất khỏi tất cả thiết bị khác.",
+            title: t("setting.security.logoutAllTitle"),
+            text: t("setting.security.logoutAllText"),
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Đăng xuất tất cả",
+            confirmButtonText: t("setting.security.button5"),
             cancelButtonText: "Hủy"
         }).then((result) => {
             if (result.isConfirmed) {
                 Swal.fire({
                     icon: "success",
-                    title: "Đã đăng xuất khỏi tất cả thiết bị!",
-                    text: "Vui lòng đăng nhập lại để tiếp tục.",
+                    title: t("setting.security.logoutAllSuccessTitle"),
+                    text: t("setting.security.logoutAllSuccessText"),
                 });
             }
         });
     };
 
     if (loading) {
-        return <div className="setting-loading">Đang tải cài đặt bảo mật...</div>;
+        return <div className="setting-loading">{t("setting.security.loading")}</div>;
     }
 
     return (
@@ -79,23 +81,23 @@ const SecuritySetting = () => {
                 <div className="setting-security-header">
                     <i className="fas fa-key"></i>
                     <div>
-                        <h3>Đổi mật khẩu</h3>
-                        <p>Cập nhật mật khẩu của bạn để bảo vệ tài khoản tốt hơn.</p>
+                        <h3>{t("setting.security.title1")}</h3>
+                        <p>{t("setting.security.description1")}</p>
                     </div>
                 </div>
                 <button
                     className="setting-security-btn"
                     onClick={() => navigate("/change-password")}
                 >
-                    Đổi mật khẩu
+                    {t("setting.security.button1")}
                 </button>
             </div>
             <div className="setting-security-section">
                 <div className="setting-security-header">
                     <i className="fas fa-shield-alt"></i>
                     <div>
-                        <h3>Xác thực hai bước (2FA)</h3>
-                        <p>Bảo vệ tài khoản bằng cách yêu cầu mã xác minh khi đăng nhập.</p>
+                        <h3>{t("setting.security.title2")}</h3>
+                        <p>{t("setting.security.description2")}</p>
                     </div>
                 </div>
                 <label className="setting-security-toggle">
@@ -111,8 +113,8 @@ const SecuritySetting = () => {
                 <div className="setting-security-header">
                     <i className="fab fa-google"></i>
                     <div>
-                        <h3>Đăng nhập nhanh bằng Google</h3>
-                        <p>Cho phép đăng nhập tài khoản bằng Google nhanh chóng và an toàn.</p>
+                        <h3>{t("setting.security.title3")}</h3>
+                        <p>{t("setting.security.description3")}</p>
                     </div>
                 </div>
                 <label className="setting-security-toggle">
@@ -128,8 +130,8 @@ const SecuritySetting = () => {
                 <div className="setting-security-header">
                     <i className="fas fa-laptop"></i>
                     <div>
-                        <h3>Thiết bị đang đăng nhập</h3>
-                        <p>Kiểm tra và quản lý các thiết bị đang đăng nhập tài khoản của bạn.</p>
+                        <h3>{t("setting.security.title4")}</h3>
+                        <p>{t("setting.security.description4")}</p>
                     </div>
                 </div>
                 <div className="setting-security-device-list">
@@ -151,17 +153,17 @@ const SecuritySetting = () => {
                 <div className="setting-security-header">
                     <i className="fas fa-sign-out-alt"></i>
                     <div>
-                        <h3>Đăng xuất khỏi tất cả thiết bị</h3>
-                        <p>Thoát tài khoản trên mọi thiết bị đang đăng nhập.</p>
+                        <h3>{t("setting.security.title5")}</h3>
+                        <p>{t("setting.security.description5")}</p>
                     </div>
                 </div>
                 <button className="setting-security-btn danger" onClick={handleLogoutAll}>
-                    Đăng xuất tất cả
+                    {t("setting.security.button5")}
                 </button>
             </div>
             <div className="setting-security-footer">
                 <button className="setting-btn" onClick={handleSave}>
-                    <i className="fas fa-save"></i> Lưu thay đổi
+                    <i className="fas fa-save"></i> {t("setting.security.saveChanges")}
                 </button>
             </div>
         </div>
