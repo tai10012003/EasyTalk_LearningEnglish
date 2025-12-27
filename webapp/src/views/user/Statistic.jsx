@@ -35,7 +35,7 @@ const Statistic = () => {
     const [userPrizes, setUserPrizes] = useState([]);
     const [championStats, setChampionStats] = useState({ week: 0, month: 0, year: 0, total: 0 });
     const [prizesLoading, setPrizesLoading] = useState(true);
-    const currentUserId = AuthService.getCurrentUser()?.id;
+    const [currentUserId, setCurrentUserId] = useState(null);
 
     const periods = [
         { key: "week", label: "Tuần này" },
@@ -59,7 +59,7 @@ const Statistic = () => {
     };
 
     const openFollowModal = (type) => {
-        setFollowModal({ open: true, type, userId: currentUserId });
+        setFollowModal({ open: true, type, userId: currentUserId  });
     };
 
     const closeFollowModal = () => {
@@ -76,6 +76,7 @@ const Statistic = () => {
                 setLoading(false);
                 return;
             }
+            setCurrentUserId(progress.user.toString());
             setChartData(stats.data || []);
             setStreak(progress?.streak || 0);
             setMaxStreak(progress?.maxStreak || 0);
@@ -119,8 +120,10 @@ const Statistic = () => {
     };
 
     useEffect(() => {
-        fetchMyFollowStats();
-    }, []);
+        if (currentUserId) {
+            fetchMyFollowStats();
+        }
+    }, [currentUserId]); 
 
     const fetchPrizes = async () => {
         setPrizesLoading(true);
