@@ -1,6 +1,7 @@
 var express = require("express");
 var router = express.Router();
 
+router.use("/dashboard", require(__dirname + "/dashboardcontroller"));
 router.use("/journey", require(__dirname + "/journeycontroller"));
 router.use("/gate", require(__dirname + "/gatecontroller"));
 router.use("/stage", require(__dirname + "/stagecontroller"));

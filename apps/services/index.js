@@ -1,3 +1,4 @@
+const DashboardService = require("./dashboardService");
 const UserService= require("./userService")
 const UserprogressService= require("./userprogressService")
 const GrammarService= require('./grammarService');
@@ -17,6 +18,7 @@ const UserSettingService= require('./usersettingService');
 const PrizeService= require("./prizeService");
 
 module.exports = {
+    DashboardService,
     UserService,
     UserprogressService,
     GrammarService,

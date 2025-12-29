@@ -45,6 +45,9 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 var controller = require(__dirname  + "/controllers");
 app.use(controller);
 
+var dashboardController = require(__dirname + "/controllers/dashboardcontroller");
+app.use(dashboardController);
+
 var journeyController = require(__dirname + "/controllers/journeycontroller");
 app.use(journeyController);
 
