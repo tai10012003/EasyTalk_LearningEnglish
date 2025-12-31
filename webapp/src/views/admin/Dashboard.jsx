@@ -18,6 +18,17 @@ function Dashboard() {
     const [exerciseBreakdown, setExerciseBreakdown] = useState([]);
     const [recentActivities, setRecentActivities] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [leaderboardTab, setLeaderboardTab] = useState('exp');
+    const [topUsersExp, setTopUsersExp] = useState([]);
+    const [topUsersTime, setTopUsersTime] = useState([]);
+    const [topUsersStreak, setTopUsersStreak] = useState([]);
+    const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
+    const [lessonCompletionStats, setLessonCompletionStats] = useState(null);
+    const [exerciseCompletionStats, setExerciseCompletionStats] = useState(null);
+    const [popularLessons, setPopularLessons] = useState(null);
+    const [popularExercises, setPopularExercises] = useState(null);
+    const [hardestLessons, setHardestLessons] = useState(null);
+    const [hardestExercises, setHardestExercises] = useState(null);
 
     useEffect(() => {
         loadDashboardData();
@@ -26,25 +37,73 @@ function Dashboard() {
         };
     }, []);
 
+    useEffect(() => {
+        loadLeaderboardData(leaderboardTab);
+    }, [leaderboardTab]);
+
     const loadDashboardData = async () => {
         setIsLoading(true);
         try {
-            const [activityData, overviewData, lessonData, exerciseData, activitiesData] = await Promise.all([
+            const [
+                activityData, 
+                overviewData, 
+                lessonData, 
+                exerciseData, 
+                activitiesData,
+                lessonCompStats,
+                exerciseCompStats,
+                popLessons,
+                popExercises,
+                hardLessons,
+                hardExercises
+            ] = await Promise.all([
                 DashboardService.fetchUserActivityLast7Days(),
                 DashboardService.fetchDashboardOverview(),
                 DashboardService.fetchLessonBreakdown(),
                 DashboardService.fetchExerciseBreakdown(),
-                DashboardService.fetchRecentActivities(5)
+                DashboardService.fetchRecentActivities(5),
+                DashboardService.fetchLessonCompletionStats(),
+                DashboardService.fetchExerciseCompletionStats(),
+                DashboardService.fetchMostPopularLessons(),
+                DashboardService.fetchMostPopularExercises(),
+                DashboardService.fetchLeastPopularLessons(),
+                DashboardService.fetchLeastPopularExercises()
             ]);
             setUserActivity(activityData);
             setOverview(overviewData);
             setLessonBreakdown(lessonData);
             setExerciseBreakdown(exerciseData);
             setRecentActivities(activitiesData);
+            setLessonCompletionStats(lessonCompStats);
+            setExerciseCompletionStats(exerciseCompStats);
+            setPopularLessons(popLessons);
+            setPopularExercises(popExercises);
+            setHardestLessons(hardLessons);
+            setHardestExercises(hardExercises);
         } catch (error) {
             console.error("Error loading dashboard data:", error);
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const loadLeaderboardData = async (type) => {
+        setIsLoadingLeaderboard(true);
+        try {
+            if (type === 'exp' && topUsersExp.length === 0) {
+                const data = await DashboardService.fetchTopUsersByExp(10);
+                setTopUsersExp(data);
+            } else if (type === 'time' && topUsersTime.length === 0) {
+                const data = await DashboardService.fetchTopUsersByStudyTime(10);
+                setTopUsersTime(data);
+            } else if (type === 'streak' && topUsersStreak.length === 0) {
+                const data = await DashboardService.fetchTopUsersByStreak(10);
+                setTopUsersStreak(data);
+            }
+        } catch (error) {
+            console.error("Error loading leaderboard data:", error);
+        } finally {
+            setIsLoadingLeaderboard(false);
         }
     };
 
@@ -133,7 +192,7 @@ function Dashboard() {
 
     const lessonPieOptions = {
         chart: { type: "pie", backgroundColor: "#ffffff", borderRadius: 16, height: 380 },
-        title: { text: "Tỷ Lệ Bài Học", style: { color: "#1e293b", fontSize: "18px", fontWeight: "700" } },
+        title: { text: "Tỷ Lệ Số Bài Học", style: { color: "#1e293b", fontSize: "18px", fontWeight: "700" } },
         tooltip: { 
             pointFormat: "<b>{point.y}</b> bài học ({point.percentage:.1f}%)",
             style: { fontSize: "13px" }
@@ -158,7 +217,7 @@ function Dashboard() {
 
     const exercisePieOptions = {
         chart: { type: "pie", backgroundColor: "#ffffff", borderRadius: 16, height: 380 },
-        title: { text: "Tỷ Lệ Bài Luyện Tập", style: { color: "#1e293b", fontSize: "18px", fontWeight: "700" } },
+        title: { text: "Tỷ Lệ Số Bài Luyện Tập", style: { color: "#1e293b", fontSize: "18px", fontWeight: "700" } },
         tooltip: { 
             pointFormat: "<b>{point.y}</b> bài luyện tập ({point.percentage:.1f}%)",
             style: { fontSize: "13px" }
@@ -186,6 +245,20 @@ function Dashboard() {
         if (label === 'week') return overview.activeUsersThisWeek > 0 ? '+8%' : '0%';
         if (label === 'today') return overview.activeUsersToday > 0 ? '+5%' : '0%';
         return '+0%';
+    };
+
+    const getRankIcon = (rank) => {
+        if (rank === 1) return '🥇';
+        if (rank === 2) return '🥈';
+        if (rank === 3) return '🥉';
+        return `#${rank}`;
+    };
+
+    const getCurrentLeaderboardData = () => {
+        if (leaderboardTab === 'exp') return topUsersExp;
+        if (leaderboardTab === 'time') return topUsersTime;
+        if (leaderboardTab === 'streak') return topUsersStreak;
+        return [];
     };
 
     return (
@@ -224,7 +297,7 @@ function Dashboard() {
                         </div>
                         <div className="dashboard-card">
                             <div className="dashboard-card-info">
-                                <h5>Bài Luyện Tập</h5>
+                                <h5>Tổng Bài Luyện Tập</h5>
                                 <h2>{overview.totalExercises}</h2>
                                 <small className="text-warning">{calculatePercentage(overview.totalExercises, 'today')} hôm nay</small>
                             </div>
@@ -243,11 +316,6 @@ function Dashboard() {
                             </div>
                         </div>
                     </div>
-                    <div className="dashboard-full-chart">
-                        <div className="chart-container">
-                            <HighchartsReact highcharts={Highcharts} options={activityChartOptions} />
-                        </div>
-                    </div>
                     <div className="dashboard-pie-charts">
                         <div className="chart-pie-left">
                             <div className="chart-container">
@@ -260,10 +328,443 @@ function Dashboard() {
                             </div>
                         </div>
                     </div>
-                    
+                    <div className="dashboard-completion-section">
+                        {lessonCompletionStats && (
+                            <div className="dashboard-completion-grid">
+                                <div className="dashboard-completion-card">
+                                    <div className="dashboard-completion-header">
+                                        <i className="fas fa-book text-success"></i>
+                                        <h5>Tỷ Lệ Hoàn Thành Bài Học</h5>
+                                    </div>
+                                    <div className="dashboard-completion-body">
+                                        <div className="dashboard-completion-item">
+                                            <span className="dashboard-completion-label">Ngữ Pháp:</span>
+                                            <div className="dashboard-completion-progress">
+                                                <div
+                                                    className="dashboard-completion-bar"
+                                                    style={{ width: `${lessonCompletionStats.grammars.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="dashboard-completion-percent">
+                                                {lessonCompletionStats.grammars.percentage}%
+                                            </span>
+                                            <span className="dashboard-completion-detail">
+                                                ({lessonCompletionStats.grammars.avgUnlocked}/{lessonCompletionStats.grammars.total} bài TB)
+                                            </span>
+                                        </div>
+                                        <div className="dashboard-completion-item">
+                                            <span className="dashboard-completion-label">Phát Âm:</span>
+                                            <div className="dashboard-completion-progress">
+                                                <div
+                                                    className="dashboard-completion-bar bg-info"
+                                                    style={{ width: `${lessonCompletionStats.pronunciations.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="dashboard-completion-percent">
+                                                {lessonCompletionStats.pronunciations.percentage}%
+                                            </span>
+                                            <span className="dashboard-completion-detail">
+                                                ({lessonCompletionStats.pronunciations.avgUnlocked}/{lessonCompletionStats.pronunciations.total} bài TB)
+                                            </span>
+                                        </div>
+                                        <div className="dashboard-completion-item">
+                                            <span className="dashboard-completion-label">Câu Chuyện:</span>
+                                            <div className="dashboard-completion-progress">
+                                                <div
+                                                    className="dashboard-completion-bar bg-warning"
+                                                    style={{ width: `${lessonCompletionStats.stories.percentage}%` }}
+                                                ></div>
+                                            </div>
+                                            <span className="dashboard-completion-percent">
+                                                {lessonCompletionStats.stories.percentage}%
+                                            </span>
+                                            <span className="dashboard-completion-detail">
+                                                ({lessonCompletionStats.stories.avgUnlocked}/{lessonCompletionStats.stories.total} bài TB)
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {exerciseCompletionStats && (
+                                    <div className="dashboard-completion-card">
+                                        <div className="dashboard-completion-header">
+                                            <i className="fas fa-pencil-alt text-warning"></i>
+                                            <h5>Tỷ Lệ Hoàn Thành Bài Tập</h5>
+                                        </div>
+                                        <div className="dashboard-completion-body">
+                                            <div className="dashboard-completion-item">
+                                                <span className="dashboard-completion-label">Ngữ Pháp:</span>
+                                                <div className="dashboard-completion-progress">
+                                                    <div
+                                                        className="dashboard-completion-bar"
+                                                        style={{ width: `${exerciseCompletionStats.grammarExercises.percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="dashboard-completion-percent">
+                                                    {exerciseCompletionStats.grammarExercises.percentage}%
+                                                </span>
+                                                <span className="dashboard-completion-detail">
+                                                    ({exerciseCompletionStats.grammarExercises.avgUnlocked}/{exerciseCompletionStats.grammarExercises.total} bài TB)
+                                                </span>
+                                            </div>
+                                            <div className="dashboard-completion-item">
+                                                <span className="dashboard-completion-label">Phát Âm:</span>
+                                                <div className="dashboard-completion-progress">
+                                                    <div
+                                                        className="dashboard-completion-bar bg-info"
+                                                        style={{ width: `${exerciseCompletionStats.pronunciationExercises.percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="dashboard-completion-percent">
+                                                    {exerciseCompletionStats.pronunciationExercises.percentage}%
+                                                </span>
+                                                <span className="dashboard-completion-detail">
+                                                    ({exerciseCompletionStats.pronunciationExercises.avgUnlocked}/{exerciseCompletionStats.pronunciationExercises.total} bài TB)
+                                                </span>
+                                            </div>
+                                            <div className="dashboard-completion-item">
+                                                <span className="dashboard-completion-label">Từ Vựng:</span>
+                                                <div className="dashboard-completion-progress">
+                                                    <div
+                                                        className="dashboard-completion-bar bg-warning"
+                                                        style={{ width: `${exerciseCompletionStats.vocabularyExercises.percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="dashboard-completion-percent">
+                                                    {exerciseCompletionStats.vocabularyExercises.percentage}%
+                                                </span>
+                                                <span className="dashboard-completion-detail">
+                                                    ({exerciseCompletionStats.vocabularyExercises.avgUnlocked}/{exerciseCompletionStats.vocabularyExercises.total} bài TB)
+                                                </span>
+                                            </div>
+                                            <div className="dashboard-completion-item">
+                                                <span className="dashboard-completion-label">Nghe Chép:</span>
+                                                <div className="dashboard-completion-progress">
+                                                    <div
+                                                        className="dashboard-completion-bar bg-danger"
+                                                        style={{ width: `${exerciseCompletionStats.dictationExercises.percentage}%` }}
+                                                    ></div>
+                                                </div>
+                                                <span className="dashboard-completion-percent">
+                                                    {exerciseCompletionStats.dictationExercises.percentage}%
+                                                </span>
+                                                <span className="dashboard-completion-detail">
+                                                    ({exerciseCompletionStats.dictationExercises.avgUnlocked}/{exerciseCompletionStats.dictationExercises.total} bài TB)
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                        <div className="dashboard-popular-grid">
+                            {popularLessons && (
+                                <div className="dashboard-popular-card">
+                                    <div className="dashboard-popular-header popular">
+                                        <i className="fas fa-fire"></i>
+                                        <h5>Bài Học Phổ Biến Nhất</h5>
+                                    </div>
+                                    <div className="dashboard-popular-body">
+                                        {popularLessons.grammar && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-success">
+                                                    {popularLessons.grammar.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularLessons.grammar.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularLessons.grammar.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {popularLessons.pronunciation && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-primary">
+                                                    {popularLessons.pronunciation.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularLessons.pronunciation.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularLessons.pronunciation.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {popularLessons.story && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-warning">
+                                                    {popularLessons.story.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularLessons.story.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularLessons.story.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {popularExercises && (
+                                <div className="dashboard-popular-card">
+                                    <div className="dashboard-popular-header popular">
+                                        <i className="fas fa-fire"></i>
+                                        <h5>Bài Luyện Tập Phổ Biến Nhất</h5>
+                                    </div>
+                                    <div className="dashboard-popular-body">
+                                        {popularExercises.grammarExercises && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-success">
+                                                    {popularExercises.grammarExercises.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularExercises.grammarExercises.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularExercises.grammarExercises.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {popularExercises.pronunciationExercises && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-primary">
+                                                    {popularExercises.pronunciationExercises.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularExercises.pronunciationExercises.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularExercises.pronunciationExercises.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {popularExercises.vocabularyExercises && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-warning">
+                                                    {popularExercises.vocabularyExercises.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularExercises.vocabularyExercises.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularExercises.vocabularyExercises.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {popularExercises.dictations && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-danger">
+                                                    {popularExercises.dictations.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{popularExercises.dictations.title}</div>
+                                                    <div className="dashboard-popular-count">
+                                                        <i className="fas fa-users"></i> {popularExercises.dictations.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {hardestLessons && (
+                                <div className="dashboard-popular-card">
+                                    <div className="dashboard-popular-header hardest">
+                                        <i className="fas fa-exclamation-triangle"></i>
+                                        <h5>Bài Học Khó Nhất</h5>
+                                    </div>
+                                    <div className="dashboard-popular-body">
+                                        {hardestLessons.grammar && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-success">
+                                                    {hardestLessons.grammar.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestLessons.grammar.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestLessons.grammar.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {hardestLessons.pronunciation && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-primary">
+                                                    {hardestLessons.pronunciation.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestLessons.pronunciation.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestLessons.pronunciation.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {hardestLessons.story && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-warning">
+                                                    {hardestLessons.story.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestLessons.story.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestLessons.story.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                            {hardestExercises && (
+                                <div className="dashboard-popular-card">
+                                    <div className="dashboard-popular-header hardest">
+                                        <i className="fas fa-exclamation-triangle"></i>
+                                        <h5>Bài Luyện Tập Khó Nhất</h5>
+                                    </div>
+                                    <div className="dashboard-popular-body">
+                                        {hardestExercises.grammarExercises && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-success">
+                                                    {hardestExercises.grammarExercises.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestExercises.grammarExercises.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestExercises.grammarExercises.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {hardestExercises.pronunciationExercises && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-primary">
+                                                    {hardestExercises.pronunciationExercises.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestExercises.pronunciationExercises.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestExercises.pronunciationExercises.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {hardestExercises.vocabularyExercises && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-warning">
+                                                    {hardestExercises.vocabularyExercises.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestExercises.vocabularyExercises.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestExercises.vocabularyExercises.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {hardestExercises.dictations && (
+                                            <div className="dashboard-popular-item">
+                                                <span className="dashboard-popular-badge bg-danger">
+                                                    {hardestExercises.dictations.type}
+                                                </span>
+                                                <div className="dashboard-popular-content">
+                                                    <div className="dashboard-popular-title">{hardestExercises.dictations.title}</div>
+                                                    <div className="dashboard-popular-count text-danger">
+                                                        <i className="fas fa-users"></i> Chỉ {hardestExercises.dictations.count} người dùng
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="dashboard-leaderboard">
+                        <div className="dashboard-leaderboard-header">
+                            <h5><i className="fas fa-trophy"></i> Bảng Xếp Hạng Top 10 Người Xuất Sắc Nhất EasyTalk</h5>
+                        </div>
+                        <div className="dashboard-leaderboard-tabs">
+                            <button 
+                                className={`dashboard-leaderboard-tab ${leaderboardTab === 'exp' ? 'active' : ''}`}
+                                onClick={() => setLeaderboardTab('exp')}
+                            >
+                                <i className="fas fa-star"></i>
+                                Điểm Kinh Nghiệm
+                            </button>
+                            <button 
+                                className={`dashboard-leaderboard-tab ${leaderboardTab === 'time' ? 'active' : ''}`}
+                                onClick={() => setLeaderboardTab('time')}
+                            >
+                                <i className="fas fa-clock"></i>
+                                Thời Gian Học
+                            </button>
+                            <button 
+                                className={`dashboard-leaderboard-tab ${leaderboardTab === 'streak' ? 'active' : ''}`}
+                                onClick={() => setLeaderboardTab('streak')}
+                            >
+                                <i className="fas fa-fire"></i>
+                                Streak
+                            </button>
+                        </div>
+                        <div className="dashboard-leaderboard-content">
+                            {isLoadingLeaderboard ? (
+                                <div style={{ textAlign: 'center', padding: '50px 20px' }}>
+                                    <i className="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                    <p style={{ marginTop: '15px', color: '#64748b' }}>Đang tải bảng xếp hạng...</p>
+                                </div>
+                            ) : getCurrentLeaderboardData().length > 0 ? (
+                                <div className="dashboard-leaderboard-list">
+                                    {getCurrentLeaderboardData().map((user) => (
+                                        <div key={user.userId} className="dashboard-leaderboard-item">
+                                            <div className="dashboard-leaderboard-rank">
+                                                {getRankIcon(user.rank)}
+                                            </div>
+                                            <div className="dashboard-leaderboard-user">
+                                                <div className="dashboard-leaderboard-username">{user.username}</div>
+                                            </div>
+                                            <div className="dashboard-leaderboard-value">
+                                                {leaderboardTab === 'exp' && (
+                                                    <span className="dashboard-leaderboard-exp">
+                                                        <i className="fas fa-star"></i> {user.value.toLocaleString()} EXP
+                                                    </span>
+                                                )}
+                                                {leaderboardTab === 'time' && (
+                                                    <span className="dashboard-leaderboard-time">
+                                                        <i className="fas fa-clock"></i> {user.formattedValue}
+                                                    </span>
+                                                )}
+                                                {leaderboardTab === 'streak' && (
+                                                    <span className="dashboard-leaderboard-streak">
+                                                        <i className="fas fa-fire"></i> {user.value} ngày
+                                                        {user.maxStreak > user.value && (
+                                                            <small style={{ marginLeft: '8px', color: '#94a3b8' }}>
+                                                                (Max: {user.maxStreak})
+                                                            </small>
+                                                        )}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div style={{ textAlign: 'center', padding: '50px 20px', color: '#64748b' }}>
+                                    <i className="fas fa-inbox fa-3x" style={{ marginBottom: '15px', opacity: 0.5 }}></i>
+                                    <p>Chưa có dữ liệu bảng xếp hạng</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                    <div className="dashboard-full-chart">
+                        <div className="chart-container">
+                            <HighchartsReact highcharts={Highcharts} options={activityChartOptions} />
+                        </div>
+                    </div>
                     <div className="dashboard-recent">
                         <div className="recent-header">
-                            <h5><i className="fas fa-history me-2"></i>Hoạt Động Gần Đây</h5>
+                            <h5><i className="fas fa-history me-2"></i>Hoạt Động Gần Đây Của Người Dùng</h5>
                         </div>
                         <div className="recent-list">
                             {recentActivities.length > 0 ? (
@@ -281,7 +782,7 @@ function Dashboard() {
                             ) : (
                                 <div style={{ textAlign: 'center', padding: '30px', color: '#64748b' }}>
                                     <i className="fas fa-inbox fa-2x" style={{ marginBottom: '10px' }}></i>
-                                    <p>Chưa có hoạt động gần đây</p>
+                                    <p>Chưa có hoạt động gần đây của người dùng</p>
                                 </div>
                             )}
                         </div>

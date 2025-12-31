@@ -226,12 +226,6 @@ function Sidebar({ isCollapsed, setIsCollapsed }) {
                                 <p>Theo dõi tiến trình học tập</p>
                             </Link>
                         </li>
-                        <li className={`admin-nav-item ${isSingleMenuActive("/admin/chart") ? "active" : ""}`}>
-                            <Link to="/admin/chart">
-                                <i className="far fa-chart-bar"></i>
-                                <p>Thống kê</p>
-                            </Link>
-                        </li>
                     </ul>
                 </div>
             </div>
