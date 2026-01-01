@@ -552,6 +552,13 @@ class UserprogressRepository {
                 for (let d = 1; d <= daysInMonth; d++) {
                     dateKeys.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
                 }
+            } else if (/^\d{4}$/.test(periodKey)) {
+                const y = Number(periodKey);
+                const start = new Date(y, 0, 1);
+                const end = new Date(y, 11, 31);
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    dateKeys.push(getVietnamDate(new Date(d)));
+                }
             }
         } else {
             dateKeys = this._getDateKeysForPeriod(period);
@@ -600,6 +607,13 @@ class UserprogressRepository {
                 const daysInMonth = new Date(y, m, 0).getDate();
                 for (let d = 1; d <= daysInMonth; d++) {
                     dateKeys.push(`${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`);
+                }
+            } else if (/^\d{4}$/.test(periodKey)) {
+                const y = Number(periodKey);
+                const start = new Date(y, 0, 1);
+                const end = new Date(y, 11, 31);
+                for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                    dateKeys.push(getVietnamDate(new Date(d)));
                 }
             }
         } else {
