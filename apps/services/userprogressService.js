@@ -787,10 +787,14 @@ class UserprogressService {
         const userIdStr = userId.toString();
         const isTopExp = topExpUserIds.includes(userIdStr);
         const isTopTime = topTimeUserIds.includes(userIdStr);
-        if (isTopExp && isTopTime) prize.championType = "both";
-        else if (isTopExp) prize.championType = "exp";
-        else if (isTopTime) prize.championType = "time";
-        return isTopExp || isTopTime;
+        const meetsMinExp = topExpScore >= 100;
+        const meetsMinTime = topTimeScore >= 0.333;
+        const validExp = isTopExp && meetsMinExp;
+        const validTime = isTopTime && meetsMinTime;
+        if (validExp && validTime) prize.championType = "both";
+        else if (validExp) prize.championType = "exp";
+        else if (validTime) prize.championType = "time";
+        return validExp || validTime;
     }
 
     async _checkChampionMonth(userId, prize, periodKey) {
@@ -806,10 +810,14 @@ class UserprogressService {
         const userIdStr = userId.toString();
         const isTopExp = topExpUserIds.includes(userIdStr);
         const isTopTime = topTimeUserIds.includes(userIdStr);
-        if (isTopExp && isTopTime) prize.championType = "both";
-        else if (isTopExp) prize.championType = "exp";
-        else if (isTopTime) prize.championType = "time";
-        return isTopExp || isTopTime;
+        const meetsMinExp = topExpScore >= 400;
+        const meetsMinTime = topTimeScore >= 1;
+        const validExp = isTopExp && meetsMinExp;
+        const validTime = isTopTime && meetsMinTime;
+        if (validExp && validTime) prize.championType = "both";
+        else if (validExp) prize.championType = "exp";
+        else if (validTime) prize.championType = "time";
+        return validExp || validTime;
     }
 
     async _checkChampionYear(userId, prize, periodKey) {
@@ -825,10 +833,14 @@ class UserprogressService {
         const userIdStr = userId.toString();
         const isTopExp = topExpUserIds.includes(userIdStr);
         const isTopTime = topTimeUserIds.includes(userIdStr);
-        if (isTopExp && isTopTime) prize.championType = "both";
-        else if (isTopExp) prize.championType = "exp";
-        else if (isTopTime) prize.championType = "time";
-        return isTopExp || isTopTime;
+        const meetsMinExp = topExpScore >= 2000;
+        const meetsMinTime = topTimeScore >= 8;
+        const validExp = isTopExp && meetsMinExp;
+        const validTime = isTopTime && meetsMinTime;
+        if (validExp && validTime) prize.championType = "both";
+        else if (validExp) prize.championType = "exp";
+        else if (validTime) prize.championType = "time";
+        return validExp || validTime;
     }
 
     // _getWeekNumber(date) {
