@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 const AddReminder = ({ isOpen, onClose, onCreated }) => {
     const [userEmail, setUserEmail] = useState("");
     const [reminderTime, setReminderTime] = useState("");
-    const [frequency, setFrequency] = useState("Once");
+    const [frequency, setFrequency] = useState("one-time");
     const [additionalInfo, setAdditionalInfo] = useState("");
     const [loading, setLoading] = useState(false);
 
@@ -19,7 +19,7 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
 
     const resetForm = () => {
         setReminderTime("");
-        setFrequency("Once");
+        setFrequency("one-time");
         setAdditionalInfo("");
     };
 
@@ -85,10 +85,10 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
                                 onChange={(e) => setFrequency(e.target.value)}
                                 required
                             >
-                                <option value="Once">Một lần</option>
-                                <option value="Daily">Hàng ngày</option>
-                                <option value="Weekly">Hàng tuần</option>
-                                <option value="Monthly">Hàng tháng</option>
+                                <option value="one-time">Một lần</option>
+                                <option value="daily">Hàng ngày</option>
+                                <option value="weekly">Hàng tuần</option>
+                                <option value="monthly">Hàng tháng</option>
                             </select>
                         </div>
                         <div className="mb-3">

@@ -30,7 +30,9 @@ const ReminderCard = ({ reminder, onEdit, onDeleted }) => {
                 <div className="reminder-card-header">
                     <p className="reminder-info"><strong>Email:</strong> {reminder.email}</p>
                     <p className="reminder-info"><strong>Thời gian:</strong> {new Date(reminder.reminderTime).toLocaleString()}</p>
-                    <p className="reminder-info"><strong>Tần suất:</strong> {reminder.frequency}</p>
+                    <p className="reminder-info"><strong>Tần suất: </strong> 
+                        {reminder.frequency === 'one-time' ? 'Một lần' : reminder.frequency === 'daily' ? 'Hàng ngày' : reminder.frequency === 'weekly' ? 'Hàng tuần' : 'Hàng tháng'}
+                    </p>
                     <div className="reminder-actions">
                         <button className="edit-btn" onClick={() => onEdit(reminder)}>
                             <i className="fas fa-edit"></i>
