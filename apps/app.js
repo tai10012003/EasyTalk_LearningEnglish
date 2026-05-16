@@ -1,12 +1,12 @@
-var express = require("express");
-var app = express();
+const express = require("express");
 const http = require("http");
-const server = http.createServer(app);
-var bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
 const cors = require("cors");
 const dotenv = require('dotenv');
+
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 dotenv.config({ path: envFile });
+
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'Reason:', reason);
 });
@@ -15,100 +15,152 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
 
-const { connectRedis } = require('./util/redisClient');
+const app = express();
+const server = http.createServer(app);
+
+const { connectRedis } = require('../apps/src/shared/utils/redisClient');
 async function initRedis() {
   try {
     await connectRedis(5000);
     console.log('Redis connected successfully');
   } catch (err) {
     console.error(`Redis init failed: ${err.message}`);
-    console.error('Running without Redis cache - fallback to DB (app stable)');
+    console.error('Running without Redis cache - fallback to DB');
   }
 }
 
-initRedis().catch(() => {});
-
-const { initSocket } = require("./util/socket");
+const { initSocket } = require('../apps/src/shared/utils/socket');
 initSocket(server);
+console.log('Socket.IO initialized');
 
-// Cho phép tất cả domain (tạm thời)
-app.use(cors());
-
-// Nếu muốn chỉ cho React frontend gọi API thì dùng:
 app.use(cors({
-  origin: "http://localhost:5173"
+  origin: process.env.CLIENT_URL || "http://localhost:5173"
 }));
 
-app.use(bodyParser.json({ limit: '50mb' })); 
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
-
-var controller = require(__dirname  + "/controllers");
-app.use(controller);
-
-var dashboardController = require(__dirname + "/controllers/dashboardcontroller");
-app.use(dashboardController);
-
-var journeyController = require(__dirname + "/controllers/journeycontroller");
-app.use(journeyController);
-
-var gateController = require(__dirname + "/controllers/gatecontroller");
-app.use(gateController);
-
-var stageController = require(__dirname + "/controllers/stagecontroller"); 
-app.use(stageController);
-
-var storyController = require(__dirname + "/controllers/storycontroller");
-app.use(storyController);
-
-var grammarController = require(__dirname + "/controllers/grammarcontroller");
-app.use(grammarController);
-
-var grammarexerciseController = require(__dirname + "/controllers/grammarexercisecontroller");
-app.use(grammarexerciseController);
-
-var pronunciationController = require(__dirname + "/controllers/pronunciationcontroller");
-app.use(pronunciationController);
-
-var pronunciationexerciseController = require(__dirname + "/controllers/pronunciationexercisecontroller");
-app.use(pronunciationexerciseController);
-
-var flashcardController = require(__dirname + "/controllers/flashcardcontroller");
-app.use(flashcardController);
-
-var vocabularyexerciseController = require(__dirname + "/controllers/vocabularyexercisecontroller");
-app.use(vocabularyexerciseController);
-
-var dictationexerciseController = require(__dirname + "/controllers/dictationcontroller");
-app.use(dictationexerciseController);
-
-var userController = require(__dirname + "/controllers/usercontroller");
-app.use(userController);
-
-var chatController = require(__dirname + "/controllers/chatcontroller");
-app.use(chatController);
-
-var writingController = require(__dirname + "/controllers/writingcontroller");
-app.use(writingController);
-
-var reminderController = require(__dirname + "/controllers/remindercontroller");
-app.use(reminderController);
-
-var notificationController = require(__dirname + "/controllers/notificationcontroller");
-app.use(notificationController);
-
-var usersettingController = require(__dirname + "/controllers/usersettingcontroller");
-app.use(usersettingController);
-
-var prizeController = require(__dirname + "/controllers/prizecontroller");
-app.use(prizeController);
-
-var userprogressController = require(__dirname + "/controllers/userprogresscontroller");
-app.use(userprogressController);
 
 app.use("/static", express.static(__dirname + "/public"));
 
+const UserRepository = require('../apps/src/modules/user/repositories/userRepository');
+const UserProgressRepository = require('../apps/src/modules/userprogress/repositories/userprogressRepository');
+
+const userRepository = new UserRepository();
+const userProgressRepository = new UserProgressRepository();
+
+const NotificationService = require('../apps/src/modules/notification/services/notificationService');
+const UserSettingService = require('../apps/src/modules/usersetting/services/userSettingService');
+const UserProgressService = require('../apps/src/modules/userprogress/services/userprogressService');
+const StreakService = require('../apps/src/modules/userprogress/services/streakService');
+const LeaderboardService = require('../apps/src/modules/userprogress/services/leaderboardService');
+const FlashcardService = require('../apps/src/modules/flashcard/services/flashcardService');
+const JourneyService = require('../apps/src/modules/journey/services/journeyService');
+const GateService = require('../apps/src/modules/gate/services/gateService');
+const StageService = require('../apps/src/modules/stage/services/stageService');
+
+const notificationService = new NotificationService();
+const userSettingService = new UserSettingService();
+const userProgressService = new UserProgressService();
+const streakService = new StreakService();
+const leaderboardService = new LeaderboardService();
+const flashcardService = new FlashcardService();
+const journeyService = new JourneyService();
+const gateService = new GateService();
+const stageService = new StageService();
+
+const userController = require('../apps/src/modules/user/controllers/userController');
+const userProgressController = require('../apps/src/modules/userprogress/controllers/userprogressController');
+const prizeController = require('../apps/src/modules/prize/controllers/prizeController');
+const notificationController = require('../apps/src/modules/notification/controllers/notificationController');
+const grammarController = require('../apps/src/modules/grammar/controllers/grammarController');
+const pronunciationController = require('../apps/src/modules/pronunciation/controllers/pronunciationController');
+const storyController = require('../apps/src/modules/story/controllers/storyController');
+const grammarExerciseController = require('../apps/src/modules/grammarexercise/controllers/grammarexerciseController');
+const pronunciationExerciseController = require('../apps/src/modules/pronunciationexercise/controllers/pronunciationExerciseController');
+const vocabularyExerciseController = require('../apps/src/modules/vocabularyexercise/controllers/vocabularyexerciseController');
+const dictationController = require('../apps/src/modules/dictationexercise/controllers/dictationexerciseController');
+const journeyController = require('../apps/src/modules/journey/controllers/journeyController');
+const gateController = require('../apps/src/modules/gate/controllers/gateController');
+const stageController = require('../apps/src/modules/stage/controllers/stageController');
+const flashcardController = require('../apps/src/modules/flashcard/controllers/flashcardController');
+const reminderController = require('../apps/src/modules/reminder/controllers/reminderController');
+const userSettingController = require('../apps/src/modules/usersetting/controllers/usersettingController');
+const dashboardController = require('../apps/src/modules/dashboard/controllers/dashboardController');
+const chatAIController = require('../apps/src/modules/chatai/controllers/chatAIController');
+const writingAIController = require('../apps/src/modules/writingai/controllers/writingAIController');
+
+// ==================== DEPENDENCY INJECTIONS ====================
+// User module injections
+userController.setNotificationService(notificationService);
+userController.setUserSettingService(userSettingService);
+userController.setUserProgressService(userProgressService);
+userController.setFlashcardService(flashcardService);
+// Journey module injections
+journeyController.setGateService(gateService);
+journeyController.setUserProgressService(userProgressService);
+// Gate module injections
+gateController.setJourneyService(journeyService);
+gateController.setStageService(stageService);
+// Stage module injections
+stageController.setJourneyService(journeyService);
+stageController.setGateService(gateService);
+stageController.setUserProgressService(userProgressService);
+// Reminder module injection
+reminderController.setNotificationService(notificationService);
+// Dashboard module injection
+dashboardController.setRepositories(userRepository, userProgressRepository);
+// UserProgress module injection
+userProgressService.setStreakService(streakService);
+userProgressService.setLeaderboardService(leaderboardService);
+
+app.use("/user", userController);
+app.use("/userprogress", userProgressController);
+app.use("/prize", prizeController);
+app.use("/notification", notificationController);
+app.use("/grammar", grammarController);
+app.use("/pronunciation", pronunciationController);
+app.use("/grammar-exercise", grammarExerciseController);
+app.use("/story", storyController);
+app.use("/vocabulary-exercise", vocabularyExerciseController);
+app.use("/pronunciation-exercise", pronunciationExerciseController);
+app.use("/dictation-exercise", dictationController);
+app.use("/journey", journeyController);
+app.use("/gate", gateController);
+app.use("/stage", stageController);
+app.use("/flashcards", flashcardController);
+app.use("/reminder", reminderController);
+app.use("/setting", userSettingController);
+app.use("/dashboard", dashboardController);
+app.use("/chat", chatAIController);
+app.use("/writing", writingAIController);
+
+
+async function initBackgroundTasks() {
+  try {
+    const { reminderService } = reminderController;
+    if (reminderService && reminderService.initReminders) {
+      await reminderService.initReminders();
+      console.log('Reminder cron jobs initialized');
+    }
+  } catch (error) {
+    console.error('Failed to initialize reminder cron jobs:', error);
+  }
+}
+
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await initRedis();
+    await initBackgroundTasks();
+    server.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+startServer();
+
+module.exports = app;
