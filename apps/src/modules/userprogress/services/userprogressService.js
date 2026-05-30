@@ -99,8 +99,8 @@ class UserProgressService {
                 !initialPronunciation ? pronunciationService.getPronunciationList(1, 1) : null,
                 !initialGrammarExercise ? grammarexerciseService.getGrammarexerciseList(1, 1) : null,
                 !initialPronunciationExercise ? pronunciationexerciseService.getPronunciationexerciseList(1, 1) : null,
-                !initialVocabularyExercise ? vocabularyexerciseService.getVocabularyExerciseList(1, 1) : null,
-                !initialDictation ? dictationexerciseService.getDictationexerciseList(1, 1) : null
+                !initialVocabularyExercise ? vocabularyexerciseService.getVocabularyexerciseList(1, 1) : null,
+                !initialDictation ? dictationexerciseService.getDictationList(1, 1) : null
             ]);
 
             initialStory = initialStory || storyPage?.stories?.[0]?._id || null;
@@ -108,7 +108,7 @@ class UserProgressService {
             initialPronunciation = initialPronunciation || pronPage?.pronunciations?.[0]?._id || null;
             initialGrammarExercise = initialGrammarExercise || grammarExPage?.grammarexercises?.[0]?._id || null;
             initialPronunciationExercise = initialPronunciationExercise || pronunciationExPage?.pronunciationexercises?.[0]?._id || null;
-            initialVocabularyExercise = initialVocabularyExercise || vocabularyExPage?.vocabularyExercises?.[0]?._id || null;
+            initialVocabularyExercise = initialVocabularyExercise || vocabularyExPage?.vocabularyexercises?.[0]?._id || null;
             initialDictation = initialDictation || dictationPage?.dictationExercises?.[0]?._id || null;
         }
         const userProgress = {

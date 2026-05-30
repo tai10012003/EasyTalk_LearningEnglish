@@ -42,7 +42,7 @@ router.get("/api/pronunciation/:id", verifyToken, async function (req, res) {
         if (!userProgress) {
             const firstPage = await pronunciationService.getPronunciationList(1, 1);
             const firstPronunciation = (firstPage && firstPage.pronunciations && firstPage.pronunciations[0]) ? firstPage.pronunciations[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstPronunciation ? firstPronunciation._id : null, null);
+            userProgress = await userProgressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
         }
         const isUnlocked = (userProgress.unlockedPronunciations || []).some(s => s.toString() == pronunciationId.toString());
         if (!isUnlocked) {
@@ -82,7 +82,7 @@ router.post("/api/pronunciation/complete/:id", verifyToken, async (req, res) => 
         if (!userProgress) {
             const firstPage = await pronunciationService.getPronunciationList(1, 1);
             const firstPronunciation = (firstPage?.pronunciations?.[0]) || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstPronunciation?._id || null, null);
+            userProgress = await userProgressService.createUserProgress(userId, null, null, null, firstPronunciation?._id || null);
         }
         const isUnlocked = (userProgress.unlockedPronunciations || []).some(s => s.toString() == pronunciationId.toString());
         if (!isUnlocked) {

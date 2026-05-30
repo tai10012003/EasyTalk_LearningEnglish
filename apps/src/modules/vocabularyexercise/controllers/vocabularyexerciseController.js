@@ -40,7 +40,7 @@ router.get("/api/vocabulary-exercises/:id", verifyToken, async function (req, re
         if (!userProgress) {
             const firstPage = await vocabularyexerciseService.getVocabularyexerciseList(1, 1);
             const firstVocabularyExercise = (firstPage && firstPage.vocabularyexercises && firstPage.vocabularyexercises[0]) ? firstPage.vocabularyexercises[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null, null, null);
+            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null);
         }
         const isUnlocked = (userProgress.unlockedVocabularyExercises || []).some(s => s.toString() == vocabularyexerciseId.toString());
         if (!isUnlocked) {
@@ -80,7 +80,7 @@ router.post("/api/vocabulary-exercises/complete/:id", verifyToken, async (req, r
         if (!userProgress) {
             const firstPage = await vocabularyexerciseService.getVocabularyexerciseList(1, 1);
             const firstVocabularyExercise = (firstPage?.vocabularyexercises?.[0]) || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null, null, null);
+            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null);
         }
         const isUnlocked = (userProgress.unlockedVocabularyExercises || []).some(s => s.toString() == vocabularyexerciseId.toString());
         if (!isUnlocked) {
