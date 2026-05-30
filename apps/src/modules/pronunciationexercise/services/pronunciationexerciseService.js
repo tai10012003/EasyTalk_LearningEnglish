@@ -1,10 +1,22 @@
 const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
 const PronunciationExerciseRepository = require('../repositories/pronunciationexerciseRepository');
+const SpeechAnalysisService = require('./speechAnalysisService');
 const { invalidatePronunciationExerciseCache } = require('../utils/cacheHelper');
+const { calculateAccuracy } = require('../utils/accuracyCalculator');
+const { PronunciationExercise } = require('../models/pronunciationexercise');
 
 class PronunciationExerciseService {
     constructor() {
         this.repository = new PronunciationExerciseRepository();
+        this.speechAnalysisService = new SpeechAnalysisService();
+    }
+
+    getUserProgressService() {
+        if (!this._userProgressService) {
+            const UserProgressService = require('../../userprogress/services/userprogressService');
+            this._userProgressService = new UserProgressService();
+        }
+        return this._userProgressService;
     }
 
     async getPronunciationexerciseList(page = 1, limit = 12, role = "user") {
@@ -13,16 +25,15 @@ class PronunciationExerciseService {
         const ttl = 300;
         try {
             const cached = await redis.get(cacheKey);
-            if(cached) {
+            if (cached) {
                 console.log(`Direct cache hit: ${cacheKey}`);
                 return JSON.parse(cached);
             }
         } catch (err) {
             console.error('Direct cache get error:', err);
         }
-
         const filter = {};
-        if(role !== "admin") {
+        if (role !== "admin") {
             filter.display = true;
         }
         const { exercises, total } = await this.repository.findAll(filter, page, limit);
@@ -44,51 +55,121 @@ class PronunciationExerciseService {
         return await this.repository.findBySlug(slug);
     }
 
-    async insertPronunciationexercise(exerciseData) {
-        const formattedQuestions = this._formatQuestions(exerciseData.questions || []);
-        const newExercise = {
-            title: exerciseData.title,
-            questions: formattedQuestions,
-            slug: exerciseData.slug,
-            sort: exerciseData.sort,
-            display: exerciseData.display,
-            createdAt: new Date()
-        };
-        const result = await this.repository.insert(newExercise);
-        await invalidatePronunciationExerciseCache();
-        return result;
+    async _getOrCreateUserProgress(userId) {
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstPronunciationExercisePage = await this.getPronunciationexerciseList(1, 1);
+            const firstPronunciationExercise = firstPronunciationExercisePage?.pronunciationexercises?.[0] || null;
+            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, firstPronunciationExercise?._id || null, null, null);
+        }
+        return userProgress;
     }
 
-    async updatePronunciationexercise(id, updateData) {
-        const formattedQuestions = this._formatQuestions(updateData.questions || []);
-        const update = {
-            title: updateData.title.trim(),
-            questions: formattedQuestions,
-            slug: updateData.slug,
-            sort: updateData.sort,
-            display: updateData.display,
-            updatedAt: new Date(),
+    async getPronunciationexerciseDetails(userId, prouunciationeExerciseId) {
+        const pronunciationExercise = await this.getPronunciationexerciseById(prouunciationeExerciseId);
+        if (!pronunciationExercise) {
+            return { status: 404, data: { message: "Pronunciation exercise not found" } };
+        }
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isPronunciationExerciseUnlocked = (userProgress.unlockedPronunciationExercises || []).some(s => s.toString() == prouunciationeExerciseId.toString());
+        if (!isPronunciationExerciseUnlocked) {
+            return { status: 403, data: { success: false, message: "This pronunciation exercise is locked for you. Please complete previous pronunciation exercise first." } };
+        }
+        return { status: 200, data: { pronunciationExercise, userProgress } };
+    }
+
+    async completePronunciationexercise(userId, pronunciationExerciseId) {
+        const pronunciationExercise = await this.getPronunciationexerciseById(pronunciationExerciseId);
+        if (!pronunciationExercise) {
+            return { status: 404, data: { success: false, message: "Pronunciation exercise not found" } };
+        }
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isPronunciationExerciseUnlocked = (userProgress.unlockedPronunciationExercises || []).some(s => s.toString() == pronunciationExerciseId.toString());
+        if (!isPronunciationExerciseUnlocked) {
+            return { status: 403, data: { success: false, message: "You cannot complete a locked pronunciation exercise." } };
+        }
+        const pronunciationExerciseList = await this.getPronunciationexerciseList(1, 10000);
+        const pronunciationExercises = pronunciationExerciseList?.pronunciationexercises || [];
+        const currentPronunciationExerciseIndex = pronunciationExercises.findIndex(s => s._id.toString() == pronunciationExerciseId.toString());
+        let nextPronunciationExercise = null;
+        if (currentPronunciationExerciseIndex !== -1 && currentPronunciationExerciseIndex < pronunciationExercises.length - 1) {
+            nextPronunciationExercise = pronunciationExercises[currentPronunciationExerciseIndex + 1];
+        }
+        if (nextPronunciationExercise) {
+            userProgress = await userProgressService.unlockNextPronunciationExercise(userProgress, nextPronunciationExercise._id, 10);
+        } else {
+            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        }
+        await userProgressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        return {
+            status: 200,
+            data: {
+                success: true,
+                message: nextPronunciationExercise ? "Pronunciation exercise completed. Next pronunciation exercise unlocked." : "Pronunciation exercise completed. You have finished all pronunciation exercise.",
+                userProgress: {
+                    unlockedPronunciationExercises: updatedUserProgress.unlockedPronunciationExercises,
+                    experiencePoints: updatedUserProgress.experiencePoints,
+                    streak: updatedUserProgress.streak,
+                    maxStreak: updatedUserProgress.maxStreak,
+                    studyDates: updatedUserProgress.studyDates
+                }
+            }
         };
-        const result = await this.repository.update(id, update);
+    }
+
+    async analyzePronunciation(audioBuffer, pronunciationExerciseId, questionIndex) {
+        if (!audioBuffer) {
+            return { status: 400, data: { success: false, message: 'No audio file provided' } };
+        }
+        const pronunciationExercise = await this.getPronunciationexerciseById(pronunciationExerciseId);
+        const analysisResult = await this.speechAnalysisService.analyzeWithExercise(audioBuffer, pronunciationExercise, questionIndex);
+        if (!analysisResult.success) {
+            return { status: 400, data: { success: false, message: analysisResult.error } };
+        }
+        const { accuracy, detailedResult } = calculateAccuracy(analysisResult.transcription, analysisResult.correctAnswer);
+        return {
+            status: 200,
+            data: {
+                success: true,
+                transcription: analysisResult.transcription,
+                accuracy,
+                detailedResult,
+                index: questionIndex
+            }
+        };
+    }
+
+    async insertPronunciationexercise(exerciseData) {
+        const document = PronunciationExercise.buildDocument(exerciseData);
+        const result = await this.repository.insert(document);
         await invalidatePronunciationExerciseCache();
-        return result;
+        return { status: 201, data: { success: true, message: "Bài luyện tập phát âm đã được thêm thành công !", result } };
+    }
+
+    async updatePronunciationexercise(id, exerciseData) {
+        const existing = await this.getPronunciationexerciseById(id);
+        if (!existing) {
+            return { status: 404, data: { message: "Bài luyện tập phát âm không tìm thấy." } };
+        }
+        const document = PronunciationExercise.buildDocument(exerciseData);
+        delete document.createdAt;
+        document.updatedAt = new Date();
+        const result = await this.repository.update(id, document);
+        await invalidatePronunciationExerciseCache();
+        return { status: 200, data: { message: "Bài luyện tập phát âm đã được cập nhật thành công !", result } };
     }
 
     async deletePronunciationexercise(id) {
-        const result = await this.repository.delete(id);
+        const existing = await this.getPronunciationexerciseById(id);
+        if (!existing) {
+            return { status: 404, data: { success: false, message: "Bài luyện tập phát âm không tìm thấy." } };
+        }
+        await this.repository.delete(id);
         await invalidatePronunciationExerciseCache();
-        return result;
-    }
-
-    _formatQuestions(questions) {
-        if(!Array.isArray(questions)) return [];
-        return questions.map(q => ({
-            question: q.question,
-            type: q.type,
-            correctAnswer: q.correctAnswer,
-            explanation: q.explanation || "",
-            options: q.options || [],
-        }));
+        return { status: 200, data: { success: true, message: "Bài luyện tập phát âm đã xóa thành công !" } };
     }
 }
 

@@ -3,11 +3,8 @@ const router = express.Router();
 const verifyToken = require("../../../shared/middleware/verifyToken");
 const { cacheMiddleware } = require("../../../shared/middleware/cacheMiddleware");
 const GrammarExerciseService = require("../services/grammarexerciseService");
-const UserProgressService = require("../../userprogress/services/userprogressService");
-const { validateGrammarExerciseInput } = require("../validators/grammarexerciseValidator");
-
+const { validateGrammarExerciseInput, buildGrammarExerciseDataFromRequest } = require("../validators/grammarexerciseValidator");
 const grammarexerciseService = new GrammarExerciseService();
-const userProgressService = new UserProgressService();
 
 router.get("/api/grammar-exercises", verifyToken, cacheMiddleware(300), async (req, res) => {
     try {
@@ -30,32 +27,15 @@ router.get("/api/grammar-exercises", verifyToken, cacheMiddleware(300), async (r
 
 router.get("/api/grammar-exercises/:id", verifyToken, async function (req, res) {
     try {
-        const userId = req.user.id;
-        const grammarexerciseId = req.params.id;
-        const exercise = await grammarexerciseService.getGrammarexerciseById(grammarexerciseId);
-        if (!exercise) {
-            return res.status(404).json({ message: "Grammar exercise not found." });
-        }
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
-        if (!userProgress) {
-            const firstPage = await grammarexerciseService.getGrammarexerciseList(1, 1);
-            const firstGrammarExercise = (firstPage && firstPage.grammarexercises && firstPage.grammarexercises[0]) ? firstPage.grammarexercises[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, firstGrammarExercise ? firstGrammarExercise._id : null, null, null, null);
-        }
-        const isUnlocked = (userProgress.unlockedGrammarExercises || []).some(s => s.toString() == grammarexerciseId.toString());
-        if (!isUnlocked) {
-            return res.status(403).json({ 
-                success: false, 
-                message: "This grammar exercise is locked for you. Please complete previous grammar exercise first." 
-            });
-        }
-        res.json({ exercise, userProgress });
+        const { status, data } = await grammarexerciseService.getGrammarExerciseDetails(req.user.id, req.params.id);
+        return res.status(status).json(data);
     } catch (err) {
-        res.status(500).json({ message: "Error fetching grammar exercise details", error: err });
+        console.error("Error fetching grammar exercise details:", err);
+        res.status(500).json({ message: "Error fetching grammar exercise details", error: err.message });
     }
 });
 
-router.get("/api/grammar-exercises/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
+router.get("/api/grammar-exercises/slug/:slug", verifyToken, cacheMiddleware(300), async function (req, res) {
     try {
         const slug = req.params.slug;
         const exercise = await grammarexerciseService.getGrammarexerciseBySlug(slug);
@@ -64,62 +44,21 @@ router.get("/api/grammar-exercises/slug/:slug", verifyToken, cacheMiddleware(300
         }
         res.json(exercise);
     } catch (err) {
-        res.status(500).json({ message: "Error fetching Grammar exercise details", error: err });
+        console.error("Error fetching Grammar exercise details by slug:", err);
+        res.status(500).json({ message: "Error fetching Grammar exercise details", error: err.message });
     }
 });
 
 router.post("/api/grammar-exercises/complete/:id", verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id;
-        const grammarexerciseId = req.params.id;
-        const exercise = await grammarexerciseService.getGrammarexerciseById(grammarexerciseId);
-        if (!exercise) {
-            return res.status(404).json({ success: false, message: "Grammar exercise not found" });
-        }
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
-        if (!userProgress) {
-            const firstPage = await grammarexerciseService.getGrammarexerciseList(1, 1);
-            const firstGrammarExercise = (firstPage?.grammarexercises?.[0]) || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, firstGrammarExercise ? firstGrammarExercise._id : null, null, null, null);
-        }
-        const isUnlocked = (userProgress.unlockedGrammarExercises || []).some(s => s.toString() == grammarexerciseId.toString());
-        if (!isUnlocked) {
-            return res.status(403).json({ 
-                success: false, 
-                message: "You cannot complete a locked grammar exercise." 
-            });
-        }
-        const all = await grammarexerciseService.getGrammarexerciseList(1, 10000);
-        const allGrammarExercises = all?.grammarexercises || [];
-        const idx = allGrammarExercises.findIndex(s => s._id.toString() == grammarexerciseId.toString());
-        let nextGrammarExercise = null;
-        if (idx !== -1 && idx < allGrammarExercises.length - 1) {
-            nextGrammarExercise = allGrammarExercises[idx + 1];
-        }
-        if (nextGrammarExercise) {
-            userProgress = await userProgressService.unlockNextGrammarExercise(userProgress, nextGrammarExercise._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
-        return res.json({
-            success: true,
-            message: nextGrammarExercise ? "Grammar exercise completed. Next grammar exercise unlocked." : "Grammar exercise completed. You have finished all grammar exercise.",
-            userProgress: {
-                unlockedGrammarExercises: updatedUserProgress.unlockedGrammarExercises,
-                experiencePoints: updatedUserProgress.experiencePoints,
-                streak: updatedUserProgress.streak,
-                maxStreak: updatedUserProgress.maxStreak,
-                studyDates: updatedUserProgress.studyDates
-            }
-        });
+        const { status, data } = await grammarexerciseService.completeGrammarExercise(req.user.id, req.params.id);
+        return res.status(status).json(data);
     } catch (error) {
         console.error("Error completing grammar exercise: ", error);
-        res.status(500).json({ 
-            success: false, 
-            message: "Error processing completion", 
-            error: error.message 
+        res.status(500).json({
+            success: false,
+            message: "Error processing completion",
+            error: error.message
         });
     }
 });
@@ -128,30 +67,16 @@ router.post("/add", async (req, res) => {
     try {
         const validation = validateGrammarExerciseInput(req.body);
         if (!validation.valid) {
-            return res.status(400).json({ 
-                success: false, 
-                message: validation.errors.join(', ') 
-            });
+            return res.status(400).json({ success: false, message: validation.errors.join(', ') });
         }
-        const grammarexercise = {
-            title: req.body.title,
-            questions: req.body.questions || [],
-            slug: req.body.slug,
-            sort: parseInt(req.body.sort),
-            display: req.body.display !== undefined ? req.body.display == "true" : true
-        };
-        const result = await grammarexerciseService.insertGrammarexercise(grammarexercise);
-        res.status(201).json({ 
-            success: true, 
-            message: "Bài luyện tập ngữ pháp đã được thêm thành công !", 
-            result
-        });
+        const { status, data } = await grammarexerciseService.insertGrammarexercise(buildGrammarExerciseDataFromRequest(req.body));
+        res.status(status).json(data);
     } catch (err) {
         console.error(err);
-        return res.status(500).json({ 
-            success: false, 
-            message: "Error adding grammar exercise", 
-            error: err.message 
+        return res.status(500).json({
+            success: false,
+            message: "Error adding grammar exercise",
+            error: err.message
         });
     }
 });
@@ -165,7 +90,7 @@ router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
         res.json(exercise);
     } catch (err) {
         console.error("Error fetching grammar exercise:", err);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error", error: err.message });
     }
 });
 
@@ -173,54 +98,33 @@ router.put("/update/:id", async (req, res) => {
     try {
         const validation = validateGrammarExerciseInput(req.body);
         if (!validation.valid) {
-            return res.status(400).json({ 
-                success: false, 
-                message: validation.errors.join(', ') 
+            return res.status(400).json({
+                success: false,
+                message: validation.errors.join(', ')
             });
         }
-        const existingGrammarExercise = await grammarexerciseService.getGrammarexerciseById(req.params.id);
-        if (!existingGrammarExercise) {
-            return res.status(404).json({ message: "Bài luyện tập ngữ pháp không tìm thấy." });
-        }
-        const grammarexercise = {
-            title: req.body.title,
-            questions: req.body.questions || [],
-            slug: req.body.slug,
-            sort: parseInt(req.body.sort),
-            display: req.body.display !== undefined ? req.body.display == "true" : true
-        };
-        const result = await grammarexerciseService.updateGrammarexercise(req.params.id, grammarexercise);
-        res.json({ 
-            message: "Bài luyện tập ngữ pháp đã được cập nhật thành công !", 
-            result 
-        });
+        const { status, data } = await grammarexerciseService.updateGrammarexercise(req.params.id, buildGrammarExerciseDataFromRequest(req.body));
+        res.status(status).json(data);
     } catch (err) {
-        return res.status(500).json({ 
-            success: false, 
-            message: "Error updating grammar exercise", 
-            error: err.message 
+        console.error("Update grammar exercise error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Error updating grammar exercise",
+            error: err.message
         });
     }
 });
 
 router.delete("/delete/:id", async (req, res) => {
     try {
-        const deletedExercise = await grammarexerciseService.deleteGrammarexercise(req.params.id);
-        if (!deletedExercise || deletedExercise.deletedCount == 0) {
-            return res.status(404).json({ 
-                success: false, 
-                message: "Bài luyện tập ngữ pháp không tìm thấy." 
-            });
-        }
-        res.json({ 
-            success: true, 
-            message: "Bài luyện tập ngữ pháp đã xóa thành công !" 
-        });
+        const { status, data } = await grammarexerciseService.deleteGrammarexercise(req.params.id);
+        return res.status(status).json(data);
     } catch (err) {
-        res.status(500).json({ 
-            success: false, 
-            message: "Error deleting grammar exercise", 
-            error: err.message 
+        console.error("Delete grammar exercise error:", err);
+        res.status(500).json({
+            success: false,
+            message: "Error deleting grammar exercise",
+            error: err.message
         });
     }
 });

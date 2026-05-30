@@ -4,11 +4,8 @@ const multer = require("multer");
 const verifyToken = require("../../../shared/middleware/verifyToken");
 const { cacheMiddleware } = require('../../../shared/middleware/cacheMiddleware');
 const GrammarService = require("../services/grammarService");
-const UserProgressService = require("../../userprogress/services/userprogressService");
-const { validateGrammarInput, parseQuizzes } = require("../validators/grammarValidator");
-
+const { validateGrammarInput, buildGrammarDataFromRequest } = require("../validators/grammarValidator");
 const grammarService = new GrammarService();
-const userProgressService = new UserProgressService();
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
@@ -20,99 +17,37 @@ router.get("/api/grammar-list", verifyToken, cacheMiddleware(300), async functio
         const role = req.user.role || "user";
         const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit, "", role);
         const totalPages = Math.ceil(totalGrammars / limit);
-        res.json({
-            grammars,
-            currentPage: page,
-            totalPages,
-        });
+        res.json({ grammars, currentPage: page, totalPages });
     } catch (err) {
-        res.status(500).json({ message: "Error fetching grammars", error: err });
+        res.status(500).json({ message: "Error fetching grammars", error: err.message });
     }
 });
 
 router.get("/api/grammar/:id", verifyToken, async function (req, res) {
     try {
-        const userId = req.user.id;
-        const grammarId = req.params.id;
-        const grammar = await grammarService.getGrammar(grammarId);
-        if (!grammar) {
-            return res.status(404).json({ message: "Grammar not found" });
-        }
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
-        if (!userProgress) {
-            const firstPage = await grammarService.getGrammarList(1, 1);
-            const firstGrammar = (firstPage && firstPage.grammars && firstPage.grammars[0]) ? firstPage.grammars[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
-        }
-        const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
-        if (!isUnlocked) {
-            return res.status(403).json({ 
-                success: false, 
-                message: "This grammar is locked for you. Please complete previous grammars first." 
-            });
-        }
-        res.json({ grammar, userProgress });
+        const { status, data } = await grammarService.getGrammarDetails(req.user.id, req.params.id);
+        return res.status(status).json(data);
     } catch (err) {
-        res.status(500).json({ message: "Error fetching grammar details", error: err });
+        res.status(500).json({ message: "Error fetching grammar details", error: err.message });
     }
 });
 
-router.get("/api/grammar/slug/:slug", verifyToken, cacheMiddleware(300), async function(req, res) {
+router.get("/api/grammar/slug/:slug", verifyToken, cacheMiddleware(300), async function (req, res) {
     try {
-        const slug = req.params.slug;
-        const grammar = await grammarService.getGrammarBySlug(slug);
+        const grammar = await grammarService.getGrammarBySlug(req.params.slug);
         if (!grammar) {
             return res.status(404).json({ message: "Grammar not found" });
         }
         res.json({ grammar });
     } catch (err) {
-        res.status(500).json({ message: "Error fetching grammar details", error: err });
+        res.status(500).json({ message: "Error fetching grammar details", error: err.message });
     }
 });
 
 router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
     try {
-        const userId = req.user.id;
-        const grammarId = req.params.id;
-        const grammar = await grammarService.getGrammar(grammarId);
-        if (!grammar) {
-            return res.status(404).json({ success: false, message: "Grammar not found" });
-        }
-        let userProgress = await userProgressService.getUserProgressByUserId(userId);
-        if (!userProgress) {
-            const firstPage = await grammarService.getGrammarList(1, 1);
-            const firstGrammar = (firstPage?.grammars?.[0]) || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar?._id || null, null);
-        }
-        const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
-        if (!isUnlocked) {
-            return res.status(403).json({ success: false, message: "You cannot complete a locked grammar." });
-        }
-        const all = await grammarService.getGrammarList(1, 10000);
-        const allGrammars = all?.grammars || [];
-        const idx = allGrammars.findIndex(s => s._id.toString() == grammarId.toString());
-        let nextGrammar = null;
-        if (idx !== -1 && idx < allGrammars.length - 1) {
-            nextGrammar = allGrammars[idx + 1];
-        }
-        if (nextGrammar) {
-            userProgress = await userProgressService.unlockNextGrammar(userProgress, nextGrammar._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
-        return res.json({
-            success: true,
-            message: nextGrammar ? "Grammar completed. Next grammar unlocked." : "Grammar completed. You have finished all grammars.",
-            userProgress: {
-                unlockedGrammars: updatedUserProgress.unlockedGrammars,
-                experiencePoints: updatedUserProgress.experiencePoints,
-                streak: updatedUserProgress.streak,
-                maxStreak: updatedUserProgress.maxStreak,
-                studyDates: updatedUserProgress.studyDates
-            }
-        });
+        const { status, data } = await grammarService.completeGrammar(req.user.id, req.params.id);
+        return res.status(status).json(data);
     } catch (error) {
         console.error("Error completing grammar:", error);
         res.status(500).json({ success: false, message: "Error processing completion", error: error.message });
@@ -122,27 +57,12 @@ router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
 router.post("/api/add", upload.single("image"), async function (req, res) {
     try {
         const validation = validateGrammarInput(req.body);
-        if (!validation.valid) {
-            return res.status(400).json({ message: validation.errors.join(', ') });
-        }
-        const quizzes = parseQuizzes(req.body.quizzes);
-        const grammar = {
-            title: req.body.title,
-            description: req.body.description,
-            category: req.body.category,
-            level: req.body.level,
-            content: req.body.content,
-            images: req.body.images || null,
-            quizzes: quizzes,
-            slug: req.body.slug,
-            sort: parseInt(req.body.sort) || 0,
-            display: req.body.display !== undefined ? req.body.display == "true" : true
-        };
-        const result = await grammarService.insertGrammar(grammar, req.file || null);
-        res.status(201).json({ message: "Bài học ngữ pháp đã được thêm thành công !", result });
+        if (!validation.valid) return res.status(400).json({ message: validation.errors.join(', ') });
+        const { status, data } = await grammarService.insertGrammar(buildGrammarDataFromRequest(req.body), req.file || null);
+        return res.status(status).json(data);
     } catch (error) {
         console.error("Add grammar error:", error);
-        res.status(500).json({ message: "Error adding grammar", error });
+        res.status(500).json({ message: "Error adding grammar", error: error.message });
     }
 });
 
@@ -155,49 +75,26 @@ router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
         res.json(grammar);
     } catch (err) {
         console.error("Error fetching grammar:", err);
-        res.status(500).json({ message: "Server error" });
+        res.status(500).json({ message: "Server error", error: err.message });
     }
 });
 
 router.put("/api/update/:id", upload.single("image"), async function (req, res) {
     try {
         const validation = validateGrammarInput(req.body);
-        if (!validation.valid) {
-            return res.status(400).json({ message: validation.errors.join(', ') });
-        }
-        const quizzes = parseQuizzes(req.body.quizzes);
-        const existingGrammar = await grammarService.getGrammar(req.params.id);
-        if (!existingGrammar) {
-            return res.status(404).json({ message: "Bài học ngữ pháp không tìm thấy." });
-        }
-        const grammar = {
-            title: req.body.title,
-            description: req.body.description,
-            category: req.body.category,
-            level: req.body.level,
-            content: req.body.content,
-            quizzes: quizzes,
-            images: existingGrammar.images || req.body.images || "",
-            slug: req.body.slug,
-            sort: parseInt(req.body.sort) || 0,
-            display: req.body.display !== undefined ? req.body.display == "true" : true
-        };
-        const result = await grammarService.updateGrammar(req.params.id, grammar, req.file || null);
-        res.json({ message: "Bài học ngữ pháp đã được cập nhật thành công !", result });
+        if (!validation.valid) return res.status(400).json({ message: validation.errors.join(', ') });
+        const { status, data } = await grammarService.updateGrammar(req.params.id, buildGrammarDataFromRequest(req.body), req.file || null);
+        return res.status(status).json(data);
     } catch (error) {
         console.error("Update grammar error:", error);
-        res.status(500).json({ message: "Error updating grammar", error });
+        res.status(500).json({ message: "Error updating grammar", error: error.message });
     }
 });
 
 router.delete("/api/grammar/:id", async function (req, res) {
     try {
-        const grammar = await grammarService.getGrammar(req.params.id);
-        if (!grammar) {
-            return res.status(404).json({ message: "Bài học ngữ pháp không tìm thấy." });
-        }
-        const result = await grammarService.deleteGrammar(req.params.id);
-        res.json({ message: "Bài học ngữ pháp đã xóa thành công !" });
+        const { status, data } = await grammarService.deleteGrammar(req.params.id);
+        return res.status(status).json(data);
     } catch (error) {
         console.error("Delete grammar error:", error);
         res.status(500).json({ message: "Error deleting grammar", error: error.message });

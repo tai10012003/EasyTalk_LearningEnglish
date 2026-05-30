@@ -2,11 +2,20 @@ const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/re
 const GrammarRepository = require('../repositories/grammarRepository');
 const grammarImageService = require('../services/grammarImageService');
 const { invalidateGrammarCache } = require('../utils/cacheHelper');
+const { Grammar } = require('../models/grammar');
 
 class GrammarService {
     constructor() {
         this.grammarRepository = new GrammarRepository();
         this.imageService = new grammarImageService("easytalk/grammar");
+    }
+
+    getUserProgressService() {
+        if (!this.userProgressService) {
+            const UserProgressService = require('../../userprogress/services/userprogressService');
+            this.userProgressService = new UserProgressService();
+        }
+        return this.userProgressService;
     }
 
     async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
@@ -47,55 +56,91 @@ class GrammarService {
         return await this.grammarRepository.findBySlug(slug);
     }
 
-    async insertGrammar(grammar, file = null) {
+    async _getOrCreateUserProgress(userId) {
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstGrammarPage = await this.getGrammarList(1, 1);
+            const firstGrammar = (firstGrammarPage && firstGrammarPage.grammars && firstGrammarPage.grammars[0]) ? firstGrammarPage.grammars[0] : null;
+            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
+        }
+        return userProgress;
+    }
+
+    async getGrammarDetails(userId, grammarId) {
+        const grammar = await this.getGrammar(grammarId);
+        if (!grammar) {
+            return { status: 404, data: { message: "Grammar not found" } };
+        }
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
+        if (!isUnlocked) {
+            return { status: 403, data: { success: false, message: "This grammar is locked for you. Please complete previous grammars first." } };
+        }
+        return { status: 200, data: { grammar, userProgress } };
+    }
+
+    async completeGrammar(userId, grammarId) {
+        const grammar = await this.getGrammar(grammarId);
+        if (!grammar) {
+            return { status: 404, data: { success: false, message: "Grammar not found" } };
+        }
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isGrammarUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
+        if (!isGrammarUnlocked) {
+            return { status: 403, data: { success: false, message: "You cannot complete a locked grammar." } };
+        }
+        const grammarList = await this.getGrammarList(1, 10000);
+        const grammars = grammarList?.grammars || [];
+        const currentGrammarIndex = grammars.findIndex(s => s._id.toString() == grammarId.toString());
+        let nextGrammar = null;
+        if (currentGrammarIndex !== -1 && currentGrammarIndex < grammars.length - 1) {
+            nextGrammar = grammars[currentGrammarIndex + 1];
+        }
+        if (nextGrammar) {
+            userProgress = await userProgressService.unlockNextGrammar(userProgress, nextGrammar._id, 10);
+        } else {
+            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        }
+        await userProgressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        return {
+            status: 200,
+            data: {
+                success: true,
+                message: nextGrammar ? "Grammar completed. Next grammar unlocked." : "Grammar completed. You have finished all grammars.",
+                userProgress: {
+                    unlockedGrammars: updatedUserProgress.unlockedGrammars,
+                    experiencePoints: updatedUserProgress.experiencePoints,
+                    streak: updatedUserProgress.streak,
+                    maxStreak: updatedUserProgress.maxStreak,
+                    studyDates: updatedUserProgress.studyDates
+                }
+            }
+        };
+    }
+
+    async insertGrammar(grammarData, file = null) {
         let imageUrl = null;
         if (file) {
             const publicIdBase = await this.imageService.getNextPublicId(this.grammarRepository, 'grammar');
             imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
-        } else if (grammar.images) {
-            imageUrl = grammar.images;
+        } else if (grammarData.images) {
+            imageUrl = grammarData.images;
         }
-        const newGrammar = {
-            title: grammar.title,
-            description: grammar.description,
-            category: grammar.category,
-            level: grammar.level,
-            content: grammar.content,
-            images: imageUrl,
-            quizzes: [],
-            slug: grammar.slug,
-            sort: grammar.sort,
-            display: grammar.display,
-            createdAt: new Date()
-        };
-        if (grammar.quizzes && Array.isArray(grammar.quizzes)) {
-            grammar.quizzes.forEach(question => {
-                newGrammar.quizzes.push({
-                    question: question.question,
-                    type: question.type,
-                    correctAnswer: question.correctAnswer,
-                    explanation: question.explanation || "",
-                    options: question.options || []
-                });
-            });
-        }
-        const result = await this.grammarRepository.insert(newGrammar);
+        const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
+        const result = await this.grammarRepository.insert(document);
         await invalidateGrammarCache();
-        return result;
+        return { status: 201, data: { message: "Bài học ngữ pháp đã được thêm thành công !", result } };
     }
 
-    async updateGrammar(id, grammar, file = null) {
-        const formattedQuestions = grammar.quizzes.map(q => ({
-            question: q.question,
-            type: q.type,
-            correctAnswer: q.correctAnswer,
-            explanation: q.explanation || "",
-            options: q.options || []
-        }));
+    async updateGrammar(id, grammarData, file = null) {
         const existing = await this.getGrammar(id);
-        let imageUrl = existing && existing.images ? existing.images : (grammar.images || "");
+        if (!existing) return { status: 404, data: { message: "Bài học ngữ pháp không tìm thấy." } };
+        let imageUrl = existing.images || grammarData.images || "";
         if (file) {
-            const existingPublicId = existing && existing.images ? this.imageService.extractPublicIdFromUrl(existing.images) : null;
+            const existingPublicId = existing.images ? this.imageService.extractPublicIdFromUrl(existing.images) : null;
             if (existingPublicId) {
                 imageUrl = await this.imageService.uploadReplacementImage(file, existingPublicId);
             } else {
@@ -103,35 +148,24 @@ class GrammarService {
                 imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
             }
         }
-        const updateData = {
-            title: grammar.title.trim(),
-            description: grammar.description.trim(),
-            content: grammar.content.trim(),
-            category: grammar.category.trim(),
-            level: grammar.level.trim(),
-            images: imageUrl,
-            quizzes: formattedQuestions,
-            slug: grammar.slug,
-            sort: grammar.sort,
-            display: grammar.display,
-            updatedAt: new Date()
-        };
-        const result = await this.grammarRepository.update(id, updateData);
+        const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
+        delete document.createdAt;
+        document.updatedAt = new Date();
+        const result = await this.grammarRepository.update(id, document);
         await invalidateGrammarCache();
-        return result;
+        return { status: 200, data: { message: "Bài học ngữ pháp đã được cập nhật thành công !", result } };
     }
 
     async deleteGrammar(id) {
         const existing = await this.getGrammar(id);
-        if (existing && existing.images) {
+        if (!existing) return { status: 404, data: { message: "Bài học ngữ pháp không tìm thấy." } };
+        if (existing.images) {
             const publicId = this.imageService.extractPublicIdFromUrl(existing.images);
-            if (publicId) {
-                await this.imageService.deleteImage(publicId);
-            }
+            if (publicId) await this.imageService.deleteImage(publicId);
         }
-        const result = await this.grammarRepository.delete(id);
+        await this.grammarRepository.delete(id);
         await invalidateGrammarCache();
-        return result;
+        return { status: 200, data: { message: "Bài học ngữ pháp đã xóa thành công !" } };
     }
 }
 

@@ -1,32 +1,9 @@
-function validatePronunciationInput(body) {
-    const errors = [];
-    if (!body.title || body.title.trim() === '') {
-        errors.push('Title is required');
-    }
-    if (!body.description || body.description.trim() === '') {
-        errors.push('Description is required');
-    }
-    if (!body.content || body.content.trim() === '') {
-        errors.push('Content is required');
-    }
-    if (!body.category || body.category.trim() === '') {
-        errors.push('Category is required');
-    }
-    if (!body.level || body.level.trim() === '') {
-        errors.push('Level is required');
-    }
-    if (body.sort !== undefined) {
-        const sort = parseInt(body.sort);
-        if (isNaN(sort) || sort < 0) {
-            errors.push('Sort must be a non-negative number');
-        }
-    }
-    return { valid: errors.length === 0, errors };
-}
+const { Pronunciation } = require('../models/pronunciation');
 
 function parseQuizzes(quizzesString) {
     try {
         if (!quizzesString) return [];
+        if (typeof quizzesString !== 'string') return quizzesString;
         return JSON.parse(quizzesString);
     } catch (e) {
         console.error("Parse quizzes error:", e);
@@ -34,4 +11,33 @@ function parseQuizzes(quizzesString) {
     }
 }
 
-module.exports = { validatePronunciationInput, parseQuizzes };
+function validatePronunciationInput(body) {
+    const quizzes = parseQuizzes(body.quizzes);
+    const errors = Pronunciation.validate({
+        title: body.title,
+        description: body.description,
+        category: body.category,
+        level: body.level,
+        content: body.content,
+        sort: body.sort !== undefined ? Number(body.sort) : undefined,
+        quizzes
+    });
+    return { valid: errors.length === 0, errors };
+}
+
+function buildPronunciationDataFromRequest(body) {
+    return {
+        title: body.title,
+        description: body.description,
+        category: body.category,
+        level: body.level,
+        content: body.content,
+        images: body.images || null,
+        quizzes: parseQuizzes(body.quizzes),
+        slug: body.slug,
+        sort: parseInt(body.sort) || 0,
+        display: body.display !== undefined ? body.display === 'true' || body.display === true : true
+    };
+}
+
+module.exports = { validatePronunciationInput, buildPronunciationDataFromRequest, parseQuizzes };
