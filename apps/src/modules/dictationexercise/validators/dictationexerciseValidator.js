@@ -1,18 +1,23 @@
+const DictationExercise = require('../models/dictationexercise');
+
 function validateDictationExerciseInput(body) {
-    const errors = [];
-    if(!body.title || body.title.trim() === '') {
-        errors.push('Title is required');
-    }
-    if(!body.content || body.content.trim() === '') {
-        errors.push('Content is required');
-    }
-    if(body.sort !== undefined) {
-        const sort = parseInt(body.sort);
-        if(isNaN(sort) || sort < 0) {
-            errors.push('Sort must be a non-negative number');
-        }
-    }
+    const errors = DictationExercise.validate({
+        title: body.title,
+        content: body.content,
+        sort: body.sort !== undefined ? Number(body.sort) : undefined
+    });
     return { valid: errors.length === 0, errors };
 }
 
-module.exports = { validateDictationExerciseInput };
+function buildDictationExerciseDataFromRequest(body) {
+    return {
+        title: body.title,
+        description: body.description || '',
+        content: body.content,
+        slug: body.slug,
+        sort: parseInt(body.sort) || 0,
+        display: body.display !== undefined ? body.display === 'true' || body.display === true : true
+    };
+}
+
+module.exports = { validateDictationExerciseInput, buildDictationExerciseDataFromRequest };

@@ -1,10 +1,19 @@
 const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
 const VocabularyExerciseRepository = require('../repositories/vocabularyexerciseRepository');
 const { invalidateVocabularyExerciseCache } = require('../utils/cacheHelper');
+const { VocabularyExercise } = require('../models/vocabularyexercise');
 
 class VocabularyExerciseService {
     constructor() {
         this.repository = new VocabularyExerciseRepository();
+    }
+
+    getUserProgressService() {
+        if (!this.userProgressService) {
+            const UserProgressService = require('../../userprogress/services/userprogressService');
+            this.userProgressService = new UserProgressService();
+        }
+        return this.userProgressService;
     }
 
     async getVocabularyexerciseList(page = 1, limit = 12, role = "user") {
@@ -13,7 +22,7 @@ class VocabularyExerciseService {
         const ttl = 300;
         try {
             const cached = await redis.get(cacheKey);
-            if(cached) {
+            if (cached) {
                 console.log(`Direct cache hit: ${cacheKey}`);
                 return JSON.parse(cached);
             }
@@ -21,7 +30,7 @@ class VocabularyExerciseService {
             console.error('Direct cache get error:', err);
         }
         const filter = {};
-        if(role !== "admin") {
+        if (role !== "admin") {
             filter.display = true;
         }
         const { exercises, total } = await this.repository.findAll(filter, page, limit);
@@ -43,51 +52,99 @@ class VocabularyExerciseService {
         return await this.repository.findBySlug(slug);
     }
 
-    async insertVocabularyexercise(exerciseData) {
-        const formattedQuestions = this._formatQuestions(exerciseData.questions || []);
-        const newExercise = {
-            title: exerciseData.title,
-            questions: formattedQuestions,
-            slug: exerciseData.slug,
-            sort: exerciseData.sort,
-            display: exerciseData.display,
-            createdAt: new Date()
-        };
-        const result = await this.repository.insert(newExercise);
-        await invalidateVocabularyExerciseCache();
-        return result;
+    async _getOrCreateUserProgress(userId) {
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstVocabularyExercisePage = await this.getVocabularyexerciseList(1, 1);
+            const firstVocabularyExercise = firstVocabularyExercisePage?.vocabularyexercises?.[0] || null;
+            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null);
+        }
+        return userProgress;
     }
 
-    async updateVocabularyexercise(id, updateData) {
-        const formattedQuestions = this._formatQuestions(updateData.questions || []);
-        const update = {
-            title: updateData.title.trim(),
-            questions: formattedQuestions,
-            slug: updateData.slug,
-            sort: updateData.sort,
-            display: updateData.display,
-            updatedAt: new Date(),
+    async getVocabularyExerciseDetails(userId, vocabularyExerciseId) {
+        const vocabularyExercise = await this.getVocabularyexerciseById(vocabularyExerciseId);
+        if (!vocabularyExercise) {
+            return { status: 404, data: { message: "Vocabulary exercise not found." } };
+        }
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isUnlockedVocabularyExercise = (userProgress.unlockedVocabularyExercises || []).some(s => s.toString() == vocabularyExerciseId.toString());
+        if (!isUnlockedVocabularyExercise) {
+            return { status: 403, data: { success: false, message: "You cannot complete a locked vocabulary exercise." } };
+        }
+        return { status: 200, data: { vocabularyExercise, userProgress } };
+    }
+
+    async completeVocabularyExercise(userId, vocabularyExerciseId) {
+        const vocabularyExercise = await this.getVocabularyexerciseById(vocabularyExerciseId);
+        if (!vocabularyExercise) {
+            return { status: 404, data: { success: false, message: "Vocabulary exercise not found" } };
+        }
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isUnlockedVocabularyExercise = (userProgress.unlockedVocabularyExercises || []).some(s => s.toString() == vocabularyExerciseId.toString());
+        if (!isUnlockedVocabularyExercise) {
+            return { status: 403, data: { success: false, message: "You cannot complete a locked vocabulary exercise." } };
+        }
+        const vocabularyExerciseList = await this.getVocabularyexerciseList(1, 10000);
+        const vocabularyExercises = vocabularyExerciseList?.vocabularyexercises || [];
+        const currentVocabularyExerciseIndex = vocabularyExercises.findIndex(s => s._id.toString() == vocabularyExerciseId.toString());
+        let nextVocabularyExercise = null;
+        if (currentVocabularyExerciseIndex !== -1 && currentVocabularyExerciseIndex < vocabularyExercises.length - 1) {
+            nextVocabularyExercise = vocabularyExercises[currentVocabularyExerciseIndex + 1];
+        }
+        if (nextVocabularyExercise) {
+            userProgress = await userProgressService.unlockNextVocabularyExercise(userProgress, nextVocabularyExercise._id, 10);
+        } else {
+            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        }
+        await userProgressService.updateUserProgress(userProgress);
+        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        return {
+            status: 200,
+            data: {
+                success: true,
+                message: nextVocabularyExercise ? "Vocabulary exercise completed. Next vocabulary exercise unlocked." : "Vocabulary exercise completed. You have finished all vocabulary exercise.",
+                userProgress: {
+                    unlockedVocabularyExercises: updatedUserProgress.unlockedVocabularyExercises,
+                    experiencePoints: updatedUserProgress.experiencePoints,
+                    streak: updatedUserProgress.streak,
+                    maxStreak: updatedUserProgress.maxStreak,
+                    studyDates: updatedUserProgress.studyDates
+                }
+            }
         };
-        const result = await this.repository.update(id, update);
+    }
+
+    async insertVocabularyexercise(exerciseData) {
+        const document = VocabularyExercise.buildDocument(exerciseData);
+        const result = await this.repository.insert(document);
         await invalidateVocabularyExerciseCache();
-        return result;
+        return { status: 201, data: { success: true, message: "Bài luyện tập từ vựng đã được thêm thành công !", result } };
+    }
+
+    async updateVocabularyexercise(id, exerciseData) {
+        const existing = await this.getVocabularyexerciseById(id);
+        if (!existing) {
+            return { status: 404, data: { success: false, message: "Bài luyện tập từ vựng không tìm thấy." } };
+        }
+        const document = VocabularyExercise.buildDocument(exerciseData);
+        delete document.createdAt;
+        document.updatedAt = new Date();
+        const result = await this.repository.update(id, document);
+        await invalidateVocabularyExerciseCache();
+        return { status: 200, data: { success: true, message: "Bài luyện tập từ vựng đã được cập nhật thành công !", result } };
     }
 
     async deleteVocabularyexercise(id) {
-        const result = await this.repository.delete(id);
+        const existing = await this.getVocabularyexerciseById(id);
+        if (!existing) {
+            return { status: 404, data: { success: false, message: "Bài luyện tập từ vựng không tìm thấy." } };
+        }
+        await this.repository.delete(id);
         await invalidateVocabularyExerciseCache();
-        return result;
-    }
-
-    _formatQuestions(questions) {
-        if(!Array.isArray(questions)) return [];
-        return questions.map(q => ({
-            question: q.question,
-            type: q.type,
-            correctAnswer: q.correctAnswer,
-            explanation: q.explanation || "",
-            options: q.options || [],
-        }));
+        return { status: 200, data: { success: true, message: "Bài luyện tập từ vựng đã xóa thành công !" } };
     }
 }
 
