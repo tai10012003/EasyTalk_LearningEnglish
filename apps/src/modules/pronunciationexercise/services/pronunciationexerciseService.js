@@ -6,8 +6,8 @@ const { calculateAccuracy } = require('../utils/accuracyCalculator');
 const { PronunciationExercise } = require('../models/pronunciationexercise');
 
 class PronunciationExerciseService {
-    constructor() {
-        this.repository = new PronunciationExerciseRepository();
+    constructor(repository = new PronunciationExerciseRepository()) {
+        this.repository = repository;
         this.speechAnalysisService = new SpeechAnalysisService();
     }
 
@@ -90,13 +90,7 @@ class PronunciationExerciseService {
         if (!isPronunciationExerciseUnlocked) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked pronunciation exercise." } };
         }
-        const pronunciationExerciseList = await this.getPronunciationexerciseList(1, 10000);
-        const pronunciationExercises = pronunciationExerciseList?.pronunciationexercises || [];
-        const currentPronunciationExerciseIndex = pronunciationExercises.findIndex(s => s._id.toString() == pronunciationExerciseId.toString());
-        let nextPronunciationExercise = null;
-        if (currentPronunciationExerciseIndex !== -1 && currentPronunciationExerciseIndex < pronunciationExercises.length - 1) {
-            nextPronunciationExercise = pronunciationExercises[currentPronunciationExerciseIndex + 1];
-        }
+        const nextPronunciationExercise = await this.repository.findNextBySortOrder(pronunciationExercise.sort);
         if (nextPronunciationExercise) {
             userProgress = await userProgressService.unlockNextPronunciationExercise(userProgress, nextPronunciationExercise._id, 10);
         } else {

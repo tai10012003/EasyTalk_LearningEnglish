@@ -4,8 +4,8 @@ const { invalidateGrammarExerciseCache } = require('../utils/cacheHelper');
 const { GrammarExercise } = require('../models/grammarexercise');
 
 class GrammarExerciseService {
-    constructor() {
-        this.repository = new GrammarExerciseRepository();
+    constructor(repository = new GrammarExerciseRepository()) {
+        this.repository = repository;
     }
 
     getUserProgressService() {
@@ -87,13 +87,7 @@ class GrammarExerciseService {
         if (!isUnlockedGrammarExercise) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked grammar exercise." } };
         }
-        const grammarExerciseList = await this.getGrammarexerciseList(1, 10000);
-        const grammarExercises = grammarExerciseList?.grammarexercises || [];
-        const currentGrammarExerciseIndex = grammarExercises.findIndex(s => s._id.toString() == grammarExerciseId.toString());
-        let nextGrammarExercise = null;
-        if (currentGrammarExerciseIndex !== -1 && currentGrammarExerciseIndex < grammarExercises.length - 1) {
-            nextGrammarExercise = grammarExercises[currentGrammarExerciseIndex + 1];
-        }
+        const nextGrammarExercise = await this.repository.findNextBySortOrder(grammarExercise.sort);
         if (nextGrammarExercise) {
             userProgress = await userProgressService.unlockNextGrammarExercise(userProgress, nextGrammarExercise._id, 10);
         } else {

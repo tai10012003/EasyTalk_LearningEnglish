@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const verifyToken = require("../../../shared/middleware/verifyToken");
+const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const { cacheMiddleware } = require('../../../shared/middleware/cacheMiddleware');
 const GrammarService = require("../services/grammarService");
 const { validateGrammarInput, buildGrammarDataFromRequest } = require("../validators/grammarValidator");
@@ -54,7 +54,7 @@ router.post("/api/grammar/complete/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/api/add", upload.single("image"), async function (req, res) {
+router.post("/api/add", verifyAdmin, upload.single("image"), async function (req, res) {
     try {
         const validation = validateGrammarInput(req.body);
         if (!validation.valid) return res.status(400).json({ message: validation.errors.join(', ') });
@@ -66,7 +66,7 @@ router.post("/api/add", upload.single("image"), async function (req, res) {
     }
 });
 
-router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
+router.get("/api/:id", verifyAdmin, cacheMiddleware(600), async function (req, res) {
     try {
         const grammar = await grammarService.getGrammar(req.params.id);
         if (!grammar) {
@@ -79,7 +79,7 @@ router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     }
 });
 
-router.put("/api/update/:id", upload.single("image"), async function (req, res) {
+router.put("/api/update/:id", verifyAdmin, upload.single("image"), async function (req, res) {
     try {
         const validation = validateGrammarInput(req.body);
         if (!validation.valid) return res.status(400).json({ message: validation.errors.join(', ') });
@@ -91,7 +91,7 @@ router.put("/api/update/:id", upload.single("image"), async function (req, res) 
     }
 });
 
-router.delete("/api/grammar/:id", async function (req, res) {
+router.delete("/api/grammar/:id", verifyAdmin, async function (req, res) {
     try {
         const { status, data } = await grammarService.deleteGrammar(req.params.id);
         return res.status(status).json(data);

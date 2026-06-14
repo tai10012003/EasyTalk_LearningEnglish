@@ -4,8 +4,8 @@ const { invalidateVocabularyExerciseCache } = require('../utils/cacheHelper');
 const { VocabularyExercise } = require('../models/vocabularyexercise');
 
 class VocabularyExerciseService {
-    constructor() {
-        this.repository = new VocabularyExerciseRepository();
+    constructor(repository = new VocabularyExerciseRepository()) {
+        this.repository = repository;
     }
 
     getUserProgressService() {
@@ -87,13 +87,7 @@ class VocabularyExerciseService {
         if (!isUnlockedVocabularyExercise) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked vocabulary exercise." } };
         }
-        const vocabularyExerciseList = await this.getVocabularyexerciseList(1, 10000);
-        const vocabularyExercises = vocabularyExerciseList?.vocabularyexercises || [];
-        const currentVocabularyExerciseIndex = vocabularyExercises.findIndex(s => s._id.toString() == vocabularyExerciseId.toString());
-        let nextVocabularyExercise = null;
-        if (currentVocabularyExerciseIndex !== -1 && currentVocabularyExerciseIndex < vocabularyExercises.length - 1) {
-            nextVocabularyExercise = vocabularyExercises[currentVocabularyExerciseIndex + 1];
-        }
+        const nextVocabularyExercise = await this.repository.findNextBySortOrder(vocabularyExercise.sort);
         if (nextVocabularyExercise) {
             userProgress = await userProgressService.unlockNextVocabularyExercise(userProgress, nextVocabularyExercise._id, 10);
         } else {

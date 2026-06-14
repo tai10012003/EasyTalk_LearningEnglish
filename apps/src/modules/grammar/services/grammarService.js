@@ -5,8 +5,8 @@ const { invalidateGrammarCache } = require('../utils/cacheHelper');
 const { Grammar } = require('../models/grammar');
 
 class GrammarService {
-    constructor() {
-        this.grammarRepository = new GrammarRepository();
+    constructor(repository = new GrammarRepository()) {
+        this.repository = repository;
         this.imageService = new grammarImageService("easytalk/grammar");
     }
 
@@ -37,7 +37,7 @@ class GrammarService {
             filter.display = true;
         }
         if (search) filter.title = { $regex: search, $options: "i" };
-        const { grammars, total } = await this.grammarRepository.findAll(filter, skip, limit);
+        const { grammars, total } = await this.repository.findAll(filter, skip, limit);
         const result = { grammars, totalGrammars: total };
         try {
             await redis.setex(cacheKey, ttl, JSON.stringify(result));
@@ -49,11 +49,11 @@ class GrammarService {
     }
 
     async getGrammar(id) {
-        return await this.grammarRepository.findById(id);
+        return await this.repository.findById(id);
     }
 
     async getGrammarBySlug(slug) {
-        return await this.grammarRepository.findBySlug(slug);
+        return await this.repository.findBySlug(slug);
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -91,13 +91,7 @@ class GrammarService {
         if (!isGrammarUnlocked) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked grammar." } };
         }
-        const grammarList = await this.getGrammarList(1, 10000);
-        const grammars = grammarList?.grammars || [];
-        const currentGrammarIndex = grammars.findIndex(s => s._id.toString() == grammarId.toString());
-        let nextGrammar = null;
-        if (currentGrammarIndex !== -1 && currentGrammarIndex < grammars.length - 1) {
-            nextGrammar = grammars[currentGrammarIndex + 1];
-        }
+        const nextGrammar = await this.repository.findNextBySortOrder(grammar.sort);
         if (nextGrammar) {
             userProgress = await userProgressService.unlockNextGrammar(userProgress, nextGrammar._id, 10);
         } else {
@@ -124,13 +118,13 @@ class GrammarService {
     async insertGrammar(grammarData, file = null) {
         let imageUrl = null;
         if (file) {
-            const publicIdBase = await this.imageService.getNextPublicId(this.grammarRepository, 'grammar');
+            const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'grammar');
             imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
         } else if (grammarData.images) {
             imageUrl = grammarData.images;
         }
         const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
-        const result = await this.grammarRepository.insert(document);
+        const result = await this.repository.insert(document);
         await invalidateGrammarCache();
         return { status: 201, data: { message: "Bài học ngữ pháp đã được thêm thành công !", result } };
     }
@@ -144,14 +138,14 @@ class GrammarService {
             if (existingPublicId) {
                 imageUrl = await this.imageService.uploadReplacementImage(file, existingPublicId);
             } else {
-                const publicIdBase = await this.imageService.getNextPublicId(this.grammarRepository, 'grammar');
+                const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'grammar');
                 imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
             }
         }
         const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
         delete document.createdAt;
         document.updatedAt = new Date();
-        const result = await this.grammarRepository.update(id, document);
+        const result = await this.repository.update(id, document);
         await invalidateGrammarCache();
         return { status: 200, data: { message: "Bài học ngữ pháp đã được cập nhật thành công !", result } };
     }
@@ -163,7 +157,7 @@ class GrammarService {
             const publicId = this.imageService.extractPublicIdFromUrl(existing.images);
             if (publicId) await this.imageService.deleteImage(publicId);
         }
-        await this.grammarRepository.delete(id);
+        await this.repository.delete(id);
         await invalidateGrammarCache();
         return { status: 200, data: { message: "Bài học ngữ pháp đã xóa thành công !" } };
     }

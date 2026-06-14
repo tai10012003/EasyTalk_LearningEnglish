@@ -24,6 +24,13 @@ class PronunciationRepository {
         return await this.collection.findOne({ slug });
     }
 
+    async findNextBySortOrder(currentSort) {
+        return await this.collection.findOne(
+            { display: true, sort: { $gt: currentSort } },
+            { sort: { sort: 1 } }
+        );
+    }
+
     async insert(pronunciation) {
         return await this.collection.insertOne(pronunciation);
     }

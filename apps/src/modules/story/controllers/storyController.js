@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const multer = require("multer");
-const verifyToken = require("../../../shared/middleware/verifyToken");
+const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const { cacheMiddleware } = require('../../../shared/middleware/cacheMiddleware');
 const StoryService = require("../services/storyService");
 const { validateStoryInput, buildStoryDataFromRequest } = require("../validators/storyValidator");
@@ -57,7 +57,7 @@ router.post("/api/story/complete/:id", verifyToken, async (req, res) => {
     }
 });
 
-router.post("/api/add", upload.single("image"), async (req, res) => {
+router.post("/api/add", verifyAdmin, upload.single("image"), async (req, res) => {
     try {
         const validation = validateStoryInput(req.body);
         if (!validation.valid) return res.status(400).json({ success: false, message: validation.errors.join(', ') });
@@ -69,7 +69,7 @@ router.post("/api/add", upload.single("image"), async (req, res) => {
     }
 });
 
-router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
+router.get("/api/:id", verifyAdmin, cacheMiddleware(600), async function (req, res) {
     try {
         const story = await storyService.getStory(req.params.id);
         if (!story) return res.status(404).json({ message: "Story not found" });
@@ -80,7 +80,7 @@ router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     }
 });
 
-router.put("/api/update/:id", upload.single("image"), async (req, res) => {
+router.put("/api/update/:id", verifyAdmin, upload.single("image"), async (req, res) => {
     try {
         const validation = validateStoryInput(req.body);
         if (!validation.valid) return res.status(400).json({ success: false, message: validation.errors.join(', ') });
@@ -92,7 +92,7 @@ router.put("/api/update/:id", upload.single("image"), async (req, res) => {
     }
 });
 
-router.delete("/api/story/:id", async (req, res) => {
+router.delete("/api/story/:id", verifyAdmin, async (req, res) => {
     try {
         const { status, data } = await storyService.deleteStory(req.params.id);
         return res.status(status).json(data);

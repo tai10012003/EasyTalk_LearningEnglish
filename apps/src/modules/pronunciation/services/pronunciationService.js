@@ -5,8 +5,8 @@ const { invalidatePronunciationCache } = require('../utils/cacheHelper');
 const { Pronunciation } = require('../models/pronunciation');
 
 class PronunciationService {
-    constructor() {
-        this.pronunciationRepository = new PronunciationRepository();
+    constructor(repository = new PronunciationRepository()) {
+        this.repository = repository;
         this.imageService = new pronunciationImageService("easytalk/pronunciation");
     }
 
@@ -37,7 +37,7 @@ class PronunciationService {
             filter.display = true;
         }
         if (search) filter.title = { $regex: search, $options: "i" };
-        const { pronunciations, total } = await this.pronunciationRepository.findAll(filter, skip, limit);
+        const { pronunciations, total } = await this.repository.findAll(filter, skip, limit);
         const result = { pronunciations, totalPronunciations: total };
         try {
             await redis.setex(cacheKey, ttl, JSON.stringify(result));
@@ -49,11 +49,11 @@ class PronunciationService {
     }
 
     async getPronunciation(id) {
-        return await this.pronunciationRepository.findById(id);
+        return await this.repository.findById(id);
     }
 
     async getPronunciationBySlug(slug) {
-        return await this.pronunciationRepository.findBySlug(slug);
+        return await this.repository.findBySlug(slug);
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -91,13 +91,7 @@ class PronunciationService {
         if (!isPronunciationUnlocked) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked pronunciation." } };
         }
-        const pronunciationList = await this.getPronunciationList(1, 10000);
-        const pronunciations = pronunciationList?.pronunciations || [];
-        const currentPronuncationIndex = pronunciations.findIndex(s => s._id.toString() == pronunciationId.toString());
-        let nextPronunciation = null;
-        if (currentPronuncationIndex !== -1 && currentPronuncationIndex < pronunciations.length - 1) {
-            nextPronunciation = pronunciations[currentPronuncationIndex + 1];
-        }
+        const nextPronunciation = await this.repository.findNextBySortOrder(pronunciation.sort);
         if (nextPronunciation) {
             userProgress = await userProgressService.unlockNextPronunciation(userProgress, nextPronunciation._id, 10);
         } else {
@@ -124,13 +118,13 @@ class PronunciationService {
     async insertPronunciation(pronunciationData, file = null) {
         let imageUrl = null;
         if (file) {
-            const publicIdBase = await this.imageService.getNextPublicId(this.pronunciationRepository, 'pronunciation');
+            const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'pronunciation');
             imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
         } else if (pronunciationData.images) {
             imageUrl = pronunciationData.images;
         }
         const document = Pronunciation.buildDocument({ ...pronunciationData, images: imageUrl });
-        const result = await this.pronunciationRepository.insert(document);
+        const result = await this.repository.insert(document);
         await invalidatePronunciationCache();
         return { status: 201, data: { message: "Bài học phát âm đã được thêm thành công !", result } };
     }
@@ -144,14 +138,14 @@ class PronunciationService {
             if (existingPublicId) {
                 imageUrl = await this.imageService.uploadReplacementImage(file, existingPublicId);
             } else {
-                const publicIdBase = await this.imageService.getNextPublicId(this.pronunciationRepository, 'pronunciation');
+                const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'pronunciation');
                 imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
             }
         }
         const document = Pronunciation.buildDocument({ ...pronunciationData, images: imageUrl });
         delete document.createdAt;
         document.updatedAt = new Date();
-        const result = await this.pronunciationRepository.update(id, document);
+        const result = await this.repository.update(id, document);
         await invalidatePronunciationCache();
         return { status: 200, data: { message: "Bài học phát âm đã được cập nhật thành công !", result } };
     }
@@ -163,7 +157,7 @@ class PronunciationService {
             const publicId = this.imageService.extractPublicIdFromUrl(existing.images);
             if (publicId) await this.imageService.deleteImage(publicId);
         }
-        await this.pronunciationRepository.delete(id);
+        await this.repository.delete(id);
         await invalidatePronunciationCache();
         return { status: 200, data: { message: "Bài học phát âm đã xóa thành công !" } };
     }

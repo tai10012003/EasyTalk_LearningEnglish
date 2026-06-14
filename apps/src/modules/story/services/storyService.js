@@ -5,8 +5,8 @@ const { invalidateStoryCache } = require('../utils/cacheHelper');
 const { Story } = require('../model/story');
 
 class StoryService {
-    constructor() {
-        this.storyRepository = new StoryRepository();
+    constructor(repository = new StoryRepository()) {
+        this.repository = repository;
         this.imageService = new storyImageService("easytalk/story");
     }
 
@@ -39,7 +39,7 @@ class StoryService {
         if (category) filter.category = category;
         if (level) filter.level = level;
         if (search) filter.title = { $regex: search, $options: "i" };
-        const { stories, total } = await this.storyRepository.findAll(filter, skip, limit);
+        const { stories, total } = await this.repository.findAll(filter, skip, limit);
         const result = { stories, totalStory: total };
         try {
             await redis.setex(cacheKey, ttl, JSON.stringify(result));
@@ -51,11 +51,11 @@ class StoryService {
     }
 
     async getStory(id) {
-        return await this.storyRepository.findById(id);
+        return await this.repository.findById(id);
     }
 
     async getStoryBySlug(slug) {
-        return await this.storyRepository.findBySlug(slug);
+        return await this.repository.findBySlug(slug);
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -89,11 +89,7 @@ class StoryService {
         let userProgress = await this._getOrCreateUserProgress(userId);
         const isStoryUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
         if (!isStoryUnlocked) return { status: 403, data: { success: false, message: "You cannot complete a locked story." } };
-        const storyList = await this.getStoryList(1, 10000);
-        const stories = storyList?.stories || [];
-        const currentStoryIndex = stories.findIndex(s => s._id.toString() == storyId.toString());
-        let nextStory = null;
-        if (currentStoryIndex !== -1 && currentStoryIndex < stories.length - 1) nextStory = stories[currentStoryIndex + 1];
+        const nextStory = await this.repository.findNextBySortOrder(story.sort);
         if (nextStory) {
             userProgress = await userProgressService.unlockNextStory(userProgress, nextStory._id, 10);
         } else {
@@ -120,13 +116,13 @@ class StoryService {
     async insertStory(storyData, file = null) {
         let imageUrl = null;
         if (file) {
-            const publicIdBase = await this.imageService.getNextPublicId(this.storyRepository, 'story');
+            const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'story');
             imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
         } else if (storyData.image) {
             imageUrl = storyData.image;
         }
         const document = Story.buildDocument({ ...storyData, image: imageUrl });
-        const result = await this.storyRepository.insert(document);
+        const result = await this.repository.insert(document);
         await invalidateStoryCache();
         return { status: 201, data: { success: true, message: "Câu chuyện đã được thêm thành công!", result } };
     }
@@ -140,14 +136,14 @@ class StoryService {
             if (existingPublicId) {
                 imageUrl = await this.imageService.uploadReplacementImage(file, existingPublicId);
             } else {
-                const publicIdBase = await this.imageService.getNextPublicId(this.storyRepository, 'story');
+                const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'story');
                 imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
             }
         }
         const document = Story.buildDocument({ ...storyData, image: imageUrl });
         delete document.createdAt;
         document.updatedAt = new Date();
-        const result = await this.storyRepository.update(id, document);
+        const result = await this.repository.update(id, document);
         await invalidateStoryCache();
         return { status: 200, data: { success: true, message: "Câu chuyện đã được cập nhật thành công!", result } };
     }
@@ -161,7 +157,7 @@ class StoryService {
                 await this.imageService.deleteImage(publicId);
             }
         }
-        await this.storyRepository.delete(id);
+        await this.repository.delete(id);
         await invalidateStoryCache();
         return { status: 200, data: { success: true, message: "Câu chuyện đã xóa thành công!" } };
     }

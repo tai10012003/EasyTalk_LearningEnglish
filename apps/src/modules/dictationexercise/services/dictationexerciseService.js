@@ -4,8 +4,8 @@ const { invalidateDictationExerciseCache } = require('../utils/cacheHelper');
 const DictationExercise = require('../models/dictationexercise');
 
 class DictationExerciseService {
-    constructor() {
-        this.repository = new DictationExerciseRepository();
+    constructor(repository = new DictationExerciseRepository()) {
+        this.repository = repository;
     }
 
     getUserProgressService() {
@@ -87,13 +87,7 @@ class DictationExerciseService {
         if (!isUnlockedDictation) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked dictation exercise." } };
         }
-        const dictationExerciseList = await this.getDictationList(1, 10000);
-        const dictationExercises = dictationExerciseList?.dictationExercises || [];
-        const currentDictationExerciseIndex = dictationExercises.findIndex(s => s._id.toString() == dictationId.toString());
-        let nextDictationExercise = null;
-        if (currentDictationExerciseIndex !== -1 && currentDictationExerciseIndex < dictationExercises.length - 1) {
-            nextDictationExercise = dictationExercises[currentDictationExerciseIndex + 1];
-        }
+        const nextDictationExercise = await this.repository.findNextBySortOrder(dictationExercise.sort);
         if (nextDictationExercise) {
             userProgress = await userProgressService.unlockNextDictation(userProgress, nextDictationExercise._id, 10);
         } else {

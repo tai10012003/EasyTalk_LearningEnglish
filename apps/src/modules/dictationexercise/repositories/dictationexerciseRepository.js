@@ -25,6 +25,13 @@ class DictationExerciseRepository {
         return await this.collection.findOne({ slug });
     }
 
+    async findNextBySortOrder(currentSort) {
+        return await this.collection.findOne(
+            { display: true, sort: { $gt: currentSort } },
+            { sort: { sort: 1 } }
+        );
+    }
+
     async insert(dictationData) {
         dictationData.createdAt = new Date();
         return await this.collection.insertOne(dictationData);

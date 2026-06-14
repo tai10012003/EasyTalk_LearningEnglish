@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const verifyToken = require("../../../shared/middleware/verifyToken");
+const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const { cacheMiddleware } = require("../../../shared/middleware/cacheMiddleware");
 const VocabularyExerciseService = require("../services/vocabularyexerciseService");
 const { validateVocabularyExerciseInput, buildVocabularyExerciseDataFromRequest } = require("../validators/vocabularyexerciseValidator");
@@ -63,7 +63,7 @@ router.post("/api/vocabulary-exercises/complete/:id", verifyToken, async (req, r
     }
 });
 
-router.post("/add", async (req, res) => {
+router.post("/add", verifyAdmin, async (req, res) => {
     try {
         const validation = validateVocabularyExerciseInput(req.body);
         if (!validation.valid) {
@@ -81,7 +81,7 @@ router.post("/add", async (req, res) => {
     }
 });
 
-router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
+router.get("/api/:id", verifyAdmin, cacheMiddleware(600), async function (req, res) {
     try {
         const exercise = await vocabularyexerciseService.getVocabularyexerciseById(req.params.id);
         if (!exercise) {
@@ -94,7 +94,7 @@ router.get("/api/:id", cacheMiddleware(600), async function (req, res) {
     }
 });
 
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", verifyAdmin, async (req, res) => {
     try {
         const validation = validateVocabularyExerciseInput(req.body);
         if (!validation.valid) {
@@ -115,7 +115,7 @@ router.put("/update/:id", async (req, res) => {
     }
 });
 
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", verifyAdmin, async (req, res) => {
     try {
         const { status, data } = await vocabularyexerciseService.deleteVocabularyexercise(req.params.id);
         return res.status(status).json(data);
