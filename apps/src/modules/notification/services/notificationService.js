@@ -2,9 +2,10 @@ const { ObjectId } = require("mongodb");
 const NotificationRepository = require("../repositories/notificationRepository");
 
 class NotificationService {
-    constructor(io = null) {
-        this.notificationRepository = new NotificationRepository();
-        this.io = io;
+    constructor(deps = {}) {
+        const options = deps && typeof deps.emit === 'function' ? { io: deps } : (deps || {});
+        this.notificationRepository = options.repository || new NotificationRepository();
+        this.io = options.io || null;
     }
 
     setSocketIO(io) {

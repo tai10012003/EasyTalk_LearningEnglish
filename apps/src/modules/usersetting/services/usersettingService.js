@@ -4,8 +4,8 @@ const UserSetting = require("../models/usersetting");
 const { getDefaultSettings } = require("../utils/defaultSettings");
 
 class UserSettingService {
-    constructor() {
-        this.repository = new UserSettingRepository();
+    constructor(deps = {}) {
+        this.repository = deps.repository || new UserSettingRepository();
     }
 
     async getUserSettingByUserId(userId) {

@@ -5,7 +5,11 @@ const UserSettingService = require("../services/usersettingService");
 const { validateUserSettingUpdate, validateSection } = require("../validators/usersettingValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const userSettingService = new UserSettingService();
+let userSettingService = new UserSettingService();
+
+function setUserSettingService(service) {
+    userSettingService = service;
+}
 
 router.get("/api/usersettings", verifyToken, asyncHandler(async (req, res) => {
     const userId = req.user.id;
@@ -40,3 +44,4 @@ router.put("/api/usersettings/:section", verifyToken, asyncHandler(async (req, r
 }));
 
 module.exports = router;
+module.exports.setUserSettingService = setUserSettingService;

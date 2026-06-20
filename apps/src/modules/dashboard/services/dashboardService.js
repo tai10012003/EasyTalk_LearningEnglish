@@ -3,10 +3,10 @@ const ContentAnalyticsService = require('./contentAnalyticsService');
 const LeaderboardAnalyticsService = require('./leaderboardAnalyticsService');
 
 class DashboardService {
-    constructor(userRepository, userProgressRepository) {
-        this.activityService = new ActivityAnalyticsService(userRepository);
-        this.contentService = new ContentAnalyticsService(userRepository.db);
-        this.leaderboardService = new LeaderboardAnalyticsService(userProgressRepository);
+    constructor(userRepository, userProgressRepository, deps = {}) {
+        this.activityService = deps.activityService || new ActivityAnalyticsService(userRepository);
+        this.contentService = deps.contentService || new ContentAnalyticsService(userRepository.db);
+        this.leaderboardService = deps.leaderboardService || new LeaderboardAnalyticsService(userProgressRepository);
     }
 
     async getUserActivityLast7Days() {

@@ -6,7 +6,7 @@ const { validateJourneyInput } = require("../validators/journeyValidator");
 const { calculateJourneyProgress, calculateOverallProgress } = require("../utils/progressCalculator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const journeyService = new JourneyService();
+let journeyService = new JourneyService();
 
 let gateService = null;
 let userProgressService = null;
@@ -122,5 +122,8 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setJourneyServiceInstance = (service) => {
+    journeyService = service;
+};
 module.exports.setGateService = setGateService;
 module.exports.setUserProgressService = setUserProgressService;

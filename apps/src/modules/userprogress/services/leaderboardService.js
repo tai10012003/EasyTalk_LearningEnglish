@@ -1,8 +1,8 @@
 const UserProgressRepository = require('../repositories/userprogressRepository');
 
 class LeaderboardService {
-    constructor() {
-        this.userProgressRepository = new UserProgressRepository();
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
     }
 
     async getLeaderboard(type = 'exp', period = 'all', limit = 50) {

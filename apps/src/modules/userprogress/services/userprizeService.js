@@ -5,13 +5,12 @@ const { calculatePerfectStreak } = require('../utils/streakCalculator');
 const { invalidateUserProgressCache } = require('../utils/cacheHelper');
 const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 
-const prizeService = new PrizeService();
-
 class UserPrizeService {
-    constructor() {
-        this.userProgressRepository = new UserProgressRepository();
-        this.notificationService = new NotificationService();
-        this.userProgressService = null;
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
+        this.notificationService = deps.notificationService || new NotificationService();
+        this.prizeService = deps.prizeService || new PrizeService();
+        this.userProgressService = deps.userProgressService || null;
     }
 
     setUserProgressService(userProgressService) {
@@ -21,7 +20,7 @@ class UserPrizeService {
     async checkAndUnlockNonChampionPrizes(userId) {
         const userProgress = await this.userProgressRepository.findByUserId(userId);
         if(!userProgress) return { newPrizes: [], totalUnlocked: 0 };
-        const allPrizes = await prizeService.getAllPrizes();
+        const allPrizes = await this.prizeService.getAllPrizes();
         const newlyUnlocked = [];
         for(const prize of allPrizes) {
             if(['champion_week', 'champion_month', 'champion_year'].includes(prize.type)) continue;
@@ -53,7 +52,7 @@ class UserPrizeService {
     async checkAndUnlockChampionPrizes(userId) {
         const userProgress = await this.userProgressRepository.findByUserId(userId);
         if(!userProgress) return { newPrizes: [], totalUnlocked: 0 };
-        const allPrizes = await prizeService.getAllPrizes();
+        const allPrizes = await this.prizeService.getAllPrizes();
         const championPrizes = allPrizes.filter(p =>['champion_week', 'champion_month', 'champion_year'].includes(p.type));
         const newlyUnlocked = [];
         const now = this._getVnNow();
@@ -94,7 +93,7 @@ class UserPrizeService {
 
     async getUserPrizesWithDetails(userId) {
         const unlockedPrizes = await this.userProgressRepository.getUserPrizes(userId);
-        const allPrizes = await prizeService.getAllPrizes();
+        const allPrizes = await this.prizeService.getAllPrizes();
         return unlockedPrizes.map(up => {
             const prizeDetail = allPrizes.find(p => p.code === up.code);
             return {

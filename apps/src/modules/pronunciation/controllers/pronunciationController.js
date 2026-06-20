@@ -4,7 +4,7 @@ const multer = require("multer");
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const PronunciationService = require("../services/pronunciationService");
 const { validatePronunciationInput, buildPronunciationDataFromRequest } = require("../validators/pronunciationValidator");
-const pronunciationService = new PronunciationService();
+let pronunciationService = new PronunciationService();
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
 const storage = multer.memoryStorage();
@@ -65,3 +65,6 @@ router.delete("/api/pronunciation/:id", verifyAdmin, asyncHandler(async function
 }));
 
 module.exports = router;
+module.exports.setPronunciationService = (service) => {
+    pronunciationService = service;
+};

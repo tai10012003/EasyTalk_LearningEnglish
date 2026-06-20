@@ -7,10 +7,10 @@ const tokenManager = require('../utils/tokenManager');
 
 class UserService {
     constructor(deps = {}) {
-        this.repository = new UserRepository();
-        this.authService = new AuthenticationService();
-        this.emailService = new EmailService();
-        this.socialAuthService = new SocialAuthService();
+        this.repository = deps.repository || new UserRepository();
+        this.authService = deps.authService || new AuthenticationService();
+        this.emailService = deps.emailService || new EmailService();
+        this.socialAuthService = deps.socialAuthService || new SocialAuthService();
         this.notificationService = deps.notificationService || null;
         this.userSettingService = deps.userSettingService || null;
         this.userProgressService = deps.userProgressService || null;

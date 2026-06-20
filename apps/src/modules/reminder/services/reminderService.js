@@ -5,11 +5,11 @@ const ReminderEmailService = require('./reminderEmailService');
 const { validateFutureTime, convertToVietnamTime } = require('../utils/timezoneHelper');
 
 class ReminderService {
-    constructor() {
-        this.repository = new ReminderRepository();
-        this.schedulerService = new ReminderSchedulerService();
-        this.emailService = new ReminderEmailService();
-        this.notificationService = null;
+    constructor(deps = {}) {
+        this.repository = deps.repository || new ReminderRepository();
+        this.schedulerService = deps.schedulerService || new ReminderSchedulerService();
+        this.emailService = deps.emailService || new ReminderEmailService();
+        this.notificationService = deps.notificationService || null;
     }
 
     setNotificationService(service) {

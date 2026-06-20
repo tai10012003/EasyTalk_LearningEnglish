@@ -5,9 +5,9 @@ const { calculateDifficultyStats } = require('../repositories/queries/flashcardC
 // const { invalidateFlashcardCache } = require('../utils/cacheHelper');
 
 class FlashcardService {
-    constructor() {
-        this.repository = new FlashcardRepository();
-        this.imageService = new FlashcardImageService();
+    constructor(deps = {}) {
+        this.repository = deps.repository || new FlashcardRepository();
+        this.imageService = deps.imageService || new FlashcardImageService();
     }
 
     async getFlashcardList(page = 1, limit = 12, tab = "explore", userId) {

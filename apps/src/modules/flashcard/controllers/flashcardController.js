@@ -8,11 +8,15 @@ const { validateFlashcardListInput, validateFlashcardInput, validateDifficultyUp
 const { buildDifficultyUpdateOperations } = require("../repositories/queries/flashcardCalculator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const flashcardService = new FlashcardService();
+let flashcardService = new FlashcardService();
 let userProgressService = null;
 
 function setUserProgressService(service) {
     userProgressService = service;
+}
+
+function setFlashcardService(service) {
+    flashcardService = service;
 }
 
 const storage = multer.memoryStorage();
@@ -155,3 +159,4 @@ router.get("/flashcardlist/:listId/review", verifyToken, asyncHandler(async (req
 
 module.exports = router;
 module.exports.setUserProgressService = setUserProgressService;
+module.exports.setFlashcardService = setFlashcardService;

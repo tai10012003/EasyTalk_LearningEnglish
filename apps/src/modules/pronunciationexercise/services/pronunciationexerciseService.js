@@ -7,9 +7,12 @@ const { PronunciationExercise } = require('../models/pronunciationexercise');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class PronunciationExerciseService {
-    constructor(repository = new PronunciationExerciseRepository()) {
-        this.repository = repository;
-        this.speechAnalysisService = new SpeechAnalysisService();
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new PronunciationExerciseRepository();
+        this.speechAnalysisService = options.speechAnalysisService || new SpeechAnalysisService();
+        this.cache = options.cacheService || cache;
+        this._userProgressService = options.userProgressService || null;
     }
 
     getUserProgressService() {
@@ -23,7 +26,7 @@ class PronunciationExerciseService {
     async getPronunciationexerciseList(page = 1, limit = 12, role = "user") {
         const cacheKey = `pronunciationexercise:list:page=${page}:limit=${limit}:role=${role}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -34,13 +37,13 @@ class PronunciationExerciseService {
     }
 
     async getPronunciationexerciseById(id) {
-        return await cache.getOrSet(`pronunciationexercise:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(`pronunciationexercise:item:id=${id}`, 600, async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getPronunciationexerciseBySlug(slug) {
-        return await cache.getOrSet(`pronunciationexercise:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(`pronunciationexercise:item:slug=${slug}`, 600, async () => {
             return await this.repository.findBySlug(slug);
         });
     }

@@ -5,7 +5,7 @@ const DictationExerciseService = require("../../dictationexercise/services/dicta
 const { validateDictationExerciseInput, buildDictationExerciseDataFromRequest } = require("../validators/dictationexerciseValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const dictationexerciseService = new DictationExerciseService();
+let dictationexerciseService = new DictationExerciseService();
 
 router.get("/api/dictation-exercises", verifyToken, asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
@@ -71,3 +71,6 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async function (req, res)
 }));
 
 module.exports = router;
+module.exports.setDictationExerciseService = (service) => {
+    dictationexerciseService = service;
+};

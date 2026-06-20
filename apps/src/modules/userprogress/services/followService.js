@@ -2,8 +2,8 @@ const UserProgressRepository = require('../repositories/userprogressRepository')
 const { invalidateUserProgressCache } = require('../utils/cacheHelper');
 
 class FollowService {
-    constructor() {
-        this.userProgressRepository = new UserProgressRepository();
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
     }
 
     async followUser(currentUserId, targetUserId) {

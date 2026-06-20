@@ -3,11 +3,18 @@ const router = express.Router();
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const ChatAIService = require("../services/chatAIService");
 const { validateChatMessage } = require("../validators/chatValidator");
-const chatAIService = new ChatAIService();
+let chatAIService = null;
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
+function getChatAIService() {
+    if (!chatAIService) {
+        chatAIService = new ChatAIService();
+    }
+    return chatAIService;
+}
+
 router.get("/api/chat/start", verifyToken, asyncHandler(async (req, res) => {
-    const result = await chatAIService.startConversation();
+    const result = await getChatAIService().startConversation();
     res.json(result);
 }));
 
@@ -17,8 +24,11 @@ router.post("/api/chat", verifyToken, asyncHandler(async (req, res) => {
         return res.status(400).json({ error: validation.errors.join(', ') });
     }
     const { message, step, sessionTopic } = req.body;
-    const result = await chatAIService.continueConversation(message, step, sessionTopic);
+    const result = await getChatAIService().continueConversation(message, step, sessionTopic);
     res.json(result);
 }));
 
 module.exports = router;
+module.exports.setChatAIService = (service) => {
+    chatAIService = service;
+};

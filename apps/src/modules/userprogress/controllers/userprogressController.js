@@ -11,12 +11,12 @@ const UserPrizeService = require('../services/userprizeService');
 const LeaderboardService = require('../services/leaderboardService');
 const FollowService = require('../services/followService');
 
-const userProgressService = new UserProgressService();
-const badgeService = new BadgeService();
-const streakService = new StreakService();
-const userPrizeService = new UserPrizeService();
-const leaderboardService = new LeaderboardService();
-const followService = new FollowService();
+let userProgressService = new UserProgressService();
+let badgeService = new BadgeService();
+let streakService = new StreakService();
+let userPrizeService = new UserPrizeService();
+let leaderboardService = new LeaderboardService();
+let followService = new FollowService();
 
 userProgressService.setBadgeService(badgeService);
 userProgressService.setStreakService(streakService);
@@ -250,3 +250,21 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setUserProgressService = (service) => {
+    userProgressService = service;
+};
+module.exports.setBadgeService = (service) => {
+    badgeService = service;
+};
+module.exports.setStreakService = (service) => {
+    streakService = service;
+};
+module.exports.setUserPrizeService = (service) => {
+    userPrizeService = service;
+};
+module.exports.setLeaderboardService = (service) => {
+    leaderboardService = service;
+};
+module.exports.setFollowService = (service) => {
+    followService = service;
+};

@@ -5,8 +5,8 @@ const PrizeService = require('../services/prizeService');
 const UserPrizeService = require('../../userprogress/services/userprizeService');
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const prizeService = new PrizeService();
-const userPrizeService = new UserPrizeService();
+let prizeService = new PrizeService();
+let userPrizeService = new UserPrizeService();
 
 router.get("/api/prizes", verifyToken, asyncHandler(async (req, res) => {
         const prizes = await prizeService.getAllPrizes();
@@ -74,3 +74,9 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setPrizeService = (service) => {
+    prizeService = service;
+};
+module.exports.setUserPrizeService = (service) => {
+    userPrizeService = service;
+};

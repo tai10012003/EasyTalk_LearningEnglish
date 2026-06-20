@@ -6,7 +6,7 @@ const StoryService = require("../services/storyService");
 const { validateStoryInput, buildStoryDataFromRequest } = require("../validators/storyValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const storyService = new StoryService();
+let storyService = new StoryService();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
@@ -64,3 +64,6 @@ router.delete("/api/story/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setStoryService = (service) => {
+    storyService = service;
+};

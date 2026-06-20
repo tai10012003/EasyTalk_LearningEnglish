@@ -1,8 +1,8 @@
 const PrizeRepository = require('../repositories/prizeRepository');
 
 class PrizeService {
-    constructor() {
-        this.prizeRepository = new PrizeRepository();
+    constructor(deps = {}) {
+        this.prizeRepository = deps.repository || new PrizeRepository();
     }
 
     async getAllPrizes() {

@@ -7,7 +7,7 @@ const { validateStageInput } = require("../validators/stageValidator");
 const { handleStageCompletion } = require("../repositories/queries/stageCompletion");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const stageService = new StageService();
+let stageService = new StageService();
 
 let journeyService = null;
 let gateService = null;
@@ -150,6 +150,9 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setStageServiceInstance = (service) => {
+    stageService = service;
+};
 module.exports.setJourneyService = setJourneyService;
 module.exports.setGateService = setGateService;
 module.exports.setUserProgressService = setUserProgressService;

@@ -6,9 +6,12 @@ const { Grammar } = require('../models/grammar');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class GrammarService {
-    constructor(repository = new GrammarRepository()) {
-        this.repository = repository;
-        this.imageService = new grammarImageService("easytalk/grammar");
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new GrammarRepository();
+        this.imageService = options.imageService || new grammarImageService("easytalk/grammar");
+        this.cache = options.cacheService || cache;
+        this.userProgressService = options.userProgressService || null;
     }
 
     getUserProgressService() {
@@ -22,7 +25,7 @@ class GrammarService {
     async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
         const cacheKey = `grammar:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -35,13 +38,13 @@ class GrammarService {
     }
 
     async getGrammar(id) {
-        return await cache.getOrSet(`grammar:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(`grammar:item:id=${id}`, 600, async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getGrammarBySlug(slug) {
-        return await cache.getOrSet(`grammar:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(`grammar:item:slug=${slug}`, 600, async () => {
             return await this.repository.findBySlug(slug);
         });
     }

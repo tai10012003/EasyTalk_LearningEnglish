@@ -3,27 +3,29 @@ const GateRepository = require('../repositories/gateRepository');
 const { invalidateGateCache } = require('../utils/cacheHelper');
 
 class GateService {
-    constructor() {
-        this.repository = new GateRepository();
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new GateRepository();
+        this.cache = options.cacheService || cache;
     }
 
     async getGateList(page = 1, limit = 12) {
         const cacheKey = `gate:list:page=${page}:limit=${limit}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const { gates, total } = await this.repository.findAll(page, limit);
             return { gates, totalGates: total };
         });
     }
 
     async getGateById(gateId) {
-        return await cache.getOrSet(`gate:item:id=${gateId}`, 600, async () => {
+        return await this.cache.getOrSet(`gate:item:id=${gateId}`, 600, async () => {
             return await this.repository.findById(gateId);
         });
     }
 
     async getGatesInJourney(journeyId) {
-        return await cache.getOrSet(`gate:journey:id=${journeyId}`, 600, async () => {
+        return await this.cache.getOrSet(`gate:journey:id=${journeyId}`, 600, async () => {
             return await this.repository.findByJourney(journeyId);
         });
     }

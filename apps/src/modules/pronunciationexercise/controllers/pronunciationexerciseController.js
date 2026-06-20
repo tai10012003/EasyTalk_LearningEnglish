@@ -6,7 +6,7 @@ const PronunciationExerciseService = require("../services/pronunciationexerciseS
 const { validatePronunciationExerciseInput, buildPronunciationExerciseDataFromRequest } = require("../validators/pronunciationexerciseValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const pronunciationexerciseService = new PronunciationExerciseService();
+let pronunciationexerciseService = new PronunciationExerciseService();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
@@ -76,3 +76,6 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setPronunciationExerciseService = (service) => {
+    pronunciationexerciseService = service;
+};

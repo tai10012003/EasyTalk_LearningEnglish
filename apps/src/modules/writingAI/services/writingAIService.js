@@ -2,9 +2,9 @@ const TopicGeneratorService = require('./topicGeneratorService');
 const WritingAnalyzerService = require('./writingAnalyzerService');
 
 class WritingAIService {
-    constructor() {
-        this.topicGenerator = new TopicGeneratorService();
-        this.writingAnalyzer = new WritingAnalyzerService();
+    constructor(deps = {}) {
+        this.topicGenerator = deps.topicGenerator || new TopicGeneratorService();
+        this.writingAnalyzer = deps.writingAnalyzer || new WritingAnalyzerService();
     }
 
     async generateRandomTopic() {

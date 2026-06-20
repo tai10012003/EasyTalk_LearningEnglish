@@ -5,8 +5,11 @@ const { VocabularyExercise } = require('../models/vocabularyexercise');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class VocabularyExerciseService {
-    constructor(repository = new VocabularyExerciseRepository()) {
-        this.repository = repository;
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new VocabularyExerciseRepository();
+        this.cache = options.cacheService || cache;
+        this.userProgressService = options.userProgressService || null;
     }
 
     getUserProgressService() {
@@ -20,7 +23,7 @@ class VocabularyExerciseService {
     async getVocabularyexerciseList(page = 1, limit = 12, role = "user") {
         const cacheKey = `vocabularyexercise:list:page=${page}:limit=${limit}:role=${role}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -31,13 +34,13 @@ class VocabularyExerciseService {
     }
 
     async getVocabularyexerciseById(id) {
-        return await cache.getOrSet(`vocabularyexercise:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(`vocabularyexercise:item:id=${id}`, 600, async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getVocabularyexerciseBySlug(slug) {
-        return await cache.getOrSet(`vocabularyexercise:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(`vocabularyexercise:item:slug=${slug}`, 600, async () => {
             return await this.repository.findBySlug(slug);
         });
     }

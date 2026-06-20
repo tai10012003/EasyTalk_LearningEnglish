@@ -3,14 +3,16 @@ const JourneyRepository = require('../repositories/journeyRepository');
 const { invalidateJourneyCache } = require('../utils/cacheHelper');
 
 class JourneyService {
-    constructor() {
-        this.repository = new JourneyRepository();
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new JourneyRepository();
+        this.cache = options.cacheService || cache;
     }
 
     async getJourneyList(page = 1, limit = 10) {
         const cacheKey = `journey:list:page=${page}:limit=${limit}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const { journeys, total } = await this.repository.findAll(page, limit);
             return { journeys, totalJourneys: total };
         });
@@ -19,7 +21,7 @@ class JourneyService {
     async getAllJourneysWithDetails() {
         const cacheKey = `journey:allWithDetails`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             return await this.repository.findAllWithDetails();
         });
     }
@@ -27,7 +29,7 @@ class JourneyService {
     async getJourneyWithDetails(journeyId) {
         const cacheKey = `journey:details:id=${journeyId}`;
         const ttl = 600;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             return await this.repository.findByIdWithDetails(journeyId);
         });
     }

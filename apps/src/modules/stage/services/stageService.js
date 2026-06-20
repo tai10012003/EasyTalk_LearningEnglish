@@ -4,14 +4,16 @@ const StageRepository = require('../repositories/stageRepository');
 const { invalidateStageCache } = require('../utils/cacheHelper');
 
 class StageService {
-    constructor() {
-        this.repository = new StageRepository();
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new StageRepository();
+        this.cache = options.cacheService || cache;
     }
 
     async getStageList(page = 1, limit = 12) {
         const cacheKey = `stage:list:page=${page}:limit=${limit}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const { stages, total } = await this.repository.findAll(page, limit);
             return { stages, totalStages: total };
         });
@@ -20,7 +22,7 @@ class StageService {
     async getStageById(id) {
         const cacheKey = `stage:detail:id=${id}`;
         const ttl = 600;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             return await this.repository.findById(id);
         });
     }

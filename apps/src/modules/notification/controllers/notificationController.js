@@ -3,11 +3,12 @@ const router = express.Router();
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const NotificationService = require("../services/notificationService");
 const { validateCreateNotification } = require("../validators/notificationValidator");
-const { getIo } = require("../../../shared/utils/socket");
-const io = getIo();
-const notificationService = new NotificationService();
+let notificationService = new NotificationService();
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
-notificationService.setSocketIO(io);
+
+function setNotificationService(service) {
+    notificationService = service;
+}
 
 router.get("/api/notifications", verifyToken, asyncHandler(async (req, res) => {
         const userId = req.user.id;
@@ -73,3 +74,4 @@ router.delete("/api/delete/:id", verifyToken, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setNotificationService = setNotificationService;

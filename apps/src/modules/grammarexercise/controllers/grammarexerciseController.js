@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const GrammarExerciseService = require("../services/grammarexerciseService");
 const { validateGrammarExerciseInput, buildGrammarExerciseDataFromRequest } = require("../validators/grammarexerciseValidator");
-const grammarexerciseService = new GrammarExerciseService();
+let grammarexerciseService = new GrammarExerciseService();
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
 router.get("/api/grammar-exercises", verifyToken, asyncHandler(async (req, res) => {
@@ -74,3 +74,6 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setGrammarExerciseService = (service) => {
+    grammarexerciseService = service;
+};

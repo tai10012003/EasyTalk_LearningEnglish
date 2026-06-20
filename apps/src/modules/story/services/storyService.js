@@ -6,9 +6,12 @@ const { Story } = require('../model/story');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class StoryService {
-    constructor(repository = new StoryRepository()) {
-        this.repository = repository;
-        this.imageService = new storyImageService("easytalk/story");
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new StoryRepository();
+        this.imageService = options.imageService || new storyImageService("easytalk/story");
+        this.cache = options.cacheService || cache;
+        this.userProgressService = options.userProgressService || null;
     }
 
     getUserProgressService() {
@@ -22,7 +25,7 @@ class StoryService {
     async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user") {
         const cacheKey = `story:list:page=${page}:limit=${limit}:category=${category}:level=${level}:search=${search}:role=${role}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -37,13 +40,13 @@ class StoryService {
     }
 
     async getStory(id) {
-        return await cache.getOrSet(`story:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(`story:item:id=${id}`, 600, async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getStoryBySlug(slug) {
-        return await cache.getOrSet(`story:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(`story:item:slug=${slug}`, 600, async () => {
             return await this.repository.findBySlug(slug);
         });
     }

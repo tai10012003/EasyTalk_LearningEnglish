@@ -7,10 +7,10 @@ const { invalidateUserProgressCache } = require('../utils/cacheHelper');
 const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 
 class StreakService {
-    constructor() {
-        this.userProgressRepository = new UserProgressRepository();
-        this.notificationService = new NotificationService();
-        this.transporter = nodemailer.createTransport({
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
+        this.notificationService = deps.notificationService || new NotificationService();
+        this.transporter = deps.transporter || nodemailer.createTransport({
             service: 'gmail',
             auth: {
                 user: config.email.user,

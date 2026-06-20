@@ -6,9 +6,12 @@ const { Pronunciation } = require('../models/pronunciation');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class PronunciationService {
-    constructor(repository = new PronunciationRepository()) {
-        this.repository = repository;
-        this.imageService = new pronunciationImageService("easytalk/pronunciation");
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new PronunciationRepository();
+        this.imageService = options.imageService || new pronunciationImageService("easytalk/pronunciation");
+        this.cache = options.cacheService || cache;
+        this._userProgressService = options.userProgressService || null;
     }
 
     getUserProgressService() {
@@ -22,7 +25,7 @@ class PronunciationService {
     async getPronunciationList(page = 1, limit = 12, search = "", role = "user") {
         const cacheKey = `pronunciation:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -35,13 +38,13 @@ class PronunciationService {
     }
 
     async getPronunciation(id) {
-        return await cache.getOrSet(`pronunciation:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(`pronunciation:item:id=${id}`, 600, async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getPronunciationBySlug(slug) {
-        return await cache.getOrSet(`pronunciation:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(`pronunciation:item:slug=${slug}`, 600, async () => {
             return await this.repository.findBySlug(slug);
         });
     }

@@ -12,9 +12,9 @@ const BADGES = [
 ];
 
 class BadgeService {
-    constructor() {
-        this.userProgressRepository = new UserProgressRepository();
-        this.userPrizeService = null;
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
+        this.userPrizeService = deps.userPrizeService || null;
     }
 
     setUserPrizeService(userPrizeService) {

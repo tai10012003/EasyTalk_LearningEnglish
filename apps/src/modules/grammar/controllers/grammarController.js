@@ -4,7 +4,7 @@ const multer = require("multer");
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const GrammarService = require("../services/grammarService");
 const { validateGrammarInput, buildGrammarDataFromRequest } = require("../validators/grammarValidator");
-const grammarService = new GrammarService();
+let grammarService = new GrammarService();
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
 const storage = multer.memoryStorage();
@@ -66,3 +66,6 @@ router.delete("/api/grammar/:id", verifyAdmin, asyncHandler(async function (req,
 }));
 
 module.exports = router;
+module.exports.setGrammarService = (service) => {
+    grammarService = service;
+};

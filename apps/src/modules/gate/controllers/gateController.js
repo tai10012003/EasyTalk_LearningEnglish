@@ -6,7 +6,7 @@ const GateService = require("../services/gateService");
 const { validateGateInput } = require("../validators/gateValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-const gateService = new GateService();
+let gateService = new GateService();
 
 let journeyService = null;
 let stageService = null;
@@ -88,5 +88,8 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setGateServiceInstance = (service) => {
+    gateService = service;
+};
 module.exports.setJourneyService = setJourneyService;
 module.exports.setStageService = setStageService;

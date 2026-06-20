@@ -13,13 +13,15 @@ const VocabularyexerciseService = require('../../vocabularyexercise/services/voc
 const DictationexerciseService = require('../../dictationexercise/services/dictationexerciseService');
 
 class UserProgressService {
-    constructor() {
-        this.userProgressRepository = new UserProgressRepository();
-        this.streakService = null;
-        this.badgeService = null;
-        this.userPrizeService = null;
-        this.followService = null;
-        this.leaderboardService = null;
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
+        this.cache = deps.cacheService || cache;
+        this.streakService = deps.streakService || null;
+        this.badgeService = deps.badgeService || null;
+        this.userPrizeService = deps.userPrizeService || null;
+        this.followService = deps.followService || null;
+        this.leaderboardService = deps.leaderboardService || null;
+        this.contentServices = deps.contentServices || {};
     }
 
     setStreakService(streakService) {
@@ -42,10 +44,17 @@ class UserProgressService {
         this.leaderboardService = leaderboardService;
     }
 
+    setContentServices(contentServices) {
+        this.contentServices = {
+            ...this.contentServices,
+            ...contentServices
+        };
+    }
+
     async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
         const cacheKey = `userprogress:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
         const ttl = 300;
-        return await cache.getOrSet(cacheKey, ttl, async () => {
+        return await this.cache.getOrSet(cacheKey, ttl, async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (search) {
@@ -71,13 +80,13 @@ class UserProgressService {
     }
 
     async createUserProgress(userId, journey = null, initialStory = null, initialGrammar = null, initialPronunciation = null, initialGrammarExercise = null, initialPronunciationExercise = null, initialVocabularyExercise = null, initialDictation = null) {
-        const grammarService = new GrammarService();
-        const storyService = new StoryService();
-        const pronunciationService = new PronunciationService();
-        const grammarexerciseService = new GrammarexerciseService();
-        const pronunciationexerciseService = new PronunciationexerciseService();
-        const vocabularyexerciseService = new VocabularyexerciseService();
-        const dictationexerciseService = new DictationexerciseService();
+        const grammarService = this.contentServices.grammarService || new GrammarService({ cacheService: this.cache });
+        const storyService = this.contentServices.storyService || new StoryService({ cacheService: this.cache });
+        const pronunciationService = this.contentServices.pronunciationService || new PronunciationService({ cacheService: this.cache });
+        const grammarexerciseService = this.contentServices.grammarexerciseService || new GrammarexerciseService({ cacheService: this.cache });
+        const pronunciationexerciseService = this.contentServices.pronunciationexerciseService || new PronunciationexerciseService({ cacheService: this.cache });
+        const vocabularyexerciseService = this.contentServices.vocabularyexerciseService || new VocabularyexerciseService({ cacheService: this.cache });
+        const dictationexerciseService = this.contentServices.dictationexerciseService || new DictationexerciseService({ cacheService: this.cache });
         const firstGate = journey?.gates?.[0]?._id || null;
         const firstStage = journey?.gates?.[0]?.stages?.[0]?._id || null;
         if (!initialStory || !initialGrammar || !initialPronunciation || !initialGrammarExercise || !initialPronunciationExercise || !initialVocabularyExercise || !initialDictation) {

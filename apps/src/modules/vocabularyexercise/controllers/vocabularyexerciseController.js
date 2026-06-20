@@ -3,7 +3,7 @@ const router = express.Router();
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const VocabularyExerciseService = require("../services/vocabularyexerciseService");
 const { validateVocabularyExerciseInput, buildVocabularyExerciseDataFromRequest } = require("../validators/vocabularyexerciseValidator");
-const vocabularyexerciseService = new VocabularyExerciseService();
+let vocabularyexerciseService = new VocabularyExerciseService();
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
 router.get("/api/vocabulary-exercises", verifyToken, asyncHandler(async (req, res) => {
@@ -74,3 +74,6 @@ router.delete("/delete/:id", verifyAdmin, asyncHandler(async (req, res) => {
 }));
 
 module.exports = router;
+module.exports.setVocabularyExerciseService = (service) => {
+    vocabularyexerciseService = service;
+};
