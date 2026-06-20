@@ -1,7 +1,8 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const DictationExerciseRepository = require('../repositories/dictationexerciseRepository');
 const { invalidateDictationExerciseCache } = require('../utils/cacheHelper');
 const DictationExercise = require('../models/dictationexercise');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class DictationExerciseService {
     constructor(repository = new DictationExerciseRepository()) {
@@ -17,39 +18,28 @@ class DictationExerciseService {
     }
 
     async getDictationList(page = 1, limit = 12, role = "user") {
-        const redis = getRedisClient();
         const cacheKey = `dictation:list:page=${page}:limit=${limit}:role=${role}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
             }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const filter = {};
-        if (role !== "admin") {
-            filter.display = true;
-        }
-        const { dictations, total } = await this.repository.findAll(filter, page, limit);
-        const result = { dictationExercises: dictations, totalDictationExercises: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+            const { dictations, total } = await this.repository.findAll(filter, page, limit);
+            return { dictationExercises: dictations, totalDictationExercises: total };
+        });
     }
 
     async getDictation(id) {
-        return await this.repository.findById(id);
+        return await cache.getOrSet(`dictation:item:id=${id}`, 600, async () => {
+            return await this.repository.findById(id);
+        });
     }
 
     async getDictationBySlug(slug) {
-        return await this.repository.findBySlug(slug);
+        return await cache.getOrSet(`dictation:item:slug=${slug}`, 600, async () => {
+            return await this.repository.findBySlug(slug);
+        });
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -87,26 +77,21 @@ class DictationExerciseService {
         if (!isUnlockedDictation) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked dictation exercise." } };
         }
-        const nextDictationExercise = await this.repository.findNextBySortOrder(dictationExercise.sort);
-        if (nextDictationExercise) {
-            userProgress = await userProgressService.unlockNextDictation(userProgress, nextDictationExercise._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        const { nextItem: nextDictationExercise, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: dictationExercise,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextDictation.bind(userProgressService),
+            unlockedField: "unlockedDictations"
+        });
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextDictationExercise ? "Dictation exercise completed. Next dictation exercise unlocked." : "Dictation exercise completed. You have finished all Dictation exercise.",
-                userProgress: {
-                    unlockedDictations: updatedUserProgress.unlockedDictations,
-                    experiencePoints: updatedUserProgress.experiencePoints,
-                    streak: updatedUserProgress.streak,
-                    maxStreak: updatedUserProgress.maxStreak,
-                    studyDates: updatedUserProgress.studyDates
-                }
+                userProgress: completedProgress
             }
         };
     }

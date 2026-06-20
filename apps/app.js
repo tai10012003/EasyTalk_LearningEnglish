@@ -3,6 +3,8 @@ const http = require("http");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const dotenv = require('dotenv');
+const { errorHandler, notFound } = require('./src/shared/middleware/errorHandler');
+const responseFormatter = require('./src/shared/middleware/responseFormatter');
 
 const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
 dotenv.config({ path: envFile });
@@ -39,6 +41,7 @@ app.use(cors({
 
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(responseFormatter);
 
 app.use("/static", express.static(__dirname + "/public"));
 
@@ -134,6 +137,8 @@ app.use("/dashboard", dashboardController);
 app.use("/chat", chatAIController);
 app.use("/writing", writingAIController);
 
+app.use(notFound);
+app.use(errorHandler);
 
 async function initBackgroundTasks() {
   try {

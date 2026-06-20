@@ -2,9 +2,18 @@ const verifyToken = require('./verifyToken');
 const { verifyAdmin, optionalAuth } = require('./verifyToken');
 const cacheMiddleware = require('./cacheMiddleware');
 const { invalidateCache, clearCacheByKey, cacheResponse } = require('./cacheMiddleware');
-const errorHandler = require('./errorHandler');
-const { asyncHandler, notFoundHandler, AppError, createError } = require('./errorHandler');
-const validation = require('./validation');
+const { AppError, errorHandler, asyncHandler, notFound } = require('./errorHandler');
+const responseFormatter = require('./responseFormatter');
+let validation = {};
+try {
+    validation = require('./validation');
+} catch (err) {
+    if (err.code !== 'MODULE_NOT_FOUND') {
+        throw err;
+    }
+}
+
+const createError = (message, statusCode, code = null) => new AppError(message, statusCode, code);
 
 module.exports = {
     verifyToken,
@@ -16,8 +25,10 @@ module.exports = {
     cacheResponse,
     errorHandler,
     asyncHandler,
-    notFoundHandler,
+    notFound,
+    notFoundHandler: notFound,
     AppError,
     createError,
+    responseFormatter,
     ...validation
 };

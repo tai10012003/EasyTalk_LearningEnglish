@@ -1,8 +1,9 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const PronunciationRepository = require('../repositories/pronunciationRepository');
 const pronunciationImageService = require('../services/pronunciationImageService');
 const { invalidatePronunciationCache } = require('../utils/cacheHelper');
 const { Pronunciation } = require('../models/pronunciation');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class PronunciationService {
     constructor(repository = new PronunciationRepository()) {
@@ -19,41 +20,30 @@ class PronunciationService {
     }
 
     async getPronunciationList(page = 1, limit = 12, search = "", role = "user") {
-        const redis = getRedisClient();
         const cacheKey = `pronunciation:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const skip = (page - 1) * limit;
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
             }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const skip = (page - 1) * limit;
-        const filter = {};
-        if (role !== "admin") {
-            filter.display = true;
-        }
-        if (search) filter.title = { $regex: search, $options: "i" };
-        const { pronunciations, total } = await this.repository.findAll(filter, skip, limit);
-        const result = { pronunciations, totalPronunciations: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+            if (search) filter.title = { $regex: search, $options: "i" };
+            const { pronunciations, total } = await this.repository.findAll(filter, skip, limit);
+            return { pronunciations, totalPronunciations: total };
+        });
     }
 
     async getPronunciation(id) {
-        return await this.repository.findById(id);
+        return await cache.getOrSet(`pronunciation:item:id=${id}`, 600, async () => {
+            return await this.repository.findById(id);
+        });
     }
 
     async getPronunciationBySlug(slug) {
-        return await this.repository.findBySlug(slug);
+        return await cache.getOrSet(`pronunciation:item:slug=${slug}`, 600, async () => {
+            return await this.repository.findBySlug(slug);
+        });
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -91,26 +81,21 @@ class PronunciationService {
         if (!isPronunciationUnlocked) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked pronunciation." } };
         }
-        const nextPronunciation = await this.repository.findNextBySortOrder(pronunciation.sort);
-        if (nextPronunciation) {
-            userProgress = await userProgressService.unlockNextPronunciation(userProgress, nextPronunciation._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        const { nextItem: nextPronunciation, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: pronunciation,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextPronunciation.bind(userProgressService),
+            unlockedField: "unlockedPronunciations"
+        });
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextPronunciation ? "Pronunciation completed. Next pronunciation unlocked." : "Pronunciation completed. You have finished all pronunciations.",
-                userProgress: {
-                    unlockedPronunciations: updatedUserProgress.unlockedPronunciations,
-                    experiencePoints: updatedUserProgress.experiencePoints,
-                    streak: updatedUserProgress.streak,
-                    maxStreak: updatedUserProgress.maxStreak,
-                    studyDates: updatedUserProgress.studyDates
-                }
+                userProgress: completedProgress
             }
         };
     }

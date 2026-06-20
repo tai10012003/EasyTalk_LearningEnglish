@@ -1,7 +1,8 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const GrammarExerciseRepository = require('../repositories/grammarexerciseRepository');
 const { invalidateGrammarExerciseCache } = require('../utils/cacheHelper');
 const { GrammarExercise } = require('../models/grammarexercise');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class GrammarExerciseService {
     constructor(repository = new GrammarExerciseRepository()) {
@@ -17,39 +18,28 @@ class GrammarExerciseService {
     }
 
     async getGrammarexerciseList(page = 1, limit = 12, role = "user") {
-        const redis = getRedisClient();
         const cacheKey = `grammarexercise:list:page=${page}:limit=${limit}:role=${role}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
             }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const filter = {};
-        if (role !== "admin") {
-            filter.display = true;
-        }
-        const { exercises, total } = await this.repository.findAll(filter, page, limit);
-        const result = { grammarexercises: exercises, totalExercises: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+            const { exercises, total } = await this.repository.findAll(filter, page, limit);
+            return { grammarexercises: exercises, totalExercises: total };
+        });
     }
 
     async getGrammarexerciseById(id) {
-        return await this.repository.findById(id);
+        return await cache.getOrSet(`grammarexercise:item:id=${id}`, 600, async () => {
+            return await this.repository.findById(id);
+        });
     }
 
     async getGrammarexerciseBySlug(slug) {
-        return await this.repository.findBySlug(slug);
+        return await cache.getOrSet(`grammarexercise:item:slug=${slug}`, 600, async () => {
+            return await this.repository.findBySlug(slug);
+        });
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -87,26 +77,21 @@ class GrammarExerciseService {
         if (!isUnlockedGrammarExercise) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked grammar exercise." } };
         }
-        const nextGrammarExercise = await this.repository.findNextBySortOrder(grammarExercise.sort);
-        if (nextGrammarExercise) {
-            userProgress = await userProgressService.unlockNextGrammarExercise(userProgress, nextGrammarExercise._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        const { nextItem: nextGrammarExercise, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: grammarExercise,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextGrammarExercise.bind(userProgressService),
+            unlockedField: "unlockedGrammarExercises"
+        });
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextGrammarExercise ? "Grammar exercise completed. Next grammar exercise unlocked." : "Grammar exercise completed. You have finished all grammar exercise.",
-                userProgress: {
-                    unlockedGrammarExercises: updatedUserProgress.unlockedGrammarExercises,
-                    experiencePoints: updatedUserProgress.experiencePoints,
-                    streak: updatedUserProgress.streak,
-                    maxStreak: updatedUserProgress.maxStreak,
-                    studyDates: updatedUserProgress.studyDates
-                }
+                userProgress: completedProgress
             }
         };
     }

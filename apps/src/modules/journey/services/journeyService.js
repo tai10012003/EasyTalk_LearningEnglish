@@ -1,4 +1,4 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const JourneyRepository = require('../repositories/journeyRepository');
 const { invalidateJourneyCache } = require('../utils/cacheHelper');
 
@@ -8,73 +8,28 @@ class JourneyService {
     }
 
     async getJourneyList(page = 1, limit = 10) {
-        const redis = getRedisClient();
         const cacheKey = `journey:list:page=${page}:limit=${limit}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
-            }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const { journeys, total } = await this.repository.findAll(page, limit);
-        const result = { journeys, totalJourneys: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const { journeys, total } = await this.repository.findAll(page, limit);
+            return { journeys, totalJourneys: total };
+        });
     }
 
     async getAllJourneysWithDetails() {
-        const redis = getRedisClient();
         const cacheKey = `journey:allWithDetails`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
-            }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const result = await this.repository.findAllWithDetails();
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            return await this.repository.findAllWithDetails();
+        });
     }
 
     async getJourneyWithDetails(journeyId) {
-        const redis = getRedisClient();
         const cacheKey = `journey:details:id=${journeyId}`;
         const ttl = 600;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
-            }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const result = await this.repository.findByIdWithDetails(journeyId);
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            return await this.repository.findByIdWithDetails(journeyId);
+        });
     }
 
     async getJourney(id) {

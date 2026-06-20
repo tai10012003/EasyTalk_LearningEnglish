@@ -1,7 +1,20 @@
-const { getRedisClient, isRedisConnected } = require('../../shared/utils/redisClient');
+const { isRedisConnected } = require('../../shared/utils/redisClient');
+const cache = require('../utils/cacheService');
+
+const normalizeCacheOptions = (options = {}) => {
+    if (typeof options === 'number') {
+        return { ttl: options, keyPrefix: 'cache:', enabled: true };
+    }
+    return {
+        ttl: options.ttl || 300,
+        keyPrefix: options.keyPrefix || 'cache:',
+        enabled: options.enabled !== false,
+        keyGenerator: options.keyGenerator
+    };
+};
 
 const cacheMiddleware = (options = {}) => {
-    const { ttl = 300, keyPrefix = 'cache:', enabled = true } = options;
+    const { ttl, keyPrefix, enabled, keyGenerator } = normalizeCacheOptions(options);
     return async (req, res, next) => {
         if (!enabled) return next();
         if (req.method !== 'GET') return next();
@@ -10,20 +23,18 @@ const cacheMiddleware = (options = {}) => {
                 console.warn('Redis not connected, skipping cache');
                 return next();
             }
-            const redis = getRedisClient();
-            const cacheKey = `${keyPrefix}${req.originalUrl || req.url}`;
-            const cachedData = await redis.get(cacheKey);
-            if (cachedData) {
-                console.log(`Cache HIT: ${cacheKey}`);
-                return res.json(JSON.parse(cachedData));
+            const cacheKey = typeof keyGenerator === 'function' ? keyGenerator(req) : `${keyPrefix}${req.originalUrl || req.url}`;
+            const cachedData = await cache.get(cacheKey);
+            if (cachedData !== undefined) {
+                return res.json(cachedData);
             }
             console.log(`Cache MISS: ${cacheKey}`);
             const originalJson = res.json.bind(res);
             res.json = (data) => {
                 res.json = originalJson;
-                redis.setex(cacheKey, ttl, JSON.stringify(data))
-                    .then(() => console.log(`Cached: ${cacheKey} (TTL: ${ttl}s)`))
-                    .catch(err => console.error('Cache set error:', err));
+                if (res.statusCode < 400) {
+                    cache.set(cacheKey, ttl, data).catch(err => console.error('Cache set error:', err));
+                }
                 return originalJson(data);
             };
             next();
@@ -35,34 +46,14 @@ const cacheMiddleware = (options = {}) => {
 };
 
 const invalidateCache = async (pattern) => {
-    try {
-        if (!isRedisConnected()) {
-            console.warn('Redis not connected, cannot invalidate cache');
-            return 0;
-        }
-        const redis = getRedisClient();
-        const keys = await redis.keys(pattern);
-        if (keys.length > 0) {
-            await redis.del(...keys);
-            console.log(`Cache invalidated: ${pattern} (${keys.length} keys deleted)`);
-            return keys.length;
-        }
-        return 0;
-    } catch (error) {
-        console.error('Cache invalidation error:', error);
-        return 0;
-    }
+    return await cache.invalidatePatterns([pattern], pattern);
 };
 
 const clearCacheByKey = async (key) => {
     try {
-        if (!isRedisConnected()) {
-            console.warn('Redis not connected, cannot clear cache');
-            return false;
-        }
-        await getRedisClient().del(key);
+        const deleted = await cache.delete(key);
         console.log(`Cache cleared: ${key}`);
-        return true;
+        return deleted > 0;
     } catch (error) {
         console.error('Cache clear error:', error);
         return false;
@@ -73,20 +64,18 @@ const cacheResponse = (keyGenerator, ttl = 300) => {
     return async (req, res, next) => {
         try {
             if (!isRedisConnected()) return next();
-            const redis = getRedisClient();
             const cacheKey = typeof keyGenerator === 'function' ? keyGenerator(req) : keyGenerator;
-            const cachedData = await redis.get(cacheKey);
-            if (cachedData) {
-                console.log(`Cache HIT: ${cacheKey}`);
-                return res.json(JSON.parse(cachedData));
+            const cachedData = await cache.get(cacheKey);
+            if (cachedData !== undefined) {
+                return res.json(cachedData);
             }
             console.log(`Cache MISS: ${cacheKey}`);
             const originalJson = res.json.bind(res);
             res.json = (data) => {
                 res.json = originalJson;
-                redis.setex(cacheKey, ttl, JSON.stringify(data))
-                    .then(() => console.log(`Cached: ${cacheKey} (TTL: ${ttl}s)`))
-                    .catch(err => console.error('Cache set error:', err));
+                if (res.statusCode < 400) {
+                    cache.set(cacheKey, ttl, data).catch(err => console.error('Cache set error:', err));
+                }
                 return originalJson(data);
             };
             next();

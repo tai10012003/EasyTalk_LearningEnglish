@@ -1,4 +1,4 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const GateRepository = require('../repositories/gateRepository');
 const { invalidateGateCache } = require('../utils/cacheHelper');
 
@@ -8,35 +8,24 @@ class GateService {
     }
 
     async getGateList(page = 1, limit = 12) {
-        const redis = getRedisClient();
         const cacheKey = `gate:list:page=${page}:limit=${limit}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if(cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
-            }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const { gates, total } = await this.repository.findAll(page, limit);
-        const result = { gates, totalGates: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const { gates, total } = await this.repository.findAll(page, limit);
+            return { gates, totalGates: total };
+        });
     }
 
     async getGateById(gateId) {
-        return await this.repository.findById(gateId);
+        return await cache.getOrSet(`gate:item:id=${gateId}`, 600, async () => {
+            return await this.repository.findById(gateId);
+        });
     }
 
     async getGatesInJourney(journeyId) {
-        return await this.repository.findByJourney(journeyId);
+        return await cache.getOrSet(`gate:journey:id=${journeyId}`, 600, async () => {
+            return await this.repository.findByJourney(journeyId);
+        });
     }
 
     async insertGate(gate) {

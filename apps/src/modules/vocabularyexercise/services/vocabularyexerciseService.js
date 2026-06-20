@@ -1,7 +1,8 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const VocabularyExerciseRepository = require('../repositories/vocabularyexerciseRepository');
 const { invalidateVocabularyExerciseCache } = require('../utils/cacheHelper');
 const { VocabularyExercise } = require('../models/vocabularyexercise');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class VocabularyExerciseService {
     constructor(repository = new VocabularyExerciseRepository()) {
@@ -17,39 +18,28 @@ class VocabularyExerciseService {
     }
 
     async getVocabularyexerciseList(page = 1, limit = 12, role = "user") {
-        const redis = getRedisClient();
         const cacheKey = `vocabularyexercise:list:page=${page}:limit=${limit}:role=${role}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
             }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const filter = {};
-        if (role !== "admin") {
-            filter.display = true;
-        }
-        const { exercises, total } = await this.repository.findAll(filter, page, limit);
-        const result = { vocabularyexercises: exercises, totalExercises: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+            const { exercises, total } = await this.repository.findAll(filter, page, limit);
+            return { vocabularyexercises: exercises, totalExercises: total };
+        });
     }
 
     async getVocabularyexerciseById(id) {
-        return await this.repository.findById(id);
+        return await cache.getOrSet(`vocabularyexercise:item:id=${id}`, 600, async () => {
+            return await this.repository.findById(id);
+        });
     }
 
     async getVocabularyexerciseBySlug(slug) {
-        return await this.repository.findBySlug(slug);
+        return await cache.getOrSet(`vocabularyexercise:item:slug=${slug}`, 600, async () => {
+            return await this.repository.findBySlug(slug);
+        });
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -87,26 +77,21 @@ class VocabularyExerciseService {
         if (!isUnlockedVocabularyExercise) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked vocabulary exercise." } };
         }
-        const nextVocabularyExercise = await this.repository.findNextBySortOrder(vocabularyExercise.sort);
-        if (nextVocabularyExercise) {
-            userProgress = await userProgressService.unlockNextVocabularyExercise(userProgress, nextVocabularyExercise._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        const { nextItem: nextVocabularyExercise, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: vocabularyExercise,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextVocabularyExercise.bind(userProgressService),
+            unlockedField: "unlockedVocabularyExercises"
+        });
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextVocabularyExercise ? "Vocabulary exercise completed. Next vocabulary exercise unlocked." : "Vocabulary exercise completed. You have finished all vocabulary exercise.",
-                userProgress: {
-                    unlockedVocabularyExercises: updatedUserProgress.unlockedVocabularyExercises,
-                    experiencePoints: updatedUserProgress.experiencePoints,
-                    streak: updatedUserProgress.streak,
-                    maxStreak: updatedUserProgress.maxStreak,
-                    studyDates: updatedUserProgress.studyDates
-                }
+                userProgress: completedProgress
             }
         };
     }

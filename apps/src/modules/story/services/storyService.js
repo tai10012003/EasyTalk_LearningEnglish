@@ -1,8 +1,9 @@
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const StoryRepository = require('../repositories/storyRepository');
 const storyImageService = require('./storyImageService');
 const { invalidateStoryCache } = require('../utils/cacheHelper');
 const { Story } = require('../model/story');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
 class StoryService {
     constructor(repository = new StoryRepository()) {
@@ -19,43 +20,32 @@ class StoryService {
     }
 
     async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user") {
-        const redis = getRedisClient();
         const cacheKey = `story:list:page=${page}:limit=${limit}:category=${category}:level=${level}:search=${search}:role=${role}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) {
-                console.log(`Direct cache hit: ${cacheKey}`);
-                return JSON.parse(cached);
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const skip = (page - 1) * limit;
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
             }
-        } catch (err) {
-            console.error('Direct cache get error:', err);
-        }
-        const skip = (page - 1) * limit;
-        const filter = {};
-        if (role !== "admin") {
-            filter.display = true;
-        }
-        if (category) filter.category = category;
-        if (level) filter.level = level;
-        if (search) filter.title = { $regex: search, $options: "i" };
-        const { stories, total } = await this.repository.findAll(filter, skip, limit);
-        const result = { stories, totalStory: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-            console.log(`Direct cache set: ${cacheKey}`);
-        } catch (err) {
-            console.error('Direct cache set error:', err);
-        }
-        return result;
+            if (category) filter.category = category;
+            if (level) filter.level = level;
+            if (search) filter.title = { $regex: search, $options: "i" };
+            const { stories, total } = await this.repository.findAll(filter, skip, limit);
+            return { stories, totalStory: total };
+        });
     }
 
     async getStory(id) {
-        return await this.repository.findById(id);
+        return await cache.getOrSet(`story:item:id=${id}`, 600, async () => {
+            return await this.repository.findById(id);
+        });
     }
 
     async getStoryBySlug(slug) {
-        return await this.repository.findBySlug(slug);
+        return await cache.getOrSet(`story:item:slug=${slug}`, 600, async () => {
+            return await this.repository.findBySlug(slug);
+        });
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -89,26 +79,21 @@ class StoryService {
         let userProgress = await this._getOrCreateUserProgress(userId);
         const isStoryUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
         if (!isStoryUnlocked) return { status: 403, data: { success: false, message: "You cannot complete a locked story." } };
-        const nextStory = await this.repository.findNextBySortOrder(story.sort);
-        if (nextStory) {
-            userProgress = await userProgressService.unlockNextStory(userProgress, nextStory._id, 10);
-        } else {
-            userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
-        }
-        await userProgressService.updateUserProgress(userProgress);
-        const updatedUserProgress = await userProgressService.getUserProgressByUserId(userId);
+        const { nextItem: nextStory, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: story,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextStory.bind(userProgressService),
+            unlockedField: "unlockedStories"
+        });
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextStory ? "Story completed. Next story unlocked." : "Story completed. You have finished all stories.",
-                userProgress: {
-                    unlockedStories: updatedUserProgress.unlockedStories,
-                    experiencePoints: updatedUserProgress.experiencePoints,
-                    streak: updatedUserProgress.streak,
-                    maxStreak: updatedUserProgress.maxStreak,
-                    studyDates: updatedUserProgress.studyDates
-                }
+                userProgress: completedProgress
             }
         };
     }

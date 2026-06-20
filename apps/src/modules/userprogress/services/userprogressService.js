@@ -1,5 +1,5 @@
 const { ObjectId } = require('mongodb');
-const { getSafeRedisClient: getRedisClient } = require('../../../shared/utils/redisClient');
+const cache = require('../../../shared/utils/cacheService');
 const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 const UserProgressRepository = require('../repositories/userprogressRepository');
 const { calculateStreak } = require('../utils/streakCalculator');
@@ -43,31 +43,19 @@ class UserProgressService {
     }
 
     async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
-        const redis = getRedisClient();
         const cacheKey = `userprogress:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
         const ttl = 300;
-        try {
-            const cached = await redis.get(cacheKey);
-            if (cached) return JSON.parse(cached);
-        } catch (err) {
-            console.error("Cache get error:", err);
-        }
-        const skip = (page - 1) * limit;
-        const filter = {};
-        if (search) {
-            const db = this.userProgressRepository.db;
-            const users = await db.collection("users").find({ username: { $regex: search, $options: "i" } }).project({ _id: 1 }).toArray();
-            filter.user = { $in: users.map(u => u._id) };
-        }
-        const { userprogresses, total } = await this.userProgressRepository.findAll(filter, skip, limit);
-        const result = { userprogresses, totalUserProgresses: total };
-        try {
-            await redis.setex(cacheKey, ttl, JSON.stringify(result));
-        } catch (err) {
-            console.error("Cache set error:", err);
-        }
-
-        return result;
+        return await cache.getOrSet(cacheKey, ttl, async () => {
+            const skip = (page - 1) * limit;
+            const filter = {};
+            if (search) {
+                const db = this.userProgressRepository.db;
+                const users = await db.collection("users").find({ username: { $regex: search, $options: "i" } }).project({ _id: 1 }).toArray();
+                filter.user = { $in: users.map(u => u._id) };
+            }
+            const { userprogresses, total } = await this.userProgressRepository.findAll(filter, skip, limit);
+            return { userprogresses, totalUserProgresses: total };
+        });
     }
 
     async getUserProgress(id) {
