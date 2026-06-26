@@ -16,7 +16,8 @@ const UpdateGrammarExercise = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/grammar-exercise/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setGrammarExercise(data);
             } catch (err) {
                 console.error("Error fetching grammar exercise", err);

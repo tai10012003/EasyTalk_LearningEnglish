@@ -3,6 +3,16 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+function paginatedResponse(responseData, page) {
+    const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
+    const meta = responseData?.meta || responseData?.data || responseData || {};
+    return {
+        data: items,
+        currentPage: meta.currentPage || page,
+        totalPages: meta.totalPages || 1,
+    };
+}
+
 export const GrammarExerciseService = {
     async fetchGrammarExercise(page = 1, limit = 12, filters = {}) {
         try {
@@ -14,7 +24,8 @@ export const GrammarExerciseService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = paginatedResponse(responseData, page);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -36,7 +47,8 @@ export const GrammarExerciseService = {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/slug/${slug}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (err) {
             console.error(err);
@@ -54,7 +66,8 @@ export const GrammarExerciseService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             throw error;
@@ -71,7 +84,8 @@ export const GrammarExerciseService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             throw error;
@@ -89,7 +103,9 @@ export const GrammarExerciseService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return data;
         } catch (err) {
             console.error("Error adding grammar:", err);
             throw err;
@@ -103,7 +119,9 @@ export const GrammarExerciseService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return data;
         } catch (err) {
             console.error("Error updating grammar:", err);
             throw err;
@@ -116,7 +134,9 @@ export const GrammarExerciseService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return data;
         } catch (err) {
             console.error("Error deleting grammar:", err);
             throw err;

@@ -12,7 +12,8 @@ export const GateService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("Fetch gate detail success:", data);
             return data;
@@ -45,7 +46,8 @@ export const GateService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
         } catch (err) {
             console.error("Error fetching gate:", err);
             return {
@@ -63,7 +65,8 @@ export const GateService = {
                 body: JSON.stringify(formData)
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
         } catch (err) {
             console.error("Error adding gate:", err);
             throw err;
@@ -77,7 +80,8 @@ export const GateService = {
                 body: JSON.stringify(formData)
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
         } catch (err) {
             console.error("Error updating gate:", err);
             throw err;
@@ -90,7 +94,8 @@ export const GateService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
         } catch (err) {
             console.error("Error deleting gate:", err);
             throw err;

@@ -12,7 +12,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -44,7 +45,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -71,7 +73,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -94,7 +97,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -118,7 +122,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -141,7 +146,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -160,7 +166,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -179,7 +186,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -198,7 +206,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -217,7 +226,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -236,7 +246,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -255,7 +266,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -274,7 +286,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -293,7 +306,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }

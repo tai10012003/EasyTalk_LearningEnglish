@@ -13,7 +13,8 @@ export const UserSettingService = {
                 const errData = await res.json().catch(() => ({}));
                 throw new Error(errData.error || errData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (err) {
@@ -40,7 +41,8 @@ export const UserSettingService = {
                 const errData = await res.json().catch(() => ({}));
                 throw new Error(errData.error || errData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (err) {
@@ -67,7 +69,8 @@ export const UserSettingService = {
                 const errData = await res.json().catch(() => ({}));
                 throw new Error(errData.error || errData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (err) {

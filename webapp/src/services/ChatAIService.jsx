@@ -14,7 +14,8 @@ export const ChatAIService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("ChatAI response:", data);
             return data;
@@ -41,7 +42,8 @@ export const ChatAIService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("ChatAI startConversation:", data);
             return data;

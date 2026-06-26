@@ -13,7 +13,8 @@ export const WritingAIService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data.topic;
         } catch (error) {
@@ -43,7 +44,8 @@ export const WritingAIService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (error) {

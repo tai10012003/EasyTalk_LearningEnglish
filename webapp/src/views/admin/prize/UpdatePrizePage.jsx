@@ -15,7 +15,8 @@ const UpdatePrizePage = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/prize/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setPrize(data);
             } catch (err) {
                 console.error("Error fetching prize", err);

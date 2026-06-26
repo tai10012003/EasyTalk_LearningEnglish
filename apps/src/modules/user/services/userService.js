@@ -1,5 +1,5 @@
 const UserRepository = require('../repositories/userRepository');
-const AuthenticationService = require('./AuthenticationService');
+const AuthenticationService = require('./authenticationService');
 const EmailService = require('./emailService');
 const SocialAuthService = require('./socialAuthService');
 const { hashPassword, comparePassword, generateTempPassword, generateVerificationCode } = require('../utils/passwordUtils');

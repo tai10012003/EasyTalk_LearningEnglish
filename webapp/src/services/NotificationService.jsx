@@ -10,7 +10,8 @@ export const NotificationService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("User notifications fetched successfully:", data);
             return data.notifications || [];
@@ -34,7 +35,8 @@ export const NotificationService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("All notifications fetched successfully:", data);
             return data.notifications || [];
@@ -62,7 +64,8 @@ export const NotificationService = {
                 const errorData = await res.json();
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             console.error("Error creating notification:", error);
@@ -76,7 +79,8 @@ export const NotificationService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             console.error("Error deleting notification:", error);
@@ -90,7 +94,9 @@ export const NotificationService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error getting notification detail:", error);
             return null;
@@ -103,7 +109,9 @@ export const NotificationService = {
                 method: "PUT",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error marking notification as read:", error);
             throw error;
@@ -116,7 +124,9 @@ export const NotificationService = {
                 method: "PUT",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error marking notification as read:", error);
             throw error;
@@ -129,7 +139,9 @@ export const NotificationService = {
                 method: "PUT",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error marking all notifications as read:", error);
             throw error;

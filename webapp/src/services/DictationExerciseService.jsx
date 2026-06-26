@@ -3,6 +3,14 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    if (responseData.meta && typeof responseData.data === "object" && responseData.data !== null && !Array.isArray(responseData.data)) {
+        return { ...responseData.data, ...responseData.meta };
+    }
+    return responseData.data;
+}
+
 export const DictationExerciseService = {
     async fetchDictationExercise(page = 1, limit = 12, filters = {}) {
         try {
@@ -14,7 +22,8 @@ export const DictationExerciseService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -34,9 +43,10 @@ export const DictationExerciseService = {
 
     async getDictationExerciseById(id) {
         try {
-            const res = await fetch(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`);
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (err) {
             console.error(err);
@@ -48,7 +58,8 @@ export const DictationExerciseService = {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (err) {
             console.error(err);
@@ -66,7 +77,8 @@ export const DictationExerciseService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             throw error;
@@ -83,7 +95,8 @@ export const DictationExerciseService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             throw error;

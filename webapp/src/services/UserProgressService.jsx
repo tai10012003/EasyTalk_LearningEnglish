@@ -12,7 +12,8 @@ export const UserProgressService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (err) {
@@ -38,7 +39,8 @@ export const UserProgressService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (err) {
@@ -64,7 +66,8 @@ export const UserProgressService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (err) {
@@ -106,7 +109,8 @@ export const UserProgressService = {
                 const errorData = await res.json().catch(() => ({}));
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             hasShownAlert = false;
             return result.data || [];
         } catch (err) {
@@ -131,7 +135,8 @@ export const UserProgressService = {
                 method: "GET"
             });
             if (!basicRes.ok) throw new Error("Không thể lấy tiến trình cơ bản");
-            const basicProgress = await basicRes.json();
+            const responseData = await basicRes.json();
+            const basicProgress = responseData.data;
             if (!basicProgress?._id) throw new Error("Không tìm thấy _id tiến trình");
             const fullRes = await AuthService.fetchWithAuth(`${API_URL}/userprogress/api/userprogress/${basicProgress._id}`, {
                 method: "GET"
@@ -140,7 +145,8 @@ export const UserProgressService = {
                 const err = await fullRes.json().catch(() => ({}));
                 throw new Error(err.message || "Không thể lấy chi tiết tiến trình");
             }
-            const progress = await fullRes.json();
+            const respone = await fullRes.json()
+            const progress = respone.data;
             hasShownAlert = false;
             return progress;
         } catch (err) {
@@ -169,7 +175,9 @@ export const UserProgressService = {
                 err.status = res.status;
                 throw err;
             }
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error fetching user progress by user ID:", error);
             throw error;
@@ -183,7 +191,8 @@ export const UserProgressService = {
                 method: "GET"
             });
             if (!res.ok) throw new Error("Cannot fetch statistics");
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             hasShownAlert = false;
             return result;
         } catch (err) {
@@ -210,7 +219,8 @@ export const UserProgressService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("Fetch user progress success:", data);
             return data;
@@ -238,7 +248,9 @@ export const UserProgressService = {
                 err.status = res.status;
                 throw err;
             }
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error fetching user progress detail:", error);
             throw error;
@@ -251,7 +263,9 @@ export const UserProgressService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting user progress:", err);
             throw err;
@@ -267,7 +281,8 @@ export const UserProgressService = {
                 const errorData = await res.json();
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data.prizes || [];
         } catch (err) {
@@ -292,7 +307,8 @@ export const UserProgressService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error("Không thể lấy thống kê quán quân");
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data.stats;
         } catch (err) {
             console.error("Error fetching champion stats:", err);
@@ -306,7 +322,9 @@ export const UserProgressService = {
                 method: "POST"
             });
             if (!res.ok) throw new Error("Không thể theo dõi");
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Lỗi theo dõi:", err);
             throw err;
@@ -319,7 +337,9 @@ export const UserProgressService = {
                 method: "POST"
             });
             if (!res.ok) throw new Error("Không thể hủy theo dõi");
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Lỗi hủy theo dõi:", err);
             throw err;
@@ -332,7 +352,8 @@ export const UserProgressService = {
                 method: "GET"
             });
             if (!res.ok) return false;
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data.isFollowing || false;
         } catch (err) {
             console.error("Lỗi kiểm tra follow:", err);
@@ -346,7 +367,8 @@ export const UserProgressService = {
                 method: "GET"
             });
             if (!res.ok) return 0;
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data.count || 0;
         } catch (err) {
             console.error("Lỗi lấy số người theo dõi:", err);
@@ -360,7 +382,8 @@ export const UserProgressService = {
                 method: "GET"
             });
             if (!res.ok) return 0;
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data.count || 0;
         } catch (err) {
             console.error("Lỗi lấy số người đang theo dõi:", err);
@@ -374,7 +397,8 @@ export const UserProgressService = {
                 method: "GET"
             });
             if (!res.ok) throw new Error("Không thể lấy follow stats");
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return {
                 isFollowing: data.isFollowing || false,
                 followersCount: data.followersCount || 0,
@@ -394,7 +418,8 @@ export const UserProgressService = {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/followers-list/${userId}`);
             if (!res.ok) throw new Error("Không thể tải danh sách người theo dõi");
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data.users || [];
         } catch (err) {
@@ -417,7 +442,8 @@ export const UserProgressService = {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/following-list/${userId}`);
             if (!res.ok) throw new Error("Không thể tải danh sách đang theo dõi");
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data.users || [];
         } catch (err) {

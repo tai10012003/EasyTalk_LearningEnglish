@@ -21,8 +21,8 @@ const StoryCard = ({ item, index, isUnlocked, isCurrent }) => {
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">Chủ đề: {item.category}</p>
                     <p className="user-card-desc">Mức độ: {item.level}</p>
-                    {item.images && (
-                        <img src={item.images} alt={item.title} className="user-card-img" />
+                    {(item.image || item.images) && (
+                        <img src={item.image || item.images} alt={item.title} className="user-card-img" />
                     )}
                     <div className="user-card-footer">
                         {isUnlocked && isCurrent ? (

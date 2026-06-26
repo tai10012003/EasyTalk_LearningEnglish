@@ -228,7 +228,7 @@ router.get("/following-list/:userId", verifyToken, asyncHandler(async (req, res)
     res.json({ users });
 }));
 
-router.get("/api/userprogress/:id", verifyAdmin, asyncHandler(async (req, res) => {
+router.get("/api/userprogress/:id", asyncHandler(async (req, res) => {
     const userProgressId = req.params.id;
     const userProgress = await userProgressService.getUserProgress(userProgressId);
     if(!userProgress) {

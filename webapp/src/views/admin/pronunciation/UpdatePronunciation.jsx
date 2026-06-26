@@ -59,7 +59,8 @@ const UpdatePronunciation = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/pronunciation/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setPronunciation(data);
             } catch (err) {
                 console.error("Error fetching pronunciation:", err);

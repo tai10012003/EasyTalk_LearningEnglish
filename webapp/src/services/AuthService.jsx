@@ -29,7 +29,8 @@ export const AuthService = {
                 const errorData = await res.json();
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             localStorage.setItem("token", data.token);
             localStorage.setItem("refreshToken", data.refreshToken);
             localStorage.setItem("role", data.role);
@@ -38,7 +39,7 @@ export const AuthService = {
             i18n.changeLanguage(lang);
             this.startTokenRefreshTimer();
             hasShownAlert = false;
-            console.log("Login success:", data);
+            console.log("Login success:", responseData);
             // await PrizeService.checkAndUnlockPrizes();
             return data;
         } catch (error) {
@@ -57,7 +58,9 @@ export const AuthService = {
             const err = await res.json();
             throw new Error(err.message || "Lỗi khi gửi mã xác thực");
         }
-        return await res.json();
+        const responseData = await res.json();
+        const data = responseData.data;
+        return await data;
     },
 
     async verifyRegisterCode(email, code) {
@@ -70,7 +73,9 @@ export const AuthService = {
             const err = await res.json();
             throw new Error(err.message || "Mã xác thực không đúng");
         }
-        return await res.json();
+        const responseData = await res.json();
+        const data = responseData.data;
+        return await data;
     },
 
     async refreshToken() {
@@ -87,7 +92,8 @@ export const AuthService = {
             if (!res.ok) {
                 throw new Error("Failed to refresh token");
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             localStorage.setItem("token", data.token);
             console.log("✅ Token refreshed successfully");
             return data.token;
@@ -216,13 +222,11 @@ export const AuthService = {
                 },
                 body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword }),
             });
-
-            const data = await res.json();
-
+            const responseData = await res.json();
+            const data = responseData.data;
             if (!res.ok) {
                 throw new Error(data.message || "Lỗi khi đổi mật khẩu");
             }
-
             return { success: true, message: data.message || "Đổi mật khẩu thành công" };
         } catch (error) {
             console.error("Error changing password:", error.message);
@@ -236,7 +240,9 @@ export const AuthService = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email }),
         });
-        return await res.json();
+        const responseData = await res.json();
+        const data = responseData.data;
+        return await data;
     },
 
     async verifyCode(email, code) {
@@ -245,7 +251,9 @@ export const AuthService = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, code }),
         });
-        return await res.json();
+        const responseData = await res.json();
+        const data = responseData.data;
+        return await data;
     },
 
     async resetPassword(email, newPassword) {
@@ -254,7 +262,9 @@ export const AuthService = {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ email, newPassword }),
         });
-        return await res.json();
+        const responseData = await res.json();
+        const data = responseData.data;
+        return await data;
     },
 
     async resetTempPassword(userId) {
@@ -263,7 +273,8 @@ export const AuthService = {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
             });
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             if (!res.ok) {
                 throw new Error(data.message || "Không thể đặt lại mật khẩu tạm thời!");
             }

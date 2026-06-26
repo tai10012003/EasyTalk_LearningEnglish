@@ -17,7 +17,8 @@ const PersonalInfo = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/user/profile/data`, {
                     method: "GET" 
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 if (!data.success) throw new Error("Không thể tải thông tin người dùng!");
                 const u = data.user;
                 setUser(u);

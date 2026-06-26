@@ -11,7 +11,8 @@ export const ReminderService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("Reminders fetched successfully:", data);
             return data;
@@ -43,7 +44,8 @@ export const ReminderService = {
                 body: JSON.stringify(reminderData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             Swal.fire({
                 icon: "success",
                 title: "Thành công",
@@ -73,7 +75,8 @@ export const ReminderService = {
                 body: JSON.stringify(reminderData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             Swal.fire({
                 icon: "success",
                 title: "Đã cập nhật",
@@ -99,7 +102,8 @@ export const ReminderService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             Swal.fire({
                 icon: "success",
                 title: "Đã xóa",
@@ -125,7 +129,9 @@ export const ReminderService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error getting reminder detail:", error);
             return null;

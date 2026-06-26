@@ -15,7 +15,8 @@ export const PronunciationService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -39,7 +40,8 @@ export const PronunciationService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (err) {
             console.error("Error fetching pronunciation by slug:", err);
@@ -57,7 +59,8 @@ export const PronunciationService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             throw error;
@@ -74,8 +77,8 @@ export const PronunciationService = {
                 err.status = res.status;
                 throw err;
             }
-
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             throw error;
@@ -93,7 +96,9 @@ export const PronunciationService = {
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding pronunciation:", err);
             throw err;
@@ -111,7 +116,9 @@ export const PronunciationService = {
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating pronunciation:", err);
             throw err;
@@ -124,7 +131,9 @@ export const PronunciationService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting pronunciation:", err);
             throw err;

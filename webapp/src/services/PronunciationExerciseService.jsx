@@ -3,6 +3,16 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+function paginatedResponse(responseData, page) {
+    const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
+    const meta = responseData?.meta || responseData?.data || responseData || {};
+    return {
+        data: items,
+        currentPage: meta.currentPage || page,
+        totalPages: meta.totalPages || 1,
+    };
+}
+
 export const PronunciationExerciseService = {
     async fetchPronunciationExercise(page = 1, limit = 12, filters = {}) {
         try {
@@ -11,11 +21,11 @@ export const PronunciationExerciseService = {
             const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises${query}`, {
                 method: 'GET',
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = paginatedResponse(responseData, page);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -37,7 +47,8 @@ export const PronunciationExerciseService = {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (err) {
             console.error(err);
@@ -56,7 +67,8 @@ export const PronunciationExerciseService = {
             });
 
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (err) {
             console.error("Error analyzing audio:", err);
@@ -74,7 +86,8 @@ export const PronunciationExerciseService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             throw error;
@@ -91,7 +104,8 @@ export const PronunciationExerciseService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             return data;
         } catch (error) {
             throw error;
@@ -109,7 +123,9 @@ export const PronunciationExerciseService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding pronunciation:", err);
             throw err;
@@ -123,7 +139,9 @@ export const PronunciationExerciseService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating pronunciation:", err);
             throw err;
@@ -136,7 +154,9 @@ export const PronunciationExerciseService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting pronunciation:", err);
             throw err;

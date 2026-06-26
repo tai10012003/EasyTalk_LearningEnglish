@@ -15,7 +15,8 @@ const UpdateUserPage = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/user/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setUser(data);
             } catch (err) {
                 console.error("Error fetching user", err);

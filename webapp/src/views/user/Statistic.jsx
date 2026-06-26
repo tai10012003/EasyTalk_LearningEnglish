@@ -76,7 +76,7 @@ const Statistic = () => {
                 setLoading(false);
                 return;
             }
-            setCurrentUserId(progress.user.toString());
+            setCurrentUserId(progress.user);
             setChartData(stats.data || []);
             setStreak(progress?.streak || 0);
             setMaxStreak(progress?.maxStreak || 0);

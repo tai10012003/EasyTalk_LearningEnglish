@@ -16,7 +16,8 @@ const UpdatePronunciationExercise = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/pronunciation-exercise/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setPronunciationExercise(data);
             } catch (err) {
                 console.error("Error fetching pronunciation exercise", err);

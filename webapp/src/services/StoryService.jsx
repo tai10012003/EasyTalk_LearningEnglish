@@ -1,8 +1,27 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
-
 let hasShownAlert = false;
+
+
+function paginatedResponse(responseData, page) {
+    const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
+    const meta = responseData?.meta || responseData?.data || responseData || {};
+    return {
+        data: items,
+        currentPage: meta.currentPage || page,
+        totalPages: meta.totalPages || 1,
+    };
+}
+
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    if (responseData.meta && typeof responseData.data === "object" && responseData.data !== null && !Array.isArray(responseData.data)) {
+        return { ...responseData.data, ...responseData.meta };
+    }
+    return responseData.data;
+}
+
 export const StoryService = {
     async fetchStories(page = 1, limit = 12, filters = {}) {
         try {
@@ -16,7 +35,8 @@ export const StoryService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = paginatedResponse(responseData, page);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -42,9 +62,10 @@ export const StoryService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             console.log("Fetch story detail success:", data);
-            return data.data;
+            return data?.data || data;
         } catch (error) {
             console.error("Error fetching story detail:", error.message);
             return null;
@@ -65,7 +86,8 @@ export const StoryService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             throw error;
@@ -82,7 +104,8 @@ export const StoryService = {
                 err.status = res.status;
                 throw err;
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             throw error;
@@ -100,7 +123,9 @@ export const StoryService = {
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding story:", err);
             throw err;
@@ -118,7 +143,9 @@ export const StoryService = {
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating story:", err);
             throw err;
@@ -131,7 +158,9 @@ export const StoryService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting story:", err);
             throw err;

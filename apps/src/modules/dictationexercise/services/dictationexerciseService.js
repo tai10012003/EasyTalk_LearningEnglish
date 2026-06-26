@@ -52,6 +52,14 @@ class DictationExerciseService {
             const firstDictationExercisePage = await this.getDictationList(1, 1);
             const firstDictationExercise = firstDictationExercisePage?.dictationExercises?.[0] || null;
             userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, null, null, firstDictationExercise ? firstDictationExercise._id : null);
+        } else if (!Array.isArray(userProgress.unlockedDictations) || userProgress.unlockedDictations.length === 0) {
+            const firstDictationExercisePage = await this.getDictationList(1, 1);
+            const firstDictationExercise = firstDictationExercisePage?.dictationExercises?.[0] || null;
+            if (firstDictationExercise?._id) {
+                userProgress.unlockedDictations = [firstDictationExercise._id];
+                await userProgressService.updateUserProgress(userProgress);
+                userProgress = await userProgressService.getUserProgressByUserId(userId);
+            }
         }
         return userProgress;
     }

@@ -12,7 +12,8 @@ export const PrizeService = {
                 const errorData = await res.json();
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data.prizes || [];
         } catch (err) {
@@ -40,7 +41,8 @@ export const PrizeService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -64,7 +66,8 @@ export const PrizeService = {
                 method: "POST",
             });
             if (!res.ok) throw new Error("Check prize failed");
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             if (data.newPrizes?.length > 0) {
                 const names = data.newPrizes.map(p => p.name).join(", ");
                 Swal.fire({
@@ -87,7 +90,9 @@ export const PrizeService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding prize:", err);
             throw err;
@@ -101,7 +106,9 @@ export const PrizeService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating prize:", err);
             throw err;
@@ -114,7 +121,9 @@ export const PrizeService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting prize:", err);
             throw err;
