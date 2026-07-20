@@ -1,12 +1,14 @@
 const ActivityAnalyticsService = require('./activityAnalyticsService');
 const ContentAnalyticsService = require('./contentAnalyticsService');
 const LeaderboardAnalyticsService = require('./leaderboardAnalyticsService');
+const SecurityDashboardService = require('./securityDashboardService');
 
 class DashboardService {
     constructor(userRepository, userProgressRepository, deps = {}) {
         this.activityService = deps.activityService || new ActivityAnalyticsService(userRepository);
         this.contentService = deps.contentService || new ContentAnalyticsService(userRepository.db);
         this.leaderboardService = deps.leaderboardService || new LeaderboardAnalyticsService(userProgressRepository);
+        this.securityService = deps.securityService || new SecurityDashboardService(userRepository.db);
     }
 
     async getUserActivityLast7Days() {
@@ -63,6 +65,10 @@ class DashboardService {
 
     async getTopUsersByStreak(limit = 10) {
         return await this.leaderboardService.getTopUsersByStreak(limit);
+    }
+
+    async getSecurityOverview() {
+        return await this.securityService.getSecurityOverview();
     }
 }
 

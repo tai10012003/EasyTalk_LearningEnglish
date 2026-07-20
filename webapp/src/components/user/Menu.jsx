@@ -13,7 +13,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const parseJwt = (token) => {
   try {
     return JSON.parse(atob(token.split('.')[1]));
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -25,8 +25,7 @@ const isTokenExpired = (token) => {
 
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [socket, setSocket] = useState(null);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [username, setUsername] = useState('User');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -64,9 +63,8 @@ function Menu() {
     if (!isLoggedIn) return;
     console.log("🔹 Initializing socket...");
     const newSocket = io(API_URL, { transports: ['websocket', 'polling'] });
-    setSocket(newSocket);
     newSocket.on("connect", () => {
-      const token = localStorage.getItem("token");
+      const token = AuthService.getAccessToken();
       const decoded = parseJwt(token);
       if (decoded && decoded.id) {
         newSocket.emit("register", decoded.id);
@@ -81,15 +79,13 @@ function Menu() {
     return () => {
       console.log("🔹 Disconnecting socket...");
       newSocket.disconnect();
-      setSocket(null);
     };
   }, [isLoggedIn]);
 
   useEffect(() => {
     const checkAndRefreshToken = async () => {
-      const token = localStorage.getItem("token");
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (token && refreshToken) {
+      const token = AuthService.getAccessToken();
+      if (token) {
         if (isTokenExpired(token)) {
           try {
             await AuthService.refreshToken();
@@ -100,7 +96,7 @@ function Menu() {
             return;
           }
         }
-        const currentToken = localStorage.getItem("token");
+        const currentToken = AuthService.getAccessToken();
         const decoded = parseJwt(currentToken);
         if (decoded && decoded.username) {
           setIsLoggedIn(true);

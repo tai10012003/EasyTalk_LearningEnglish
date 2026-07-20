@@ -2,6 +2,7 @@ const UserRepository = require('../repositories/userRepository');
 const AuthenticationService = require('./authenticationService');
 const EmailService = require('./emailService');
 const SocialAuthService = require('./socialAuthService');
+const SecurityAuditService = require('./securityAuditService');
 const { hashPassword, comparePassword, generateTempPassword, generateVerificationCode } = require('../utils/passwordUtils');
 const tokenManager = require('../utils/tokenManager');
 
@@ -11,6 +12,7 @@ class UserService {
         this.authService = deps.authService || new AuthenticationService();
         this.emailService = deps.emailService || new EmailService();
         this.socialAuthService = deps.socialAuthService || new SocialAuthService();
+        this.securityAuditService = deps.securityAuditService || new SecurityAuditService();
         this.notificationService = deps.notificationService || null;
         this.userSettingService = deps.userSettingService || null;
         this.userProgressService = deps.userProgressService || null;
@@ -89,7 +91,7 @@ class UserService {
         return user;
     }
 
-    async login(email, password) {
+    async login(email, password, req = null) {
         const user = await this.repository.findByEmail(email);
         if(!user) {
             throw new Error("Email đăng nhập hoặc mật khẩu không đúng !!");
@@ -101,15 +103,20 @@ class UserService {
         if(user.active === "locked") {
             throw new Error("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên để hỗ trợ !!");
         }
-        const { accessToken, refreshToken } = this.authService.generateTokenPair(user);
+        const { accessToken, refreshToken } = await this.authService.generateTokenPair(user, req);
         await this.repository.update(user._id.toString(), { lastActive: new Date() });
         await this.userProgressService.checkAndResetStreakOnLogin(user._id.toString());
         await this.userProgressService.checkAndUnlockChampionPrizes(user._id.toString());
         const language = await this.userSettingService.getUserLanguage(user._id);
+        await this.securityAuditService.log("login_success", {
+            userId: user._id,
+            email: user.email,
+            req
+        });
         return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
     }
 
-    async loginWithGoogle(code) {
+    async loginWithGoogle(code, req = null) {
         const { user, isNewUser, tempPassword } = await this.socialAuthService.handleGoogleLogin(code, this.repository);
         if (isNewUser) {
             await this.userProgressService.createUserProgress(user._id);
@@ -129,15 +136,21 @@ class UserService {
                 "system"
             );
         }
-        const { accessToken, refreshToken } = this.authService.generateTokenPair(user);
+        const { accessToken, refreshToken } = await this.authService.generateTokenPair(user, req);
         await this.repository.update(user._id.toString(), { lastActive: new Date() });
         await this.userProgressService.checkAndResetStreakOnLogin(user._id.toString());
         await this.userProgressService.checkAndUnlockChampionPrizes(user._id.toString());
         const language = await this.userSettingService.getUserLanguage(user._id);
+        await this.securityAuditService.log("social_login_success", {
+            userId: user._id,
+            email: user.email,
+            metadata: { provider: "google" },
+            req
+        });
         return { token: accessToken,  refreshToken: refreshToken,  role: user.role, language };
     }
 
-    async loginWithFacebook(code) {
+    async loginWithFacebook(code, req = null) {
         const { user, isNewUser, tempPassword } = await this.socialAuthService.handleFacebookLogin(code, this.repository);
         if (isNewUser && tempPassword) {
             const mailHtml = `
@@ -151,33 +164,71 @@ class UserService {
             `;
             console.log(`✅ Đã gửi mật khẩu tạm thời đến ${user.email}`);
         }
-        const { accessToken, refreshToken } = this.authService.generateTokenPair(user);
+        const { accessToken, refreshToken } = await this.authService.generateTokenPair(user, req);
         await this.repository.update(user._id.toString(), { lastActive: new Date() });
         await this.userProgressService.checkAndResetStreakOnLogin(user._id.toString());
         await this.userProgressService.checkAndUnlockChampionPrizes(user._id.toString());
+        await this.securityAuditService.log("social_login_success", {
+            userId: user._id,
+            email: user.email,
+            metadata: { provider: "facebook" },
+            req
+        });
         return { token: accessToken, refreshToken: refreshToken, role: user.role };
     }
 
-    async refreshAccessToken(refreshToken) {
-        const decoded = this.authService.verifyRefreshToken(refreshToken);
+    async refreshAccessToken(refreshToken, req = null) {
+        const { decoded, session } = await this.authService.verifyRefreshToken(refreshToken);
         const user = await this.repository.findById(decoded.id);
         if(!user) throw new Error("User không tồn tại");
         if(user.active === "locked") {
+            await this.authService.revokeAllUserSessions(user._id, "user_locked");
             throw new Error("Tài khoản đã bị khóa");
         }
         const newAccessToken = this.authService.generateAccessToken(user);
-        return { token: newAccessToken, role: user.role };
+        const newRefreshToken = await this.authService.rotateRefreshToken(user, refreshToken, req, session);
+        const language = await this.userSettingService.getUserLanguage(user._id);
+        return { token: newAccessToken, refreshToken: newRefreshToken, role: user.role, language };
     }
 
     async logout(refreshToken, req = null) {
-        this.authService.revokeRefreshToken(refreshToken);
+        await this.authService.revokeRefreshToken(refreshToken);
         if(req?.user?.id) {
             await this.repository.update(req.user.id, { lastActive: new Date() });
         }
         return { message: "Đăng xuất thành công" };
     }
 
-    async changePassword(userId, currentPassword, newPassword, confirmNewPassword) {
+    async listSessions(userId, refreshToken) {
+        return await this.authService.listUserSessions(userId, refreshToken);
+    }
+
+    async revokeSession(userId, sessionId, req = null) {
+        const result = await this.authService.revokeUserSession(userId, sessionId, "user_revoked_session");
+        if(result.modifiedCount > 0) {
+            await this.securityAuditService.log("session_revoked", {
+                userId,
+                actorId: userId,
+                metadata: { sessionId },
+                req
+            });
+        }
+        return result;
+    }
+
+    async revokeAllSessions(userId, req = null) {
+        const result = await this.authService.revokeAllUserSessions(userId, "user_revoked_all_sessions");
+        await this.repository.incrementTokenVersion(userId);
+        await this.securityAuditService.log("logout_all_sessions", {
+            userId,
+            actorId: userId,
+            metadata: { revokedCount: result.modifiedCount || 0 },
+            req
+        });
+        return result;
+    }
+
+    async changePassword(userId, currentPassword, newPassword, confirmNewPassword, req = null) {
         if(!currentPassword || !newPassword || !confirmNewPassword) {
             throw new Error("Vui lòng nhập đầy đủ thông tin mật khẩu.");
         }
@@ -194,6 +245,12 @@ class UserService {
         }
         const hashedNewPassword = await hashPassword(newPassword);
         await this.repository.updatePassword(userId, hashedNewPassword);
+        await this.authService.revokeAllUserSessions(userId, "password_changed");
+        await this.securityAuditService.log("password_changed", {
+            userId,
+            actorId: userId,
+            req
+        });
         return { message: "Đổi mật khẩu thành công." };
     }
 
@@ -237,15 +294,26 @@ class UserService {
         }
         const hashedPassword = await hashPassword(newPassword);
         await this.repository.updatePassword(user._id, hashedPassword);
+        await this.authService.revokeAllUserSessions(user._id, "password_reset");
+        await this.securityAuditService.log("password_reset", {
+            userId: user._id,
+            email: user.email
+        });
         return { message: "Password reset successful" };
     }
 
-    async resetTempPassword(userId) {
+    async resetTempPassword(userId, actorId = null, req = null) {
         const user = await this.repository.findById(userId);
         if(!user) throw new Error("Không tìm thấy người dùng!");
         const tempPassword = generateTempPassword();
         const hashedTempPassword = await hashPassword(tempPassword);
         await this.repository.updatePassword(userId, hashedTempPassword);
+        await this.authService.revokeAllUserSessions(userId, "temp_password_reset");
+        await this.securityAuditService.log("temp_password_reset", {
+            userId,
+            actorId,
+            req
+        });
         await this.emailService.sendTempPassword(user.email, user.username, tempPassword);
         await this.notificationService.createNotification(
             userId,
@@ -268,8 +336,45 @@ class UserService {
         return await this.repository.insert(user);
     }
 
-    async updateUser(user) {
+    async updateUser(user, actorId = null, req = null) {
         const { _id, ...updateFields } = user;
+        const currentUser = await this.repository.findById(_id);
+        if(!currentUser) {
+            throw new Error("Không tìm thấy người dùng.");
+        }
+        const roleChanged = updateFields.role && updateFields.role !== currentUser.role;
+        const activeChanged = updateFields.active && updateFields.active !== currentUser.active;
+        const lockedNow = updateFields.active === "locked" && currentUser.active !== "locked";
+        if(updateFields.active === "locked") {
+            await this.authService.revokeAllUserSessions(_id, "user_locked");
+        }
+        if(roleChanged || lockedNow) {
+            if(roleChanged) {
+                await this.securityAuditService.log("admin_role_changed", {
+                    userId: _id,
+                    actorId,
+                    metadata: { from: currentUser.role, to: updateFields.role },
+                    req
+                });
+            }
+            if(activeChanged) {
+                await this.securityAuditService.log(updateFields.active === "locked" ? "user_locked" : "user_unlocked", {
+                    userId: _id,
+                    actorId,
+                    metadata: { from: currentUser.active, to: updateFields.active },
+                    req
+                });
+            }
+            return await this.repository.updateAndIncrementTokenVersion(_id, updateFields);
+        }
+        if(activeChanged) {
+            await this.securityAuditService.log(updateFields.active === "locked" ? "user_locked" : "user_unlocked", {
+                userId: _id,
+                actorId,
+                metadata: { from: currentUser.active, to: updateFields.active },
+                req
+            });
+        }
         return await this.repository.update(_id, updateFields);
     }
 
@@ -278,6 +383,7 @@ class UserService {
         if(!user) throw new Error("Không tìm thấy người dùng.");
         const result = await this.repository.delete(id);
         try {
+            await this.authService.revokeAllUserSessions(id, "user_deleted");
             await this.notificationService.deleteNotificationsByUser(id);
             await this.userProgressService.deleteUserProgressByUser(id);
             await this.flashcardService.deleteUserFlashcards(id);

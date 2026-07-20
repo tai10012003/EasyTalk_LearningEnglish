@@ -3,11 +3,15 @@ const http = require("http");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const dotenv = require('dotenv');
+const path = require("path");
 const { errorHandler, notFound } = require('./src/shared/middleware/errorHandler');
 const responseFormatter = require('./src/shared/middleware/responseFormatter');
 
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
-dotenv.config({ path: envFile });
+const runtimeEnv = process.env.APP_ENV || process.env.NODE_ENV;
+const envFile = process.env.ENV_FILE || (runtimeEnv === 'production' ? '.env.production' : '.env.development');
+dotenv.config({ path: path.resolve(__dirname, envFile) });
+const { validateEnv } = require('./src/shared/config/envValidator');
+validateEnv();
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'Reason:', reason);
@@ -19,6 +23,20 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 const server = http.createServer(app);
+
+function getAllowedClientOrigins() {
+  return (process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")
+    .map(origin => origin.trim())
+    .filter(Boolean)
+    .map(origin => {
+      try {
+        return new URL(origin).origin;
+      } catch {
+        return origin;
+      }
+    });
+}
 
 const { connectRedis } = require('../apps/src/shared/utils/redisClient');
 async function initRedis() {
@@ -32,11 +50,20 @@ async function initRedis() {
 }
 
 const { initSocket } = require('../apps/src/shared/utils/socket');
-const io = initSocket(server);
+const io = initSocket(server, getAllowedClientOrigins());
 console.log('Socket.IO initialized');
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || "http://localhost:5173"
+  origin(origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (getAllowedClientOrigins().includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
+  credentials: true
 }));
 
 app.use(bodyParser.json({ limit: '50mb' }));

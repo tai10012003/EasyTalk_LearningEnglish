@@ -1,7 +1,7 @@
 const { ObjectId } = require('mongodb');
 
 class User {
-    constructor({ _id = null, username, email, password, role = 'user', active = 'active', facebookId = null, createdAt = new Date(), lastActive = new Date() }) {
+    constructor({ _id = null, username, email, password, role = 'user', active = 'active', facebookId = null, tokenVersion = 0, createdAt = new Date(), lastActive = new Date() }) {
         this._id = _id;
         this.username = username;
         this.email = email;
@@ -9,6 +9,7 @@ class User {
         this.role = role;
         this.active = active;
         this.facebookId = facebookId;
+        this.tokenVersion = tokenVersion;
         this.createdAt = createdAt;
         this.lastActive = lastActive;
     }
@@ -47,6 +48,7 @@ class User {
             role: data.role || 'user',
             active: data.active || 'active',
             facebookId: data.facebookId || null,
+            tokenVersion: 0,
             createdAt: new Date(),
             lastActive: new Date()
         };

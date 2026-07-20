@@ -1,8 +1,13 @@
 let io = null;
 const { Server } = require("socket.io");
 
-function initSocket(server) {
-    io = new Server(server, { cors: { origin: "http://localhost:5173" } });
+function initSocket(server, allowedOrigins = ["http://localhost:5173"]) {
+    io = new Server(server, {
+        cors: {
+            origin: allowedOrigins,
+            credentials: true
+        }
+    });
     const onlineUsers = new Map();
     global.onlineUsers = onlineUsers;
     io.on("connection", (socket) => {

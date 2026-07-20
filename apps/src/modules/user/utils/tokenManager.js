@@ -1,7 +1,6 @@
 class TokenManager {
     constructor() {
         this.verificationCodes = {};
-        this.refreshTokens = new Map();
     }
 
     storeVerificationCode(email, code, expiresAt, dataToRegister = null) {
@@ -18,18 +17,6 @@ class TokenManager {
 
     deleteVerificationCode(email) {
         delete this.verificationCodes[email];
-    }
-
-    storeRefreshToken(token, userId) {
-        this.refreshTokens.set(token, userId.toString());
-    }
-
-    hasRefreshToken(token) {
-        return this.refreshTokens.has(token);
-    }
-
-    deleteRefreshToken(token) {
-        this.refreshTokens.delete(token);
     }
 
     clearExpiredCodes() {

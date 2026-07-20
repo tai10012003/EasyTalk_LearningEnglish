@@ -3,6 +3,14 @@ import { AuthService } from '@/services/AuthService.jsx';
 const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
 
+function unwrapDashboardData(responseData) {
+    const payload = responseData?.data;
+    if (payload?.success && Object.prototype.hasOwnProperty.call(payload, "data")) {
+        return payload.data;
+    }
+    return payload;
+}
+
 export const DashboardService = {
     async fetchUserActivityLast7Days() {
         try {
@@ -61,6 +69,30 @@ export const DashboardService = {
                 newUsersThisMonth: 18,
                 activeUsersThisWeek: 8,
                 activeUsersToday: 5
+            };
+        }
+    },
+
+    async fetchSecurityOverview() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dashboard/security-overview`, {
+                method: 'GET'
+            });
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            return unwrapDashboardData(responseData);
+        } catch (error) {
+            console.error("Error fetching security overview:", error.message);
+            return {
+                activeSessions: 0,
+                revokedSessionsToday: 0,
+                rotatedSessionsToday: 0,
+                failedLoginsToday: 0,
+                suspiciousRefreshReuse: 0,
+                recentSecurityLogs: [],
+                recentActiveSessions: []
             };
         }
     },

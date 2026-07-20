@@ -67,11 +67,8 @@ export const StageService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/stage/api/stages${query}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stages${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
 
             if (!res.ok) {

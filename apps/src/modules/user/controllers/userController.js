@@ -8,6 +8,8 @@ const { getFacebookAuthURL } = require("../../../shared/utils/facebookAuth");
 const UserService = require("../services/userService");
 const { validateRegisterInput, validateLoginInput, validateChangePasswordInput, validateUserInput } = require("../validators/userValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
+const { getRefreshTokenFromRequest, setRefreshTokenCookie, clearRefreshTokenCookie } = require("../utils/refreshTokenCookie");
+const { createRateLimiter, getClientIp } = require("../../../shared/middleware/rateLimiter");
 
 const userService = new UserService();
 let notificationService = null;
@@ -34,6 +36,74 @@ function setFlashcardService(service) {
     flashcardService = service;
     userService.flashcardService = service;
 }
+
+function getAllowedClientOrigins() {
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    return clientUrl
+        .split(",")
+        .map(origin => origin.trim())
+        .filter(Boolean)
+        .map(origin => {
+            try {
+                return new URL(origin).origin;
+            } catch {
+                return origin;
+            }
+        });
+}
+
+function validateRefreshRequestOrigin(req, res, next) {
+    const requestOrigin = req.headers.origin;
+    const requestReferer = req.headers.referer;
+    const candidate = requestOrigin || requestReferer;
+    if(!candidate) {
+        if(process.env.NODE_ENV === "production") {
+            return res.status(403).json({
+                success: false,
+                message: "Refresh request origin is required.",
+                code: "CSRF_ORIGIN_REQUIRED"
+            });
+        }
+        return next();
+    }
+    let normalizedOrigin;
+    try {
+        normalizedOrigin = new URL(candidate).origin;
+    } catch {
+        return res.status(403).json({
+            success: false,
+            message: "Refresh request origin is invalid.",
+            code: "CSRF_ORIGIN_INVALID"
+        });
+    }
+    if(!getAllowedClientOrigins().includes(normalizedOrigin)) {
+        return res.status(403).json({
+            success: false,
+            message: "Refresh request origin is not allowed.",
+            code: "CSRF_ORIGIN_FORBIDDEN"
+        });
+    }
+    next();
+}
+
+const loginRateLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 10,
+    keyPrefix: "login",
+    keyGenerator: (req) => {
+        const email = String(req.body?.email || "unknown").trim().toLowerCase();
+        return `${getClientIp(req)}:${email}`;
+    },
+    message: "Bạn đã thử đăng nhập quá nhiều lần. Vui lòng thử lại sau."
+});
+
+const refreshTokenRateLimiter = createRateLimiter({
+    windowMs: 60 * 1000,
+    max: 30,
+    keyPrefix: "refresh-token",
+    keyGenerator: (req) => getClientIp(req),
+    message: "Refresh token quá nhiều lần. Vui lòng thử lại sau."
+});
 
 router.post("/register/send-code", asyncHandler(async (req, res) => {
     try {
@@ -65,16 +135,24 @@ router.post("/register/verify-code", asyncHandler(async (req, res) => {
     }
 }));
 
-router.post("/login", asyncHandler(async (req, res) => {
+router.post("/login", loginRateLimiter, asyncHandler(async (req, res) => {
     try {
         const validation = validateLoginInput(req.body);
         if(!validation.valid) {
             return res.status(400).json({ success: false, message: validation.errors.join(', ') });
         }
         const { email, password } = req.body;
-        const result = await userService.login(email, password);
+        const result = await userService.login(email, password, req);
+        setRefreshTokenCookie(res, result.refreshToken);
+        delete result.refreshToken;
         res.json(result);
     } catch (error) {
+        await userService.securityAuditService.log("login_failed", {
+            email: req.body?.email || "",
+            status: "failed",
+            reason: error.message,
+            req
+        });
         res.status(403).json({ message: error.message });
     }
 }));
@@ -88,8 +166,9 @@ router.get("/auth/google/callback", asyncHandler(async (req, res) => {
     if(!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực");
     const redirectBase = process.env.CLIENT_URL || "http://localhost:5173";
     try {
-        const { token, refreshToken, role, language } = await userService.loginWithGoogle(code);
-        const redirectUrl = `${redirectBase}/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=google&language=${language}`;
+        const { refreshToken } = await userService.loginWithGoogle(code, req);
+        setRefreshTokenCookie(res, refreshToken);
+        const redirectUrl = `${redirectBase}/login?socialLogin=success&provider=google`;
         res.redirect(redirectUrl);
     } catch (error) {
         res.redirect(`${redirectBase}/login?error=${encodeURIComponent(error.message)}`);
@@ -105,8 +184,9 @@ router.get("/auth/facebook/callback", asyncHandler(async (req, res) => {
     if(!code) return res.status(400).send("Lỗi: Không nhận được mã xác thực từ Facebook");
     const redirectBase = process.env.CLIENT_URL || "http://localhost:5173";
     try {
-        const { token, refreshToken, role } = await userService.loginWithFacebook(code);
-        const redirectUrl = `${redirectBase}/login?token=${token}&refreshToken=${refreshToken}&role=${role}&provider=facebook`;
+        const { refreshToken } = await userService.loginWithFacebook(code, req);
+        setRefreshTokenCookie(res, refreshToken);
+        const redirectUrl = `${redirectBase}/login?socialLogin=success&provider=facebook`;
         res.redirect(redirectUrl);
     } catch (error) {
         console.error("Facebook login error:", error);
@@ -114,19 +194,60 @@ router.get("/auth/facebook/callback", asyncHandler(async (req, res) => {
     }
 }));
 
-router.post("/refresh-token", asyncHandler(async (req, res) => {
+router.post("/refresh-token", refreshTokenRateLimiter, validateRefreshRequestOrigin, asyncHandler(async (req, res) => {
     try {
-        const { refreshToken } = req.body;
-        const result = await userService.refreshAccessToken(refreshToken);
+        const refreshToken = getRefreshTokenFromRequest(req);
+        const result = await userService.refreshAccessToken(refreshToken, req);
+        setRefreshTokenCookie(res, result.refreshToken);
+        delete result.refreshToken;
         res.json(result);
     } catch (error) {
-        res.status(401).json({ message: error.message });
+        if(error.code !== "REFRESH_TOKEN_REUSED") {
+            clearRefreshTokenCookie(res);
+        }
+        res.status(401).json({ message: error.message, code: error.code });
     }
 }));
 
+router.get("/sessions", verifyToken, asyncHandler(async (req, res) => {
+    const refreshToken = getRefreshTokenFromRequest(req);
+    const sessions = await userService.listSessions(req.user.id, refreshToken);
+    res.json({ success: true, sessions });
+}));
+
+router.delete("/sessions/:sessionId", verifyToken, asyncHandler(async (req, res) => {
+    const currentSession = await userService.authService.getSessionFromRefreshToken(getRefreshTokenFromRequest(req));
+    const result = await userService.revokeSession(req.user.id, req.params.sessionId, req);
+    if(result.modifiedCount == 0) {
+        return res.status(404).json({
+            success: false,
+            message: "Không tìm thấy phiên đăng nhập hoặc phiên đã bị thu hồi."
+        });
+    }
+    if(currentSession?.sessionId === req.params.sessionId) {
+        clearRefreshTokenCookie(res);
+    }
+    res.json({
+        success: true,
+        message: "Đã đăng xuất thiết bị thành công.",
+        currentRevoked: currentSession?.sessionId === req.params.sessionId
+    });
+}));
+
+router.delete("/sessions", verifyToken, asyncHandler(async (req, res) => {
+    const result = await userService.revokeAllSessions(req.user.id, req);
+    clearRefreshTokenCookie(res);
+    res.json({
+        success: true,
+        message: "Đã đăng xuất tất cả thiết bị.",
+        revokedCount: result.modifiedCount || 0
+    });
+}));
+
 router.post("/logout", optionalAuth, asyncHandler(async (req, res) => {
-    const { refreshToken } = req.body;
+    const refreshToken = getRefreshTokenFromRequest(req);
     const result = await userService.logout(refreshToken, req);
+    clearRefreshTokenCookie(res);
     const userId = req.user?.id;
     if (userId) {
         await cache.invalidatePatterns([`cache:${userId}:*`], `User ${userId}`);
@@ -141,7 +262,8 @@ router.post("/change-password", verifyToken, asyncHandler(async (req, res) => {
             return res.status(400).json({ success: false, message: validation.errors.join(', ') });
         }
         const { currentPassword, newPassword, confirmNewPassword } = req.body;
-        const result = await userService.changePassword(req.user.id, currentPassword, newPassword, confirmNewPassword);
+        const result = await userService.changePassword(req.user.id, currentPassword, newPassword, confirmNewPassword, req);
+        clearRefreshTokenCookie(res);
         await notificationService.createNotification(
             req.user.id,
             "Đổi mật khẩu thành công",
@@ -245,8 +367,8 @@ router.put('/update/:id', verifyAdmin, asyncHandler(async (req, res) => {
     }
     const { username, email, role, active } = req.body;
     const updatedUser = { username, email, role, active };
-    const result = await userService.updateUser({ _id: req.params.id, ...updatedUser });
-    if(result.modifiedCount == 0) {
+    const result = await userService.updateUser({ _id: req.params.id, ...updatedUser }, req.user.id, req);
+    if(!result) {
         return res.status(404).json({ success: false, message: "Không tìm thấy người dùng hoặc không có thay đổi nào được thực hiện." });
     }
     res.json({ success: true, message: "Thông tin người dùng đã được cập nhật thành công !" });
@@ -254,7 +376,7 @@ router.put('/update/:id', verifyAdmin, asyncHandler(async (req, res) => {
 
 router.post('/reset-temp-password/:userId', verifyAdmin, asyncHandler(async (req, res) => {
     const { userId } = req.params;
-    const result = await userService.resetTempPassword(userId);
+    const result = await userService.resetTempPassword(userId, req.user.id, req);
     res.json(result);
 }));
 

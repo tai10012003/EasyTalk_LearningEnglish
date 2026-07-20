@@ -20,6 +20,7 @@ class UserRepository {
                     email: 1,
                     role: 1,
                     active: 1,
+                    tokenVersion: 1,
                     createdAt: 1,
                     lastActive: 1
                 }
@@ -41,6 +42,7 @@ class UserRepository {
     async insert(user) {
         user.createdAt = new Date();
         user.lastActive = new Date();
+        user.tokenVersion = user.tokenVersion || 0;
         return await this.collection.insertOne(user);
     }
 
@@ -57,7 +59,31 @@ class UserRepository {
         const objectId = new ObjectId(id);
         const result = await this.collection.updateOne(
             { _id: objectId },
-            { $set: { password: hashedPassword } }
+            {
+                $set: { password: hashedPassword },
+                $inc: { tokenVersion: 1 }
+            }
+        );
+        return result.modifiedCount > 0;
+    }
+
+    async updateAndIncrementTokenVersion(id, updateFields) {
+        const objectId = new ObjectId(id);
+        const result = await this.collection.updateOne(
+            { _id: objectId },
+            {
+                $set: updateFields,
+                $inc: { tokenVersion: 1 }
+            }
+        );
+        return result.modifiedCount > 0;
+    }
+
+    async incrementTokenVersion(id) {
+        const objectId = new ObjectId(id);
+        const result = await this.collection.updateOne(
+            { _id: objectId },
+            { $inc: { tokenVersion: 1 } }
         );
         return result.modifiedCount > 0;
     }

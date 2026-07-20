@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { toast, ToastContainer } from "react-toastify";
-import i18n from "@/i18n";
 import "react-toastify/dist/ReactToastify.css";
 import LoginForm from '@/components/user/auth/LoginForm.jsx';
 import Mascot from '@/components/user/auth/Mascot.jsx';
@@ -14,35 +13,40 @@ function Login() {
 
   useEffect(() => {
     const query = new URLSearchParams(window.location.search);
-    const token = query.get("token");
-    const refreshToken = query.get("refreshToken");
-    const role = query.get("role");
     const error = query.get("error");
     const provider = query.get("provider");
-    const language = query.get("language");
+    const socialLogin = query.get("socialLogin");
     if (error) {
       const providerName = provider == "facebook" ? "Facebook" : "Google";
       toast.error(`Đăng nhập ${providerName} thất bại: ${error}`);
       setTimeout(() => (window.location.href = "/login"), 2000);
       return;
     }
-    if (token) {
-      localStorage.setItem("token", token);
-      localStorage.setItem("role", role);
-      sessionStorage.setItem("LoggedIn", "true");
-      if (language) {
-        localStorage.setItem("language", language);
-        i18n.changeLanguage(language);
-      }
-      if (refreshToken) {
-        localStorage.setItem("refreshToken", refreshToken);
-      }
-      AuthService.startTokenRefreshTimer();
+    if (socialLogin == "success") {
       const providerName = provider == "facebook" ? "Facebook" : "Google";
-      toast.success(`Đăng nhập ${providerName} thành công!`);
-      setTimeout(() => {
-        window.location.href = role == "admin" ? "/admin/dashboard" : "/";
-      }, 1500);
+      if (AuthService.isAuthenticated()) {
+        const currentRole = localStorage.getItem("role");
+        sessionStorage.setItem("LoggedIn", "true");
+        toast.success(`Đăng nhập ${providerName} thành công!`);
+        setTimeout(() => {
+          window.location.href = currentRole == "admin" ? "/admin/dashboard" : "/";
+        }, 1500);
+        return;
+      }
+      AuthService.refreshToken({ logoutOnFailure: false })
+        .then(() => {
+          const currentRole = localStorage.getItem("role");
+          sessionStorage.setItem("LoggedIn", "true");
+          toast.success(`Đăng nhập ${providerName} thành công!`);
+          setTimeout(() => {
+            window.location.href = currentRole == "admin" ? "/admin/dashboard" : "/";
+          }, 1500);
+        })
+        .catch((refreshError) => {
+          toast.error(`Đăng nhập ${providerName} thất bại: ${refreshError.message}`);
+          setTimeout(() => (window.location.href = "/login"), 2000);
+      });
+      return;
     }
   }, []);
 

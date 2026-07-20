@@ -1,16 +1,33 @@
 import i18n from "@/i18n";
 const API_URL = import.meta.env.VITE_API_URL;
+let accessToken = null;
 let isRefreshing = false;
+let refreshPromise = null;
 let refreshSubscribers = [];
 // import { PrizeService } from "./PrizeService.jsx";
 
 function onRefreshed(token) {
-  refreshSubscribers.forEach(callback => callback(token));
+  refreshSubscribers.forEach(({ callback }) => callback(token));
   refreshSubscribers = [];
 }
 
-function addRefreshSubscriber(callback) {
-  refreshSubscribers.push(callback);
+function onRefreshFailed(error) {
+  refreshSubscribers.forEach(({ reject }) => reject(error));
+  refreshSubscribers = [];
+}
+
+function addRefreshSubscriber(callback, reject) {
+  refreshSubscribers.push({ callback, reject });
+}
+
+async function isTokenExpiredResponse(response) {
+    if (response.status !== 401) return false;
+    try {
+        const errorData = await response.clone().json();
+        return errorData?.code === "TOKEN_EXPIRED";
+    } catch {
+        return false;
+    }
 }
 
 function getTokenExpiration(token) {
@@ -23,7 +40,41 @@ function getTokenExpiration(token) {
     }
 }
 
+function decodeToken(token) {
+    if (!token) return null;
+    try {
+        return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+        return null;
+    }
+}
+
+function wait(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export const AuthService = {
+    setAccessToken(token) {
+        accessToken = token || null;
+    },
+    getAccessToken() {
+        return accessToken;
+    },
+    isAuthenticated() {
+        return !!accessToken;
+    },
+    async bootstrapSession() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        try {
+            await this.refreshToken({ logoutOnFailure: false });
+            return true;
+        } catch {
+            this.setAccessToken(null);
+            return false;
+        }
+    },
+
     async login(email, password) {
         try {
             const res = await fetch(`${API_URL}/user/login`, {
@@ -31,6 +82,7 @@ export const AuthService = {
                 headers: {
                     "Content-Type": "application/json",
                 },
+                credentials: "include",
                 body: JSON.stringify({ email, password }),
             });
 
@@ -40,8 +92,9 @@ export const AuthService = {
             }
             const responseData = await res.json();
             const data = responseData.data;
-            localStorage.setItem("token", data.token);
-            localStorage.setItem("refreshToken", data.refreshToken);
+            this.setAccessToken(data.token);
+            localStorage.removeItem("token");
+            localStorage.removeItem("refreshToken");
             localStorage.setItem("role", data.role);
             const lang = data.language || "vi";
             localStorage.setItem("language", lang);
@@ -86,30 +139,57 @@ export const AuthService = {
         return await data;
     },
 
-    async refreshToken() {
-        const refreshToken = localStorage.getItem("refreshToken");
-        if (!refreshToken) {
-            throw new Error("No refresh token available");
+    async refreshToken({ logoutOnFailure = true, retryOnReuse = true } = {}) {
+        if (refreshPromise) {
+            return refreshPromise;
         }
-        try {
+        refreshPromise = (async () => {
             const res = await fetch(`${API_URL}/user/refresh-token`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ refreshToken }),
+                credentials: "include",
             });
             if (!res.ok) {
-                throw new Error("Failed to refresh token");
+                let errorData = {};
+                try {
+                    errorData = await res.json();
+                } catch {
+                    errorData = {};
+                }
+                if (errorData.code === "REFRESH_TOKEN_REUSED" && retryOnReuse) {
+                    await wait(250);
+                    refreshPromise = null;
+                    return await this.refreshToken({ logoutOnFailure, retryOnReuse: false });
+                }
+                const error = new Error(errorData.message || "Failed to refresh token");
+                error.code = errorData.code;
+                throw error;
             }
             const responseData = await res.json();
             const data = responseData.data;
-            localStorage.setItem("token", data.token);
+            this.setAccessToken(data.token);
+            localStorage.removeItem("token");
+            if (data.role) {
+                localStorage.setItem("role", data.role);
+            }
+            if (data.language) {
+                localStorage.setItem("language", data.language);
+                i18n.changeLanguage(data.language);
+            }
             this.startTokenRefreshTimer();
-            console.log("✅ Token refreshed successfully");
+            console.log("Token refreshed successfully");
             return data.token;
+        })();
+        try {
+            return await refreshPromise;
         } catch (error) {
             console.error("Error refreshing token:", error);
-            this.logout();
+            if (logoutOnFailure) {
+                this.logout();
+            }
             throw error;
+        } finally {
+            refreshPromise = null;
         }
     },
 
@@ -117,12 +197,11 @@ export const AuthService = {
         if (this.refreshTimer) {
             clearTimeout(this.refreshTimer);
         }
-        const token = localStorage.getItem("token");
+        const token = this.getAccessToken();
         const expiresAt = getTokenExpiration(token);
         const refreshIn = expiresAt ? Math.max(expiresAt - Date.now() - 60 * 1000, 30 * 1000) : 12 * 60 * 1000;
         this.refreshTimer = setTimeout(async () => {
-            const token = localStorage.getItem("token");
-            if (token) {
+            if (this.getAccessToken()) {
                 try {
                     await this.refreshToken();
                 } catch (error) {
@@ -134,14 +213,22 @@ export const AuthService = {
     },
 
     async fetchWithAuth(url, options = {}) {
-        const token = localStorage.getItem("token");
+        const token = this.getAccessToken();
+        const isFormData = options.body instanceof FormData;
         const headers = {
             ...options.headers,
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
         };
+        if (token) {
+            headers["Authorization"] = `Bearer ${token}`;
+        }
+        if (isFormData) {
+            delete headers["Content-Type"];
+            delete headers["content-type"];
+        } else if (!headers["Content-Type"] && !headers["content-type"]) {
+            headers["Content-Type"] = "application/json";
+        }
         let response = await fetch(url, { ...options, headers });
-        if (response.status == 401 || response.status == 403) {
+        if (await isTokenExpiredResponse(response)) {
             if (!isRefreshing) {
                 isRefreshing = true;
                 try {
@@ -152,17 +239,22 @@ export const AuthService = {
                     return fetch(url, { ...options, headers });
                 } catch (error) {
                     isRefreshing = false;
+                    onRefreshFailed(error);
                     console.error("Refresh token failed, logging out...");
                     this.logout();
                     throw error;
                 }
             }
-            return new Promise((resolve) => {
+            return new Promise((resolve, reject) => {
                 addRefreshSubscriber(async (newToken) => {
-                    headers["Authorization"] = `Bearer ${newToken}`;
-                    const retryResponse = await fetch(url, { ...options, headers });
-                    resolve(retryResponse);
-                });
+                    try {
+                        headers["Authorization"] = `Bearer ${newToken}`;
+                        const retryResponse = await fetch(url, { ...options, headers });
+                        resolve(retryResponse);
+                    } catch (error) {
+                        reject(error);
+                    }
+                }, reject);
             });
         }
         return response;
@@ -172,20 +264,16 @@ export const AuthService = {
         try {
             const userStr = localStorage.getItem("user");
             if (!userStr) {
-                const token = localStorage.getItem("token");
+                const token = this.getAccessToken();
                 if (!token) return null;
-                try {
-                    const payload = JSON.parse(atob(token.split('.')[1]));
-                    return {
-                        id: payload.id || payload.userId || payload.sub,
-                        username: payload.username,
-                        email: payload.email,
-                        role: localStorage.getItem("role") || payload.role
-                    };
-                } catch (e) {
-                    console.error("Error decoding token:", e);
-                    return null;
-                }
+                const payload = decodeToken(token);
+                if (!payload) return null;
+                return {
+                    id: payload.id || payload.userId || payload.sub,
+                    username: payload.username,
+                    email: payload.email,
+                    role: localStorage.getItem("role") || payload.role
+                };
             }
             return JSON.parse(userStr);
         } catch (error) {
@@ -195,19 +283,22 @@ export const AuthService = {
     },
 
     async logout() {
-        const refreshToken = localStorage.getItem("refreshToken");
         const role = localStorage.getItem("role");
         try {
-            if (refreshToken) {
-                await fetch(`${API_URL}/user/logout`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ refreshToken }),
-                });
+            const token = this.getAccessToken();
+            const headers = { "Content-Type": "application/json" };
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
             }
+            await fetch(`${API_URL}/user/logout`, {
+                method: "POST",
+                headers,
+                credentials: "include",
+            });
         } catch (error) {
             console.error("Logout error:", error);
         } finally {
+            this.setAccessToken(null);
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
@@ -226,13 +317,8 @@ export const AuthService = {
 
     async changePassword(currentPassword, newPassword, confirmNewPassword) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/user/change-password`, {
+            const res = await this.fetchWithAuth(`${API_URL}/user/change-password`, {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword }),
             });
             const responseData = await res.json();
@@ -282,9 +368,8 @@ export const AuthService = {
 
     async resetTempPassword(userId) {
         try {
-            const res = await fetch(`${API_URL}/user/reset-temp-password/${userId}`, {
+            const res = await this.fetchWithAuth(`${API_URL}/user/reset-temp-password/${userId}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
             });
             const responseData = await res.json();
             const data = responseData.data;
@@ -302,7 +387,3 @@ export const AuthService = {
     resetAlertFlag() {
     }
 };
-
-if (localStorage.getItem("token")) {
-    AuthService.startTokenRefreshTimer();
-}

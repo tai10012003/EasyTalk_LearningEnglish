@@ -1,26 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from "react-i18next";
 import banner from "@/assets/images/banner.png";
+import { AuthService } from "@/services/AuthService.jsx";
 
 function Banner() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   useEffect(() => {
-    const checkLoginStatus = () => {
-      const token = localStorage.getItem("token");
-      const refreshToken = localStorage.getItem("refreshToken");
-      setIsLoggedIn(!!(token && refreshToken));
-    };
-    checkLoginStatus();
-    const handleStorageChange = (e) => {
-      if (e.key == 'token' || e.key == 'refreshToken') {
-        checkLoginStatus();
-      }
-    };
-    window.addEventListener('storage', handleStorageChange);
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-    };
+    setIsLoggedIn(AuthService.isAuthenticated());
   }, []);
   return (
     <section className="banner_part bg-gray-100 py-16">

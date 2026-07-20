@@ -140,12 +140,8 @@ export const FlashCardService = {
 
     async createFlashcard(listId, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/flashcardlist/${listId}`, {
                 method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -168,12 +164,8 @@ export const FlashCardService = {
 
     async updateFlashcard(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/flashcards/update-flashcard/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/update-flashcard/${id}`, {
                 method: "PUT",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);

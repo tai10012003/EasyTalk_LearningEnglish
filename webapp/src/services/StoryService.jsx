@@ -77,49 +77,37 @@ export const StoryService = {
     },
 
     async getStoryDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = unwrapResponseData(responseData);
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
     },
 
     async completeStory(storyId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/complete/${storyId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = unwrapResponseData(responseData);
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/complete/${storyId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
     },
 
     async addStory(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/add`, {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -134,12 +122,8 @@ export const StoryService = {
 
     async updateStory(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/story/api/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);

@@ -29,6 +29,15 @@ function Dashboard() {
     const [popularExercises, setPopularExercises] = useState(null);
     const [hardestLessons, setHardestLessons] = useState(null);
     const [hardestExercises, setHardestExercises] = useState(null);
+    const [securityOverview, setSecurityOverview] = useState({
+        activeSessions: 0,
+        revokedSessionsToday: 0,
+        rotatedSessionsToday: 0,
+        failedLoginsToday: 0,
+        suspiciousRefreshReuse: 0,
+        recentSecurityLogs: [],
+        recentActiveSessions: []
+    });
 
     useEffect(() => {
         loadDashboardData();
@@ -55,7 +64,8 @@ function Dashboard() {
                 popLessons,
                 popExercises,
                 hardLessons,
-                hardExercises
+                hardExercises,
+                securityData
             ] = await Promise.all([
                 DashboardService.fetchUserActivityLast7Days(),
                 DashboardService.fetchDashboardOverview(),
@@ -67,7 +77,8 @@ function Dashboard() {
                 DashboardService.fetchMostPopularLessons(),
                 DashboardService.fetchMostPopularExercises(),
                 DashboardService.fetchLeastPopularLessons(),
-                DashboardService.fetchLeastPopularExercises()
+                DashboardService.fetchLeastPopularExercises(),
+                DashboardService.fetchSecurityOverview()
             ]);
             setUserActivity(activityData);
             setOverview(overviewData);
@@ -80,6 +91,7 @@ function Dashboard() {
             setPopularExercises(popExercises);
             setHardestLessons(hardLessons);
             setHardestExercises(hardExercises);
+            setSecurityOverview(securityData);
         } catch (error) {
             console.error("Error loading dashboard data:", error);
         } finally {
@@ -261,6 +273,50 @@ function Dashboard() {
         return [];
     };
 
+    const formatDateTime = (value) => {
+        if (!value) return "Chưa có";
+        return new Date(value).toLocaleString("vi-VN");
+    };
+
+    const formatShortId = (value) => {
+        if (!value) return "N/A";
+        const id = typeof value === "object" && value.$oid ? value.$oid : String(value);
+        return id.length > 10 ? `${id.slice(0, 6)}...${id.slice(-4)}` : id;
+    };
+
+    const formatSecurityEvent = (event) => {
+        const labels = {
+            login_success: "Đăng nhập thành công",
+            login_failed: "Đăng nhập thất bại",
+            social_login_success: "Đăng nhập MXH",
+            refresh_token_reuse_detected: "Token reuse",
+            password_changed: "Đổi mật khẩu",
+            password_reset: "Reset mật khẩu",
+            temp_password_reset: "Reset mật khẩu tạm",
+            admin_role_changed: "Đổi quyền admin",
+            user_locked: "Khóa tài khoản",
+            user_unlocked: "Mở khóa tài khoản",
+            logout_all_sessions: "Đăng xuất tất cả",
+            session_revoked: "Thu hồi phiên"
+        };
+        return labels[event] || event || "Sự kiện";
+    };
+
+    const getDeviceName = (userAgent = "") => {
+        if (!userAgent) return "Không rõ thiết bị";
+        const browser = userAgent.includes("Edg") ? "Edge"
+            : userAgent.includes("Chrome") ? "Chrome"
+            : userAgent.includes("Firefox") ? "Firefox"
+            : userAgent.includes("Safari") ? "Safari"
+            : "Trình duyệt";
+        const platform = userAgent.includes("Windows") ? "Windows"
+            : userAgent.includes("Mac") ? "macOS"
+            : userAgent.includes("Android") ? "Android"
+            : userAgent.includes("iPhone") || userAgent.includes("iPad") ? "iOS"
+            : "Thiết bị";
+        return `${browser} - ${platform}`;
+    };
+
     return (
         <div className="admin-dashboard">
             <h1 className="admin-dashboard-title">Dashboard Quản Trị</h1>
@@ -313,6 +369,145 @@ function Dashboard() {
                             </div>
                             <div className="dashboard-card-icon bg-danger">
                                 <i className="fas fa-user-graduate"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="dashboard-security-section" style={{ marginTop: "24px", marginBottom: "24px" }}>
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: "16px",
+                            marginBottom: "16px"
+                        }}>
+                            <div>
+                                <h5 style={{ margin: 0, color: "#1e293b", fontWeight: 700 }}>
+                                    <i className="fas fa-shield-alt me-2"></i>
+                                    Bảo Mật & Phiên Đăng Nhập
+                                </h5>
+                                <p style={{ margin: "4px 0 0", color: "#64748b", fontSize: "14px" }}>
+                                    Theo dõi refresh token, phiên đăng nhập và nhật ký bảo mật gần đây.
+                                </p>
+                            </div>
+                            {securityOverview.suspiciousRefreshReuse > 0 && (
+                                <span style={{
+                                    background: "#fee2e2",
+                                    color: "#b91c1c",
+                                    borderRadius: "999px",
+                                    padding: "8px 12px",
+                                    fontSize: "13px",
+                                    fontWeight: 700
+                                }}>
+                                    <i className="fas fa-exclamation-triangle me-1"></i>
+                                    Có cảnh báo token reuse
+                                </span>
+                            )}
+                        </div>
+                        <div className="dashboard-cards">
+                            <div className="dashboard-card">
+                                <div className="dashboard-card-info">
+                                    <h5>Phiên Đang Hoạt Động</h5>
+                                    <h2>{securityOverview.activeSessions}</h2>
+                                    <small className="text-info">usersessions active</small>
+                                </div>
+                                <div className="dashboard-card-icon bg-success">
+                                    <i className="fas fa-laptop"></i>
+                                </div>
+                            </div>
+                            <div className="dashboard-card">
+                                <div className="dashboard-card-info">
+                                    <h5>Rotation Hôm Nay</h5>
+                                    <h2>{securityOverview.rotatedSessionsToday}</h2>
+                                    <small className="text-success">refresh token rotated</small>
+                                </div>
+                                <div className="dashboard-card-icon bg-primary">
+                                    <i className="fas fa-sync-alt"></i>
+                                </div>
+                            </div>
+                            <div className="dashboard-card">
+                                <div className="dashboard-card-info">
+                                    <h5>Login Thất Bại</h5>
+                                    <h2>{securityOverview.failedLoginsToday}</h2>
+                                    <small className="text-warning">trong hôm nay</small>
+                                </div>
+                                <div className="dashboard-card-icon bg-warning">
+                                    <i className="fas fa-user-lock"></i>
+                                </div>
+                            </div>
+                            <div className="dashboard-card">
+                                <div className="dashboard-card-info">
+                                    <h5>Token Reuse</h5>
+                                    <h2>{securityOverview.suspiciousRefreshReuse}</h2>
+                                    <small className={securityOverview.suspiciousRefreshReuse > 0 ? "text-danger" : "text-success"}>
+                                        cảnh báo hôm nay
+                                    </small>
+                                </div>
+                                <div className="dashboard-card-icon bg-danger">
+                                    <i className="fas fa-radiation"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div style={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
+                            gap: "20px",
+                            marginTop: "20px"
+                        }}>
+                            <div className="dashboard-recent" style={{ marginTop: 0 }}>
+                                <div className="recent-header">
+                                    <h5><i className="fas fa-clipboard-list me-2"></i>Nhật Ký Bảo Mật Gần Đây</h5>
+                                </div>
+                                <div className="recent-list">
+                                    {securityOverview.recentSecurityLogs.length > 0 ? (
+                                        securityOverview.recentSecurityLogs.map((log) => (
+                                            <div key={formatShortId(log._id)} className="recent-item">
+                                                <i className={`fas ${log.status === "failed" ? "fa-times-circle text-danger" : "fa-check-circle text-success"} recent-icon`}></i>
+                                                <div className="recent-content">
+                                                    <div className="recent-text">
+                                                        <strong>{formatSecurityEvent(log.event)}</strong>
+                                                        <span style={{ color: "#64748b" }}> - {log.email || formatShortId(log.userId)}</span>
+                                                    </div>
+                                                    <small className="text-muted">
+                                                        {log.ipAddress || "Không rõ IP"} • {formatDateTime(log.createdAt)}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                            <i className="fas fa-clipboard-check fa-2x" style={{ marginBottom: '10px' }}></i>
+                                            <p>Chưa có nhật ký bảo mật.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="dashboard-recent" style={{ marginTop: 0 }}>
+                                <div className="recent-header">
+                                    <h5><i className="fas fa-laptop-code me-2"></i>Phiên Đăng Nhập Gần Đây</h5>
+                                </div>
+                                <div className="recent-list">
+                                    {securityOverview.recentActiveSessions.length > 0 ? (
+                                        securityOverview.recentActiveSessions.map((session) => (
+                                            <div key={session.sessionId || formatShortId(session._id)} className="recent-item">
+                                                <i className="fas fa-desktop text-info recent-icon"></i>
+                                                <div className="recent-content">
+                                                    <div className="recent-text">
+                                                        <strong>{getDeviceName(session.userAgent)}</strong>
+                                                        <span style={{ color: "#64748b" }}> - {formatShortId(session.userId)}</span>
+                                                    </div>
+                                                    <small className="text-muted">
+                                                        {session.ipAddress || "Không rõ IP"} • {formatDateTime(session.lastUsedAt || session.createdAt)}
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div style={{ textAlign: 'center', padding: '24px', color: '#64748b' }}>
+                                            <i className="fas fa-laptop fa-2x" style={{ marginBottom: '10px' }}></i>
+                                            <p>Chưa có phiên đăng nhập active.</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

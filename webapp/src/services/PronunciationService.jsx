@@ -50,49 +50,37 @@ export const PronunciationService = {
     },
 
     async getPronunciationDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = responseData.data;
+        return data;
     },
 
     async completePronunciation(pronunciationId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = responseData.data;
+        return data;
     },
 
     async addPronunciation(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/add`, {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -107,12 +95,8 @@ export const PronunciationService = {
 
     async updatePronunciation(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
