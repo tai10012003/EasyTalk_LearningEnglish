@@ -178,6 +178,11 @@ class UserProgressService {
         return result.modifiedCount > 0 || result.upsertedCount > 0;
     }
 
+    async incrementDailyFlashcardReview(userId, count = 1) {
+        if (!this.badgeService) throw new Error("BadgeService chưa được inject!");
+        return await this.badgeService.incrementDailyFlashcardReview(userId, count);
+    }
+
     async addDiamonds(userId, amount) {
         if (amount <= 0) return false;
         const result = await this.userProgressRepository.update(userId, {

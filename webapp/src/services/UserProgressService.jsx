@@ -112,7 +112,7 @@ export const UserProgressService = {
             const responseData = await res.json();
             const result = responseData.data;
             hasShownAlert = false;
-            return result.data || [];
+            return result || [];
         } catch (err) {
             console.error("Error fetching leaderboard:", err);
             if (!hasShownAlert) {

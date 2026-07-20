@@ -19,7 +19,7 @@ const PersonalInfo = () => {
                 });
                 const responseData = await res.json();
                 const data = responseData.data;
-                if (!data.success) throw new Error("Không thể tải thông tin người dùng!");
+                if (!responseData.success) throw new Error("Không thể tải thông tin người dùng!");
                 const u = data.user;
                 setUser(u);
                 setFormData({

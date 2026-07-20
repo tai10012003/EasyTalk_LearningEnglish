@@ -77,7 +77,7 @@ const Statistic = () => {
                 return;
             }
             setCurrentUserId(progress.user);
-            setChartData(stats.data || []);
+            setChartData(stats || []);
             setStreak(progress?.streak || 0);
             setMaxStreak(progress?.maxStreak || 0);
             setCurrentUser(progress);

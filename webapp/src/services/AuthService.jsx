@@ -1,6 +1,5 @@
 import i18n from "@/i18n";
 const API_URL = import.meta.env.VITE_API_URL;
-let hasShownAlert = false;
 let isRefreshing = false;
 let refreshSubscribers = [];
 // import { PrizeService } from "./PrizeService.jsx";
@@ -12,6 +11,16 @@ function onRefreshed(token) {
 
 function addRefreshSubscriber(callback) {
   refreshSubscribers.push(callback);
+}
+
+function getTokenExpiration(token) {
+    if (!token) return null;
+    try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        return payload.exp ? payload.exp * 1000 : null;
+    } catch {
+        return null;
+    }
 }
 
 export const AuthService = {
@@ -38,7 +47,6 @@ export const AuthService = {
             localStorage.setItem("language", lang);
             i18n.changeLanguage(lang);
             this.startTokenRefreshTimer();
-            hasShownAlert = false;
             console.log("Login success:", responseData);
             // await PrizeService.checkAndUnlockPrizes();
             return data;
@@ -95,6 +103,7 @@ export const AuthService = {
             const responseData = await res.json();
             const data = responseData.data;
             localStorage.setItem("token", data.token);
+            this.startTokenRefreshTimer();
             console.log("✅ Token refreshed successfully");
             return data.token;
         } catch (error) {
@@ -105,21 +114,23 @@ export const AuthService = {
     },
 
     startTokenRefreshTimer() {
-        const refreshInterval = 12 * 60 * 1000;
         if (this.refreshTimer) {
-            clearInterval(this.refreshTimer);
+            clearTimeout(this.refreshTimer);
         }
-        this.refreshTimer = setInterval(async () => {
+        const token = localStorage.getItem("token");
+        const expiresAt = getTokenExpiration(token);
+        const refreshIn = expiresAt ? Math.max(expiresAt - Date.now() - 60 * 1000, 30 * 1000) : 12 * 60 * 1000;
+        this.refreshTimer = setTimeout(async () => {
             const token = localStorage.getItem("token");
             if (token) {
                 try {
                     await this.refreshToken();
                 } catch (error) {
                     console.error("Auto refresh failed:", error);
-                    clearInterval(this.refreshTimer);
+                    clearTimeout(this.refreshTimer);
                 }
             }
-        }, refreshInterval);
+        }, refreshIn);
     },
 
     async fetchWithAuth(url, options = {}) {
@@ -137,6 +148,8 @@ export const AuthService = {
                     const newToken = await this.refreshToken();
                     isRefreshing = false;
                     onRefreshed(newToken);
+                    headers["Authorization"] = `Bearer ${newToken}`;
+                    return fetch(url, { ...options, headers });
                 } catch (error) {
                     isRefreshing = false;
                     console.error("Refresh token failed, logging out...");
@@ -201,7 +214,7 @@ export const AuthService = {
             localStorage.removeItem("language");
             i18n.changeLanguage("vi");
             if (this.refreshTimer) {
-                clearInterval(this.refreshTimer);
+                clearTimeout(this.refreshTimer);
             }
             if (role == "admin") {
                 window.location.href = "/login";
@@ -287,7 +300,6 @@ export const AuthService = {
     },
 
     resetAlertFlag() {
-        hasShownAlert = false;
     }
 };
 

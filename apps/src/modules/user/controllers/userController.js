@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
+const { verifyToken, verifyAdmin, optionalAuth } = require("../../../shared/middleware/verifyToken");
 const cache = require('../../../shared/utils/cacheService');
 const { getGoogleAuthURL } = require("../../../shared/utils/googleAuth");
 const { getFacebookAuthURL } = require("../../../shared/utils/facebookAuth");
@@ -124,11 +124,13 @@ router.post("/refresh-token", asyncHandler(async (req, res) => {
     }
 }));
 
-router.post("/logout", verifyToken, asyncHandler(async (req, res) => {
+router.post("/logout", optionalAuth, asyncHandler(async (req, res) => {
     const { refreshToken } = req.body;
     const result = await userService.logout(refreshToken, req);
-    const userId = req.user.id;
-    await cache.invalidatePatterns([`cache:${userId}:*`], `User ${userId}`);
+    const userId = req.user?.id;
+    if (userId) {
+        await cache.invalidatePatterns([`cache:${userId}:*`], `User ${userId}`);
+    }
     res.json(result);
 }));
 
