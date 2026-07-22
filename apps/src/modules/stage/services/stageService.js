@@ -1,5 +1,7 @@
 const { ObjectId } = require('mongodb');
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const StageRepository = require('../repositories/stageRepository');
 const { invalidateStageCache } = require('../utils/cacheHelper');
 
@@ -11,18 +13,16 @@ class StageService {
     }
 
     async getStageList(page = 1, limit = 12) {
-        const cacheKey = `stage:list:page=${page}:limit=${limit}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('stage', { page, limit });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.relationList('stage'), cacheNs.listTags('stage')), async () => {
             const { stages, total } = await this.repository.findAll(page, limit);
             return { stages, totalStages: total };
         });
     }
 
     async getStageById(id) {
-        const cacheKey = `stage:detail:id=${id}`;
-        const ttl = 600;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.key('stage', 'detail', { id });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.relationDetail('stage'), [cacheNs.tag('stage', 'detail'), cacheNs.tag('stage', 'detail', id), cacheNs.tag('stage', 'all')]), async () => {
             return await this.repository.findById(id);
         });
     }

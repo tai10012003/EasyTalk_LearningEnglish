@@ -1,5 +1,7 @@
 const { ObjectId } = require('mongodb');
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 const UserProgressRepository = require('../repositories/userprogressRepository');
 const { calculateStreak } = require('../utils/streakCalculator');
@@ -52,9 +54,8 @@ class UserProgressService {
     }
 
     async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
-        const cacheKey = `userprogress:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('userprogress', { page, limit, search, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.userList(), cacheNs.listTags('userprogress')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (search) {
@@ -133,7 +134,7 @@ class UserProgressService {
             studyDates: [],
         };
         await this.userProgressRepository.insert(userProgress);
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return userProgress;
     }
 
@@ -167,14 +168,14 @@ class UserProgressService {
         if (this.userPrizeService) {
             await this.userPrizeService.checkAndUnlockNonChampionPrizes(userProgress.user);
         }
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userProgress.user);
         return result;
     }
 
     async recordStudyTime(userId, seconds) {
         if (!seconds || seconds <= 0) return false;
         const result = await this.userProgressRepository.addDailyStudyTime(userId, seconds);
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return result.modifiedCount > 0 || result.upsertedCount > 0;
     }
 
@@ -188,7 +189,7 @@ class UserProgressService {
         const result = await this.userProgressRepository.update(userId, {
             $inc: { diamonds: amount }
         });
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return result.modifiedCount > 0 || result.upsertedCount > 0;
     }
 
@@ -199,7 +200,7 @@ class UserProgressService {
 
     async deleteUserProgressByUser(userId) {
         const result = await this.userProgressRepository.deleteByUser(userId);
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return result;
     }
 

@@ -28,7 +28,7 @@ class BadgeService {
     async updateDailyFlashcardGoal(userId, goal) {
         if(goal < 0 || goal > 200) throw new Error("Goal must be between 0 and 200");
         const result = await this.userProgressRepository.updateDailyGoal(userId, goal);
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return result;
     }
 
@@ -85,7 +85,7 @@ class BadgeService {
         if(this.userPrizeService) {
             nonChampionResult = await this.userPrizeService.checkAndUnlockNonChampionPrizes(userId);
         }
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return {
             ...result,
             expBonus,

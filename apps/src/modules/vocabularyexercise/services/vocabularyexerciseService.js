@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const VocabularyExerciseRepository = require('../repositories/vocabularyexerciseRepository');
 const { invalidateVocabularyExerciseCache } = require('../utils/cacheHelper');
 const { VocabularyExercise } = require('../models/vocabularyexercise');
@@ -21,9 +23,8 @@ class VocabularyExerciseService {
     }
 
     async getVocabularyexerciseList(page = 1, limit = 12, role = "user") {
-        const cacheKey = `vocabularyexercise:list:page=${page}:limit=${limit}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('vocabularyexercise', { page, limit, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('vocabularyexercise', role), cacheNs.listTags('vocabularyexercise')), async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -34,13 +35,13 @@ class VocabularyExerciseService {
     }
 
     async getVocabularyexerciseById(id) {
-        return await this.cache.getOrSet(`vocabularyexercise:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('vocabularyexercise', id), withTags(policies.contentDetail('vocabularyexercise'), cacheNs.itemTags('vocabularyexercise', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getVocabularyexerciseBySlug(slug) {
-        return await this.cache.getOrSet(`vocabularyexercise:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('vocabularyexercise', slug), withTags(policies.contentDetail('vocabularyexercise'), cacheNs.itemTags('vocabularyexercise', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -102,7 +103,7 @@ class VocabularyExerciseService {
     async insertVocabularyexercise(exerciseData) {
         const document = VocabularyExercise.buildDocument(exerciseData);
         const result = await this.repository.insert(document);
-        await invalidateVocabularyExerciseCache();
+        await invalidateVocabularyExerciseCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { success: true, message: "Bài luyện tập từ vựng đã được thêm thành công !", result } };
     }
 
@@ -115,7 +116,7 @@ class VocabularyExerciseService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidateVocabularyExerciseCache();
+        await invalidateVocabularyExerciseCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { success: true, message: "Bài luyện tập từ vựng đã được cập nhật thành công !", result } };
     }
 
@@ -125,7 +126,7 @@ class VocabularyExerciseService {
             return { status: 404, data: { success: false, message: "Bài luyện tập từ vựng không tìm thấy." } };
         }
         await this.repository.delete(id);
-        await invalidateVocabularyExerciseCache();
+        await invalidateVocabularyExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài luyện tập từ vựng đã xóa thành công !" } };
     }
 }

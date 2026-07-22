@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const PronunciationRepository = require('../repositories/pronunciationRepository');
 const pronunciationImageService = require('../services/pronunciationImageService');
 const { invalidatePronunciationCache } = require('../utils/cacheHelper');
@@ -23,9 +25,8 @@ class PronunciationService {
     }
 
     async getPronunciationList(page = 1, limit = 12, search = "", role = "user") {
-        const cacheKey = `pronunciation:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('pronunciation', { page, limit, search, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('pronunciation', role), cacheNs.listTags('pronunciation')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -38,13 +39,13 @@ class PronunciationService {
     }
 
     async getPronunciation(id) {
-        return await this.cache.getOrSet(`pronunciation:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('pronunciation', id), withTags(policies.contentDetail('pronunciation'), cacheNs.itemTags('pronunciation', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getPronunciationBySlug(slug) {
-        return await this.cache.getOrSet(`pronunciation:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('pronunciation', slug), withTags(policies.contentDetail('pronunciation'), cacheNs.itemTags('pronunciation', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -113,7 +114,7 @@ class PronunciationService {
         }
         const document = Pronunciation.buildDocument({ ...pronunciationData, images: imageUrl });
         const result = await this.repository.insert(document);
-        await invalidatePronunciationCache();
+        await invalidatePronunciationCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { message: "Bài học phát âm đã được thêm thành công !", result } };
     }
 
@@ -134,7 +135,7 @@ class PronunciationService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidatePronunciationCache();
+        await invalidatePronunciationCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { message: "Bài học phát âm đã được cập nhật thành công !", result } };
     }
 
@@ -146,7 +147,7 @@ class PronunciationService {
             if (publicId) await this.imageService.deleteImage(publicId);
         }
         await this.repository.delete(id);
-        await invalidatePronunciationCache();
+        await invalidatePronunciationCache({ id, slug: existing.slug });
         return { status: 200, data: { message: "Bài học phát âm đã xóa thành công !" } };
     }
 }

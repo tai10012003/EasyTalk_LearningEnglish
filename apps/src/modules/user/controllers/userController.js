@@ -3,6 +3,7 @@ const router = express.Router();
 const bcrypt = require("bcrypt");
 const { verifyToken, verifyAdmin, optionalAuth } = require("../../../shared/middleware/verifyToken");
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
 const { getGoogleAuthURL } = require("../../../shared/utils/googleAuth");
 const { getFacebookAuthURL } = require("../../../shared/utils/facebookAuth");
 const UserService = require("../services/userService");
@@ -250,7 +251,10 @@ router.post("/logout", optionalAuth, asyncHandler(async (req, res) => {
     clearRefreshTokenCookie(res);
     const userId = req.user?.id;
     if (userId) {
-        await cache.invalidatePatterns([`cache:${userId}:*`], `User ${userId}`);
+        await cache.invalidateTags([
+            cacheNs.tag('userprogress', 'detail', userId),
+            cacheNs.tag('userprogress', 'list')
+        ], `User ${userId}`);
     }
     res.json(result);
 }));

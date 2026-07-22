@@ -1,10 +1,11 @@
-const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { invalidateContentCache } = require('../../../shared/utils/cacheInvalidation');
 
-async function invalidatePronunciationExerciseCache() {
-    return await cache.invalidatePatterns([
-        'pronunciationexercise:list:*',
-        'pronunciationexercise:item:*'
-    ], 'Pronunciation Exercise');
+async function invalidatePronunciationExerciseCache(options = {}) {
+    return await invalidateContentCache('pronunciationexercise', 'Pronunciation Exercise', {
+        ...options,
+        extraTags: [cacheNs.tag('userprogress', 'detail')]
+    });
 }
 
 module.exports = { invalidatePronunciationExerciseCache };

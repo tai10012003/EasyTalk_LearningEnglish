@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const GrammarExerciseRepository = require('../repositories/grammarexerciseRepository');
 const { invalidateGrammarExerciseCache } = require('../utils/cacheHelper');
 const { GrammarExercise } = require('../models/grammarexercise');
@@ -21,9 +23,8 @@ class GrammarExerciseService {
     }
 
     async getGrammarexerciseList(page = 1, limit = 12, role = "user") {
-        const cacheKey = `grammarexercise:list:page=${page}:limit=${limit}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('grammarexercise', { page, limit, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammarexercise', role), cacheNs.listTags('grammarexercise')), async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -34,13 +35,13 @@ class GrammarExerciseService {
     }
 
     async getGrammarexerciseById(id) {
-        return await this.cache.getOrSet(`grammarexercise:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('grammarexercise', id), withTags(policies.contentDetail('grammarexercise'), cacheNs.itemTags('grammarexercise', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getGrammarexerciseBySlug(slug) {
-        return await this.cache.getOrSet(`grammarexercise:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('grammarexercise', slug), withTags(policies.contentDetail('grammarexercise'), cacheNs.itemTags('grammarexercise', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -102,7 +103,7 @@ class GrammarExerciseService {
     async insertGrammarexercise(exerciseData) {
         const document = GrammarExercise.buildDocument(exerciseData);
         const result = await this.repository.insert(document);
-        await invalidateGrammarExerciseCache();
+        await invalidateGrammarExerciseCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { success: true, message: "Bài luyện tập ngữ pháp đã được thêm thành công !", result } };
     }
 
@@ -115,7 +116,7 @@ class GrammarExerciseService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidateGrammarExerciseCache();
+        await invalidateGrammarExerciseCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { success: true, message: "Bài luyện tập ngữ pháp đã được cập nhật thành công !", result } };
     }
 
@@ -125,7 +126,7 @@ class GrammarExerciseService {
             return { status: 404, data: { success: false, message: "Bài luyện tập ngữ pháp không tìm thấy." } };
         }
         await this.repository.delete(id);
-        await invalidateGrammarExerciseCache();
+        await invalidateGrammarExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài luyện tập ngữ pháp đã xóa thành công !" } };
     }
 }

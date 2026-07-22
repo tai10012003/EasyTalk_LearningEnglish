@@ -1,10 +1,11 @@
-const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { invalidateContentCache } = require('../../../shared/utils/cacheInvalidation');
 
-async function invalidateStoryCache() {
-    return await cache.invalidatePatterns([
-        'story:list:*',
-        'story:item:*'
-    ], 'Story');
+async function invalidateStoryCache(options = {}) {
+    return await invalidateContentCache('story', 'Story', {
+        ...options,
+        extraTags: [cacheNs.tag('userprogress', 'detail')]
+    });
 }
 
 module.exports = { invalidateStoryCache };

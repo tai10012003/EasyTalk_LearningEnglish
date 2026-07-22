@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const JourneyRepository = require('../repositories/journeyRepository');
 const { invalidateJourneyCache } = require('../utils/cacheHelper');
 
@@ -10,26 +12,23 @@ class JourneyService {
     }
 
     async getJourneyList(page = 1, limit = 10) {
-        const cacheKey = `journey:list:page=${page}:limit=${limit}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('journey', { page, limit });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.relationList('journey'), cacheNs.listTags('journey')), async () => {
             const { journeys, total } = await this.repository.findAll(page, limit);
             return { journeys, totalJourneys: total };
         });
     }
 
     async getAllJourneysWithDetails() {
-        const cacheKey = `journey:allWithDetails`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.key('journey', 'details', { id: 'all' });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.relationList('journey'), [cacheNs.tag('journey', 'details'), cacheNs.tag('journey', 'all')]), async () => {
             return await this.repository.findAllWithDetails();
         });
     }
 
     async getJourneyWithDetails(journeyId) {
-        const cacheKey = `journey:details:id=${journeyId}`;
-        const ttl = 600;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.key('journey', 'details', { id: journeyId });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.relationDetail('journey'), [cacheNs.tag('journey', 'details'), cacheNs.tag('journey', 'details', journeyId), cacheNs.tag('journey', 'all')]), async () => {
             return await this.repository.findByIdWithDetails(journeyId);
         });
     }

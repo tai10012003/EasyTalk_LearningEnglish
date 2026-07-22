@@ -1,5 +1,5 @@
 const UserProgressRepository = require('../repositories/userprogressRepository');
-const { invalidateUserProgressCache } = require('../utils/cacheHelper');
+const { invalidateUserProgressCaches } = require('../utils/cacheHelper');
 
 class FollowService {
     constructor(deps = {}) {
@@ -8,12 +8,12 @@ class FollowService {
 
     async followUser(currentUserId, targetUserId) {
         await this.userProgressRepository.followUser(currentUserId, targetUserId);
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCaches([currentUserId, targetUserId]);
     }
 
     async unfollowUser(currentUserId, targetUserId) {
         await this.userProgressRepository.unfollowUser(currentUserId, targetUserId);
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCaches([currentUserId, targetUserId]);
     }
 
     async isFollowing(currentUserId, targetUserId) {

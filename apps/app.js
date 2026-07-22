@@ -6,6 +6,7 @@ const dotenv = require('dotenv');
 const path = require("path");
 const { errorHandler, notFound } = require('./src/shared/middleware/errorHandler');
 const responseFormatter = require('./src/shared/middleware/responseFormatter');
+const logger = require('./src/shared/utils/logger');
 
 const runtimeEnv = process.env.APP_ENV || process.env.NODE_ENV;
 const envFile = process.env.ENV_FILE || (runtimeEnv === 'production' ? '.env.production' : '.env.development');
@@ -41,8 +42,10 @@ function getAllowedClientOrigins() {
 const { connectRedis } = require('../apps/src/shared/utils/redisClient');
 async function initRedis() {
   try {
-    await connectRedis(5000);
-    console.log('Redis connected successfully');
+    const connected = await connectRedis(5000);
+    if (connected) {
+      console.log('Redis connected successfully');
+    }
   } catch (err) {
     console.error(`Redis init failed: ${err.message}`);
     console.error('Running without Redis cache - fallback to DB');
@@ -95,6 +98,7 @@ app.use("/setting", controllers.userSettingController);
 app.use("/dashboard", controllers.dashboardController);
 app.use("/chat", controllers.chatAIController);
 app.use("/writing", controllers.writingAIController);
+app.use("/cache", controllers.cacheController);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -111,12 +115,23 @@ async function initBackgroundTasks() {
   }
 }
 
+async function initCacheWarmUp() {
+  if (process.env.CACHE_WARM_UP_ON_START !== 'true') return;
+  try {
+    const warmed = await controllers.cacheController.warmUpSelectedCache();
+    logger.info('Cache warm-up completed', { warmed });
+  } catch (error) {
+    logger.error('Cache warm-up failed', { message: error.message });
+  }
+}
+
 const PORT = process.env.PORT || 3000;
 
 async function startServer() {
   try {
     await initRedis();
     await initBackgroundTasks();
+    await initCacheWarmUp();
     server.listen(PORT, () => {
       console.log(`Server is running on port ${PORT}`);
     });

@@ -1,4 +1,4 @@
-const { getRedisClient, isRedisConnected } = require("../utils/redisClient");
+const { getSafeRedisClient } = require("../utils/redisClient");
 
 const memoryStore = new Map();
 
@@ -20,13 +20,16 @@ function cleanupMemoryStore() {
 }
 
 async function incrementRedisCounter(key, windowMs) {
-    const client = getRedisClient();
+    const client = getSafeRedisClient();
+    if (!client.isAvailable()) return null;
     const count = await client.incr(key);
+    if (count === null || count === undefined) return null;
     if(count === 1) {
         await client.pexpire(key, windowMs);
     }
     const ttl = await client.pttl(key);
-    return { count, resetAt: Date.now() + Math.max(ttl, 0) };
+    const resetInMs = ttl > 0 ? ttl : windowMs;
+    return { count, resetAt: Date.now() + resetInMs };
 }
 
 function incrementMemoryCounter(key, windowMs) {
@@ -48,9 +51,8 @@ function createRateLimiter({ windowMs, max, keyPrefix, keyGenerator, message }) 
         const key = `rate-limit:${keyPrefix}:${keyPart}`;
         let record;
         try {
-            record = isRedisConnected()
-                ? await incrementRedisCounter(key, windowMs)
-                : incrementMemoryCounter(key, windowMs);
+            record = await incrementRedisCounter(key, windowMs);
+            if (!record) record = incrementMemoryCounter(key, windowMs);
         } catch (error) {
             console.warn(`[RateLimit] Redis failed, falling back to memory: ${error.message}`);
             record = incrementMemoryCounter(key, windowMs);

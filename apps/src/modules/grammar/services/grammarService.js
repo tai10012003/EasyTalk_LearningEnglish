@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const GrammarRepository = require('../repositories/grammarRepository');
 const grammarImageService = require('../services/grammarImageService');
 const { invalidateGrammarCache } = require('../utils/cacheHelper');
@@ -23,9 +25,8 @@ class GrammarService {
     }
 
     async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
-        const cacheKey = `grammar:list:page=${page}:limit=${limit}:search=${search}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('grammar', { page, limit, search, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammar', role), cacheNs.listTags('grammar')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -38,13 +39,13 @@ class GrammarService {
     }
 
     async getGrammar(id) {
-        return await this.cache.getOrSet(`grammar:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('grammar', id), withTags(policies.contentDetail('grammar'), cacheNs.itemTags('grammar', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getGrammarBySlug(slug) {
-        return await this.cache.getOrSet(`grammar:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('grammar', slug), withTags(policies.contentDetail('grammar'), cacheNs.itemTags('grammar', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -113,7 +114,7 @@ class GrammarService {
         }
         const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
         const result = await this.repository.insert(document);
-        await invalidateGrammarCache();
+        await invalidateGrammarCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { message: "Bài học ngữ pháp đã được thêm thành công !", result } };
     }
 
@@ -134,7 +135,7 @@ class GrammarService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidateGrammarCache();
+        await invalidateGrammarCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { message: "Bài học ngữ pháp đã được cập nhật thành công !", result } };
     }
 
@@ -146,7 +147,7 @@ class GrammarService {
             if (publicId) await this.imageService.deleteImage(publicId);
         }
         await this.repository.delete(id);
-        await invalidateGrammarCache();
+        await invalidateGrammarCache({ id, slug: existing.slug });
         return { status: 200, data: { message: "Bài học ngữ pháp đã xóa thành công !" } };
     }
 }

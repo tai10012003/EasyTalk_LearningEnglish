@@ -107,7 +107,7 @@ class StreakService {
             }
             const updateOp = { $set: { streak: 0 } };
             await this.userProgressRepository.update(userId, updateOp, true);
-            await invalidateUserProgressCache();
+            await invalidateUserProgressCache(userId);
             return { ...userProgress, streak: 0 };
         }
         return userProgress;

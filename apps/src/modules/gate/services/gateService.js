@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const GateRepository = require('../repositories/gateRepository');
 const { invalidateGateCache } = require('../utils/cacheHelper');
 
@@ -10,22 +12,21 @@ class GateService {
     }
 
     async getGateList(page = 1, limit = 12) {
-        const cacheKey = `gate:list:page=${page}:limit=${limit}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('gate', { page, limit });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.relationList('gate'), cacheNs.listTags('gate')), async () => {
             const { gates, total } = await this.repository.findAll(page, limit);
             return { gates, totalGates: total };
         });
     }
 
     async getGateById(gateId) {
-        return await this.cache.getOrSet(`gate:item:id=${gateId}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('gate', gateId), withTags(policies.relationDetail('gate'), cacheNs.itemTags('gate', gateId)), async () => {
             return await this.repository.findById(gateId);
         });
     }
 
     async getGatesInJourney(journeyId) {
-        return await this.cache.getOrSet(`gate:journey:id=${journeyId}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.key('gate', 'journey', { id: journeyId }), withTags(policies.relationDetail('gate'), [cacheNs.tag('gate', 'journey'), cacheNs.tag('gate', 'journey', journeyId), cacheNs.tag('gate', 'all')]), async () => {
             return await this.repository.findByJourney(journeyId);
         });
     }

@@ -43,6 +43,7 @@ const userSettingController = require('../modules/usersetting/controllers/userse
 const dashboardController = require('../modules/dashboard/controllers/dashboardController');
 const chatAIController = require('../modules/chatai/controllers/chatAIController');
 const writingAIController = require('../modules/writingai/controllers/writingAIController');
+const cacheController = require('../modules/cache/controllers/cacheController');
 
 function buildDependencies(options = {}) {
     const repositories = {
@@ -139,6 +140,7 @@ function buildDependencies(options = {}) {
     userProgressController.setUserPrizeService(services.userPrizeService);
     userProgressController.setLeaderboardService(services.leaderboardService);
     userProgressController.setFollowService(services.followService);
+    cacheController.setCacheServices(services);
 
     const controllers = {
         userController,
@@ -160,7 +162,8 @@ function buildDependencies(options = {}) {
         userSettingController,
         dashboardController,
         chatAIController,
-        writingAIController
+        writingAIController,
+        cacheController
     };
 
     return {

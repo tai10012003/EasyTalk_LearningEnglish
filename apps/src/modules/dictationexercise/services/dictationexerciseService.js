@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const DictationExerciseRepository = require('../repositories/dictationexerciseRepository');
 const { invalidateDictationExerciseCache } = require('../utils/cacheHelper');
 const DictationExercise = require('../models/dictationexercise');
@@ -21,9 +23,8 @@ class DictationExerciseService {
     }
 
     async getDictationList(page = 1, limit = 12, role = "user") {
-        const cacheKey = `dictation:list:page=${page}:limit=${limit}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('dictation', { page, limit, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('dictation', role), cacheNs.listTags('dictation')), async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -34,13 +35,13 @@ class DictationExerciseService {
     }
 
     async getDictation(id) {
-        return await this.cache.getOrSet(`dictation:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('dictation', id), withTags(policies.contentDetail('dictation'), cacheNs.itemTags('dictation', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getDictationBySlug(slug) {
-        return await this.cache.getOrSet(`dictation:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('dictation', slug), withTags(policies.contentDetail('dictation'), cacheNs.itemTags('dictation', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -110,7 +111,7 @@ class DictationExerciseService {
     async insertDictation(dictationData) {
         const document = DictationExercise.buildDocument(dictationData);
         const result = await this.repository.insert(document);
-        await invalidateDictationExerciseCache();
+        await invalidateDictationExerciseCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { success: true, message: "Bài nghe chép chính tả đã được thêm thành công!", result } };
     }
 
@@ -123,7 +124,7 @@ class DictationExerciseService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidateDictationExerciseCache();
+        await invalidateDictationExerciseCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { success: true, message: "Bài nghe chép chính tả đã được cập nhật thành công!", result } };
     }
 
@@ -133,7 +134,7 @@ class DictationExerciseService {
             return { status: 404, data: { success: false, message: "Bài nghe chép chính tả không tìm thấy." } };
         }
         await this.repository.delete(id);
-        await invalidateDictationExerciseCache();
+        await invalidateDictationExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài nghe chép chính tả đã xóa thành công!" } };
     }
 }

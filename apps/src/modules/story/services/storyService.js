@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const StoryRepository = require('../repositories/storyRepository');
 const storyImageService = require('./storyImageService');
 const { invalidateStoryCache } = require('../utils/cacheHelper');
@@ -23,9 +25,8 @@ class StoryService {
     }
 
     async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user") {
-        const cacheKey = `story:list:page=${page}:limit=${limit}:category=${category}:level=${level}:search=${search}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('story', { page, limit, category, level, search, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('story', role), cacheNs.listTags('story')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -40,13 +41,13 @@ class StoryService {
     }
 
     async getStory(id) {
-        return await this.cache.getOrSet(`story:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('story', id), withTags(policies.contentDetail('story'), cacheNs.itemTags('story', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getStoryBySlug(slug) {
-        return await this.cache.getOrSet(`story:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('story', slug), withTags(policies.contentDetail('story'), cacheNs.itemTags('story', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -111,7 +112,7 @@ class StoryService {
         }
         const document = Story.buildDocument({ ...storyData, image: imageUrl });
         const result = await this.repository.insert(document);
-        await invalidateStoryCache();
+        await invalidateStoryCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { success: true, message: "Câu chuyện đã được thêm thành công!", result } };
     }
 
@@ -132,7 +133,7 @@ class StoryService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidateStoryCache();
+        await invalidateStoryCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { success: true, message: "Câu chuyện đã được cập nhật thành công!", result } };
     }
 
@@ -146,7 +147,7 @@ class StoryService {
             }
         }
         await this.repository.delete(id);
-        await invalidateStoryCache();
+        await invalidateStoryCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Câu chuyện đã xóa thành công!" } };
     }
 }

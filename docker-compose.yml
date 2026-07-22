@@ -11,6 +11,7 @@ services:
       - ./apps/.env.production
     environment:
       - NODE_ENV=production
+      - REDIS_HOST=redis
     depends_on:
       redis:
         condition: service_healthy
@@ -38,13 +39,22 @@ services:
   redis:
     image: redis:7-alpine
     container_name: redis
-    ports:
-      - "6379:6379"
+    env_file:
+      - ./apps/.env.production
+    expose:
+      - "6379"
     volumes:
       - redis_data:/data
-    command: redis-server --appendonly yes
+    command: >
+      sh -c 'redis-server
+      --requirepass "$$REDIS_PASSWORD"
+      --maxmemory "$${REDIS_MAXMEMORY:-256mb}"
+      --maxmemory-policy "$${REDIS_MAXMEMORY_POLICY:-allkeys-lru}"
+      --appendonly "$${REDIS_APPENDONLY:-no}"
+      --save "$${REDIS_SAVE_SECONDS:-}"'
+    mem_limit: ${REDIS_CONTAINER_MEMORY_LIMIT:-384m}
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
       interval: 10s
       timeout: 5s
       retries: 5

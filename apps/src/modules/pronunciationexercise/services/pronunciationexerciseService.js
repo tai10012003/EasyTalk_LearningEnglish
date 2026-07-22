@@ -1,4 +1,6 @@
 const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const PronunciationExerciseRepository = require('../repositories/pronunciationexerciseRepository');
 const SpeechAnalysisService = require('./speechAnalysisService');
 const { invalidatePronunciationExerciseCache } = require('../utils/cacheHelper');
@@ -24,9 +26,8 @@ class PronunciationExerciseService {
     }
 
     async getPronunciationexerciseList(page = 1, limit = 12, role = "user") {
-        const cacheKey = `pronunciationexercise:list:page=${page}:limit=${limit}:role=${role}`;
-        const ttl = 300;
-        return await this.cache.getOrSet(cacheKey, ttl, async () => {
+        const cacheKey = cacheNs.listKey('pronunciationexercise', { page, limit, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('pronunciationexercise', role), cacheNs.listTags('pronunciationexercise')), async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -37,13 +38,13 @@ class PronunciationExerciseService {
     }
 
     async getPronunciationexerciseById(id) {
-        return await this.cache.getOrSet(`pronunciationexercise:item:id=${id}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.itemKey('pronunciationexercise', id), withTags(policies.contentDetail('pronunciationexercise'), cacheNs.itemTags('pronunciationexercise', id)), async () => {
             return await this.repository.findById(id);
         });
     }
 
     async getPronunciationexerciseBySlug(slug) {
-        return await this.cache.getOrSet(`pronunciationexercise:item:slug=${slug}`, 600, async () => {
+        return await this.cache.getOrSet(cacheNs.slugKey('pronunciationexercise', slug), withTags(policies.contentDetail('pronunciationexercise'), cacheNs.itemTags('pronunciationexercise', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
     }
@@ -127,7 +128,7 @@ class PronunciationExerciseService {
     async insertPronunciationexercise(exerciseData) {
         const document = PronunciationExercise.buildDocument(exerciseData);
         const result = await this.repository.insert(document);
-        await invalidatePronunciationExerciseCache();
+        await invalidatePronunciationExerciseCache({ id: result.insertedId, slug: document.slug });
         return { status: 201, data: { success: true, message: "Bài luyện tập phát âm đã được thêm thành công !", result } };
     }
 
@@ -140,7 +141,7 @@ class PronunciationExerciseService {
         delete document.createdAt;
         document.updatedAt = new Date();
         const result = await this.repository.update(id, document);
-        await invalidatePronunciationExerciseCache();
+        await invalidatePronunciationExerciseCache({ id, slugs: [existing.slug, document.slug] });
         return { status: 200, data: { message: "Bài luyện tập phát âm đã được cập nhật thành công !", result } };
     }
 
@@ -150,7 +151,7 @@ class PronunciationExerciseService {
             return { status: 404, data: { success: false, message: "Bài luyện tập phát âm không tìm thấy." } };
         }
         await this.repository.delete(id);
-        await invalidatePronunciationExerciseCache();
+        await invalidatePronunciationExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài luyện tập phát âm đã xóa thành công !" } };
     }
 }

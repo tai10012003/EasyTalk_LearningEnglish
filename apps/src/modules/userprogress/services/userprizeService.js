@@ -45,7 +45,7 @@ class UserPrizeService {
                 }
             }
         }
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return { newPrizes: newlyUnlocked, totalUnlocked: newlyUnlocked.length };
     }
 
@@ -87,7 +87,7 @@ class UserPrizeService {
                 }
             }
         }
-        await invalidateUserProgressCache();
+        await invalidateUserProgressCache(userId);
         return { newPrizes: newlyUnlocked, totalUnlocked: newlyUnlocked.length };
     }
 
