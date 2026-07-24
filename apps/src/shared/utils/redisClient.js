@@ -115,9 +115,17 @@ const connectRedis = async (timeoutMs = 5000) => {
         logger.info('Redis disabled by REDIS_ENABLED=false');
         return false;
     }
+    if (isRedisConnected()) {
+        return true;
+    }
     if (connectPromise) return connectPromise;
     connectPromise = new Promise((resolve, reject) => {
         const client = getRedisClient();
+        if (client.status === 'ready') {
+            isConnected = true;
+            resolve(true);
+            return;
+        }
         const onReady = () => { clearTimeout(timer); resolve(true); };
         const timer = setTimeout(() => {
             client.off('ready', onReady);

@@ -44,17 +44,13 @@ async function initRedis() {
   try {
     const connected = await connectRedis(5000);
     if (connected) {
-      console.log('Redis connected successfully');
+      logger.info('Redis connected successfully');
     }
   } catch (err) {
-    console.error(`Redis init failed: ${err.message}`);
-    console.error('Running without Redis cache - fallback to DB');
+    logger.error('Redis init failed', { message: err.message });
+    logger.warn('Running without Redis cache - fallback to DB');
   }
 }
-
-const { initSocket } = require('../apps/src/shared/utils/socket');
-const io = initSocket(server, getAllowedClientOrigins());
-console.log('Socket.IO initialized');
 
 app.use(cors({
   origin(origin, callback) {
@@ -75,33 +71,43 @@ app.use(responseFormatter);
 
 app.use("/static", express.static(__dirname + "/public"));
 
+const { initSocket } = require('../apps/src/shared/utils/socket');
 const { buildDependencies } = require('./src/bootstrap/dependencies');
-const { controllers } = buildDependencies({ io });
+let controllers = null;
+let routesInitialized = false;
 
-app.use("/user", controllers.userController);
-app.use("/userprogress", controllers.userProgressController);
-app.use("/prize", controllers.prizeController);
-app.use("/notification", controllers.notificationController);
-app.use("/grammar", controllers.grammarController);
-app.use("/pronunciation", controllers.pronunciationController);
-app.use("/grammar-exercise", controllers.grammarExerciseController);
-app.use("/story", controllers.storyController);
-app.use("/vocabulary-exercise", controllers.vocabularyExerciseController);
-app.use("/pronunciation-exercise", controllers.pronunciationExerciseController);
-app.use("/dictation-exercise", controllers.dictationController);
-app.use("/journey", controllers.journeyController);
-app.use("/gate", controllers.gateController);
-app.use("/stage", controllers.stageController);
-app.use("/flashcards", controllers.flashcardController);
-app.use("/reminder", controllers.reminderController);
-app.use("/setting", controllers.userSettingController);
-app.use("/dashboard", controllers.dashboardController);
-app.use("/chat", controllers.chatAIController);
-app.use("/writing", controllers.writingAIController);
-app.use("/cache", controllers.cacheController);
+function initRealtimeAndRoutes() {
+  if (routesInitialized) return;
+  const io = initSocket(server, getAllowedClientOrigins());
+  logger.info('Socket.IO initialized');
+  controllers = buildDependencies({ io }).controllers;
 
-app.use(notFound);
-app.use(errorHandler);
+  app.use("/user", controllers.userController);
+  app.use("/userprogress", controllers.userProgressController);
+  app.use("/prize", controllers.prizeController);
+  app.use("/notification", controllers.notificationController);
+  app.use("/grammar", controllers.grammarController);
+  app.use("/pronunciation", controllers.pronunciationController);
+  app.use("/grammar-exercise", controllers.grammarExerciseController);
+  app.use("/story", controllers.storyController);
+  app.use("/vocabulary-exercise", controllers.vocabularyExerciseController);
+  app.use("/pronunciation-exercise", controllers.pronunciationExerciseController);
+  app.use("/dictation-exercise", controllers.dictationController);
+  app.use("/journey", controllers.journeyController);
+  app.use("/gate", controllers.gateController);
+  app.use("/stage", controllers.stageController);
+  app.use("/flashcards", controllers.flashcardController);
+  app.use("/reminder", controllers.reminderController);
+  app.use("/setting", controllers.userSettingController);
+  app.use("/dashboard", controllers.dashboardController);
+  app.use("/chat", controllers.chatAIController);
+  app.use("/writing", controllers.writingAIController);
+  app.use("/cache", controllers.cacheController);
+
+  app.use(notFound);
+  app.use(errorHandler);
+  routesInitialized = true;
+}
 
 async function initBackgroundTasks() {
   try {
@@ -130,13 +136,14 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     await initRedis();
+    initRealtimeAndRoutes();
     await initBackgroundTasks();
     await initCacheWarmUp();
     server.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
+      logger.info('Server started', { port: PORT });
     });
   } catch (error) {
-    console.error('Failed to start server:', error);
+    logger.error('Failed to start server', { message: error.message });
     process.exit(1);
   }
 }

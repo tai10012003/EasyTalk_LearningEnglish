@@ -1,5 +1,6 @@
 const { ObjectId } = require("mongodb");
 const NotificationRepository = require("../repositories/notificationRepository");
+const logger = require("../../../shared/utils/logger");
 
 class NotificationService {
     constructor(deps = {}) {
@@ -26,17 +27,12 @@ class NotificationService {
             expireAt,
         };
         const insertedId = await this.notificationRepository.createNotification(notification);
-        if (this.io && global.onlineUsers) {
-            const socketId = global.onlineUsers.get(userId.toString());
-            if (socketId) {
-                this.io.to(socketId).emit("new-notification", {
-                    _id: insertedId,
-                    ...notification
-                });
-                console.log(`🔔 Notification đã gửi realtime cho user ${userId}`);
-            } else {
-                console.log(`⚠️ User ${userId} not online. Notification will be received on next page load.`);
-            }
+        if (this.io) {
+            this.io.to(`user:${userId.toString()}`).emit("new-notification", {
+                _id: insertedId,
+                ...notification
+            });
+            logger.debug("Notification emitted realtime", { userId: userId.toString(), notificationId: insertedId.toString() });
         }
         return insertedId;
     }
@@ -61,19 +57,24 @@ class NotificationService {
                 expireAt,
             }));
             const result = await this.notificationRepository.createManyNotifications(notifications);
-            if (this.io && global.onlineUsers) {
+            if (this.io) {
                 normalUsers.forEach(user => {
-                    const socketId = global.onlineUsers.get(user._id.toString());
-                    if (socketId) {
-                        const notif = notifications.find(n => n.user.toString() == user._id.toString());
-                        this.io.to(socketId).emit("new-notification", { _id: notif._id, ...notif });
-                        console.log(`🔔 Notification đã gửi realtime cho user ${user._id}`);
-                    }
+                    const notifIndex = notifications.findIndex(n => n.user.toString() == user._id.toString());
+                    if (notifIndex === -1) return;
+                    const insertedId = result.insertedIds?.[notifIndex];
+                    this.io.to(`user:${user._id.toString()}`).emit("new-notification", {
+                        _id: insertedId,
+                        ...notifications[notifIndex]
+                    });
+                    logger.debug("Notification emitted realtime", {
+                        userId: user._id.toString(),
+                        notificationId: insertedId?.toString()
+                    });
                 });
             }
             return { count: result.insertedCount, insertedIds: result.insertedIds };
         } catch (error) {
-            console.error("Error creating notifications for all users:", error);
+            logger.error("Error creating notifications for all users", { message: error.message });
             throw error;
         }
     }
@@ -111,7 +112,7 @@ class NotificationService {
             const result = await this.notificationRepository.deleteManyByUser(userId);
             return result;
         } catch (error) {
-            console.error("Lỗi khi xóa thông báo của user:", error);
+            logger.error("Error deleting notifications by user", { userId: userId.toString(), message: error.message });
             throw error;
         }
     }

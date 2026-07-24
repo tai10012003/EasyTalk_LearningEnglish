@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
 import Swal from 'sweetalert2';
-import { io } from "socket.io-client";
 import { UserProgressService } from '@/services/UserProgressService.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
 import { NotificationService } from '@/services/NotificationService.jsx';
+import { SocketService } from '@/services/SocketService.jsx';
 import logo from '@/assets/images/logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -61,24 +61,16 @@ function Menu() {
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    console.log("🔹 Initializing socket...");
-    const newSocket = io(API_URL, { transports: ['websocket', 'polling'] });
-    newSocket.on("connect", () => {
-      const token = AuthService.getAccessToken();
-      const decoded = parseJwt(token);
-      if (decoded && decoded.id) {
-        newSocket.emit("register", decoded.id);
-      }
-    });
-    newSocket.on("connect_error", (err) => console.error("❌ Socket connect error:", err));
-    newSocket.on("disconnect", (reason) => console.log("⚠️ Socket disconnected:", reason));
-    newSocket.on("new-notification", (notif) => {
+
+    const unsubscribeNotifications = SocketService.subscribeToNotifications((notif) => {
       setNotifications(prev => [notif, ...prev]);
       setUnreadCount(prev => prev + 1);
     });
+    SocketService.connect();
+
     return () => {
-      console.log("🔹 Disconnecting socket...");
-      newSocket.disconnect();
+      unsubscribeNotifications();
+      SocketService.disconnect();
     };
   }, [isLoggedIn]);
 
