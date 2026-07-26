@@ -32,6 +32,7 @@ function Menu() {
   const [dropdownOpen, setDropdownOpen] = useState({
     lessons: false,
     practice: false,
+    more: false,
     login: false,
   });
   const [streakData, setStreakData] = useState({ streak: 0 });
@@ -53,11 +54,16 @@ function Menu() {
     '/communicate',
     '/writing',
   ];
+  const coachRoutes = ['/coach'];
+  const moreRoutes = ['/leaderboard', '/statistic'];
   const isLessonsActive = lessonRoutes.some((p) => location.pathname == p);
   const isPracticeActive = practiceRoutes.some((p) => location.pathname == p);
+  const isCoachActive = coachRoutes.some((p) => location.pathname == p);
+  const isMoreActive = moreRoutes.some((p) => location.pathname == p);
   const isMobile = window.innerWidth <= 991;
   const showLessons = isMobile ? dropdownOpen.lessons : (dropdownOpen.lessons || isLessonsActive);
   const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);
+  const showMore = isMobile ? dropdownOpen.more : (dropdownOpen.more || isMoreActive);
 
   useEffect(() => {
     if (!isLoggedIn) return;
@@ -300,7 +306,7 @@ function Menu() {
 
   const handleLinkClick = () => {
     setMenuOpen(false);
-    setDropdownOpen({ lessons: false, practice: false, login: false });
+    setDropdownOpen({ lessons: false, practice: false, more: false, login: false });
   };
 
   return (
@@ -471,6 +477,17 @@ function Menu() {
                         <i className="fas fa-road me-2"></i>{t("header.menu.journey")}
                       </NavLink>
                     </li>
+                    {isLoggedIn && (
+                      <li className="nav-item">
+                        <NavLink
+                          className={() => `nav-link ${isCoachActive ? 'active' : ''}`}
+                          to="/coach"
+                          onClick={handleLinkClick}
+                        >
+                          <i className="fas fa-brain me-2"></i>AI COACH
+                        </NavLink>
+                      </li>
+                    )}
                     <li className={`nav-item dropdown ${showLessons ? 'show' : ''}`}>
                       <a
                         className={`nav-link dropdown-toggle ${isLessonsActive ? 'active' : ''}`}
@@ -594,23 +611,34 @@ function Menu() {
                         BÀI VIẾT
                       </NavLink>
                     </li> */}
-                    <li className="nav-item">
-                      <NavLink
-                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                        to="/leaderboard"
-                        onClick={handleLinkClick}
+                    <li className={`nav-item dropdown ${showMore ? 'show' : ''}`}>
+                      <a
+                        className={`nav-link dropdown-toggle ${isMoreActive ? 'active' : ''}`}
+                        onClick={() => toggleDropdown('more')}
+                        role="button"
+                        aria-expanded={showMore}
                       >
-                        <i className="fas fa-trophy me-2"></i>{t("header.menu.leaderboard")}
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink
-                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                        to="/statistic"
-                        onClick={handleLinkClick}
+                        <i className="fas fa-ellipsis-h me-2"></i>KHÁC
+                      </a>
+                      <div
+                        className={`dropdown-menu ${showMore ? 'show' : ''}`}
+                        aria-labelledby="navbarDropdownMore"
                       >
-                        <i className="fas fa-chart-line me-2"></i>{t("header.menu.statistics")}
-                      </NavLink>
+                        <NavLink
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
+                          to="/leaderboard"
+                          onClick={handleLinkClick}
+                        >
+                          <i className="fas fa-trophy me-2"></i>{t("header.menu.leaderboard")}
+                        </NavLink>
+                        <NavLink
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
+                          to="/statistic"
+                          onClick={handleLinkClick}
+                        >
+                          <i className="fas fa-chart-line me-2"></i>{t("header.menu.statistics")}
+                        </NavLink>
+                      </div>
                     </li>
                     {/* <li className="nav-item">
                       <NavLink

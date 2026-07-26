@@ -7,18 +7,28 @@ class WritingAnalyzerService {
         this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
     }
 
-    async analyzeWriting(userText) {
+    async analyzeWriting(userText, options = {}) {
+        const modeConfig = options.modeConfig || null;
         try {
             const response = await this.openai.chat.completions.create({
                 model: GPT_CONFIG.model,
                 messages: [
                     {
                         role: "system",
-                        content: WRITING_ANALYSIS_PROMPT
+                        content: this.buildWritingPrompt(modeConfig)
                     },
                     { 
                         role: "user", 
-                        content: userText 
+                        content: JSON.stringify({
+                            mode: modeConfig ? {
+                                key: modeConfig.key,
+                                title: modeConfig.title,
+                                correctionDepth: modeConfig.correctionDepth,
+                                promptHints: modeConfig.promptHints,
+                                skillFocus: modeConfig.skillFocus
+                            } : null,
+                            text: userText
+                        })
                     },
                 ],
                 temperature: GPT_CONFIG.writingAnalysis.temperature,
@@ -31,6 +41,22 @@ class WritingAnalyzerService {
             console.error("Error with OpenAI API:", error);
             throw new Error("Có lỗi xảy ra. Vui lòng thử lại sau.");
         }
+    }
+
+    buildWritingPrompt(modeConfig = null) {
+        if (!modeConfig) return WRITING_ANALYSIS_PROMPT;
+        return [
+            WRITING_ANALYSIS_PROMPT,
+            "",
+            "Agent writing mode:",
+            `- Title: ${modeConfig.title}`,
+            `- Correction depth: ${modeConfig.correctionDepth || "medium"}`,
+            `- Skill focus: ${(modeConfig.skillFocus || []).join(", ")}`,
+            "Use this mode to decide feedback depth and priority.",
+            "Do not invent learner level, IELTS band, topic data, or achievements.",
+            "If the mode has prompt hints, follow them:",
+            ...(modeConfig.promptHints || []).map(hint => `- ${hint}`)
+        ].join("\n");
     }
 }
 

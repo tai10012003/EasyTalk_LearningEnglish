@@ -25,6 +25,11 @@ router.get("/security-overview", verifyAdmin, asyncHandler(async (req, res) => {
     res.json({ success: true, data: securityOverview });
 }));
 
+router.get("/agent-debug", verifyAdmin, asyncHandler(async (req, res) => {
+    const agentDebug = await dashboardService.getAgentDebugOverview();
+    res.json({ success: true, data: agentDebug });
+}));
+
 router.get("/lesson-breakdown", verifyAdmin, asyncHandler(async (req, res) => {
     const lessonBreakdown = await dashboardService.getLessonBreakdown();
     res.json({ success: true, data: lessonBreakdown });

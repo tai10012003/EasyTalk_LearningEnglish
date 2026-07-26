@@ -26,6 +26,7 @@ import DictationExercise from "@/views/user/DictationExercise.jsx";
 import DictationExerciseDetail from "@/views/user/DictationExerciseDetail.jsx";
 import ChatAI from "@/views/user/ChatAI.jsx";
 import WritingAI from "@/views/user/WritingAI.jsx";
+import Coach from "@/views/user/Coach.jsx";
 import LeaderBoard from "@/views/user/LeaderBoard.jsx";
 import Statistic from "@/views/user/Statistic.jsx";
 import UserStreak from "@/views/user/UserStreak.jsx";
@@ -216,6 +217,14 @@ const UserRoute = [
         element: (
         <PrivateRoute>
             <WritingAI />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/coach",
+        element: (
+        <PrivateRoute>
+            <Coach />
         </PrivateRoute>
         ),
     },

@@ -97,7 +97,7 @@ function DictationExercise() {
                             const currentIndex = findCurrentDictationExerciseIndex();
                             const isCurrent = index === currentIndex;
                             return (
-                                <div key={item._id} ref={isCurrent ? currentLessonRef : null} >
+                                <div key={item._id} ref={isCurrent ? currentLessonRef : null}>
                                     <DictationExerciseCard item={item} index={index} isUnlocked={isUnlocked} isCurrent={isCurrent} />
                                 </div>
                             );

@@ -24,7 +24,9 @@ router.post("/api/analyze", verifyToken, asyncHandler(async (req, res) => {
         return res.status(400).json({ error: validation.errors.join(', ') });
     }
     const userText = req.body.text;
-    const result = await getWritingAIService().analyzeWriting(userText);
+    const result = await getWritingAIService().analyzeWriting(userText, req.user.id, {
+        mode: req.body.mode
+    });
     res.json(result);
 }));
 

@@ -130,7 +130,7 @@ router.put("/update-difficulties", verifyToken, asyncHandler(async (req, res) =>
         });
     }
     const bulkOps = buildDifficultyUpdateOperations(updates, userId);
-    const result = await flashcardService.updateFlashcardDifficulty(bulkOps);
+    const result = await flashcardService.updateFlashcardDifficulty(bulkOps, userId, updates);
     await userProgressService.incrementDailyFlashcardReview(userId, updates.length);
     res.json({ 
         success: true, 

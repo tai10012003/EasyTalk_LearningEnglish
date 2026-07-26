@@ -102,6 +102,7 @@ function initRealtimeAndRoutes() {
   app.use("/dashboard", controllers.dashboardController);
   app.use("/chat", controllers.chatAIController);
   app.use("/writing", controllers.writingAIController);
+  app.use("/agent", controllers.learningAgentController);
   app.use("/cache", controllers.cacheController);
 
   app.use(notFound);

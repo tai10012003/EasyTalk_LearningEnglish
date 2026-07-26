@@ -35,7 +35,7 @@ router.get("/api/pronunciation-exercises/slug/:slug", verifyToken, asyncHandler(
 router.post('/analyze/:id/:index', verifyToken, upload.single('audio'), asyncHandler(async (req, res) => {
         const audioBuffer = req.file ? req.file.buffer : null;
         const questionIndex = parseInt(req.params.index, 10);
-        const { status, data } = await pronunciationexerciseService.analyzePronunciation(audioBuffer, req.params.id, questionIndex);
+        const { status, data } = await pronunciationexerciseService.analyzePronunciation(audioBuffer, req.params.id, questionIndex, req.user.id);
         return res.status(status).json(data);
 }));
 

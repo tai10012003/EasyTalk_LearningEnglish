@@ -6,7 +6,8 @@
     "test": "node --test",
     "start": "node app.js",
     "start:prod": "NODE_ENV=production node app.js",
-    "dev": "node --watch app.js"
+    "dev": "node --watch app.js",
+    "seed:agent-modes": "node scripts/seedAgentModes.js"
   },
   "keywords": [],
   "author": "",

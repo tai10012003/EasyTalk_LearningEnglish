@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, useCallback } from "react";
 import { UNSAFE_NavigationContext } from "react-router-dom";
 import { WritingAIService } from "@/services/WritingAIService.jsx";
+import { LearningAgentService } from "@/services/LearningAgentService.jsx";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import WritingAIInput from "@/components/user/writingAI/WritingAIInput.jsx";
 import WritingAIResult from "@/components/user/writingAI/WritingAIResult.jsx";
@@ -8,6 +9,8 @@ import Swal from "sweetalert2";
 
 function WritingAI() {
     const [topic, setTopic] = useState("");
+    const [writingModes, setWritingModes] = useState([]);
+    const [selectedMode, setSelectedMode] = useState(null);
     const [userText, setUserText] = useState("");
     const [analysisResult, setAnalysisResult] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,13 +20,14 @@ function WritingAI() {
     const allowNavigationRef = useRef(false);
     const hasStarted = userText.trim().length > 0 && !analysisResult;
 
-    useEffect(() => {
-        document.title = "Luyện viết với AI - EasyTalk";
-        fetchTopic();
+    const pickModeTopic = useCallback((mode) => {
+        const topics = mode?.config?.topicSuggestions || [];
+        if (!topics.length) return null;
+        return topics[Math.floor(Math.random() * topics.length)];
     }, []);
 
-    const fetchTopic = async () => {
-        setIsLoading(true);
+    const fetchTopic = useCallback(async (showLoading = true) => {
+        if (showLoading) setIsLoading(true);
         try {
             const generatedTopic = await WritingAIService.getRandomTopic();
             setTopic(generatedTopic);
@@ -31,7 +35,45 @@ function WritingAI() {
             console.error("Error fetching topic:", err);
             setTopic("Không thể lấy đề bài. Vui lòng thử lại.");
         } finally {
+            if (showLoading) setIsLoading(false);
+        }
+    }, []);
+
+    const loadWritingSetup = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const modes = await LearningAgentService.getModes("writing");
+            setWritingModes(modes);
+            const firstMode = modes[0] || null;
+            setSelectedMode(firstMode);
+            const modeTopic = pickModeTopic(firstMode);
+            if (modeTopic) {
+                setTopic(modeTopic);
+            } else {
+                await fetchTopic(false);
+            }
+        } catch (err) {
+            console.error("Error loading writing modes:", err);
+            await fetchTopic(false);
+        } finally {
             setIsLoading(false);
+        }
+    }, [fetchTopic, pickModeTopic]);
+
+    useEffect(() => {
+        document.title = "Luyện viết với AI - EasyTalk";
+        loadWritingSetup();
+    }, [loadWritingSetup]);
+
+    const handleModeSelect = (mode) => {
+        setSelectedMode(mode);
+        setAnalysisResult(null);
+        setUserText("");
+        const modeTopic = pickModeTopic(mode);
+        if (modeTopic) {
+            setTopic(modeTopic);
+        } else {
+            fetchTopic(false);
         }
     };
 
@@ -43,16 +85,17 @@ function WritingAI() {
                 title: "Chú ý",
                 text: "Vui lòng nhập bài viết trước khi nộp!",
             });
-        if (trimmedText.length < 200) {
+        const minCharacters = selectedMode?.config?.minCharacters || 200;
+        if (trimmedText.length < minCharacters) {
             return Swal.fire({
                 icon: "warning",
                 title: "Chú ý",
-                text: "Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài!",
+                text: `Bài viết của bạn phải ít nhất ${minCharacters} ký tự mới được phép nộp bài!`,
             });
         }
         setIsSubmitting(true);
         try {
-            const result = await WritingAIService.analyzeWriting(trimmedText);
+            const result = await WritingAIService.analyzeWriting(trimmedText, selectedMode?.key || null);
             setAnalysisResult(result);
         } catch (err) {
             console.error("Error analyzing writing:", err);
@@ -69,7 +112,12 @@ function WritingAI() {
     const handleReset = async () => {
         setUserText("");
         setAnalysisResult(null);
-        fetchTopic();
+        const modeTopic = pickModeTopic(selectedMode);
+        if (modeTopic) {
+            setTopic(modeTopic);
+        } else {
+            fetchTopic();
+        }
     };
 
     useEffect(() => {
@@ -122,15 +170,39 @@ function WritingAI() {
 
     return (
         <>
-            <div className="container writingai-container">
+            <div className="container writingai-container" data-coach-target="agent-task-writing-workspace">
                 <div className="writingai-header text-center mb-3">
-                    <h3>Luyện Viết Với AI - Thực Hành Tiếng Anh
+                    <h3>{selectedMode?.title ? `Luyện viết: ${selectedMode.title}` : "Luyện Viết Với AI - Thực Hành Tiếng Anh"}
                     <i
                         className="fas fa-question-circle help-icon"
                         style={{ cursor: "pointer" }}
                         onClick={() => setIsModalOpen(true)}
                     ></i>
                     </h3>
+                    {selectedMode?.description && <p className="agent-mode-subtitle">{selectedMode.description}</p>}
+                </div>
+
+                <div className="agent-mode-grid writing-mode-grid">
+                    {writingModes.map((mode) => (
+                        <button
+                            key={mode.key}
+                            className={`agent-mode-card ${selectedMode?.key === mode.key ? "active" : ""}`}
+                            onClick={() => handleModeSelect(mode)}
+                            disabled={isSubmitting}
+                        >
+                            <div className="agent-mode-card-top">
+                                <span>{mode.estimatedMinutes || 10} phút</span>
+                                {mode.recommendedScore > 0 && <strong>Gợi ý</strong>}
+                            </div>
+                            <h4>{mode.title}</h4>
+                            <p>{mode.description}</p>
+                            <div className="agent-mode-skills">
+                                {(mode.skillFocus || []).slice(0, 3).map((skill) => (
+                                    <span key={skill}>{skill}</span>
+                                ))}
+                            </div>
+                        </button>
+                    ))}
                 </div>
 
                 <WritingAIInput

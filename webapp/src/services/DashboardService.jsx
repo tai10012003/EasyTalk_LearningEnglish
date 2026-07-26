@@ -97,6 +97,39 @@ export const DashboardService = {
         }
     },
 
+    async fetchAgentDebugOverview() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dashboard/agent-debug`, {
+                method: 'GET'
+            });
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            return unwrapDashboardData(responseData);
+        } catch (error) {
+            console.error("Error fetching Agent debug overview:", error.message);
+            return {
+                today: "",
+                usageToday: {
+                    requests: 0,
+                    inputTokens: 0,
+                    outputTokens: 0,
+                    totalTokens: 0,
+                    estimatedCostUsd: 0,
+                    fallbackCount: 0,
+                    uniqueUsers: 0
+                },
+                taskBreakdown: [],
+                fallbackBreakdown: [],
+                recentUsage: [],
+                recentLearningEvents: [],
+                recentSessions: [],
+                memorySignals: []
+            };
+        }
+    },
+
     async fetchLessonBreakdown() {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/dashboard/lesson-breakdown`, {

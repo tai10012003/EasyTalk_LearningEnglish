@@ -12,6 +12,11 @@ class DictationExerciseService {
         this.repository = options.repository || new DictationExerciseRepository();
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
+        this.agentLearningEventService = options.agentLearningEventService || null;
+    }
+
+    setAgentLearningEventService(service) {
+        this.agentLearningEventService = service;
     }
 
     getUserProgressService() {
@@ -98,6 +103,7 @@ class DictationExerciseService {
             unlockNext: userProgressService.unlockNextDictation.bind(userProgressService),
             unlockedField: "unlockedDictations"
         });
+        await this.recordDictationLearningEvent(userId, dictationExercise);
         return {
             status: 200,
             data: {
@@ -106,6 +112,18 @@ class DictationExerciseService {
                 userProgress: completedProgress
             }
         };
+    }
+
+    async recordDictationLearningEvent(userId, dictationExercise) {
+        if (!this.agentLearningEventService) return;
+        try {
+            await this.agentLearningEventService.recordDictationCompletion(userId, {
+                exerciseId: dictationExercise._id,
+                title: dictationExercise.title
+            });
+        } catch (error) {
+            console.error("Failed to record dictation learning event:", error.message);
+        }
     }
 
     async insertDictation(dictationData) {

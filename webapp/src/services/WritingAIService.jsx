@@ -31,14 +31,14 @@ export const WritingAIService = {
         }
     },
 
-    async analyzeWriting(userText) {
+    async analyzeWriting(userText, mode = null) {
         try {
             if (!userText || userText.trim() == "") {
                 throw new Error("Vui lòng nhập bài viết của bạn.");
             }
             const res = await AuthService.fetchWithAuth(`${API_URL}/writing/api/analyze`, {
                 method: "POST",
-                body: JSON.stringify({ text: userText }),
+                body: JSON.stringify({ text: userText, mode }),
             });
             if (!res.ok) {
                 const errorData = await res.json();

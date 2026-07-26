@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const DictationExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
     return (
         <div className={`user-timeline-item ${index % 2 === 0 ? 'left' : 'right'} ${isUnlocked ? 'unlocked' : ''} ${isCurrent ? 'current' : ''}`}>
-            <div className="user-timeline-card">
+            <div className="user-timeline-card" data-coach-target={isCurrent ? "agent-task-dictation-current" : undefined}>
                 <div className="user-card-inner">
                     <div className="user-card-header">
                         <span className="user-step-badge">Bước {index + 1}</span>

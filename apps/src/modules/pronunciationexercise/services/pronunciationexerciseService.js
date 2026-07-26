@@ -15,6 +15,11 @@ class PronunciationExerciseService {
         this.speechAnalysisService = options.speechAnalysisService || new SpeechAnalysisService();
         this.cache = options.cacheService || cache;
         this._userProgressService = options.userProgressService || null;
+        this.agentLearningEventService = options.agentLearningEventService || null;
+    }
+
+    setAgentLearningEventService(service) {
+        this.agentLearningEventService = service;
     }
 
     getUserProgressService() {
@@ -103,7 +108,7 @@ class PronunciationExerciseService {
         };
     }
 
-    async analyzePronunciation(audioBuffer, pronunciationExerciseId, questionIndex) {
+    async analyzePronunciation(audioBuffer, pronunciationExerciseId, questionIndex, userId = null) {
         if (!audioBuffer) {
             return { status: 400, data: { success: false, message: 'No audio file provided' } };
         }
@@ -113,6 +118,12 @@ class PronunciationExerciseService {
             return { status: 400, data: { success: false, message: analysisResult.error } };
         }
         const { accuracy, detailedResult } = calculateAccuracy(analysisResult.transcription, analysisResult.correctAnswer);
+        await this.recordPronunciationLearningEvent(userId, {
+            pronunciationExerciseId,
+            questionIndex,
+            accuracy,
+            detailedResult
+        });
         return {
             status: 200,
             data: {
@@ -123,6 +134,20 @@ class PronunciationExerciseService {
                 index: questionIndex
             }
         };
+    }
+
+    async recordPronunciationLearningEvent(userId, result) {
+        if (!userId || !this.agentLearningEventService) return;
+        try {
+            await this.agentLearningEventService.recordPronunciationAnalysis(userId, {
+                exerciseId: result.pronunciationExerciseId,
+                questionIndex: result.questionIndex,
+                accuracy: result.accuracy,
+                detailedResult: result.detailedResult
+            });
+        } catch (error) {
+            console.error("Failed to record pronunciation learning event:", error.message);
+        }
     }
 
     async insertPronunciationexercise(exerciseData) {

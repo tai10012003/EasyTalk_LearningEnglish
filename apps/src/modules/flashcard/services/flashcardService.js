@@ -8,6 +8,11 @@ class FlashcardService {
     constructor(deps = {}) {
         this.repository = deps.repository || new FlashcardRepository();
         this.imageService = deps.imageService || new FlashcardImageService();
+        this.agentLearningEventService = deps.agentLearningEventService || null;
+    }
+
+    setAgentLearningEventService(service) {
+        this.agentLearningEventService = service;
     }
 
     async getFlashcardList(page = 1, limit = 12, tab = "explore", userId) {
@@ -149,8 +154,19 @@ class FlashcardService {
         return updated;
     }
 
-    async updateFlashcardDifficulty(bulkOps) {
-        return await this.repository.updateFlashcardBulkWrite(bulkOps);
+    async updateFlashcardDifficulty(bulkOps, userId = null, updates = []) {
+        const result = await this.repository.updateFlashcardBulkWrite(bulkOps);
+        await this.recordFlashcardLearningEvent(userId, updates);
+        return result;
+    }
+
+    async recordFlashcardLearningEvent(userId, updates) {
+        if (!userId || !this.agentLearningEventService) return;
+        try {
+            await this.agentLearningEventService.recordFlashcardDifficultyUpdate(userId, { updates });
+        } catch (error) {
+            console.error("Failed to record flashcard learning event:", error.message);
+        }
     }
 
     async deleteFlashcard(id, userId) {

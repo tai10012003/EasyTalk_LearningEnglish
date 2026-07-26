@@ -21,6 +21,15 @@ const DictationExerciseService = require('../modules/dictationexercise/services/
 const JourneyService = require('../modules/journey/services/journeyService');
 const GateService = require('../modules/gate/services/gateService');
 const StageService = require('../modules/stage/services/stageService');
+const LearningAgentService = require('../modules/learningAgent/services/learningAgentService');
+const LearnerMemoryService = require('../modules/learningAgent/services/learnerMemoryService');
+const AIProviderService = require('../modules/learningAgent/services/aiProviderService');
+const AIUsageService = require('../modules/learningAgent/services/aiUsageService');
+const AITextToSpeechService = require('../modules/learningAgent/services/aiTextToSpeechService');
+const AgentSessionService = require('../modules/learningAgent/services/agentSessionService');
+const AgentLearningEventService = require('../modules/learningAgent/services/agentLearningEventService');
+const AgentModeService = require('../modules/learningAgent/services/agentModeService');
+const WritingAIService = require('../modules/writingAI/services/writingAIService');
 const cacheService = require('../shared/utils/cacheService');
 
 const userController = require('../modules/user/controllers/userController');
@@ -41,8 +50,9 @@ const flashcardController = require('../modules/flashcard/controllers/flashcardC
 const reminderController = require('../modules/reminder/controllers/reminderController');
 const userSettingController = require('../modules/usersetting/controllers/usersettingController');
 const dashboardController = require('../modules/dashboard/controllers/dashboardController');
-const chatAIController = require('../modules/chatai/controllers/chatAIController');
-const writingAIController = require('../modules/writingai/controllers/writingAIController');
+const chatAIController = require('../modules/chatAI/controllers/chatAIController');
+const writingAIController = require('../modules/writingAI/controllers/writingAIController');
+const learningAgentController = require('../modules/learningAgent/controllers/learningAgentController');
 const cacheController = require('../modules/cache/controllers/cacheController');
 
 function buildDependencies(options = {}) {
@@ -84,6 +94,37 @@ function buildDependencies(options = {}) {
     services.journeyService = new JourneyService({ cacheService });
     services.gateService = new GateService({ cacheService });
     services.stageService = new StageService({ cacheService });
+    services.learnerMemoryService = new LearnerMemoryService();
+    services.aiUsageService = new AIUsageService();
+    services.aiProviderService = new AIProviderService({
+        aiUsageService: services.aiUsageService
+    });
+    services.aiTextToSpeechService = new AITextToSpeechService({
+        aiUsageService: services.aiUsageService
+    });
+    services.learningAgentService = new LearningAgentService({
+        userProgressService: services.userProgressService,
+        learnerMemoryService: services.learnerMemoryService,
+        aiProviderService: services.aiProviderService
+    });
+    services.agentSessionService = new AgentSessionService({
+        learnerMemoryService: services.learnerMemoryService,
+        learningAgentService: services.learningAgentService,
+        aiProviderService: services.aiProviderService
+    });
+    services.agentLearningEventService = new AgentLearningEventService({
+        learnerMemoryService: services.learnerMemoryService
+    });
+    services.agentModeService = new AgentModeService();
+    services.agentSessionService.setAgentModeService(services.agentModeService);
+    services.flashcardService.setAgentLearningEventService(services.agentLearningEventService);
+    services.pronunciationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
+    services.dictationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
+    services.writingAIService = new WritingAIService({
+        agentLearningEventService: services.agentLearningEventService,
+        agentModeService: services.agentModeService,
+        aiProviderService: services.aiProviderService
+    });
 
     userController.setNotificationService(services.notificationService);
     userController.setUserSettingService(services.userSettingService);
@@ -106,6 +147,15 @@ function buildDependencies(options = {}) {
     stageController.setUserProgressService(services.userProgressService);
     reminderController.setNotificationService(services.notificationService);
     dashboardController.setRepositories(repositories.userRepository, repositories.userProgressRepository);
+    learningAgentController.setLearningAgentService(services.learningAgentService);
+    learningAgentController.setLearnerMemoryService(services.learnerMemoryService);
+    learningAgentController.setAIProviderService(services.aiProviderService);
+    learningAgentController.setAIUsageService(services.aiUsageService);
+    learningAgentController.setAITextToSpeechService(services.aiTextToSpeechService);
+    learningAgentController.setAgentSessionService(services.agentSessionService);
+    learningAgentController.setAgentLearningEventService(services.agentLearningEventService);
+    learningAgentController.setAgentModeService(services.agentModeService);
+    writingAIController.setWritingAIService(services.writingAIService);
 
     services.userProgressService.setStreakService(services.streakService);
     services.userProgressService.setLeaderboardService(services.leaderboardService);
@@ -163,6 +213,7 @@ function buildDependencies(options = {}) {
         dashboardController,
         chatAIController,
         writingAIController,
+        learningAgentController,
         cacheController
     };
 
