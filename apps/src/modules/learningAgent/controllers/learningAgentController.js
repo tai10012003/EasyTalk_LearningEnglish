@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken } = require("../../../shared/middleware/verifyToken");
+const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 const LearningAgentService = require("../services/learningAgentService");
 const LearnerMemoryService = require("../services/learnerMemoryService");
@@ -10,6 +10,8 @@ const AgentSessionService = require("../services/agentSessionService");
 const AgentLearningEventService = require("../services/agentLearningEventService");
 const AgentModeService = require("../services/agentModeService");
 const AITextToSpeechService = require("../services/aiTextToSpeechService");
+const AIProviderDebugService = require("../services/aiProviderDebugService");
+const StudyGuideAgent = require("../agents/studyGuideAgent");
 const { validateDailyPlanQuery, validateModesQuery, validateStartChat, validateChatMessage } = require("../validators/learningAgentValidator");
 
 let learningAgentService = new LearningAgentService();
@@ -20,11 +22,23 @@ let agentSessionService = new AgentSessionService();
 let agentLearningEventService = new AgentLearningEventService();
 let agentModeService = new AgentModeService();
 let aiTextToSpeechService = new AITextToSpeechService();
+let aiProviderDebugService = new AIProviderDebugService({
+    aiProviderService,
+    aiUsageService,
+    aiTextToSpeechService
+});
+let studyGuideAgent = new StudyGuideAgent();
 
 router.get("/daily-plan", verifyToken, asyncHandler(async (req, res) => {
     const options = validateDailyPlanQuery(req.query);
     const plan = await learningAgentService.getDailyPlan(req.user.id, options);
     res.json(plan);
+}));
+
+router.get("/guide/coach", verifyToken, asyncHandler(async (req, res) => {
+    const options = validateDailyPlanQuery(req.query);
+    const guide = await studyGuideAgent.buildCoachGuide(req.user.id, options);
+    res.json(guide);
 }));
 
 router.get("/memory", verifyToken, asyncHandler(async (req, res) => {
@@ -43,6 +57,13 @@ router.get("/memory/options", verifyToken, asyncHandler(async (req, res) => {
 
 router.get("/provider/status", verifyToken, asyncHandler(async (req, res) => {
     res.json(aiProviderService.getStatus());
+}));
+
+router.get("/provider/debug", verifyAdmin, asyncHandler(async (req, res) => {
+    const debug = await aiProviderDebugService.getDebugSnapshot({
+        recentLimit: req.query.limit
+    });
+    res.json(debug);
 }));
 
 router.post("/provider/test", verifyToken, asyncHandler(async (req, res) => {
@@ -125,9 +146,11 @@ module.exports.setLearnerMemoryService = (service) => {
 };
 module.exports.setAIProviderService = (service) => {
     aiProviderService = service;
+    aiProviderDebugService.aiProviderService = service;
 };
 module.exports.setAIUsageService = (service) => {
     aiUsageService = service;
+    aiProviderDebugService.aiUsageService = service;
 };
 module.exports.setAgentSessionService = (service) => {
     agentSessionService = service;
@@ -140,4 +163,11 @@ module.exports.setAgentModeService = (service) => {
 };
 module.exports.setAITextToSpeechService = (service) => {
     aiTextToSpeechService = service;
+    aiProviderDebugService.aiTextToSpeechService = service;
+};
+module.exports.setAIProviderDebugService = (service) => {
+    aiProviderDebugService = service;
+};
+module.exports.setStudyGuideAgent = (agent) => {
+    studyGuideAgent = agent;
 };

@@ -78,6 +78,26 @@ class AIUsageService {
             ...summary
         };
     }
+
+    async getGlobalTodaySummary() {
+        const date = getVietnamDate();
+        const summary = await this.repository.getGlobalDailySummary(date);
+        return {
+            date,
+            limitPerUser: this.dailyLimitPerUser,
+            ...summary
+        };
+    }
+
+    async getRecentUsage(limit = 20) {
+        const records = this.repository.findRecent
+            ? await this.repository.findRecent(limit)
+            : [];
+        return records.map(record => ({
+            ...record,
+            user: record.user?.toString ? record.user.toString() : record.user
+        }));
+    }
 }
 
 module.exports = AIUsageService;

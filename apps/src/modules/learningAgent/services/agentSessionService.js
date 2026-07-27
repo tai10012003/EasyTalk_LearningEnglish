@@ -1,5 +1,6 @@
 const AgentSession = require('../models/agentSession');
 const AgentSessionRepository = require('../repositories/agentSessionRepository');
+const ChatCoachAgent = require('../agents/chatCoachAgent');
 
 class AgentSessionService {
     constructor(deps = {}) {
@@ -8,18 +9,26 @@ class AgentSessionService {
         this.learningAgentService = deps.learningAgentService || null;
         this.aiProviderService = deps.aiProviderService || null;
         this.agentModeService = deps.agentModeService || null;
+        this.chatCoachAgent = deps.chatCoachAgent || new ChatCoachAgent({
+            learnerMemoryService: this.learnerMemoryService,
+            learningAgentService: this.learningAgentService,
+            aiProviderService: this.aiProviderService
+        });
     }
 
     setLearnerMemoryService(service) {
         this.learnerMemoryService = service;
+        this.chatCoachAgent.setLearnerMemoryService(service);
     }
 
     setLearningAgentService(service) {
         this.learningAgentService = service;
+        this.chatCoachAgent.setLearningAgentService(service);
     }
 
     setAIProviderService(service) {
         this.aiProviderService = service;
+        this.chatCoachAgent.setAIProviderService(service);
     }
 
     setAgentModeService(service) {
@@ -27,9 +36,6 @@ class AgentSessionService {
     }
 
     async startChatSession(userId, data = {}) {
-        const memory = this.learnerMemoryService
-            ? await this.learnerMemoryService.getOrCreateMemory(userId)
-            : null;
         const modeConfig = this.agentModeService
             ? await this.agentModeService.getModeOrDefault(data.mode || 'speaking_practice', 'chat', 'speaking_practice')
             : null;
@@ -39,19 +45,7 @@ class AgentSessionService {
             modeConfigSnapshot: modeConfig
         });
         const insertedId = await this.repository.insert(session);
-        const dailyPlan = this.learningAgentService
-            ? await this.learningAgentService.getDailyPlan(userId, { targetMinutes: 12 })
-            : null;
-        const greeting = await this.aiProviderService.generateAgentChatReply({
-            userId,
-            message: '',
-            session: { ...session, _id: insertedId },
-            modeConfig,
-            memory,
-            dailyPlan,
-            history: [],
-            isFirstTurn: true
-        });
+        const greeting = await this.chatCoachAgent.createOpeningReply(userId, { ...session, _id: insertedId }, modeConfig);
         const botMessage = AgentSession.buildMessage('assistant', greeting.reply, {
             suggestions: greeting.suggestions || []
         });
@@ -64,8 +58,8 @@ class AgentSessionService {
             mode: session.mode,
             modeConfig,
             topic: session.topic,
-            memorySnapshot: memory,
-            dailyPlan
+            memorySnapshot: greeting.memorySnapshot,
+            dailyPlan: greeting.dailyPlan
         };
     }
 
@@ -84,20 +78,8 @@ class AgentSessionService {
             throw error;
         }
 
-        const memory = this.learnerMemoryService
-            ? await this.learnerMemoryService.getOrCreateMemory(userId)
-            : null;
         const userMessage = AgentSession.buildMessage('user', message);
-        const response = await this.aiProviderService.generateAgentChatReply({
-            userId,
-            message,
-            session,
-            modeConfig: session.modeConfigSnapshot || null,
-            memory,
-            dailyPlan: null,
-            history: session.messages || [],
-            isFirstTurn: false
-        });
+        const response = await this.chatCoachAgent.replyToMessage(userId, session, message);
         const assistantMessage = AgentSession.buildMessage('assistant', response.reply, {
             corrections: response.corrections || [],
             suggestions: response.suggestions || []
@@ -121,21 +103,8 @@ class AgentSessionService {
             throw error;
         }
 
-        const memory = this.learnerMemoryService
-            ? await this.learnerMemoryService.getOrCreateMemory(userId)
-            : null;
-        const summary = await this.aiProviderService.summarizeAgentChat({
-            userId,
-            session,
-            modeConfig: session.modeConfigSnapshot || null,
-            memory
-        });
+        const summary = await this.chatCoachAgent.summarizeSession(userId, session);
         await this.repository.completeSession(sessionId, summary);
-        if (this.learnerMemoryService) {
-            await this.learnerMemoryService.applySessionInsights(userId, summary, {
-                evidenceWeight: 3
-            });
-        }
 
         return {
             sessionId,

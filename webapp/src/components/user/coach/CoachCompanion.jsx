@@ -76,6 +76,19 @@ function getTaskTargetKey(task, pathname) {
     return null;
 }
 
+function selectorToCoachTargetKey(selector) {
+    if (!selector) return null;
+    if (selector.includes("data-coach-guide-target='study-time'") || selector.includes('data-coach-guide-target="study-time"')) {
+        return "coach-time-setup";
+    }
+    if (selector.includes("data-coach-guide-target='learner-memory'") || selector.includes('data-coach-guide-target="learner-memory"')) {
+        return "coach-memory-profile";
+    }
+    const taskMatch = selector.match(/data-coach-guide-task-index=['"](\d+)['"]/);
+    if (taskMatch) return `daily-plan-task-${taskMatch[1]}`;
+    return null;
+}
+
 function getCoachBriefing(plan, memory) {
     const tasks = plan?.tasks || [];
     const firstTask = tasks[0];
@@ -124,12 +137,14 @@ function CoachCompanion() {
     const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [plan, setPlan] = useState(null);
+    const [coachGuide, setCoachGuide] = useState(null);
     const [mood, setMood] = useState("idle");
     const [guideMode, setGuideMode] = useState("welcome");
     const [currentStep, setCurrentStep] = useState(0);
     const [pendingTask, setPendingTask] = useState(null);
     const [externalCoachMessage, setExternalCoachMessage] = useState("");
     const [selectedTargetMinutes, setSelectedTargetMinutes] = useState(getStoredTargetMinutes);
+    const [committedTargetMinutes, setCommittedTargetMinutes] = useState(getStoredTargetMinutes);
     const lastFetchedMinutesRef = useRef(null);
     const autoSpeakKeyRef = useRef("");
     const audioRef = useRef(null);
@@ -145,13 +160,41 @@ function CoachCompanion() {
     const memory = useMemo(() => snapshot.memory || {}, [snapshot.memory]);
     const remainingFlashcards = snapshot.dailyFlashcardRemaining || 0;
 
-    const tourSteps = useMemo(() => tasks.map((task, index) => ({
-        title: task.title,
-        meta: `${task.estimatedMinutes || 5} phút · ${getTaskTypeLabel(task.type)}`,
-        targetKey: `daily-plan-task-${index}`,
-        task,
-        onSelect: setCurrentStep
-    })), [tasks]);
+    const guideSteps = useMemo(() => Array.isArray(coachGuide?.steps) ? coachGuide.steps : [], [coachGuide?.steps]);
+    const timeGuideStep = useMemo(() => guideSteps.find((step) => step.type === "time_setup"), [guideSteps]);
+    const memoryGuideStep = useMemo(() => guideSteps.find((step) => step.type === "memory_profile"), [guideSteps]);
+    const tourSteps = useMemo(() => {
+        const backendTaskSteps = guideSteps
+            .filter((step) => step.type === "daily_plan_task")
+            .map((step, index) => {
+                const taskIndex = Number.isInteger(step.order) ? step.order - 1 : index;
+                const task = tasks[taskIndex] || tasks[index] || {
+                    title: step.title,
+                    type: step.taskType,
+                    estimatedMinutes: step.estimatedMinutes,
+                    action: step.actions?.find((action) => action.type === "navigate")
+                };
+                return {
+                    title: step.title || task.title,
+                    meta: `${step.estimatedMinutes || task.estimatedMinutes || 5} phút · ${getTaskTypeLabel(step.taskType || task.type)}`,
+                    message: step.message,
+                    targetKey: selectorToCoachTargetKey(step.target?.selector) || `daily-plan-task-${taskIndex}`,
+                    task,
+                    guideStep: step,
+                    onSelect: setCurrentStep
+                };
+            });
+
+        if (backendTaskSteps.length) return backendTaskSteps;
+
+        return tasks.map((task, index) => ({
+            title: task.title,
+            meta: `${task.estimatedMinutes || 5} phút · ${getTaskTypeLabel(task.type)}`,
+            targetKey: `daily-plan-task-${index}`,
+            task,
+            onSelect: setCurrentStep
+        }));
+    }, [guideSteps, tasks]);
 
     const activeStep = tourSteps[currentStep];
     const activeTask = activeStep?.task;
@@ -250,14 +293,22 @@ function CoachCompanion() {
     }, [location.pathname]);
 
     useEffect(() => {
-        if (!isLoggedIn || lastFetchedMinutesRef.current === selectedTargetMinutes) return;
-        lastFetchedMinutesRef.current = selectedTargetMinutes;
+        if (!isLoggedIn || lastFetchedMinutesRef.current === committedTargetMinutes) return;
+        lastFetchedMinutesRef.current = committedTargetMinutes;
         setIsLoading(true);
-        LearningAgentService.getDailyPlan(selectedTargetMinutes, { showAlert: false })
-            .then(setPlan)
-            .catch(() => setPlan(null))
+        LearningAgentService.getCoachGuide(committedTargetMinutes, { showAlert: false })
+            .then((guide) => {
+                setCoachGuide(guide);
+                setPlan(guide?.dailyPlan || null);
+            })
+            .catch(() => {
+                setCoachGuide(null);
+                return LearningAgentService.getDailyPlan(committedTargetMinutes, { showAlert: false })
+                    .then(setPlan)
+                    .catch(() => setPlan(null));
+            })
             .finally(() => setIsLoading(false));
-    }, [isLoggedIn, selectedTargetMinutes]);
+    }, [committedTargetMinutes, isLoggedIn]);
 
     useEffect(() => {
         if (!isLoggedIn) return;
@@ -348,14 +399,15 @@ function CoachCompanion() {
         if (guideMode === "planUpdated") return externalCoachMessage;
         if (guideMode === "timeSetup") return getTimeSetupMessage(selectedTargetMinutes);
         if (guideMode === "timeConfirmed") return getTimeConfirmedMessage(selectedTargetMinutes);
-        if (guideMode === "profilePrompt") return getProfilePromptMessage();
+        if (guideMode === "profilePrompt") return memoryGuideStep?.message || getProfilePromptMessage();
         if (guideMode === "profileFocus") return getProfileFocusMessage();
         if (guideMode === "coachTour") {
+            if (activeStep?.message) return activeStep.message;
             if (activeTask && currentStep > 0) return getTaskReason(activeTask, currentStep, memory);
             return getCoachBriefing(plan, memory);
         }
         return `Chào ${getUserDisplayName()}, mình là AI Coach của EasyTalk. Hôm nay mình sẽ kèm bạn học gọn và đúng trọng tâm. Bạn có muốn xem kế hoạch học tập hôm nay không?`;
-    }, [activeTask, currentStep, externalCoachMessage, guideMode, memory, pendingTask, plan, selectedTargetMinutes]);
+    }, [activeStep, activeTask, currentStep, externalCoachMessage, guideMode, memory, memoryGuideStep?.message, pendingTask, plan, selectedTargetMinutes]);
 
     useEffect(() => {
         if (!isLoggedIn || !isOpen || isLoading || !["welcome", "timeSetup", "timeConfirmed", "coachTour", "profilePrompt", "profileFocus", "planUpdated"].includes(guideMode) || !guideMessage) return;
@@ -405,16 +457,25 @@ function CoachCompanion() {
         sessionStorage.setItem(TARGET_MINUTES_SESSION_KEY, String(nextMinutes));
         lastFetchedMinutesRef.current = nextMinutes;
         setSelectedTargetMinutes(nextMinutes);
+        setCommittedTargetMinutes(nextMinutes);
         window.dispatchEvent(new CustomEvent("easyTalk:coachTargetMinutesChanged", {
             detail: { minutes: nextMinutes }
         }));
         stopSpeaking();
         setIsLoading(true);
         try {
-            const nextPlan = await LearningAgentService.getDailyPlan(nextMinutes, { showAlert: false });
-            setPlan(nextPlan);
+            const nextGuide = await LearningAgentService.getCoachGuide(nextMinutes, { showAlert: false });
+            setCoachGuide(nextGuide);
+            setPlan(nextGuide?.dailyPlan || null);
         } catch {
             lastFetchedMinutesRef.current = null;
+            setCoachGuide(null);
+            try {
+                const nextPlan = await LearningAgentService.getDailyPlan(nextMinutes, { showAlert: false });
+                setPlan(nextPlan);
+            } catch {
+                setPlan(null);
+            }
         } finally {
             setIsLoading(false);
             setGuideMode(nextMode);
@@ -482,7 +543,7 @@ function CoachCompanion() {
     const isProfilePrompt = guideMode === "profilePrompt";
     const isProfileFocus = guideMode === "profileFocus";
     const isPlanUpdated = guideMode === "planUpdated";
-    const title = isTaskReady ? "Sẵn sàng học chưa?" : isPlanUpdated ? "Kế hoạch mới" : (isProfilePrompt || isProfileFocus) ? "Hồ sơ học tập" : isTimeSetup ? "Thiết lập thời gian học" : isTimeConfirmed ? "Đã thiết lập thời gian học" : isTour ? "Kế hoạch hôm nay" : "Chào mừng trở lại";
+    const title = isTaskReady ? "Sẵn sàng học chưa?" : isPlanUpdated ? "Kế hoạch mới" : (isProfilePrompt || isProfileFocus) ? (memoryGuideStep?.title || "Hồ sơ học tập") : isTimeSetup ? (timeGuideStep?.title || "Thiết lập thời gian học") : isTimeConfirmed ? "Đã thiết lập thời gian học" : isTour ? "Kế hoạch hôm nay" : "Chào mừng trở lại";
     const status = mood === "talking" ? "Đang nói" : mood === "thinking" ? "Đang tạo giọng" : "Sẵn sàng";
 
     return (
@@ -492,7 +553,17 @@ function CoachCompanion() {
             message={guideMessage}
             mood={mood}
             status={isLoading ? "Đang chuẩn bị" : status}
-            targetKey={isTimeSetup ? "coach-time-setup" : isTour ? activeStep?.targetKey : isProfileFocus ? "coach-memory-profile" : isTaskReady ? getTaskTargetKey(pendingTask, location.pathname) : null}
+            targetKey={
+                isTimeSetup
+                    ? selectorToCoachTargetKey(timeGuideStep?.target?.selector) || "coach-time-setup"
+                    : isTour
+                    ? activeStep?.targetKey
+                    : isProfileFocus
+                    ? selectorToCoachTargetKey(memoryGuideStep?.target?.selector) || "coach-memory-profile"
+                    : isTaskReady
+                    ? getTaskTargetKey(pendingTask, location.pathname)
+                    : null
+            }
             variant={isProfileFocus ? "pointer" : isPlanUpdated ? "compact" : "default"}
             steps={isTour ? tourSteps : []}
             currentStep={currentStep}

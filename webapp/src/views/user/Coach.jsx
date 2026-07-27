@@ -231,7 +231,11 @@ function Coach() {
     return (
         <div className="coach-page container">
             <section className="coach-hero">
-                <div className="coach-hero-main" data-coach-target="coach-time-setup">
+                <div
+                    className="coach-hero-main"
+                    data-coach-target="coach-time-setup"
+                    data-coach-guide-target="study-time"
+                >
                     <span className="coach-kicker">
                         <i className="fas fa-brain"></i>
                         AI English Coach
@@ -278,6 +282,7 @@ function Coach() {
                                 key={`${task.type}-${index}`}
                                 className={`coach-task priority-${task.priority}`}
                                 data-coach-target={`daily-plan-task-${index}`}
+                                data-coach-guide-task-index={index}
                             >
                                 <div className="coach-task-index">{index + 1}</div>
                                 <div className="coach-task-body">

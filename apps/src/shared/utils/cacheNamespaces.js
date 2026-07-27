@@ -50,6 +50,9 @@ const modules = {
     flashcard: {
         list: 'list',
         item: 'item'
+    },
+    learningAgent: {
+        dailyPlan: 'dailyPlan'
     }
 };
 

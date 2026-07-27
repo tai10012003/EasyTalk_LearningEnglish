@@ -35,6 +35,36 @@ export const LearningAgentService = {
         }
     },
 
+    async getCoachGuide(targetMinutes = 10, options = {}) {
+        const { showAlert = true } = options;
+        try {
+            const query = new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString();
+            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/guide/coach?${query}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || errorData.error || `HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            hasShownAlert = false;
+            return responseData.data || responseData;
+        } catch (error) {
+            console.error("Error fetching AI coach guide:", error.message);
+            if (showAlert && !hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "warning",
+                    title: "Tạm thời chưa tải được hướng dẫn AI",
+                    text: "Bạn vẫn có thể xem kế hoạch học như bình thường.",
+                    timer: 3000,
+                    showConfirmButton: false
+                });
+            }
+            throw error;
+        }
+    },
+
     async getMemory() {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/agent/memory`, {

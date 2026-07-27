@@ -15,6 +15,7 @@ class LearnerMemory {
         this.frequentMistakes = doc.frequentMistakes || [];
         this.preferredTopics = doc.preferredTopics || [];
         this.learningSignals = doc.learningSignals || {};
+        this.memoryVersion = doc.memoryVersion || 'learner-memory-v1';
         this.coachTone = doc.coachTone || 'friendly';
         this.notes = doc.notes || '';
         this.createdAt = doc.createdAt || null;
@@ -44,6 +45,7 @@ class LearnerMemory {
                 mistakes: {},
                 updatedAt: now
             },
+            memoryVersion: 'learner-memory-v1',
             coachTone: 'friendly',
             notes: '',
             createdAt: now,
@@ -79,6 +81,9 @@ class LearnerMemory {
         }
         if (data.learningSignals !== undefined && data.learningSignals && typeof data.learningSignals === 'object' && !Array.isArray(data.learningSignals)) {
             update.learningSignals = data.learningSignals;
+        }
+        if (data.memoryVersion !== undefined && typeof data.memoryVersion === 'string') {
+            update.memoryVersion = data.memoryVersion.trim().slice(0, 80);
         }
         if (data.coachTone !== undefined && COACH_TONES.includes(data.coachTone)) {
             update.coachTone = data.coachTone;
@@ -117,6 +122,9 @@ class LearnerMemory {
         }
         if (data.learningSignals !== undefined && (!data.learningSignals || typeof data.learningSignals !== 'object' || Array.isArray(data.learningSignals))) {
             errors.push('learningSignals must be an object');
+        }
+        if (data.memoryVersion !== undefined && typeof data.memoryVersion !== 'string') {
+            errors.push('memoryVersion must be a string');
         }
         if (data.coachTone !== undefined && !COACH_TONES.includes(data.coachTone)) {
             errors.push(`coachTone must be one of: ${COACH_TONES.join(', ')}`);

@@ -26,9 +26,20 @@ const LearnerMemoryService = require('../modules/learningAgent/services/learnerM
 const AIProviderService = require('../modules/learningAgent/services/aiProviderService');
 const AIUsageService = require('../modules/learningAgent/services/aiUsageService');
 const AITextToSpeechService = require('../modules/learningAgent/services/aiTextToSpeechService');
+const AIProviderDebugService = require('../modules/learningAgent/services/aiProviderDebugService');
+const DailyPlanCacheService = require('../modules/learningAgent/services/dailyPlanCacheService');
 const AgentSessionService = require('../modules/learningAgent/services/agentSessionService');
 const AgentLearningEventService = require('../modules/learningAgent/services/agentLearningEventService');
 const AgentModeService = require('../modules/learningAgent/services/agentModeService');
+const DailyPlanAgent = require('../modules/learningAgent/agents/dailyPlanAgent');
+const ChatCoachAgent = require('../modules/learningAgent/agents/chatCoachAgent');
+const WritingCoachAgent = require('../modules/learningAgent/agents/writingCoachAgent');
+const StudyGuideAgent = require('../modules/learningAgent/agents/studyGuideAgent');
+const AgentRegistry = require('../modules/learningAgent/agents/agentRegistry');
+const ProgressTool = require('../modules/learningAgent/tools/progressTool');
+const MemoryTool = require('../modules/learningAgent/tools/memoryTool');
+const DailyPlanTool = require('../modules/learningAgent/tools/dailyPlanTool');
+const LearningEventTool = require('../modules/learningAgent/tools/learningEventTool');
 const WritingAIService = require('../modules/writingAI/services/writingAIService');
 const cacheService = require('../shared/utils/cacheService');
 
@@ -96,34 +107,74 @@ function buildDependencies(options = {}) {
     services.stageService = new StageService({ cacheService });
     services.learnerMemoryService = new LearnerMemoryService();
     services.aiUsageService = new AIUsageService();
+    services.dailyPlanCacheService = new DailyPlanCacheService({
+        cacheService
+    });
     services.aiProviderService = new AIProviderService({
         aiUsageService: services.aiUsageService
     });
     services.aiTextToSpeechService = new AITextToSpeechService({
         aiUsageService: services.aiUsageService
     });
+    services.aiProviderDebugService = new AIProviderDebugService({
+        aiProviderService: services.aiProviderService,
+        aiUsageService: services.aiUsageService,
+        aiTextToSpeechService: services.aiTextToSpeechService,
+        dailyPlanCacheService: services.dailyPlanCacheService
+    });
+    services.progressTool = new ProgressTool({
+        userProgressService: services.userProgressService
+    });
+    services.memoryTool = new MemoryTool({
+        learnerMemoryService: services.learnerMemoryService
+    });
+    services.dailyPlanAgent = new DailyPlanAgent();
     services.learningAgentService = new LearningAgentService({
-        userProgressService: services.userProgressService,
-        learnerMemoryService: services.learnerMemoryService,
+        progressTool: services.progressTool,
+        memoryTool: services.memoryTool,
+        dailyPlanAgent: services.dailyPlanAgent,
+        aiProviderService: services.aiProviderService,
+        dailyPlanCacheService: services.dailyPlanCacheService
+    });
+    services.dailyPlanTool = new DailyPlanTool({
+        learningAgentService: services.learningAgentService
+    });
+    services.learningEventTool = new LearningEventTool();
+    services.chatCoachAgent = new ChatCoachAgent({
+        memoryTool: services.memoryTool,
+        dailyPlanTool: services.dailyPlanTool,
         aiProviderService: services.aiProviderService
     });
+    services.studyGuideAgent = new StudyGuideAgent({
+        dailyPlanTool: services.dailyPlanTool,
+        memoryTool: services.memoryTool
+    });
     services.agentSessionService = new AgentSessionService({
-        learnerMemoryService: services.learnerMemoryService,
-        learningAgentService: services.learningAgentService,
+        chatCoachAgent: services.chatCoachAgent,
         aiProviderService: services.aiProviderService
     });
     services.agentLearningEventService = new AgentLearningEventService({
         learnerMemoryService: services.learnerMemoryService
     });
+    services.learningEventTool.setAgentLearningEventService(services.agentLearningEventService);
     services.agentModeService = new AgentModeService();
     services.agentSessionService.setAgentModeService(services.agentModeService);
     services.flashcardService.setAgentLearningEventService(services.agentLearningEventService);
     services.pronunciationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
     services.dictationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
-    services.writingAIService = new WritingAIService({
-        agentLearningEventService: services.agentLearningEventService,
+    services.writingCoachAgent = new WritingCoachAgent({
+        learningEventTool: services.learningEventTool,
         agentModeService: services.agentModeService,
         aiProviderService: services.aiProviderService
+    });
+    services.agentRegistry = new AgentRegistry({
+        dailyPlan: services.dailyPlanAgent,
+        chatCoach: services.chatCoachAgent,
+        writingCoach: services.writingCoachAgent,
+        studyGuide: services.studyGuideAgent
+    });
+    services.writingAIService = new WritingAIService({
+        writingCoachAgent: services.agentRegistry.require('writingCoach')
     });
 
     userController.setNotificationService(services.notificationService);
@@ -152,6 +203,8 @@ function buildDependencies(options = {}) {
     learningAgentController.setAIProviderService(services.aiProviderService);
     learningAgentController.setAIUsageService(services.aiUsageService);
     learningAgentController.setAITextToSpeechService(services.aiTextToSpeechService);
+    learningAgentController.setAIProviderDebugService(services.aiProviderDebugService);
+    learningAgentController.setStudyGuideAgent(services.agentRegistry.require('studyGuide'));
     learningAgentController.setAgentSessionService(services.agentSessionService);
     learningAgentController.setAgentLearningEventService(services.agentLearningEventService);
     learningAgentController.setAgentModeService(services.agentModeService);

@@ -121,7 +121,11 @@ function CoachMemoryPanel({ onMemorySaved }) {
 
     if (isLoading) {
         return (
-            <section className="coach-memory-card" data-coach-target="coach-memory-profile">
+            <section
+                className="coach-memory-card"
+                data-coach-target="coach-memory-profile"
+                data-coach-guide-target="learner-memory"
+            >
                 <div className="coach-memory-loading">
                     <i className="fas fa-spinner fa-spin"></i>
                     <p>Đang tải hồ sơ học tập...</p>
@@ -132,7 +136,11 @@ function CoachMemoryPanel({ onMemorySaved }) {
 
     if (!form || !options) {
         return (
-            <section className="coach-memory-card" data-coach-target="coach-memory-profile">
+            <section
+                className="coach-memory-card"
+                data-coach-target="coach-memory-profile"
+                data-coach-guide-target="learner-memory"
+            >
                 <div className="coach-memory-loading">
                     <i className="fas fa-exclamation-circle"></i>
                     <p>Chưa tải được hồ sơ học tập.</p>
@@ -143,7 +151,11 @@ function CoachMemoryPanel({ onMemorySaved }) {
 
     return (
         <section className="coach-memory-card">
-            <div className="coach-section-heading" data-coach-target="coach-memory-profile">
+            <div
+                className="coach-section-heading"
+                data-coach-target="coach-memory-profile"
+                data-coach-guide-target="learner-memory"
+            >
                 <h3>Hồ sơ học tập</h3>
                 <span>Memory nền</span>
             </div>

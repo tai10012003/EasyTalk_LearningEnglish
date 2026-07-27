@@ -4,9 +4,12 @@ const LearningAgentService = require('../src/modules/learningAgent/services/lear
 const LearnerMemoryService = require('../src/modules/learningAgent/services/learnerMemoryService');
 const AIProviderService = require('../src/modules/learningAgent/services/aiProviderService');
 const AIUsageService = require('../src/modules/learningAgent/services/aiUsageService');
+const AIProviderDebugService = require('../src/modules/learningAgent/services/aiProviderDebugService');
+const DailyPlanCacheService = require('../src/modules/learningAgent/services/dailyPlanCacheService');
 const AgentSessionService = require('../src/modules/learningAgent/services/agentSessionService');
 const AgentLearningEventService = require('../src/modules/learningAgent/services/agentLearningEventService');
 const AgentModeService = require('../src/modules/learningAgent/services/agentModeService');
+const StudyGuideAgent = require('../src/modules/learningAgent/agents/studyGuideAgent');
 const { getVietnamDate } = require('../src/shared/utils/dateFormat');
 
 function createService(progress, memory = null) {
@@ -105,6 +108,136 @@ test('daily plan uses learner memory to prioritize weak listening skill', async 
     assert.match(plan.tasks[0].description, /listening/);
 });
 
+test('daily plan cache avoids repeated provider calls and invalidates when memory changes', async () => {
+    const today = getVietnamDate();
+    let memory = {
+        proficiencyLevel: 'beginner',
+        learningGoals: ['communication'],
+        weakSkills: ['listening'],
+        preferredTopics: ['travel'],
+        memoryVersion: 'learner-memory-v1',
+        updatedAt: new Date('2026-07-27T00:00:00.000Z')
+    };
+    let providerCalls = 0;
+    const service = new LearningAgentService({
+        userProgressService: {
+            async getUserProgressByUserId() {
+                return {
+                    streak: 1,
+                    dailyFlashcardGoal: 20,
+                    dailyFlashcardReviews: { [today]: 8 },
+                    unlockedDictations: ['dictation-1']
+                };
+            }
+        },
+        learnerMemoryService: {
+            async getOrCreateMemory() {
+                return memory;
+            }
+        },
+        dailyPlanCacheService: new DailyPlanCacheService({
+            now: () => new Date('2026-07-27T08:00:00.000Z')
+        }),
+        aiProviderService: {
+            async enhanceDailyPlan(plan) {
+                providerCalls += 1;
+                return {
+                    ...plan,
+                    headline: `${plan.headline} #${providerCalls}`,
+                    mode: `${plan.mode}+custom-ai`,
+                    aiProvider: { provider: 'custom', isMock: false }
+                };
+            }
+        }
+    });
+
+    const firstPlan = await service.getDailyPlan('user-1', { targetMinutes: 20 });
+    const secondPlan = await service.getDailyPlan('user-1', { targetMinutes: 20 });
+    memory = { ...memory, weakSkills: ['grammar'], updatedAt: new Date('2026-07-27T09:00:00.000Z') };
+    const thirdPlan = await service.getDailyPlan('user-1', { targetMinutes: 20 });
+
+    assert.equal(providerCalls, 2);
+    assert.equal(firstPlan.headline, secondPlan.headline);
+    assert.equal(secondPlan.aiProvider.cache.hit, true);
+    assert.equal(thirdPlan.aiProvider.cache.hit, false);
+    assert.notEqual(thirdPlan.headline, secondPlan.headline);
+});
+
+test('daily plan cache can reuse shared cache across service instances', async () => {
+    const today = getVietnamDate();
+    const sharedStore = new Map();
+    const sharedCache = {
+        async get(key) {
+            return sharedStore.get(key);
+        },
+        async set(key, ttl, value, options) {
+            sharedStore.set(key, { ...value, ttl, tags: options.tags });
+        }
+    };
+    const progressService = {
+        async getUserProgressByUserId() {
+            return {
+                streak: 1,
+                dailyFlashcardGoal: 20,
+                dailyFlashcardReviews: { [today]: 10 },
+                unlockedDictations: ['dictation-1']
+            };
+        }
+    };
+    const memoryService = {
+        async getOrCreateMemory() {
+            return {
+                proficiencyLevel: 'beginner',
+                learningGoals: ['communication'],
+                weakSkills: ['listening'],
+                memoryVersion: 'learner-memory-v1',
+                updatedAt: new Date('2026-07-27T00:00:00.000Z')
+            };
+        }
+    };
+    let providerCalls = 0;
+    const aiProviderService = {
+        async enhanceDailyPlan(plan) {
+            providerCalls += 1;
+            return {
+                ...plan,
+                headline: `Shared cache plan #${providerCalls}`,
+                mode: `${plan.mode}+custom-ai`,
+                aiProvider: { provider: 'custom', isMock: false }
+            };
+        }
+    };
+
+    const firstService = new LearningAgentService({
+        userProgressService: progressService,
+        learnerMemoryService: memoryService,
+        aiProviderService,
+        dailyPlanCacheService: new DailyPlanCacheService({
+            cacheService: sharedCache,
+            store: new Map(),
+            now: () => new Date('2026-07-27T08:00:00.000Z')
+        })
+    });
+    const secondService = new LearningAgentService({
+        userProgressService: progressService,
+        learnerMemoryService: memoryService,
+        aiProviderService,
+        dailyPlanCacheService: new DailyPlanCacheService({
+            cacheService: sharedCache,
+            store: new Map(),
+            now: () => new Date('2026-07-27T08:01:00.000Z')
+        })
+    });
+
+    const firstPlan = await firstService.getDailyPlan('user-1', { targetMinutes: 30 });
+    const secondPlan = await secondService.getDailyPlan('user-1', { targetMinutes: 30 });
+
+    assert.equal(providerCalls, 1);
+    assert.equal(firstPlan.headline, secondPlan.headline);
+    assert.equal(secondPlan.aiProvider.cache.hit, true);
+    assert.ok([...sharedStore.values()][0].tags.some(tag => tag.includes('learningAgent:dailyPlan')));
+});
+
 test('mock AI provider enhances daily plan copy without external calls', async () => {
     const provider = new AIProviderService();
     const enhanced = await provider.enhanceDailyPlan({
@@ -172,6 +305,7 @@ test('mock AI provider records usage when user context is provided', async () =>
     assert.equal(records.length, 1);
     assert.equal(records[0].task, 'enhance_daily_plan');
     assert.equal(records[0].estimatedCostUsd, 0);
+    assert.equal(records[0].metadata.promptVersion, 'daily-plan-v1');
     assert.ok(records[0].totalTokens > 0);
 });
 
@@ -275,6 +409,166 @@ test('OpenAI provider enhances plan through injected client and records provider
     assert.equal(records[0].inputTokens, 100);
     assert.equal(records[0].outputTokens, 40);
     assert.equal(records[0].estimatedCostUsd, 0.00034);
+});
+
+test('AI provider selects task-specific models for daily plan chat writing and summary', async () => {
+    const seenModels = [];
+    const provider = new AIProviderService({
+        provider: 'custom',
+        mode: 'live',
+        defaultModel: 'default-model',
+        dailyPlanModel: 'daily-model',
+        chatModel: 'chat-model',
+        writingModel: 'writing-model',
+        summaryModel: 'summary-model',
+        providerRegistry: {
+            require() {
+                return {
+                    async createJsonCompletion(payload) {
+                        seenModels.push(payload.model);
+                        const outputs = {
+                            enhance_daily_plan: {
+                                headline: 'Daily headline',
+                                motivation: 'Daily motivation',
+                                tasks: []
+                            },
+                            agent_chat_reply: {
+                                reply: 'Hello',
+                                corrections: [],
+                                suggestions: ['Go on']
+                            },
+                            writing_feedback: {
+                                score: 8,
+                                summary: 'Good start',
+                                strengths: ['clear idea'],
+                                corrections: [],
+                                rubric: { taskResponse: 8, coherence: 8, vocabulary: 7, grammar: 7 },
+                                rewriteSuggestion: 'Better version',
+                                nextActions: [{ type: 'writing', title: 'Write again', path: '/writing' }]
+                            },
+                            agent_chat_summary: {
+                                summary: 'Short session',
+                                mistakes: [],
+                                weakSkills: [],
+                                recommendedNextActions: []
+                            }
+                        };
+                        return {
+                            choices: [{ message: { content: JSON.stringify(outputs[payload.task]) } }],
+                            usage: { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }
+                        };
+                    }
+                };
+            }
+        }
+    });
+
+    await provider.enhanceDailyPlan({
+        headline: 'Original headline',
+        motivation: 'Original motivation',
+        mode: 'rule-based',
+        learnerSnapshot: { hasProgress: true, memory: {} },
+        tasks: []
+    });
+    await provider.generateAgentChatReply({ userId: null, message: 'Hi', messages: [] });
+    await provider.generateWritingFeedback({ userId: null, text: 'I go school.' });
+    await provider.summarizeAgentChat({ userId: null, messages: [] });
+
+    assert.deepEqual(seenModels, ['daily-model', 'chat-model', 'writing-model', 'summary-model']);
+});
+
+test('AI provider can use a registered live adapter without provider-specific branching', async () => {
+    const provider = new AIProviderService({
+        provider: 'custom',
+        mode: 'live',
+        defaultModel: 'custom-json-model',
+        providerRegistry: {
+            require(key) {
+                assert.equal(key, 'custom');
+                return {
+                    async createJsonCompletion(payload) {
+                        assert.equal(payload.model, 'custom-json-model');
+                        return {
+                            choices: [
+                                {
+                                    message: {
+                                        content: JSON.stringify({
+                                            ok: true,
+                                            message: 'custom ready'
+                                        })
+                                    }
+                                }
+                            ],
+                            usage: { prompt_tokens: 4, completion_tokens: 3, total_tokens: 7 }
+                        };
+                    }
+                };
+            }
+        }
+    });
+
+    const result = await provider.testProvider();
+
+    assert.equal(result.ok, true);
+    assert.equal(result.message, 'custom ready');
+    assert.equal(result.aiProvider.provider, 'custom');
+});
+
+test('Gemini and Claude provider skeletons are registered for health checks', async () => {
+    const geminiProvider = new AIProviderService({
+        provider: 'gemini',
+        mode: 'live',
+        defaultModel: 'gemini-skeleton'
+    });
+    const claudeProvider = new AIProviderService({
+        provider: 'claude',
+        mode: 'live',
+        defaultModel: 'claude-skeleton'
+    });
+
+    const geminiResult = await geminiProvider.testProvider();
+    const claudeResult = await claudeProvider.testProvider();
+
+    assert.equal(geminiResult.ok, true);
+    assert.match(geminiResult.message, /Gemini provider adapter skeleton/);
+    assert.equal(claudeResult.ok, true);
+    assert.match(claudeResult.message, /Claude provider adapter skeleton/);
+});
+
+test('Gemini skeleton falls back to mock for daily plan content tasks', async () => {
+    const provider = new AIProviderService({
+        provider: 'gemini',
+        mode: 'live',
+        defaultModel: 'gemini-skeleton',
+        retryAttempts: 1
+    });
+
+    const enhanced = await provider.enhanceDailyPlan({
+        headline: 'Original headline',
+        motivation: 'Original motivation',
+        mode: 'rule-based',
+        totalEstimatedMinutes: 8,
+        learnerSnapshot: {
+            hasProgress: true,
+            streak: 2,
+            dailyFlashcardRemaining: 0,
+            memory: { learningGoals: ['communication'], weakSkills: ['speaking'] }
+        },
+        tasks: [
+            {
+                type: 'chat',
+                title: 'Nói chuyện với AI',
+                description: 'Old description',
+                estimatedMinutes: 3,
+                priority: 'high',
+                action: { label: 'Bắt đầu', path: '/chat' }
+            }
+        ]
+    });
+
+    assert.equal(enhanced.mode, 'rule-based+fallback-mock-ai');
+    assert.equal(enhanced.aiProvider.fallback.code, 'AI_PROVIDER_NOT_IMPLEMENTED');
+    assert.ok(enhanced.headline);
 });
 
 test('OpenAI provider requires API key when no client is injected', async () => {
@@ -536,6 +830,108 @@ test('provider health check records usage when user id is provided', async () =>
     assert.equal(result.ok, true);
     assert.equal(records.length, 1);
     assert.equal(records[0].task, 'provider_health_check');
+});
+
+test('AI provider debug snapshot exposes config usage fallback and latency', async () => {
+    const debugService = new AIProviderDebugService({
+        now: () => new Date('2026-07-27T00:00:00.000Z'),
+        aiProviderService: {
+            getStatus() {
+                return {
+                    provider: 'openai',
+                    mode: 'live',
+                    model: 'gpt-test',
+                    isMock: false,
+                    timeoutMs: 15000,
+                    retryAttempts: 1
+                };
+            },
+            getRegisteredProviders() {
+                return ['openai', 'gemini', 'claude'];
+            }
+        },
+        aiUsageService: {
+            getDailyLimit() {
+                return 5;
+            },
+            async getGlobalTodaySummary() {
+                return {
+                    date: '2026-07-27',
+                    requests: 2,
+                    totalTokens: 70,
+                    estimatedCostUsd: 0.001,
+                    uniqueUsers: 1
+                };
+            },
+            async getRecentUsage() {
+                return [
+                    {
+                        task: 'enhance_daily_plan',
+                        totalTokens: 40,
+                        estimatedCostUsd: 0.0007,
+                        metadata: {
+                            latencyMs: 1200,
+                            hadFallback: true,
+                            fallback: { code: 'AI_PROVIDER_TIMEOUT' }
+                        }
+                    },
+                    {
+                        task: 'agent_chat_reply',
+                        totalTokens: 30,
+                        estimatedCostUsd: 0.0003,
+                        metadata: {
+                            latencyMs: 600,
+                            hadFallback: false
+                        }
+                    }
+                ];
+            }
+        },
+        aiTextToSpeechService: {
+            getStatus() {
+                return { provider: 'openai', mode: 'live' };
+            }
+        }
+    });
+
+    const snapshot = await debugService.getDebugSnapshot();
+
+    assert.deepEqual(snapshot.registeredProviders, ['openai', 'gemini', 'claude']);
+    assert.equal(snapshot.limits.dailyLimitPerUser, 5);
+    assert.equal(snapshot.usageToday.requests, 2);
+    assert.equal(snapshot.fallbackSummary.total, 1);
+    assert.equal(snapshot.fallbackSummary.byCode.AI_PROVIDER_TIMEOUT, 1);
+    assert.equal(snapshot.latencySummary.averageMs, 900);
+    assert.equal(snapshot.taskSummary.enhance_daily_plan.requests, 1);
+    assert.equal(snapshot.tts.provider, 'openai');
+});
+
+test('study guide agent builds time plan and memory guide steps', async () => {
+    const agent = new StudyGuideAgent();
+    const guide = await agent.buildCoachGuide('user-1', {
+        targetMinutes: 30,
+        dailyPlan: {
+            tasks: [
+                {
+                    type: 'flashcard',
+                    title: 'Ôn 10 flashcard hôm nay',
+                    estimatedMinutes: 10,
+                    priority: 'high',
+                    action: { label: 'Ôn ngay', path: '/flashcard' }
+                }
+            ]
+        },
+        memory: {
+            weakSkills: ['listening'],
+            memoryVersion: 'learner-memory-v1'
+        }
+    });
+
+    assert.equal(guide.targetMinutes, 30);
+    assert.equal(guide.steps[0].type, 'time_setup');
+    assert.ok(guide.steps.some(step => step.type === 'daily_plan_task'));
+    assert.equal(guide.steps.at(-1).type, 'memory_profile');
+    assert.equal(guide.recommendedFirstAction.path, '/flashcard');
 });
 
 test('agent chat session starts, receives message, finishes, and applies memory insights', async () => {
