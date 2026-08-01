@@ -3,17 +3,84 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AuthService } from "@/services/AuthService.jsx";
 import { LearningAgentService } from "@/services/LearningAgentService.jsx";
 import CoachGuideOverlay from "@/components/user/coach/CoachGuideOverlay.jsx";
+import NewLearnerProfileSetup from "@/components/user/coach/NewLearnerProfileSetup.jsx";
 
 const PENDING_TASK_SESSION_KEY = "easyTalkAiCoachPendingTask";
 const START_GUIDE_SESSION_KEY = "easyTalkAiCoachStartGuide";
+const START_NEW_PROFILE_SESSION_KEY = "easyTalkAiCoachStartNewProfile";
 const WELCOME_SEEN_SESSION_KEY = "easyTalkAiCoachWelcomeSeenV4";
 const TARGET_MINUTES_SESSION_KEY = "easyTalkAiCoachTargetMinutes";
 const DEFAULT_TARGET_MINUTES = 10;
 const COACH_TARGET_MINUTES = [10, 20, 30, 45, 60, 90, 120];
 
+function getCurrentUserStorageId() {
+    const user = AuthService.getCurrentUser?.();
+    return user?.id || user?._id || user?.userId || user?.email || user?.username || "guest";
+}
+
+function getTargetMinutesStorageKey() {
+    return `${TARGET_MINUTES_SESSION_KEY}:${getCurrentUserStorageId()}`;
+}
+
 function getStoredTargetMinutes() {
-    const stored = Number.parseInt(sessionStorage.getItem(TARGET_MINUTES_SESSION_KEY), 10);
+    const stored = Number.parseInt(sessionStorage.getItem(getTargetMinutesStorageKey()), 10);
     return COACH_TARGET_MINUTES.includes(stored) ? stored : DEFAULT_TARGET_MINUTES;
+}
+
+function getGuideTargetMinutes(guide) {
+    const targetMinutes = guide?.dailyPlan?.learnerSnapshot?.memory?.studyPreferences?.effectiveTargetMinutes
+        || guide?.targetMinutes
+        || DEFAULT_TARGET_MINUTES;
+    return Math.max(targetMinutes, getGuideMinimumTargetMinutes(guide, null));
+}
+
+function getGuideStudyPreferences(guide) {
+    return guide?.dailyPlan?.learnerSnapshot?.memory?.studyPreferences || {};
+}
+
+function getMemoryProfileMinimumTargetMinutes(memory = {}) {
+    const weakSkillCount = Math.min(Array.isArray(memory?.weakSkills) ? memory.weakSkills.length : 0, 2);
+    const goalCount = Math.min(Array.isArray(memory?.learningGoals) ? memory.learningGoals.filter(Boolean).length : 0, 3);
+    const mistakeCount = Math.min(Array.isArray(memory?.frequentMistakes) ? memory.frequentMistakes.filter(Boolean).length : 0, 2);
+    const focusCount = weakSkillCount + goalCount + mistakeCount;
+
+    let minutes = DEFAULT_TARGET_MINUTES;
+    if (mistakeCount > 0) minutes += 10;
+    if (weakSkillCount >= 1) minutes += weakSkillCount * 10;
+    if (goalCount >= 2) minutes += 10;
+    if (focusCount >= 5) minutes += 15;
+
+    return COACH_TARGET_MINUTES.find(value => value >= minutes) || 120;
+}
+
+function getGuideMinimumTargetMinutes(guide, timeGuideStep) {
+    const preferences = getGuideStudyPreferences(guide);
+    const memory = guide?.dailyPlan?.learnerSnapshot?.memory || {};
+    const profileMinimumMinutes = getMemoryProfileMinimumTargetMinutes(memory);
+    const candidates = [
+        timeGuideStep?.minimumSelectableMinutes,
+        preferences.minimumSelectableMinutes,
+        timeGuideStep?.recommendedMinutes,
+        preferences.recommendedMinutes,
+        profileMinimumMinutes,
+        DEFAULT_TARGET_MINUTES
+    ]
+        .map(value => Number.parseInt(value, 10))
+        .filter(value => COACH_TARGET_MINUTES.includes(value));
+    return Math.max(...candidates);
+}
+
+function getGuideAllowedTargetMinutes(guide, timeGuideStep, minimumSelectableMinutes) {
+    const preferences = getGuideStudyPreferences(guide);
+    const backendAllowedMinutes = Array.isArray(timeGuideStep?.allowedMinutes) && timeGuideStep.allowedMinutes.length
+        ? timeGuideStep.allowedMinutes
+        : Array.isArray(preferences.allowedMinutes) && preferences.allowedMinutes.length
+            ? preferences.allowedMinutes
+            : null;
+
+    return backendAllowedMinutes
+        ? backendAllowedMinutes.filter(minutes => minutes >= minimumSelectableMinutes)
+        : COACH_TARGET_MINUTES.filter(minutes => minutes >= minimumSelectableMinutes);
 }
 
 function getUserDisplayName() {
@@ -100,18 +167,28 @@ function getCoachBriefing(plan, memory) {
 }
 
 function getProfilePromptMessage() {
-    return "Mình đã đi qua kế hoạch hôm nay rồi. Bạn có muốn cập nhật Hồ sơ học tập không? Nếu mục tiêu, trình độ, kỹ năng yếu hoặc chủ đề yêu thích thay đổi, mình sẽ cá nhân hóa kế hoạch chính xác hơn.";
+    return "Trước khi đi qua phần thiết lập thời gian học và lên kế hoạch học tập. Bạn có muốn cập nhật Hồ sơ học tập không? Nếu mục tiêu, trình độ, kỹ năng yếu hoặc chủ đề yêu thích thay đổi, mình sẽ cá nhân hóa kế hoạch chính xác hơn.";
 }
 
 function getProfileFocusMessage() {
     return "Bạn chỉnh mục tiêu, trình độ, kỹ năng yếu và chủ đề yêu thích ở đây. Xong thì mình sẽ cá nhân hóa kế hoạch sát hơn.";
 }
 
-function getTimeSetupMessage(minutes) {
-    if (minutes !== DEFAULT_TARGET_MINUTES) {
+function getTimeSetupMessage(minutes, timeGuideStep = null, hasUserPickedMinutes = false) {
+    const recommendedMinutes = timeGuideStep?.recommendedMinutes;
+    const minimumSelectableMinutes = timeGuideStep?.minimumSelectableMinutes || recommendedMinutes;
+    const recommendationReason = timeGuideStep?.recommendationReason;
+    if (!hasUserPickedMinutes) {
+        const suggestedMinutes = minimumSelectableMinutes || recommendedMinutes || minutes || DEFAULT_TARGET_MINUTES;
+        return `Dựa theo hồ sơ học tập của bạn, mình đề xuất học ${suggestedMinutes} phút hôm nay để kế hoạch đủ thời gian xử lý các trọng tâm chính${recommendationReason ? `: ${recommendationReason}` : ""}. Bạn có muốn thiết lập mốc này không?`;
+    }
+    if (minutes !== minimumSelectableMinutes) {
+        if (recommendedMinutes && recommendedMinutes !== minutes) {
+            return `Bạn đã chọn ${minutes} phút học hôm nay. Mốc này cao hơn gợi ý tối thiểu ${recommendedMinutes} phút, nên mình sẽ chia kế hoạch rộng hơn nhưng vẫn bám sát hồ sơ của bạn. Bạn có muốn thiết lập không?`;
+        }
         return `Bạn đã chọn ${minutes} phút học hôm nay, bạn có muốn thiết lập không?`;
     }
-    return `Hôm nay chỉ cần ${minutes} phút để duy trì thói quen học tập. Bạn có muốn thiết lập lại thời gian học hôm nay không?`;
+    return `Bạn đã chọn đúng mốc ${minutes} phút mình đề xuất theo hồ sơ hiện tại. Bạn có muốn thiết lập mốc này cho kế hoạch hôm nay không?`;
 }
 
 function getTimeConfirmedMessage(minutes) {
@@ -143,9 +220,11 @@ function CoachCompanion() {
     const [currentStep, setCurrentStep] = useState(0);
     const [pendingTask, setPendingTask] = useState(null);
     const [externalCoachMessage, setExternalCoachMessage] = useState("");
-    const [selectedTargetMinutes, setSelectedTargetMinutes] = useState(getStoredTargetMinutes);
-    const [committedTargetMinutes, setCommittedTargetMinutes] = useState(getStoredTargetMinutes);
-    const lastFetchedMinutesRef = useRef(null);
+    const [selectedTargetMinutes, setSelectedTargetMinutes] = useState(DEFAULT_TARGET_MINUTES);
+    const [committedTargetMinutes, setCommittedTargetMinutes] = useState(null);
+    const [hasUserPickedTargetMinutes, setHasUserPickedTargetMinutes] = useState(false);
+    const [isSavingNewProfile, setIsSavingNewProfile] = useState(false);
+    const lastFetchedMinutesRef = useRef("__init__");
     const autoSpeakKeyRef = useRef("");
     const audioRef = useRef(null);
     const audioUrlRef = useRef("");
@@ -154,14 +233,20 @@ function CoachCompanion() {
     const speechTimerRef = useRef(null);
     const location = useLocation();
     const navigate = useNavigate();
+    const currentUserStorageId = isLoggedIn ? getCurrentUserStorageId() : "guest";
     const isCoachPage = location.pathname === "/coach";
     const tasks = useMemo(() => plan?.tasks || [], [plan?.tasks]);
     const snapshot = plan?.learnerSnapshot || {};
     const memory = useMemo(() => snapshot.memory || {}, [snapshot.memory]);
-    const remainingFlashcards = snapshot.dailyFlashcardRemaining || 0;
 
     const guideSteps = useMemo(() => Array.isArray(coachGuide?.steps) ? coachGuide.steps : [], [coachGuide?.steps]);
+    const isNewLearner = Boolean(coachGuide?.isNewLearner);
+    const newLearnerProfileStep = useMemo(() => guideSteps.find((step) => step.type === "new_learner_profile"), [guideSteps]);
     const timeGuideStep = useMemo(() => guideSteps.find((step) => step.type === "time_setup"), [guideSteps]);
+    const minimumSelectableMinutes = getGuideMinimumTargetMinutes(coachGuide, timeGuideStep);
+    const allowedMinuteOptions = useMemo(() => (
+        getGuideAllowedTargetMinutes(coachGuide, timeGuideStep, minimumSelectableMinutes)
+    ), [coachGuide, minimumSelectableMinutes, timeGuideStep]);
     const memoryGuideStep = useMemo(() => guideSteps.find((step) => step.type === "memory_profile"), [guideSteps]);
     const tourSteps = useMemo(() => {
         const backendTaskSteps = guideSteps
@@ -293,6 +378,14 @@ function CoachCompanion() {
     }, [location.pathname]);
 
     useEffect(() => {
+        if (!isLoggedIn) return;
+        const storedMinutes = getStoredTargetMinutes() || DEFAULT_TARGET_MINUTES;
+        setSelectedTargetMinutes(storedMinutes);
+        setCommittedTargetMinutes(null);
+        lastFetchedMinutesRef.current = "__init__";
+    }, [currentUserStorageId, isLoggedIn]);
+
+    useEffect(() => {
         if (!isLoggedIn || lastFetchedMinutesRef.current === committedTargetMinutes) return;
         lastFetchedMinutesRef.current = committedTargetMinutes;
         setIsLoading(true);
@@ -300,6 +393,10 @@ function CoachCompanion() {
             .then((guide) => {
                 setCoachGuide(guide);
                 setPlan(guide?.dailyPlan || null);
+                const nextMinutes = getGuideTargetMinutes(guide);
+                setSelectedTargetMinutes(nextMinutes);
+                setCommittedTargetMinutes(nextMinutes);
+                lastFetchedMinutesRef.current = nextMinutes;
             })
             .catch(() => {
                 setCoachGuide(null);
@@ -315,12 +412,18 @@ function CoachCompanion() {
         autoSpeakKeyRef.current = "";
         const storedTask = sessionStorage.getItem(PENDING_TASK_SESSION_KEY);
         const shouldStartGuide = sessionStorage.getItem(START_GUIDE_SESSION_KEY) === "1";
-        const isCoachGuideFlow = ["timeSetup", "timeConfirmed", "coachTour", "profilePrompt", "profileFocus", "planUpdated"].includes(guideMode);
+        const shouldStartNewProfile = sessionStorage.getItem(START_NEW_PROFILE_SESSION_KEY) === "1";
+        const isCoachGuideFlow = ["newLearnerProfile", "profileSaved", "timeSetup", "timeConfirmed", "coachTour", "profilePrompt", "profileFocus", "planUpdated"].includes(guideMode);
         if (!storedTask) {
-            if (isCoachPage && shouldStartGuide) {
+            if (isCoachPage && shouldStartNewProfile) {
+                sessionStorage.removeItem(START_NEW_PROFILE_SESSION_KEY);
+                setIsOpen(false);
+                setGuideMode("newLearnerProfile");
+                setCurrentStep(0);
+            } else if (isCoachPage && shouldStartGuide) {
                 sessionStorage.removeItem(START_GUIDE_SESSION_KEY);
                 setIsOpen(true);
-                setGuideMode("timeSetup");
+                setGuideMode("profilePrompt");
                 setCurrentStep(0);
             } else if (isCoachPage) {
                 if (isCoachGuideFlow && isOpen) return;
@@ -362,10 +465,51 @@ function CoachCompanion() {
     useEffect(() => {
         if (!isLoggedIn) return undefined;
 
-        const handleCoachPlanRefreshed = (event) => {
+        const handleCoachPlanRefreshed = async (event) => {
             stopSpeaking();
-            setExternalCoachMessage(event.detail?.message || "Mình đã cập nhật hồ sơ của bạn. Kế hoạch hôm nay đã được điều chỉnh lại.");
-            setGuideMode("planUpdated");
+            const source = event.detail?.source;
+            const nextMode = source === "memory_profile_saved" || ["profilePrompt", "profileFocus"].includes(guideMode)
+                ? "profileSaved"
+                : "planUpdated";
+            const refreshedTargetMinutes = event.detail?.targetMinutes;
+            if (COACH_TARGET_MINUTES.includes(refreshedTargetMinutes)) {
+                setSelectedTargetMinutes(refreshedTargetMinutes);
+                setCommittedTargetMinutes(refreshedTargetMinutes);
+                lastFetchedMinutesRef.current = refreshedTargetMinutes;
+            }
+            setExternalCoachMessage(event.detail?.message || "Đã cập nhật hồ sơ cho bạn. Mình sẽ dùng thông tin này để lên kế hoạch học sát hơn.");
+            if (source === "memory_profile_saved") {
+                setIsLoading(true);
+                try {
+                    const nextGuide = await LearningAgentService.getCoachGuide(
+                        COACH_TARGET_MINUTES.includes(refreshedTargetMinutes) ? refreshedTargetMinutes : null,
+                        { showAlert: false }
+                    );
+                    setHasUserPickedTargetMinutes(false);
+                    setCoachGuide(nextGuide);
+                    setPlan(nextGuide?.dailyPlan || null);
+                    const guideTargetMinutes = getGuideTargetMinutes(nextGuide);
+                    setSelectedTargetMinutes(guideTargetMinutes);
+                    setCommittedTargetMinutes(guideTargetMinutes);
+                    lastFetchedMinutesRef.current = guideTargetMinutes;
+                    const nextTimeStep = Array.isArray(nextGuide?.steps)
+                        ? nextGuide.steps.find((step) => step.type === "time_setup")
+                        : null;
+                    if (nextTimeStep?.minimumSelectableMinutes && Array.isArray(nextTimeStep?.allowedMinutes)) {
+                        window.dispatchEvent(new CustomEvent("easyTalk:coachTargetConstraintsChanged", {
+                            detail: {
+                                minimumSelectableMinutes: nextTimeStep.minimumSelectableMinutes,
+                                allowedMinutes: nextTimeStep.allowedMinutes
+                            }
+                        }));
+                    }
+                } catch {
+                    setCoachGuide(null);
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+            setGuideMode(nextMode);
             setCurrentStep(0);
             setIsOpen(true);
         };
@@ -374,7 +518,7 @@ function CoachCompanion() {
         return () => {
             window.removeEventListener("easyTalk:coachPlanRefreshed", handleCoachPlanRefreshed);
         };
-    }, [isLoggedIn, stopSpeaking]);
+    }, [guideMode, isLoggedIn, stopSpeaking]);
 
     useEffect(() => {
         if (!isLoggedIn) return undefined;
@@ -384,6 +528,9 @@ function CoachCompanion() {
             if (!COACH_TARGET_MINUTES.includes(minutes)) return;
             setSelectedTargetMinutes(minutes);
             if (guideMode === "timeSetup") {
+                if (event.detail?.source === "user") {
+                    setHasUserPickedTargetMinutes(true);
+                }
                 autoSpeakKeyRef.current = "";
             }
         };
@@ -394,23 +541,51 @@ function CoachCompanion() {
         };
     }, [guideMode, isLoggedIn]);
 
+    useEffect(() => {
+        if (!isLoggedIn || guideMode !== "timeSetup") return;
+        if (selectedTargetMinutes >= minimumSelectableMinutes) return;
+        const nextMinutes = allowedMinuteOptions[0] || minimumSelectableMinutes;
+        setSelectedTargetMinutes(nextMinutes);
+        window.dispatchEvent(new CustomEvent("easyTalk:coachTargetMinutesPicked", {
+            detail: { minutes: nextMinutes, source: "system" }
+        }));
+    }, [allowedMinuteOptions, guideMode, isLoggedIn, minimumSelectableMinutes, selectedTargetMinutes]);
+
+    useEffect(() => {
+        if (!isLoggedIn || guideMode !== "timeSetup") {
+            window.dispatchEvent(new CustomEvent("easyTalk:coachTargetConstraintsCleared"));
+            return;
+        }
+
+        window.dispatchEvent(new CustomEvent("easyTalk:coachTargetConstraintsChanged", {
+            detail: {
+                minimumSelectableMinutes,
+                allowedMinutes: allowedMinuteOptions
+            }
+        }));
+    }, [allowedMinuteOptions, guideMode, isLoggedIn, minimumSelectableMinutes]);
+
     const guideMessage = useMemo(() => {
         if (guideMode === "taskReady") return getTaskReadyMessage(pendingTask);
         if (guideMode === "planUpdated") return externalCoachMessage;
-        if (guideMode === "timeSetup") return getTimeSetupMessage(selectedTargetMinutes);
+        if (guideMode === "profileSaved") return `${externalCoachMessage || "Đã cập nhật hồ sơ cho bạn. Mình sẽ dùng thông tin này để lên kế hoạch học sát hơn."} Bấm tiếp tục để chọn thời gian học hôm nay nhé.`;
+        if (guideMode === "timeSetup") return getTimeSetupMessage(selectedTargetMinutes, timeGuideStep, hasUserPickedTargetMinutes);
         if (guideMode === "timeConfirmed") return getTimeConfirmedMessage(selectedTargetMinutes);
-        if (guideMode === "profilePrompt") return memoryGuideStep?.message || getProfilePromptMessage();
+        if (guideMode === "profilePrompt") return getProfilePromptMessage();
         if (guideMode === "profileFocus") return getProfileFocusMessage();
         if (guideMode === "coachTour") {
             if (activeStep?.message) return activeStep.message;
             if (activeTask && currentStep > 0) return getTaskReason(activeTask, currentStep, memory);
             return getCoachBriefing(plan, memory);
         }
+        if (isNewLearner) {
+            return `Chào mừng ${getUserDisplayName()} đến với EasyTalk. Mình là AI Coach, mình muốn làm quen một chút để kèm bạn học đúng trọng tâm hơn. Bạn có muốn thiết lập hồ sơ học tập không?`;
+        }
         return `Chào ${getUserDisplayName()}, mình là AI Coach của EasyTalk. Hôm nay mình sẽ kèm bạn học gọn và đúng trọng tâm. Bạn có muốn xem kế hoạch học tập hôm nay không?`;
-    }, [activeStep, activeTask, currentStep, externalCoachMessage, guideMode, memory, memoryGuideStep?.message, pendingTask, plan, selectedTargetMinutes]);
+    }, [activeStep, activeTask, currentStep, externalCoachMessage, guideMode, hasUserPickedTargetMinutes, isNewLearner, memory, memoryGuideStep?.message, pendingTask, plan, selectedTargetMinutes, timeGuideStep]);
 
     useEffect(() => {
-        if (!isLoggedIn || !isOpen || isLoading || !["welcome", "timeSetup", "timeConfirmed", "coachTour", "profilePrompt", "profileFocus", "planUpdated"].includes(guideMode) || !guideMessage) return;
+        if (!isLoggedIn || !isOpen || isLoading || !["welcome", "profileSaved", "timeSetup", "timeConfirmed", "coachTour", "profilePrompt", "profileFocus", "planUpdated"].includes(guideMode) || !guideMessage) return;
         const speakKey = `${guideMode}-${currentStep}-${guideMessage}`;
         if (autoSpeakKeyRef.current === speakKey) return;
         autoSpeakKeyRef.current = speakKey;
@@ -447,14 +622,49 @@ function CoachCompanion() {
 
     const focusMemoryProfile = () => {
         stopSpeaking();
-        setGuideMode("profileFocus");
-        setCurrentStep(tourSteps.length);
+        setGuideMode("profilePrompt");
+        setCurrentStep(0);
+        setIsOpen(false);
+        window.dispatchEvent(new CustomEvent("easyTalk:coachMemoryEditRequested"));
+    };
+
+    const refreshCoachGuide = async (minutes = selectedTargetMinutes) => {
+        const nextGuide = await LearningAgentService.getCoachGuide(minutes, { showAlert: false });
+        setCoachGuide(nextGuide);
+        setPlan(nextGuide?.dailyPlan || null);
+        const nextMinutes = getGuideTargetMinutes(nextGuide);
+        setSelectedTargetMinutes(nextMinutes);
+        setCommittedTargetMinutes(nextMinutes);
+        lastFetchedMinutesRef.current = nextMinutes;
+        return nextGuide;
+    };
+
+    const saveNewLearnerProfile = async (profile) => {
+        setIsSavingNewProfile(true);
+        stopSpeaking();
+        try {
+            await LearningAgentService.updateMemory(profile);
+            await refreshCoachGuide(null);
+            setGuideMode("profileSaved");
+            setIsOpen(true);
+            autoSpeakKeyRef.current = "";
+        } finally {
+            setIsSavingNewProfile(false);
+        }
+    };
+
+    const skipNewLearnerProfile = () => {
+        sessionStorage.setItem(START_GUIDE_SESSION_KEY, "1");
+        setGuideMode("timeSetup");
         setIsOpen(true);
     };
 
     const applyTargetMinutes = async (minutes = selectedTargetMinutes, nextMode = "timeConfirmed") => {
-        const nextMinutes = COACH_TARGET_MINUTES.includes(minutes) ? minutes : DEFAULT_TARGET_MINUTES;
-        sessionStorage.setItem(TARGET_MINUTES_SESSION_KEY, String(nextMinutes));
+        const normalizedMinutes = COACH_TARGET_MINUTES.includes(minutes) ? minutes : DEFAULT_TARGET_MINUTES;
+        const nextMinutes = Math.max(normalizedMinutes, guideMode === "timeSetup" ? minimumSelectableMinutes : DEFAULT_TARGET_MINUTES);
+        await LearningAgentService.updateStudyPreferences(nextMinutes);
+        sessionStorage.setItem(getTargetMinutesStorageKey(), String(nextMinutes));
+        window.dispatchEvent(new CustomEvent("easyTalk:coachTargetConstraintsCleared"));
         lastFetchedMinutesRef.current = nextMinutes;
         setSelectedTargetMinutes(nextMinutes);
         setCommittedTargetMinutes(nextMinutes);
@@ -479,6 +689,9 @@ function CoachCompanion() {
         } finally {
             setIsLoading(false);
             setGuideMode(nextMode);
+            if (nextMode === "timeConfirmed") {
+                setHasUserPickedTargetMinutes(false);
+            }
             setCurrentStep(0);
             setIsOpen(true);
         }
@@ -486,6 +699,7 @@ function CoachCompanion() {
 
     const closeGuide = () => {
         stopSpeaking();
+        window.dispatchEvent(new CustomEvent("easyTalk:coachTargetConstraintsCleared"));
         setCurrentStep(0);
         if (guideMode === "welcome") {
             sessionStorage.setItem(WELCOME_SEEN_SESSION_KEY, "1");
@@ -499,17 +713,21 @@ function CoachCompanion() {
             setExternalCoachMessage("");
             setGuideMode(isCoachPage ? "coachTour" : "welcome");
         }
+        if (guideMode === "newLearnerProfile" || guideMode === "profileSaved") {
+            sessionStorage.removeItem(START_NEW_PROFILE_SESSION_KEY);
+            setGuideMode(isCoachPage ? "coachTour" : "welcome");
+        }
         setIsOpen(false);
     };
 
     if (!isLoggedIn) return null;
 
-    const shouldShowLauncher = !isOpen || (
+    const shouldShowLauncher = guideMode !== "newLearnerProfile" && (!isOpen || (
         isCoachPage
         && guideMode === "welcome"
         && sessionStorage.getItem(START_GUIDE_SESSION_KEY) !== "1"
         && !sessionStorage.getItem(PENDING_TASK_SESSION_KEY)
-    );
+    ));
 
     if (shouldShowLauncher) {
         return (
@@ -518,8 +736,13 @@ function CoachCompanion() {
                 type="button"
                 onClick={() => {
                     if (isCoachPage) {
-                        sessionStorage.setItem(START_GUIDE_SESSION_KEY, "1");
-                        setGuideMode("timeSetup");
+                        if (isNewLearner && newLearnerProfileStep) {
+                            sessionStorage.setItem(START_NEW_PROFILE_SESSION_KEY, "1");
+                            setGuideMode("newLearnerProfile");
+                        } else {
+                            sessionStorage.setItem(START_GUIDE_SESSION_KEY, "1");
+                            setGuideMode("profilePrompt");
+                        }
                         setCurrentStep(0);
                     } else {
                         sessionStorage.removeItem(WELCOME_SEEN_SESSION_KEY);
@@ -531,7 +754,6 @@ function CoachCompanion() {
                 aria-label="Mở AI Coach"
             >
                 <i className="fas fa-robot"></i>
-                {remainingFlashcards > 0 && <em>{remainingFlashcards}</em>}
             </button>
         );
     }
@@ -540,13 +762,22 @@ function CoachCompanion() {
     const isTaskReady = guideMode === "taskReady";
     const isTimeSetup = guideMode === "timeSetup";
     const isTimeConfirmed = guideMode === "timeConfirmed";
+    const isProfileSaved = guideMode === "profileSaved";
     const isProfilePrompt = guideMode === "profilePrompt";
     const isProfileFocus = guideMode === "profileFocus";
     const isPlanUpdated = guideMode === "planUpdated";
-    const title = isTaskReady ? "Sẵn sàng học chưa?" : isPlanUpdated ? "Kế hoạch mới" : (isProfilePrompt || isProfileFocus) ? (memoryGuideStep?.title || "Hồ sơ học tập") : isTimeSetup ? (timeGuideStep?.title || "Thiết lập thời gian học") : isTimeConfirmed ? "Đã thiết lập thời gian học" : isTour ? "Kế hoạch hôm nay" : "Chào mừng trở lại";
+    const title = isTaskReady ? "Sẵn sàng học chưa?" : isPlanUpdated ? "Kế hoạch mới" : isProfileSaved ? "Đã cập nhật hồ sơ" : (isProfilePrompt || isProfileFocus) ? (memoryGuideStep?.title || "Hồ sơ học tập") : isTimeSetup ? (timeGuideStep?.title || "Thiết lập thời gian học") : isTimeConfirmed ? "Đã thiết lập thời gian học" : isTour ? "Kế hoạch hôm nay" : isNewLearner ? "Chào mừng đến EasyTalk" : "Chào mừng trở lại";
     const status = mood === "talking" ? "Đang nói" : mood === "thinking" ? "Đang tạo giọng" : "Sẵn sàng";
 
     return (
+        <>
+        <NewLearnerProfileSetup
+            isOpen={guideMode === "newLearnerProfile" && isCoachPage}
+            guideStep={newLearnerProfileStep}
+            isSaving={isSavingNewProfile}
+            onSave={saveNewLearnerProfile}
+            onSkip={skipNewLearnerProfile}
+        />
         <CoachGuideOverlay
             isOpen={isOpen}
             title={title}
@@ -558,7 +789,7 @@ function CoachCompanion() {
                     ? selectorToCoachTargetKey(timeGuideStep?.target?.selector) || "coach-time-setup"
                     : isTour
                     ? activeStep?.targetKey
-                    : isProfileFocus
+                    : (isProfilePrompt || isProfileFocus)
                     ? selectorToCoachTargetKey(memoryGuideStep?.target?.selector) || "coach-memory-profile"
                     : isTaskReady
                     ? getTaskTargetKey(pendingTask, location.pathname)
@@ -569,11 +800,11 @@ function CoachCompanion() {
             currentStep={currentStep}
             onBack={() => setCurrentStep((step) => Math.max(0, step - 1))}
             onNext={() => setCurrentStep((step) => Math.min(tourSteps.length - 1, step + 1))}
-            onStartStep={showProfilePrompt}
-            finalStepLabel="Tiếp theo"
-            minuteOptions={[]}
+            onStartStep={closeGuide}
+            finalStepLabel="Hoàn tất"
             selectedMinutes={selectedTargetMinutes}
-            onSelectMinutes={setSelectedTargetMinutes}
+            minuteOptions={[]}
+            onSelectMinutes={undefined}
             onClose={() => {
                 closeGuide();
             }}
@@ -583,16 +814,31 @@ function CoachCompanion() {
                 guideMode === "welcome"
                     ? {
                         to: "/coach",
-                        icon: "fas fa-clipboard-list",
-                        label: "Xem kế hoạch hôm nay",
+                        icon: isNewLearner ? "fas fa-user-graduate" : "fas fa-clipboard-list",
+                        label: isNewLearner ? "Thiết lập hồ sơ học tập" : "Xem kế hoạch hôm nay",
                         onClick: () => {
-                            sessionStorage.setItem(START_GUIDE_SESSION_KEY, "1");
+                            if (isNewLearner && newLearnerProfileStep) {
+                                sessionStorage.setItem(START_NEW_PROFILE_SESSION_KEY, "1");
+                            } else {
+                                sessionStorage.setItem(START_GUIDE_SESSION_KEY, "1");
+                            }
                             sessionStorage.setItem(WELCOME_SEEN_SESSION_KEY, "1");
-                            setGuideMode("timeSetup");
+                            setGuideMode(isNewLearner && newLearnerProfileStep ? "newLearnerProfile" : "profilePrompt");
                             setCurrentStep(0);
-                            setIsOpen(true);
+                            setIsOpen(!isNewLearner || !newLearnerProfileStep);
                         }
                     }
+                    : isProfileSaved
+                        ? {
+                            icon: "fas fa-arrow-right",
+                            label: "Tiếp tục",
+                            onClick: () => {
+                                stopSpeaking();
+                                setHasUserPickedTargetMinutes(false);
+                                setGuideMode("timeSetup");
+                                setIsOpen(true);
+                            }
+                        }
                     : isTimeSetup
                         ? {
                             icon: "fas fa-check-circle",
@@ -621,7 +867,7 @@ function CoachCompanion() {
                             label: "Tôi sẽ cập nhật",
                             onClick: closeGuide
                         }
-                        : isPlanUpdated
+                    : isPlanUpdated
                         ? {
                             icon: "fas fa-check-circle",
                             label: "Đã rõ",
@@ -651,16 +897,24 @@ function CoachCompanion() {
                     : isTimeSetup
                         ? {
                             icon: "fas fa-forward",
-                            label: "Bỏ qua chọn thời gian",
-                            onClick: () => applyTargetMinutes(DEFAULT_TARGET_MINUTES, "coachTour")
+                            label: minimumSelectableMinutes > DEFAULT_TARGET_MINUTES ? `Dùng ${minimumSelectableMinutes} phút gợi ý` : "Bỏ qua chọn thời gian",
+                            onClick: () => applyTargetMinutes(minimumSelectableMinutes, "coachTour")
                         }
                     : isTimeConfirmed
+                        ? null
+                    : isProfileSaved
                         ? null
                     : isProfilePrompt
                         ? {
                             icon: "fas fa-times-circle",
                             label: "Không, bỏ qua",
-                            onClick: closeGuide
+                            onClick: () => {
+                                stopSpeaking();
+                                setHasUserPickedTargetMinutes(false);
+                                setGuideMode("timeSetup");
+                                setCurrentStep(0);
+                                setIsOpen(true);
+                            }
                         }
                         : isProfileFocus
                         ? {
@@ -696,6 +950,7 @@ function CoachCompanion() {
                     : null
             }
         />
+        </>
     );
 }
 

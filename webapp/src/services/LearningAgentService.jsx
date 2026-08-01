@@ -5,11 +5,11 @@ import Swal from "sweetalert2";
 let hasShownAlert = false;
 
 export const LearningAgentService = {
-    async getDailyPlan(targetMinutes = 12, options = {}) {
+    async getDailyPlan(targetMinutes = null, options = {}) {
         const { showAlert = true } = options;
         try {
-            const query = new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString();
-            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/daily-plan?${query}`, {
+            const query = targetMinutes ? `?${new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString()}` : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/daily-plan${query}`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -35,11 +35,11 @@ export const LearningAgentService = {
         }
     },
 
-    async getCoachGuide(targetMinutes = 10, options = {}) {
+    async getCoachGuide(targetMinutes = null, options = {}) {
         const { showAlert = true } = options;
         try {
-            const query = new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString();
-            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/guide/coach?${query}`, {
+            const query = targetMinutes ? `?${new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString()}` : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/guide/coach${query}`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -116,6 +116,25 @@ export const LearningAgentService = {
             return responseData.data?.memory || responseData.data;
         } catch (error) {
             console.error("Error updating learner memory:", error.message);
+            throw error;
+        }
+    },
+
+    async updateStudyPreferences(targetStudyMinutes) {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/memory/study-preferences`, {
+                method: "PUT",
+                body: JSON.stringify({ targetStudyMinutes }),
+            });
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || errorData.error || `HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            hasShownAlert = false;
+            return responseData.data?.memory || responseData.data?.memory || responseData.data;
+        } catch (error) {
+            console.error("Error updating study preferences:", error.message);
             throw error;
         }
     },

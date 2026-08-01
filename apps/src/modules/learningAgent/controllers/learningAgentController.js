@@ -51,6 +51,13 @@ router.put("/memory", verifyToken, asyncHandler(async (req, res) => {
     res.json({ message: "Cập nhật learner memory thành công", memory });
 }));
 
+router.put("/memory/study-preferences", verifyToken, asyncHandler(async (req, res) => {
+    const memory = await learnerMemoryService.updateStudyPreferences(req.user.id, {
+        targetStudyMinutes: req.body?.targetStudyMinutes
+    });
+    res.json({ message: "Cập nhật thời gian học thành công", memory });
+}));
+
 router.get("/memory/options", verifyToken, asyncHandler(async (req, res) => {
     res.json(learnerMemoryService.getAllowedValues());
 }));

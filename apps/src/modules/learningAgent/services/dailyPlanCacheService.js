@@ -1,6 +1,8 @@
 const crypto = require("crypto");
 const cacheNs = require("../../../shared/utils/cacheNamespaces");
 
+const DAILY_PLAN_CACHE_SCHEMA_VERSION = "daily-plan-v8-time-selection-copy";
+
 class DailyPlanCacheService {
     constructor(options = {}) {
         this.enabled = options.enabled ?? process.env.AI_DAILY_PLAN_CACHE_ENABLED !== "false";
@@ -84,6 +86,7 @@ class DailyPlanCacheService {
         const memoryFingerprint = this.buildMemoryFingerprint(memory);
         return cacheNs.key("learningAgent", "dailyPlan", {
             id: [
+                DAILY_PLAN_CACHE_SCHEMA_VERSION,
                 String(userId),
                 date,
                 Number.parseInt(targetMinutes || 10, 10),
@@ -114,6 +117,7 @@ class DailyPlanCacheService {
         const memoryVersion = memory?.memoryVersion || "learner-memory-v1";
         return [
             cacheNs.tag("learningAgent", "dailyPlan"),
+            cacheNs.tag("learningAgent", "dailyPlan", DAILY_PLAN_CACHE_SCHEMA_VERSION),
             cacheNs.tag("learningAgent", "dailyPlan", userId),
             cacheNs.tag("learningAgent", "memoryVersion", memoryVersion)
         ].filter(Boolean);
@@ -127,9 +131,8 @@ class DailyPlanCacheService {
             weakSkills: safeMemory.weakSkills || [],
             frequentMistakes: safeMemory.frequentMistakes || [],
             preferredTopics: safeMemory.preferredTopics || [],
+            studyPreferences: safeMemory.studyPreferences || {},
             learningSignals: safeMemory.learningSignals || {},
-            coachTone: safeMemory.coachTone || null,
-            notes: safeMemory.notes || "",
             updatedAt: safeMemory.updatedAt || null
         };
         return crypto

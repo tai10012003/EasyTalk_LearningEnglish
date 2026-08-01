@@ -41,6 +41,10 @@ test('daily plan uses user progress to prioritize remaining flashcards', async (
         unlockedDictations: ['dictation-1'],
         unlockedGrammarExercises: ['grammar-exercise-1'],
         unlockedPronunciationExercises: ['pronunciation-exercise-1']
+    }, {
+        learningGoals: ['flashcard_practice'],
+        weakSkills: [],
+        frequentMistakes: []
     });
 
     const plan = await service.getDailyPlan('user-1', { targetMinutes: 12 });
@@ -70,7 +74,7 @@ test('daily plan distributes tasks to match selected target minutes', async () =
 
     assert.equal(plan.totalEstimatedMinutes, 45);
     assert.equal(taskMinutes, 45);
-    assert.ok(plan.headline.includes('45 phút'));
+    assert.equal(plan.headline, 'Bạn muốn học bao lâu hôm nay?');
     assert.ok(plan.tasks.length >= 4);
 });
 
@@ -80,7 +84,7 @@ test('daily plan still returns useful tasks when progress is missing', async () 
     const plan = await service.getDailyPlan('user-1');
 
     assert.equal(plan.learnerSnapshot.hasProgress, false);
-    assert.ok(plan.headline.includes('phút'));
+    assert.equal(plan.headline, 'Bạn muốn học bao lâu hôm nay?');
     assert.ok(plan.tasks.some(task => task.type === 'flashcard'));
     assert.ok(plan.tasks.some(task => task.type === 'chat'));
 });
@@ -270,7 +274,7 @@ test('mock AI provider enhances daily plan copy without external calls', async (
 
     assert.equal(enhanced.mode, 'rule-based+mock-ai');
     assert.equal(enhanced.aiProvider.provider, 'mock');
-    assert.match(enhanced.headline, /8 phút/);
+    assert.equal(enhanced.headline, 'Bạn muốn học bao lâu hôm nay?');
     assert.equal(enhanced.tasks[0].title, 'Luyện nói chủ đề travel');
 });
 
@@ -911,6 +915,11 @@ test('study guide agent builds time plan and memory guide steps', async () => {
     const guide = await agent.buildCoachGuide('user-1', {
         targetMinutes: 30,
         dailyPlan: {
+            learnerSnapshot: {
+                experiencePoints: 120,
+                maxStreak: 5,
+                studyMinutesToday: 10
+            },
             tasks: [
                 {
                     type: 'flashcard',
@@ -922,16 +931,64 @@ test('study guide agent builds time plan and memory guide steps', async () => {
             ]
         },
         memory: {
+            proficiencyLevel: 'beginner',
+            learningGoals: ['communication'],
             weakSkills: ['listening'],
-            memoryVersion: 'learner-memory-v1'
+            preferredTopics: ['travel'],
+            coachTone: 'friendly',
+            memoryVersion: 'learner-memory-v1',
+            updatedAt: new Date('2026-07-10T00:00:00.000Z')
         }
     });
 
     assert.equal(guide.targetMinutes, 30);
+    assert.equal(guide.recommendedFlow, 'daily_plan_first');
+    assert.equal(guide.isNewLearner, false);
     assert.equal(guide.steps[0].type, 'time_setup');
     assert.ok(guide.steps.some(step => step.type === 'daily_plan_task'));
     assert.equal(guide.steps.at(-1).type, 'memory_profile');
     assert.equal(guide.recommendedFirstAction.path, '/flashcard');
+});
+
+test('study guide agent puts quick profile first for new learners', async () => {
+    const agent = new StudyGuideAgent();
+    const guide = await agent.buildCoachGuide('user-1', {
+        targetMinutes: 10,
+        dailyPlan: {
+            learnerSnapshot: {
+                experiencePoints: 0,
+                maxStreak: 0,
+                studyMinutesToday: 0,
+                todayFlashcardReviews: 0
+            },
+            tasks: [
+                {
+                    type: 'chat',
+                    title: 'Nói chuyện với AI hôm nay',
+                    estimatedMinutes: 3,
+                    priority: 'high',
+                    action: { label: 'Bắt đầu chat', path: '/chat' }
+                }
+            ]
+        },
+        memory: {
+            proficiencyLevel: 'beginner',
+            learningGoals: ['daily_habit', 'communication'],
+            weakSkills: [],
+            preferredTopics: [],
+            coachTone: 'friendly',
+            memoryVersion: 'learner-memory-v1'
+        }
+    });
+
+    assert.equal(guide.recommendedFlow, 'new_learner_onboarding');
+    assert.equal(guide.isNewLearner, true);
+    assert.equal(guide.shouldAskMemoryUpdate, false);
+    assert.equal(guide.steps[0].type, 'new_learner_profile');
+    assert.ok(guide.steps[0].fields.some(field => field.key === 'learningGoals'));
+    assert.ok(guide.steps.some(step => step.type === 'time_setup'));
+    assert.ok(guide.steps.some(step => step.type === 'daily_plan_task'));
+    assert.ok(!guide.steps.some(step => step.type === 'memory_profile'));
 });
 
 test('agent chat session starts, receives message, finishes, and applies memory insights', async () => {
@@ -1175,8 +1232,24 @@ test('learner memory service creates default memory when missing', async () => {
     const memory = await service.getOrCreateMemory('64b64c0f4f1a2562d08f9a10');
 
     assert.equal(memory.proficiencyLevel, 'beginner');
-    assert.deepEqual(memory.learningGoals, ['daily_habit', 'communication']);
+    assert.deepEqual(memory.learningGoals, ['learning_journey', 'ai_chat']);
     assert.equal(inserted.user.toString(), '64b64c0f4f1a2562d08f9a10');
+});
+
+test('learner memory saved target stays selectable without raising profile minimum', () => {
+    const service = new LearnerMemoryService({ repository: {} });
+    const resolution = service.resolveTargetStudyMinutes({
+        learningGoals: ['learning_journey', 'ai_chat', 'grammar_lesson'],
+        weakSkills: ['listening', 'grammar'],
+        frequentMistakes: [],
+        studyPreferences: {
+            targetStudyMinutes: 90
+        }
+    }, null);
+
+    assert.equal(resolution.effectiveTargetMinutes, 90);
+    assert.equal(resolution.minimumSelectableMinutes, 60);
+    assert.deepEqual(resolution.allowedMinutes, [60, 90, 120]);
 });
 
 test('learner memory promotes weak skill only after repeated evidence', async () => {

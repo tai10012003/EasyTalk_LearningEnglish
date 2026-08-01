@@ -2,7 +2,7 @@ const LearnerMemory = require('../models/learnerMemory');
 
 class MemorySummarizer {
     normalizeSkills(skills = []) {
-        return LearnerMemory.normalizeArray(skills, LearnerMemory.getAllowedValues().skills, 7);
+        return LearnerMemory.normalizeArray(skills, LearnerMemory.getAllowedValues().skills, 2);
     }
 
     normalizeMistakes(mistakes = []) {
@@ -10,7 +10,7 @@ class MemorySummarizer {
     }
 
     limitWeakSkills(skills = []) {
-        return [...new Set(skills)].slice(0, 7);
+        return [...new Set(skills)].slice(0, 2);
     }
 
     limitFrequentMistakes(mistakes = []) {

@@ -1,3 +1,5 @@
+const LearnerMemory = require('../models/learnerMemory');
+
 class StudyGuideAgent {
     constructor(deps = {}) {
         this.dailyPlanTool = deps.dailyPlanTool || null;
@@ -5,28 +7,75 @@ class StudyGuideAgent {
     }
 
     async buildCoachGuide(userId, options = {}) {
-        const targetMinutes = this.normalizeTargetMinutes(options.targetMinutes);
-        const dailyPlan = this.dailyPlanTool
-            ? await this.dailyPlanTool.getDailyPlan(userId, { targetMinutes })
-            : options.dailyPlan || null;
+        const requestedTargetMinutes = options.targetMinutes === null || options.targetMinutes === undefined
+            ? null
+            : this.normalizeTargetMinutes(options.targetMinutes);
         const memory = this.memoryTool
             ? await this.memoryTool.getOrCreateMemory(userId)
             : options.memory || null;
+        const targetResolution = LearnerMemory.resolveTargetStudyMinutes(memory, requestedTargetMinutes);
+        const targetMinutes = targetResolution.effectiveTargetMinutes;
+        const dailyPlan = this.dailyPlanTool
+            ? await this.dailyPlanTool.getDailyPlan(userId, { targetMinutes })
+            : options.dailyPlan || null;
         const tasks = Array.isArray(dailyPlan?.tasks) ? dailyPlan.tasks : [];
+        const profileCompleteness = this.calculateProfileCompleteness(dailyPlan, memory);
+        const isNewLearner = this.isNewLearner(dailyPlan, memory, profileCompleteness);
+        const shouldAskMemoryUpdate = this.shouldAskMemoryUpdate(memory, profileCompleteness, isNewLearner);
 
         return {
             guideId: `coach-guide-${Date.now()}`,
             title: "AI Coach Study Guide",
             targetMinutes,
+            recommendedFlow: isNewLearner ? "new_learner_onboarding" : "daily_plan_first",
+            isNewLearner,
+            profileCompleteness,
+            shouldAskMemoryUpdate,
             memoryVersion: memory?.memoryVersion || "learner-memory-v1",
             steps: [
-                this.buildTimeStep(targetMinutes),
+                isNewLearner ? this.buildNewLearnerProfileStep(memory) : null,
+                this.buildTimeStep(targetMinutes, memory, targetResolution),
                 ...tasks.map((task, index) => this.buildTaskStep(task, index, tasks.length)),
-                this.buildMemoryProfileStep(memory)
-            ],
+                shouldAskMemoryUpdate ? this.buildMemoryProfileStep(memory) : null
+            ].filter(Boolean),
             recommendedFirstAction: tasks[0]?.action || null,
             dailyPlan
         };
+    }
+
+    calculateProfileCompleteness(dailyPlan = null, memory = null) {
+        let score = 0;
+        if (memory?.proficiencyLevel) score += 20;
+        if (memory?.learningGoals?.length) score += 25;
+        if (memory?.weakSkills?.length) score += 25;
+        if (memory?.preferredTopics?.length) score += 20;
+        if (dailyPlan?.learnerSnapshot?.studyMinutesToday > 0 || dailyPlan?.learnerSnapshot?.experiencePoints > 0) {
+            score = Math.max(score, 45);
+        }
+        return Math.min(score, 100);
+    }
+
+    isNewLearner(dailyPlan = null, memory = null, profileCompleteness = 0) {
+        const snapshot = dailyPlan?.learnerSnapshot || {};
+        const hasLearningHistory = (snapshot.experiencePoints || 0) > 0
+            || (snapshot.studyMinutesToday || 0) > 0
+            || (snapshot.todayFlashcardReviews || 0) > 0
+            || (snapshot.maxStreak || 0) > 1;
+        const hasPersonalizedMemory = Boolean(
+            memory?.preferredTopics?.length
+            || memory?.weakSkills?.length
+            || memory?.frequentMistakes?.length
+            || memory?.learningGoals?.length
+        );
+        return !hasLearningHistory && (!hasPersonalizedMemory || profileCompleteness < 70);
+    }
+
+    shouldAskMemoryUpdate(memory = null, profileCompleteness = 0, isNewLearner = false) {
+        if (isNewLearner) return false;
+        if (profileCompleteness < 70) return true;
+        if (!memory?.updatedAt) return false;
+        const daysSinceUpdate = Math.floor((Date.now() - new Date(memory.updatedAt).getTime()) / 86400000);
+        return Number.isFinite(daysSinceUpdate) && daysSinceUpdate >= 14;
     }
 
     normalizeTargetMinutes(value) {
@@ -35,12 +84,21 @@ class StudyGuideAgent {
         return allowed.includes(parsed) ? parsed : 10;
     }
 
-    buildTimeStep(targetMinutes) {
+    buildTimeStep(targetMinutes, memory = null, targetResolution = null) {
+        const recommendation = targetResolution || this.recommendTargetMinutes(memory);
+        const recommendedMinutes = recommendation.minutes || recommendation.recommendedMinutes;
+        const minimumSelectableMinutes = recommendation.minimumSelectableMinutes || recommendedMinutes;
+        const allowedMinutes = recommendation.allowedMinutes || [10, 20, 30, 45, 60, 90, 120].filter(minutes => minutes >= minimumSelectableMinutes);
         return {
             key: "set-study-time",
             type: "time_setup",
             title: "Thiết lập thời gian",
-            message: `Hôm nay mình đề xuất ${targetMinutes} phút học. Bạn có thể giữ mức này hoặc chọn thời lượng khác trước khi xem kế hoạch.`,
+            message: `Dựa trên hồ sơ hiện tại, mình gợi ý tối thiểu ${minimumSelectableMinutes} phút học hôm nay: ${recommendation.reason || recommendation.recommendationReason}. Bạn vẫn có thể chọn thời lượng cao hơn, mình sẽ chia lại kế hoạch theo đúng lựa chọn của bạn.`,
+            recommendedMinutes,
+            minimumSelectableMinutes,
+            allowedMinutes,
+            savedTargetMinutes: recommendation.savedTargetMinutes || null,
+            recommendationReason: recommendation.reason || recommendation.recommendationReason,
             target: {
                 page: "/coach",
                 selector: "[data-coach-guide-target='study-time']"
@@ -48,6 +106,33 @@ class StudyGuideAgent {
             actions: [
                 { type: "confirm_time", label: `Thiết lập ${targetMinutes} phút`, value: targetMinutes },
                 { type: "default_time", label: "Dùng 10 phút", value: 10 }
+            ]
+        };
+    }
+
+    recommendTargetMinutes(memory = null) {
+        return LearnerMemory.recommendTargetMinutes(memory);
+    }
+
+    buildNewLearnerProfileStep() {
+        return {
+            key: "new-learner-profile",
+            type: "new_learner_profile",
+            title: "Thiết lập hồ sơ học tập",
+            message: "Chào mừng bạn đến với EasyTalk. Mình muốn làm quen một chút để kèm bạn học đúng trọng tâm hơn. Bạn có muốn thiết lập hồ sơ học tập không?",
+            target: {
+                page: "/coach",
+                selector: "[data-coach-guide-target='new-learner-profile']"
+            },
+            fields: [
+                { key: "proficiencyLevel", type: "single_select", label: "Trình độ hiện tại", options: ["newbie", "beginner", "elementary", "intermediate"] },
+                { key: "learningGoals", type: "multi_select", label: "Mục tiêu học", maxSelections: 3, options: ["learning_journey", "story_lesson", "grammar_lesson", "pronunciation_lesson", "flashcard_practice", "grammar_practice", "vocabulary_practice", "pronunciation_practice", "dictation_practice", "ai_chat", "ai_writing"] },
+                { key: "weakSkills", type: "multi_select", label: "Kỹ năng yếu cần ưu tiên", maxSelections: 2, options: ["grammar", "vocabulary", "pronunciation", "listening", "speaking", "writing"] },
+                { key: "preferredTopics", type: "chips", label: "Chủ đề yêu thích luyện nói và luyện viết", options: ["travel", "work", "food", "daily life", "school", "business"] }
+            ],
+            actions: [
+                { type: "update_memory", label: "Thiết lập hồ sơ học tập" },
+                { type: "dismiss", label: "Để sau" }
             ]
         };
     }

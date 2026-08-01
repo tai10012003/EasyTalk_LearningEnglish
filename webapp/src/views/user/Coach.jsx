@@ -3,15 +3,96 @@ import { Link } from "react-router-dom";
 import Swal from "sweetalert2";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import { LearningAgentService } from "@/services/LearningAgentService.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 import CoachMemoryPanel from "@/components/user/coach/CoachMemoryPanel.jsx";
 
 const COACH_TARGET_MINUTES = [10, 20, 30, 45, 60, 90, 120];
 const DEFAULT_TARGET_MINUTES = 10;
 const TARGET_MINUTES_SESSION_KEY = "easyTalkAiCoachTargetMinutes";
+const MEMORY_LABELS = {
+    learning_journey: "Hành trình học tập",
+    story_lesson: "Bài học câu chuyện",
+    grammar_lesson: "Bài học ngữ pháp",
+    pronunciation_lesson: "Bài học phát âm",
+    flashcard_practice: "Luyện tập flashcard",
+    grammar_practice: "Luyện tập ngữ pháp",
+    vocabulary_practice: "Luyện tập từ vựng",
+    pronunciation_practice: "Luyện tập phát âm",
+    dictation_practice: "Luyện tập nghe chép chính tả",
+    ai_chat: "Giao tiếp với AI",
+    ai_writing: "Luyện viết với AI",
+    grammar: "Ngữ pháp",
+    vocabulary: "Từ vựng",
+    pronunciation: "Phát âm",
+    listening: "Nghe",
+    speaking: "Nói",
+    writing: "Viết"
+};
+
+function getCurrentUserStorageId() {
+    const user = AuthService.getCurrentUser?.();
+    return user?.id || user?._id || user?.userId || user?.email || user?.username || "guest";
+}
+
+function getTargetMinutesStorageKey() {
+    return `${TARGET_MINUTES_SESSION_KEY}:${getCurrentUserStorageId()}`;
+}
 
 function getInitialTargetMinutes() {
-    const stored = Number.parseInt(sessionStorage.getItem(TARGET_MINUTES_SESSION_KEY), 10);
+    const stored = Number.parseInt(sessionStorage.getItem(getTargetMinutesStorageKey()), 10);
     return COACH_TARGET_MINUTES.includes(stored) ? stored : DEFAULT_TARGET_MINUTES;
+}
+
+function getPlanTargetMinutes(plan) {
+    const preferences = plan?.learnerSnapshot?.memory?.studyPreferences || {};
+    const rawTargetMinutes = preferences.effectiveTargetMinutes
+        || preferences.targetStudyMinutes
+        || plan?.totalEstimatedMinutes
+        || DEFAULT_TARGET_MINUTES;
+    return Math.max(rawTargetMinutes, getPlanMinimumTargetMinutes(plan));
+}
+
+function getPlanStudyPreferences(plan) {
+    return plan?.learnerSnapshot?.memory?.studyPreferences || {};
+}
+
+function getMemoryProfileMinimumTargetMinutes(memory = {}) {
+    const weakSkillCount = Math.min(Array.isArray(memory?.weakSkills) ? memory.weakSkills.length : 0, 2);
+    const goalCount = Math.min(Array.isArray(memory?.learningGoals) ? memory.learningGoals.filter(Boolean).length : 0, 3);
+    const mistakeCount = Math.min(Array.isArray(memory?.frequentMistakes) ? memory.frequentMistakes.filter(Boolean).length : 0, 2);
+    const focusCount = weakSkillCount + goalCount + mistakeCount;
+
+    let minutes = DEFAULT_TARGET_MINUTES;
+    if (mistakeCount > 0) minutes += 10;
+    if (weakSkillCount >= 1) minutes += weakSkillCount * 10;
+    if (goalCount >= 2) minutes += 10;
+    if (focusCount >= 5) minutes += 15;
+
+    return COACH_TARGET_MINUTES.find(value => value >= minutes) || 120;
+}
+
+function getPlanMinimumTargetMinutes(plan) {
+    const preferences = getPlanStudyPreferences(plan);
+    const memory = plan?.learnerSnapshot?.memory || {};
+    const profileMinimumMinutes = getMemoryProfileMinimumTargetMinutes(memory);
+    const preferenceCandidates = [
+        preferences.minimumSelectableMinutes,
+        preferences.recommendedMinutes,
+        profileMinimumMinutes,
+        DEFAULT_TARGET_MINUTES
+    ]
+        .map(value => Number.parseInt(value, 10))
+        .filter(value => COACH_TARGET_MINUTES.includes(value));
+    return Math.max(...preferenceCandidates);
+}
+
+function getPlanAllowedTargetMinutes(plan) {
+    const preferences = getPlanStudyPreferences(plan);
+    if (Array.isArray(preferences.allowedMinutes) && preferences.allowedMinutes.length) {
+        return preferences.allowedMinutes;
+    }
+    const minimumMinutes = getPlanMinimumTargetMinutes(plan);
+    return COACH_TARGET_MINUTES.filter(minutes => minutes >= minimumMinutes);
 }
 
 const EVENT_COPY = {
@@ -78,13 +159,14 @@ function pickPrimaryPlanReason(previousPlan, nextPlan) {
     const goals = Array.isArray(memory.learningGoals) ? memory.learningGoals.filter(Boolean) : [];
     const topics = Array.isArray(memory.preferredTopics) ? memory.preferredTopics.filter(Boolean) : [];
     const reasonParts = [];
+    const formatLabels = (values) => values.map(value => MEMORY_LABELS[value] || value).filter(Boolean).slice(0, 2).join(", ");
 
-    if (weakSkills.length) reasonParts.push(`kỹ năng yếu ${weakSkills.slice(0, 2).join(", ")}`);
-    if (goals.length) reasonParts.push(`mục tiêu ${goals.slice(0, 2).join(", ")}`);
+    if (weakSkills.length) reasonParts.push(`kỹ năng yếu ${formatLabels(weakSkills)}`);
+    if (goals.length) reasonParts.push(`mục tiêu ${formatLabels(goals)}`);
     if (topics.length) reasonParts.push(`chủ đề ${topics.slice(0, 2).join(", ")}`);
 
     const reason = reasonParts.length
-        ? `Vì hồ sơ mới có ${reasonParts.join(" và ")}, mình ưu tiên ${firstTask.title} trước.`
+        ? `Vì hồ sơ mới có ${reasonParts.join(" và ")}, mình ưu tiên ${firstTask.title} trước để bám sát đúng nhu cầu của bạn.`
         : `Mình ưu tiên ${firstTask.title} trước để kế hoạch hôm nay gọn và đúng trọng tâm hơn.`;
 
     return hasPriorityChanged
@@ -93,12 +175,14 @@ function pickPrimaryPlanReason(previousPlan, nextPlan) {
 }
 
 function Coach() {
+    const currentUserStorageId = getCurrentUserStorageId();
     const [plan, setPlan] = useState(null);
     const [usage, setUsage] = useState(null);
     const [learningEvents, setLearningEvents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isTestingProvider, setIsTestingProvider] = useState(false);
     const [targetMinutes, setTargetMinutes] = useState(getInitialTargetMinutes);
+    const [targetConstraints, setTargetConstraints] = useState(null);
 
     const fetchDailyPlan = useCallback(async (minutes = DEFAULT_TARGET_MINUTES, options = {}) => {
         const { showPageLoader = true } = options;
@@ -106,6 +190,7 @@ function Coach() {
         try {
             const data = await LearningAgentService.getDailyPlan(minutes);
             setPlan(data);
+            setTargetMinutes(getPlanTargetMinutes(data));
             LearningAgentService.getTodayUsage()
                 .then(setUsage)
                 .catch(() => setUsage(null));
@@ -122,13 +207,13 @@ function Coach() {
 
     useEffect(() => {
         document.title = "AI Coach - EasyTalk";
-        fetchDailyPlan(getInitialTargetMinutes());
-    }, [fetchDailyPlan]);
+        fetchDailyPlan(null);
+    }, [currentUserStorageId, fetchDailyPlan]);
 
     useEffect(() => {
         const handleTargetMinutesChanged = (event) => {
             const minutes = event.detail?.minutes || DEFAULT_TARGET_MINUTES;
-            sessionStorage.setItem(TARGET_MINUTES_SESSION_KEY, String(minutes));
+            sessionStorage.setItem(getTargetMinutesStorageKey(), String(minutes));
             setTargetMinutes(minutes);
             fetchDailyPlan(minutes, { showPageLoader: false });
         };
@@ -139,20 +224,58 @@ function Coach() {
         };
     }, [fetchDailyPlan]);
 
-    const handleTargetChange = (minutes) => {
+    useEffect(() => {
+        const handleTargetConstraintsChanged = (event) => {
+            const allowedMinutes = Array.isArray(event.detail?.allowedMinutes)
+                ? event.detail.allowedMinutes.filter(minutes => COACH_TARGET_MINUTES.includes(minutes))
+                : [];
+            const minimumMinutes = Number.parseInt(event.detail?.minimumSelectableMinutes, 10);
+
+            if (!allowedMinutes.length || !COACH_TARGET_MINUTES.includes(minimumMinutes)) {
+                setTargetConstraints(null);
+                return;
+            }
+
+            setTargetConstraints({
+                minimumSelectableMinutes: minimumMinutes,
+                allowedMinutes
+            });
+        };
+
+        const handleTargetConstraintsCleared = () => setTargetConstraints(null);
+
+        window.addEventListener("easyTalk:coachTargetConstraintsChanged", handleTargetConstraintsChanged);
+        window.addEventListener("easyTalk:coachTargetConstraintsCleared", handleTargetConstraintsCleared);
+        return () => {
+            window.removeEventListener("easyTalk:coachTargetConstraintsChanged", handleTargetConstraintsChanged);
+            window.removeEventListener("easyTalk:coachTargetConstraintsCleared", handleTargetConstraintsCleared);
+        };
+    }, []);
+
+    const handleTargetChange = async (minutes) => {
+        const allowedMinutes = targetConstraints?.allowedMinutes || getPlanAllowedTargetMinutes(plan);
+        if (!allowedMinutes.includes(minutes)) {
+            return;
+        }
         if (document.documentElement.classList.contains("coach-guide-active")) {
             setTargetMinutes(minutes);
             window.dispatchEvent(new CustomEvent("easyTalk:coachTargetMinutesPicked", {
-                detail: { minutes }
+                detail: { minutes, source: "user" }
             }));
             return;
         }
 
-        sessionStorage.setItem(TARGET_MINUTES_SESSION_KEY, String(minutes));
+        sessionStorage.setItem(getTargetMinutesStorageKey(), String(minutes));
         setTargetMinutes(minutes);
+        try {
+            await LearningAgentService.updateStudyPreferences(minutes);
+        } catch (error) {
+            fetchDailyPlan(null, { showPageLoader: false });
+            return;
+        }
         fetchDailyPlan(minutes);
         window.dispatchEvent(new CustomEvent("easyTalk:coachTargetMinutesPicked", {
-            detail: { minutes }
+            detail: { minutes, source: "user" }
         }));
     };
 
@@ -179,11 +302,42 @@ function Coach() {
         }
     };
 
+    useEffect(() => {
+        if (!plan) return;
+        const allowedMinutes = getPlanAllowedTargetMinutes(plan);
+        if (allowedMinutes.includes(targetMinutes)) return;
+        const nextMinutes = allowedMinutes[0] || getPlanMinimumTargetMinutes(plan);
+        sessionStorage.setItem(getTargetMinutesStorageKey(), String(nextMinutes));
+        setTargetMinutes(nextMinutes);
+        window.dispatchEvent(new CustomEvent("easyTalk:coachTargetMinutesPicked", {
+            detail: { minutes: nextMinutes, source: "system" }
+        }));
+        fetchDailyPlan(nextMinutes, { showPageLoader: false });
+    }, [fetchDailyPlan, plan, targetMinutes]);
+
     const handleMemorySaved = async () => {
         const previousPlan = plan;
         try {
-            const updatedPlan = await LearningAgentService.getDailyPlan(targetMinutes);
+            const updatedPlan = await LearningAgentService.getDailyPlan(null);
+            const updatedTargetMinutes = getPlanTargetMinutes(updatedPlan);
+            const updatedMinimumMinutes = getPlanMinimumTargetMinutes(updatedPlan);
+            const updatedAllowedMinutes = getPlanAllowedTargetMinutes(updatedPlan);
             setPlan(updatedPlan);
+            setTargetMinutes(updatedTargetMinutes);
+            setTargetConstraints({
+                minimumSelectableMinutes: updatedMinimumMinutes,
+                allowedMinutes: updatedAllowedMinutes
+            });
+            sessionStorage.setItem(getTargetMinutesStorageKey(), String(updatedTargetMinutes));
+            window.dispatchEvent(new CustomEvent("easyTalk:coachTargetConstraintsChanged", {
+                detail: {
+                    minimumSelectableMinutes: updatedMinimumMinutes,
+                    allowedMinutes: updatedAllowedMinutes
+                }
+            }));
+            window.dispatchEvent(new CustomEvent("easyTalk:coachTargetMinutesPicked", {
+                detail: { minutes: updatedTargetMinutes, source: "system" }
+            }));
             LearningAgentService.getTodayUsage()
                 .then(setUsage)
                 .catch(() => setUsage(null));
@@ -192,7 +346,11 @@ function Coach() {
                 .catch(() => setLearningEvents([]));
             window.dispatchEvent(new CustomEvent("easyTalk:coachPlanRefreshed", {
                 detail: {
-                    message: pickPrimaryPlanReason(previousPlan, updatedPlan)
+                    source: "memory_profile_saved",
+                    message: pickPrimaryPlanReason(previousPlan, updatedPlan),
+                    targetMinutes: updatedTargetMinutes,
+                    minimumSelectableMinutes: updatedMinimumMinutes,
+                    allowedMinutes: updatedAllowedMinutes
                 }
             }));
         } catch (error) {
@@ -227,9 +385,13 @@ function Coach() {
 
     const snapshot = plan.learnerSnapshot || {};
     const tasks = plan.tasks || [];
+    const minimumTargetMinutes = targetConstraints?.minimumSelectableMinutes || getPlanMinimumTargetMinutes(plan);
+    const allowedTargetMinutes = targetConstraints?.allowedMinutes || getPlanAllowedTargetMinutes(plan);
 
     return (
         <div className="coach-page container">
+            <CoachMemoryPanel onMemorySaved={handleMemorySaved} />
+
             <section className="coach-hero">
                 <div
                     className="coach-hero-main"
@@ -247,6 +409,8 @@ function Coach() {
                             <button
                                 key={minutes}
                                 className={`coach-target-btn ${targetMinutes === minutes ? "active" : ""}`}
+                                disabled={!allowedTargetMinutes.includes(minutes)}
+                                title={!allowedTargetMinutes.includes(minutes) ? `Hồ sơ hiện tại cần tối thiểu ${minimumTargetMinutes} phút` : undefined}
                                 onClick={() => handleTargetChange(minutes)}
                             >
                                 {minutes} phút
@@ -377,7 +541,6 @@ function Coach() {
                 )}
             </section>
 
-            <CoachMemoryPanel onMemorySaved={handleMemorySaved} />
         </div>
     );
 }

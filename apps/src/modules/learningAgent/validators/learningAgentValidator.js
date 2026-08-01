@@ -6,6 +6,9 @@ function parsePositiveInteger(value, fallback, options = {}) {
 }
 
 function validateDailyPlanQuery(query = {}) {
+    if (query.targetMinutes === undefined || query.targetMinutes === null || query.targetMinutes === '') {
+        return { targetMinutes: null };
+    }
     return {
         targetMinutes: parsePositiveInteger(query.targetMinutes, 10, { max: 120 })
     };

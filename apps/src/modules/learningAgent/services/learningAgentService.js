@@ -37,18 +37,36 @@ class LearningAgentService {
             this.progressTool.getUserProgress(userId),
             this.memoryTool.getOrCreateMemory(userId)
         ]);
-        const targetMinutes = this.dailyPlanAgent.normalizeTargetMinutes(options.targetMinutes);
+        const targetResolution = this.learnerMemoryService?.resolveTargetStudyMinutes
+            ? this.learnerMemoryService.resolveTargetStudyMinutes(memory, options.targetMinutes)
+            : { effectiveTargetMinutes: this.dailyPlanAgent.normalizeTargetMinutes(options.targetMinutes) };
+        const targetMinutes = this.dailyPlanAgent.normalizeTargetMinutes(targetResolution.effectiveTargetMinutes);
         const cachedPlan = await this.dailyPlanCacheService.get({ userId, targetMinutes, memory });
         if (cachedPlan) {
-            return this.markCacheHit(cachedPlan.plan, cachedPlan.metadata);
+            const safeCachedPlan = this.attachStudyPreferences(cachedPlan.plan, memory, targetResolution);
+            return this.markCacheHit(safeCachedPlan, cachedPlan.metadata);
         }
 
-        const basePlan = this.dailyPlanAgent.buildPlan(progress, memory, options);
+        const basePlan = this.dailyPlanAgent.buildPlan(progress, memory, {
+            ...options,
+            targetMinutes
+        });
+        basePlan.learnerSnapshot = {
+            ...(basePlan.learnerSnapshot || {}),
+            memory: {
+                ...(basePlan.learnerSnapshot?.memory || {}),
+                studyPreferences: {
+                    ...(memory?.studyPreferences || {}),
+                    ...targetResolution
+                }
+            }
+        };
         let plan = basePlan;
 
         if (this.aiProviderService) {
             plan = await this.aiProviderService.enhanceDailyPlan(basePlan, { userId });
         }
+        plan = this.attachStudyPreferences(plan, memory, targetResolution);
 
         const cacheKey = await this.dailyPlanCacheService.set({
             userId,
@@ -62,6 +80,22 @@ class LearningAgentService {
         });
 
         return this.markCacheMiss(plan, cacheKey);
+    }
+
+    attachStudyPreferences(plan, memory = null, targetResolution = {}) {
+        return {
+            ...plan,
+            learnerSnapshot: {
+                ...(plan?.learnerSnapshot || {}),
+                memory: {
+                    ...(plan?.learnerSnapshot?.memory || {}),
+                    studyPreferences: {
+                        ...(memory?.studyPreferences || {}),
+                        ...targetResolution
+                    }
+                }
+            }
+        };
     }
 
     markCacheHit(plan, metadata = {}) {

@@ -118,13 +118,12 @@ class MockAIResponseService {
         const memory = snapshot.memory || {};
         const weakSkills = memory.weakSkills || [];
         const goals = memory.learningGoals || [];
-        const tone = memory.coachTone || 'friendly';
         const totalMinutes = plan?.totalEstimatedMinutes || 10;
-        const focus = weakSkills[0] || goals[0] || 'daily_habit';
+        const focus = weakSkills[0] || goals[0] || 'learning_journey';
 
         return {
-            headline: this.buildMockHeadline(snapshot, totalMinutes, focus, tone),
-            motivation: this.buildMockMotivation(snapshot, memory, focus, tone),
+            headline: this.buildMockHeadline(snapshot, totalMinutes, focus),
+            motivation: this.buildMockMotivation(snapshot, memory, focus),
             tasks: (plan?.tasks || []).map(task => ({
                 type: task.type,
                 title: this.rewriteTaskTitle(task, memory),
@@ -133,34 +132,14 @@ class MockAIResponseService {
         };
     }
 
-    buildMockHeadline(snapshot, totalMinutes, focus, tone) {
-        if (!snapshot.hasProgress) {
-            return `Khởi động nhẹ với ${totalMinutes} phút học tiếng Anh hôm nay.`;
-        }
-        if (tone === 'concise') {
-            return `${totalMinutes} phút hôm nay: tập trung ${this.translateFocus(focus)}.`;
-        }
-        if (tone === 'strict') {
-            return `Hoàn thành ${totalMinutes} phút học hôm nay để giữ đúng cam kết.`;
-        }
-        if (snapshot.streak > 0) {
-            return `Giữ streak ${snapshot.streak} ngày với ${totalMinutes} phút học thật gọn.`;
-        }
-        return `Bắt nhịp lại với ${totalMinutes} phút học vừa sức hôm nay.`;
+    buildMockHeadline() {
+        return "Bạn muốn học bao lâu hôm nay?";
     }
 
-    buildMockMotivation(snapshot, memory, focus, tone) {
+    buildMockMotivation(snapshot, memory, focus) {
         const topicText = memory.preferredTopics?.length ? ` Chủ đề gợi ý: ${memory.preferredTopics[0]}.` : '';
-        if (tone === 'strict') {
-            return `Coach đã ưu tiên ${this.translateFocus(focus)} dựa trên hồ sơ học tập của bạn.${topicText}`;
-        }
-        if (tone === 'concise') {
-            return `Ưu tiên: ${this.translateFocus(focus)}.${topicText}`;
-        }
-        if (snapshot.dailyFlashcardRemaining > 0) {
-            return `Bạn còn ${snapshot.dailyFlashcardRemaining} flashcard. Mình xếp bài ngắn để bạn dễ hoàn thành hôm nay.${topicText}`;
-        }
-        return `Kế hoạch này bám theo mục tiêu và kỹ năng cần cải thiện của bạn.${topicText}`;
+        const streakText = snapshot.streak > 0 ? ` Bạn đang có streak ${snapshot.streak} ngày.` : '';
+        return `Coach sẽ chia kế hoạch theo hồ sơ học tập hiện tại của bạn. Trọng tâm hôm nay: ${this.translateFocus(focus)}.${topicText}${streakText}`;
     }
 
     rewriteTaskTitle(task, memory) {
@@ -177,7 +156,7 @@ class MockAIResponseService {
     }
 
     rewriteTaskDescription(task, memory) {
-        if (task.type === 'chat' && memory.learningGoals?.includes('communication')) {
+        if (task.type === 'chat' && memory.learningGoals?.includes('ai_chat')) {
             return 'Một lượt hội thoại ngắn để tăng phản xạ giao tiếp và sự tự tin.';
         }
         if (task.type === 'pronunciation_exercise' && memory.weakSkills?.includes('pronunciation')) {
@@ -188,17 +167,23 @@ class MockAIResponseService {
 
     translateFocus(focus) {
         const labels = {
-            daily_habit: 'thói quen học',
-            communication: 'giao tiếp',
-            pronunciation: 'phát âm',
-            vocabulary: 'từ vựng',
-            grammar: 'ngữ pháp',
+            learning_journey: 'hành trình học tập',
+            story_lesson: 'bài học câu chuyện',
+            grammar_lesson: 'bài học ngữ pháp',
+            pronunciation_lesson: 'bài học phát âm',
+            flashcard_practice: 'flashcard',
+            grammar_practice: 'luyện tập ngữ pháp',
+            vocabulary_practice: 'luyện tập từ vựng',
+            pronunciation_practice: 'luyện tập phát âm',
+            dictation_practice: 'nghe chép chính tả',
+            ai_chat: 'giao tiếp với AI',
+            ai_writing: 'luyện viết với AI',
             listening: 'nghe',
             speaking: 'nói',
             writing: 'viết',
-            reading: 'đọc',
-            exam: 'ôn thi',
-            work: 'tiếng Anh công việc'
+            grammar: 'ngữ pháp',
+            vocabulary: 'từ vựng',
+            pronunciation: 'phát âm'
         };
         return labels[focus] || focus;
     }

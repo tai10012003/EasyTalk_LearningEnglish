@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import CoachMascot3D from "@/components/user/coach/CoachMascot3D.jsx";
 
 function clamp(value, min, max) {
     return Math.min(Math.max(value, min), max);
@@ -24,18 +25,63 @@ function clearActiveGuideTargets() {
     });
 }
 
+class CoachModelErrorBoundary extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = { hasError: false };
+    }
+
+    static getDerivedStateFromError() {
+        return { hasError: true };
+    }
+
+    componentDidCatch() {
+        this.props.onError?.();
+    }
+
+    render() {
+        if (this.state.hasError) return null;
+        return this.props.children;
+    }
+}
+
+// function FallbackCoachGuideRobot({ mood }) {
+//     return (
+//         <div className={`coach-guide-robot mood-${mood}`} aria-hidden="true">
+//             <div className="coach-guide-robot-antenna"></div>
+//             <div className="coach-guide-robot-head">
+//                 <span></span>
+//                 <span></span>
+//                 <i></i>
+//             </div>
+//             <div className="coach-guide-robot-body">
+//                 <b></b>
+//             </div>
+//         </div>
+//     );
+// }
+
 function CoachGuideRobot({ mood }) {
+    const [useFallback, setUseFallback] = useState(false);
+    const [isModelReady, setIsModelReady] = useState(false);
+
+    // if (useFallback) {
+    //     return <FallbackCoachGuideRobot mood={mood} />;
+    // }
+
     return (
-        <div className={`coach-guide-robot mood-${mood}`} aria-hidden="true">
-            <div className="coach-guide-robot-antenna"></div>
-            <div className="coach-guide-robot-head">
-                <span></span>
-                <span></span>
-                <i></i>
-            </div>
-            <div className="coach-guide-robot-body">
-                <b></b>
-            </div>
+        <div
+            className={`coach-guide-robot coach-guide-robot-3d mood-${mood} ${isModelReady ? "model-ready" : ""}`}
+            aria-hidden="true"
+        >
+            {/* {!isModelReady && (
+                <div className="coach-guide-robot-3d-loading">
+                    <FallbackCoachGuideRobot mood={mood} />
+                </div>
+            )} */}
+            <CoachModelErrorBoundary onError={() => setUseFallback(true)}>
+                <CoachMascot3D mood={mood} onReady={setIsModelReady} />
+            </CoachModelErrorBoundary>
         </div>
     );
 }

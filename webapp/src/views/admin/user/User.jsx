@@ -6,7 +6,7 @@ function User() {
     const fetchUser = async (page = 1, role = "") => {
         const data = await UserService.fetchUser(page, 12, { role })
         return {
-            users: data.data || [],
+            users: data || [],
             currentPage: data.currentPage,
             totalPages: data.totalPages,
         };

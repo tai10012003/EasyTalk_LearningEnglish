@@ -7,7 +7,7 @@ module.exports = [
             options: { targetMinutes: 10 }
         },
         expectations: {
-            mustIncludeTaskType: "flashcard",
+            mustIncludeTaskType: "learning_journey",
             mustIncludeTaskTypeAny: ["chat"],
             exactTotalMinutes: 10,
             maxTasks: 3
@@ -23,7 +23,7 @@ module.exports = [
                 unlockedDictations: ["dictation-1"]
             },
             memory: {
-                learningGoals: ["communication"],
+                learningGoals: ["ai_chat"],
                 weakSkills: ["listening"],
                 preferredTopics: ["travel"]
             },
@@ -31,6 +31,11 @@ module.exports = [
         },
         expectations: {
             mustIncludeTaskType: "dictation",
+            mustIncludeTaskTypeAny: ["chat"],
+            mustStartWithTaskTypeAny: ["dictation", "chat"],
+            mustNotIncludeTaskType: "flashcard",
+            exactTaskCount: 2,
+            exactTotalMinutes: 20,
             maxTotalMinutes: 20,
             noFabricatedProgress: true
         }
@@ -46,14 +51,14 @@ module.exports = [
                 unlockedGrammarExercises: ["grammar-1"]
             },
             memory: {
-                learningGoals: ["communication"],
+                learningGoals: ["ai_chat"],
                 weakSkills: ["grammar"],
                 preferredTopics: ["work"]
             },
             options: { targetMinutes: 20 }
         },
         expectations: {
-            mustIncludeTaskType: "grammar_exercise",
+            mustIncludeTaskTypes: ["grammar_lesson", "grammar_exercise"],
             maxTotalMinutes: 20
         }
     },
@@ -67,7 +72,7 @@ module.exports = [
                 unlockedDictations: ["dictation-1"],
                 unlockedGrammarExercises: ["grammar-1"]
             },
-            memory: { weakSkills: ["listening"], learningGoals: ["daily_habit"] },
+            memory: { weakSkills: ["listening"], learningGoals: ["learning_journey"] },
             options: { targetMinutes: 10 }
         },
         expectations: {
@@ -87,15 +92,15 @@ module.exports = [
                 unlockedPronunciationExercises: ["pronunciation-1"]
             },
             memory: {
-                learningGoals: ["communication", "listening", "grammar"],
-                weakSkills: ["listening", "grammar", "pronunciation"],
+                learningGoals: ["ai_chat", "dictation_practice", "grammar_practice"],
+                weakSkills: ["listening", "grammar"],
                 preferredTopics: ["travel"]
             },
             options: { targetMinutes: 90 }
         },
         expectations: {
             exactTotalMinutes: 90,
-            minTasks: 4,
+            minTasks: 3,
             mustIncludeTaskType: "dictation",
             mustIncludeTaskTypeAny: ["grammar_exercise", "chat"]
         }

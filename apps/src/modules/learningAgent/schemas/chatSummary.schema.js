@@ -3,6 +3,6 @@ module.exports = {
     maxSummaryLength: 900,
     maxMistakes: 12,
     maxMistakeLength: 180,
-    maxWeakSkills: 7,
-    allowedWeakSkills: ["speaking", "listening", "reading", "writing", "grammar", "vocabulary", "pronunciation"]
+    maxWeakSkills: 6,
+    allowedWeakSkills: ["grammar", "vocabulary", "pronunciation", "listening", "speaking", "writing"]
 };

@@ -303,6 +303,7 @@ export const AuthService = {
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
             localStorage.removeItem("language");
+            localStorage.removeItem("user");
             i18n.changeLanguage("vi");
             if (this.refreshTimer) {
                 clearTimeout(this.refreshTimer);

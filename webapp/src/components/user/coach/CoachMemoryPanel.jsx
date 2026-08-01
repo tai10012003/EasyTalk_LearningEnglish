@@ -9,22 +9,27 @@ const LABELS = {
     intermediate: "Intermediate",
     "upper-intermediate": "Upper-intermediate",
     advanced: "Advanced",
-    daily_habit: "Tạo thói quen học",
-    communication: "Giao tiếp",
-    pronunciation: "Phát âm",
-    vocabulary: "Từ vựng",
-    grammar: "Ngữ pháp",
+    learning_journey: "Hành trình học tập",
+    story_lesson: "Bài học câu chuyện",
+    grammar_lesson: "Bài học ngữ pháp",
+    pronunciation_lesson: "Bài học phát âm",
+    flashcard_practice: "Luyện tập flashcard",
+    grammar_practice: "Luyện tập ngữ pháp",
+    vocabulary_practice: "Luyện tập từ vựng",
+    pronunciation_practice: "Luyện tập phát âm",
+    dictation_practice: "Luyện tập nghe chép chính tả",
+    ai_chat: "Giao tiếp với AI",
+    ai_writing: "Luyện viết với AI",
+    speaking: "Nói",
     listening: "Nghe",
     writing: "Viết",
-    exam: "Thi cử",
-    work: "Công việc",
-    speaking: "Nói",
-    reading: "Đọc",
-    friendly: "Thân thiện",
-    strict: "Nghiêm khắc",
-    encouraging: "Động viên nhiều",
-    concise: "Ngắn gọn"
+    grammar: "Ngữ pháp",
+    vocabulary: "Từ vựng",
+    pronunciation: "Phát âm"
 };
+
+const MAX_LEARNING_GOALS = 3;
+const MAX_WEAK_SKILLS = 2;
 
 function toInputText(values = []) {
     return values.join(", ");
@@ -43,8 +48,12 @@ function CoachMemoryPanel({ onMemorySaved }) {
     const [form, setForm] = useState(null);
     const [topicsInput, setTopicsInput] = useState("");
     const [mistakesInput, setMistakesInput] = useState("");
+    const [draftForm, setDraftForm] = useState(null);
+    const [draftTopicsInput, setDraftTopicsInput] = useState("");
+    const [draftMistakesInput, setDraftMistakesInput] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
+    const [isEditorOpen, setIsEditorOpen] = useState(false);
 
     useEffect(() => {
         let mounted = true;
@@ -59,10 +68,8 @@ function CoachMemoryPanel({ onMemorySaved }) {
                 setOptions(memoryOptions);
                 setForm({
                     proficiencyLevel: memory.proficiencyLevel || "beginner",
-                    learningGoals: memory.learningGoals || [],
-                    weakSkills: memory.weakSkills || [],
-                    coachTone: memory.coachTone || "friendly",
-                    notes: memory.notes || ""
+                    learningGoals: (memory.learningGoals || []).slice(0, memoryOptions?.limits?.learningGoals || MAX_LEARNING_GOALS),
+                    weakSkills: (memory.weakSkills || []).slice(0, memoryOptions?.limits?.weakSkills || MAX_WEAK_SKILLS)
                 });
                 setTopicsInput(toInputText(memory.preferredTopics || []));
                 setMistakesInput(toInputText(memory.frequentMistakes || []));
@@ -78,12 +85,56 @@ function CoachMemoryPanel({ onMemorySaved }) {
         };
     }, []);
 
+    const openEditor = () => {
+        if (!form) return;
+        setDraftForm({
+            ...form,
+            learningGoals: [...(form.learningGoals || [])],
+            weakSkills: [...(form.weakSkills || [])]
+        });
+        setDraftTopicsInput(topicsInput);
+        setDraftMistakesInput(mistakesInput);
+        setIsEditorOpen(true);
+    };
+
+    const closeEditor = () => {
+        if (isSaving) return;
+        setIsEditorOpen(false);
+        setDraftForm(null);
+        setDraftTopicsInput("");
+        setDraftMistakesInput("");
+    };
+
+    useEffect(() => {
+        window.addEventListener("easyTalk:coachMemoryEditRequested", openEditor);
+        return () => {
+            window.removeEventListener("easyTalk:coachMemoryEditRequested", openEditor);
+        };
+    }, [form, topicsInput, mistakesInput, isSaving]);
+
     const toggleArrayValue = (field, value) => {
-        setForm((current) => {
+        setDraftForm((current) => {
             const values = new Set(current?.[field] || []);
             if (values.has(value)) {
                 values.delete(value);
             } else {
+                const limit = field === "learningGoals"
+                    ? (options?.limits?.learningGoals || MAX_LEARNING_GOALS)
+                    : field === "weakSkills"
+                    ? (options?.limits?.weakSkills || MAX_WEAK_SKILLS)
+                    : Infinity;
+                if (values.size >= limit) {
+                    Swal.fire({
+                        icon: "info",
+                        title: "Chọn trọng tâm vừa đủ",
+                        text: field === "learningGoals"
+                            ? `Bạn chỉ nên chọn tối đa ${limit} mục tiêu học để Coach lên kế hoạch sát hơn.`
+                            : `Bạn chỉ nên chọn tối đa ${limit} kỹ năng yếu để Coach ưu tiên đúng trọng tâm mỗi ngày.`,
+                        timer: 1800,
+                        showConfirmButton: false
+                    });
+                    return current;
+                }
                 values.add(value);
             }
             return { ...current, [field]: [...values] };
@@ -91,15 +142,22 @@ function CoachMemoryPanel({ onMemorySaved }) {
     };
 
     const handleSave = async () => {
-        if (!form) return;
+        if (!draftForm) return;
         setIsSaving(true);
         try {
             const payload = {
-                ...form,
-                preferredTopics: fromInputText(topicsInput),
-                frequentMistakes: fromInputText(mistakesInput)
+                ...draftForm,
+                preferredTopics: fromInputText(draftTopicsInput),
+                frequentMistakes: fromInputText(draftMistakesInput)
             };
             const memory = await LearningAgentService.updateMemory(payload);
+            setForm({
+                proficiencyLevel: memory.proficiencyLevel || "beginner",
+                learningGoals: (memory.learningGoals || []).slice(0, options?.limits?.learningGoals || MAX_LEARNING_GOALS),
+                weakSkills: (memory.weakSkills || []).slice(0, options?.limits?.weakSkills || MAX_WEAK_SKILLS)
+            });
+            setTopicsInput(toInputText(memory.preferredTopics || []));
+            setMistakesInput(toInputText(memory.frequentMistakes || []));
             Swal.fire({
                 icon: "success",
                 title: "Đã lưu hồ sơ học tập",
@@ -108,6 +166,10 @@ function CoachMemoryPanel({ onMemorySaved }) {
                 showConfirmButton: false
             });
             await onMemorySaved?.(memory);
+            setIsEditorOpen(false);
+            setDraftForm(null);
+            setDraftTopicsInput("");
+            setDraftMistakesInput("");
         } catch (error) {
             Swal.fire({
                 icon: "error",
@@ -149,22 +211,20 @@ function CoachMemoryPanel({ onMemorySaved }) {
         );
     }
 
-    return (
-        <section className="coach-memory-card">
-            <div
-                className="coach-section-heading"
-                data-coach-target="coach-memory-profile"
-                data-coach-guide-target="learner-memory"
-            >
-                <h3>Hồ sơ học tập</h3>
-                <span>Memory nền</span>
-            </div>
+    const formatList = (values = [], fallback = "Chưa có") => {
+        const labels = values.map(value => LABELS[value] || value).filter(Boolean);
+        return labels.length ? labels.join(", ") : fallback;
+    };
 
+    const renderEditorForm = () => {
+        if (!draftForm) return null;
+        return (
+        <>
             <div className="coach-memory-field">
                 <label>Trình độ hiện tại</label>
                 <select
-                    value={form.proficiencyLevel}
-                    onChange={(e) => setForm({ ...form, proficiencyLevel: e.target.value })}
+                    value={draftForm.proficiencyLevel}
+                    onChange={(e) => setDraftForm({ ...draftForm, proficiencyLevel: e.target.value })}
                 >
                     {options.proficiencyLevels.map(level => (
                         <option key={level} value={level}>{LABELS[level] || level}</option>
@@ -173,13 +233,14 @@ function CoachMemoryPanel({ onMemorySaved }) {
             </div>
 
             <div className="coach-memory-field">
-                <label>Mục tiêu học</label>
+                <label>Mục tiêu học <span>Tối đa {options?.limits?.learningGoals || MAX_LEARNING_GOALS}</span></label>
                 <div className="coach-memory-chips">
                     {options.learningGoals.map(goal => (
                         <button
                             key={goal}
                             type="button"
-                            className={form.learningGoals.includes(goal) ? "active" : ""}
+                            className={draftForm.learningGoals.includes(goal) ? "active" : ""}
+                            disabled={!draftForm.learningGoals.includes(goal) && draftForm.learningGoals.length >= (options?.limits?.learningGoals || MAX_LEARNING_GOALS)}
                             onClick={() => toggleArrayValue("learningGoals", goal)}
                         >
                             {LABELS[goal] || goal}
@@ -189,13 +250,14 @@ function CoachMemoryPanel({ onMemorySaved }) {
             </div>
 
             <div className="coach-memory-field">
-                <label>Kỹ năng yếu cần Coach ưu tiên</label>
+                <label>Kỹ năng yếu cần Coach ưu tiên <span>Tối đa {options?.limits?.weakSkills || MAX_WEAK_SKILLS}</span></label>
                 <div className="coach-memory-chips">
                     {options.skills.map(skill => (
                         <button
                             key={skill}
                             type="button"
-                            className={form.weakSkills.includes(skill) ? "active" : ""}
+                            className={draftForm.weakSkills.includes(skill) ? "active" : ""}
+                            disabled={!draftForm.weakSkills.includes(skill) && draftForm.weakSkills.length >= (options?.limits?.weakSkills || MAX_WEAK_SKILLS)}
                             onClick={() => toggleArrayValue("weakSkills", skill)}
                         >
                             {LABELS[skill] || skill}
@@ -205,10 +267,10 @@ function CoachMemoryPanel({ onMemorySaved }) {
             </div>
 
             <div className="coach-memory-field">
-                <label>Chủ đề yêu thích</label>
+                <label>Chủ đề yêu thích luyện nói và luyện viết</label>
                 <input
-                    value={topicsInput}
-                    onChange={(e) => setTopicsInput(e.target.value)}
+                    value={draftTopicsInput}
+                    onChange={(e) => setDraftTopicsInput(e.target.value)}
                     placeholder="travel, work, food"
                 />
             </div>
@@ -216,39 +278,83 @@ function CoachMemoryPanel({ onMemorySaved }) {
             <div className="coach-memory-field">
                 <label>Lỗi thường gặp</label>
                 <input
-                    value={mistakesInput}
-                    onChange={(e) => setMistakesInput(e.target.value)}
+                    value={draftMistakesInput}
+                    onChange={(e) => setDraftMistakesInput(e.target.value)}
                     placeholder="past tense, article a/an, pronunciation /θ/"
                 />
             </div>
 
-            <div className="coach-memory-field">
-                <label>Phong cách Coach</label>
-                <select
-                    value={form.coachTone}
-                    onChange={(e) => setForm({ ...form, coachTone: e.target.value })}
-                >
-                    {options.coachTones.map(tone => (
-                        <option key={tone} value={tone}>{LABELS[tone] || tone}</option>
-                    ))}
-                </select>
-            </div>
+        </>
+        );
+    };
 
-            <div className="coach-memory-field">
-                <label>Ghi chú riêng</label>
-                <textarea
-                    value={form.notes}
-                    onChange={(e) => setForm({ ...form, notes: e.target.value })}
-                    maxLength={1000}
-                    placeholder="Ví dụ: Tôi muốn giao tiếp tự tin hơn khi đi làm."
-                />
-            </div>
+    return (
+        <>
+            <section
+                className="coach-memory-card coach-memory-summary-card"
+                data-coach-target="coach-memory-profile"
+                data-coach-guide-target="learner-memory"
+            >
+                <div className="coach-section-heading">
+                    <h3>Hồ sơ học tập của bạn</h3>
+                    <span>Memory nền</span>
+                </div>
 
-            <button className="coach-memory-save" onClick={handleSave} disabled={isSaving}>
-                <i className={isSaving ? "fas fa-spinner fa-spin" : "fas fa-save"}></i>
-                {isSaving ? "Đang lưu..." : "Lưu hồ sơ học tập"}
-            </button>
-        </section>
+                <div className="coach-memory-summary-text">
+                    <div className="coach-memory-summary-item">
+                        <i className="fas fa-signal"></i>
+                        <p><strong>Trình độ hiện tại</strong><span>{LABELS[form.proficiencyLevel] || form.proficiencyLevel}</span></p>
+                    </div>
+                    <div className="coach-memory-summary-item">
+                        <i className="fas fa-bullseye"></i>
+                        <p><strong>Mục tiêu học</strong><span>{formatList(form.learningGoals)}</span></p>
+                    </div>
+                    <div className="coach-memory-summary-item">
+                        <i className="fas fa-brain"></i>
+                        <p><strong>Kỹ năng yếu cần Coach ưu tiên</strong><span>{formatList(form.weakSkills)}</span></p>
+                    </div>
+                    <div className="coach-memory-summary-item">
+                        <i className="fas fa-tags"></i>
+                        <p><strong>Chủ đề yêu thích luyện nói và luyện viết</strong><span>{formatList(fromInputText(topicsInput), "Có thể để trống")}</span></p>
+                    </div>
+                    <div className="coach-memory-summary-item">
+                        <i className="fas fa-triangle-exclamation"></i>
+                        <p><strong>Lỗi thường gặp</strong><span>{formatList(fromInputText(mistakesInput), "Có thể để trống")}</span></p>
+                    </div>
+                </div>
+
+                <button className="coach-memory-save" onClick={openEditor}>
+                    <i className="fas fa-user-edit"></i>
+                    Cập nhật hồ sơ học tập
+                </button>
+            </section>
+
+            {isEditorOpen && (
+                <div className="coach-memory-modal-root" role="dialog" aria-modal="true" aria-label="Cập nhật hồ sơ học tập">
+                    <div className="coach-memory-modal-dim" onClick={closeEditor}></div>
+                    <section className="coach-memory-modal-card">
+                        <button
+                            className="coach-memory-modal-close"
+                            type="button"
+                            onClick={closeEditor}
+                            disabled={isSaving}
+                            aria-label="Đóng cập nhật hồ sơ"
+                        >
+                            <i className="fas fa-times"></i>
+                        </button>
+                        <div className="coach-section-heading">
+                            <h3>Cập nhật hồ sơ học tập</h3>
+                            <span>AI cá nhân hóa</span>
+                        </div>
+                        {renderEditorForm()}
+                        <button className="coach-memory-save" onClick={handleSave} disabled={isSaving}>
+                            <i className={isSaving ? "fas fa-spinner fa-spin" : "fas fa-save"}></i>
+                            {isSaving ? "Đang lưu..." : "Lưu hồ sơ học tập"}
+                        </button>
+                    </section>
+                </div>
+            )}
+        </>
     );
 }
 
