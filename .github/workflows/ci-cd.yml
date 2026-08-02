@@ -57,19 +57,24 @@ jobs:
       # 6️⃣ Deploy lên EC2 qua SSH Action chuẩn hóa
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
+        env:
+          ENV_CONTENT: ${{ secrets.ENV_PRODUCTION }}
+          DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+          DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
+          envs: ENV_CONTENT,DOCKER_PASS,DOCKER_USER
           script: |
-            # 1. Chuyển vào thư mục chứa docker-compose trên EC2
-            cd /home/ubuntu/app
+            # 1. Chuyển vào thư mục app trên Amazon Linux
+            cd /home/ec2-user/app
             
-            # 2. Login Docker Hub trên EC2 (Đảm bảo pull được nếu repo private)
-            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            # 2. Login Docker Hub trên EC2
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             
-            # 3. Tự động cập nhật file .env từ GitHub Secret
-            echo "${{ secrets.ENV_PRODUCTION }}" > .env
+            # 3. An toàn ghi đè nội dung file .env
+            echo "$ENV_CONTENT" > .env
             
             # 4. Pull image mới nhất về
             docker compose -f docker-compose.prod.yml pull
@@ -77,5 +82,5 @@ jobs:
             # 5. Cập nhật container (Zero downtime)
             docker compose -f docker-compose.prod.yml up -d --remove-orphans
             
-            # 6. Xóa các Docker image cũ không dùng để tiết kiệm đĩa EC2
+            # 6. Xóa các Docker image cũ không dùng
             docker image prune -f
