@@ -2,7 +2,7 @@ const UserRepository = require('../modules/user/repositories/userRepository');
 const UserProgressRepository = require('../modules/userprogress/repositories/userprogressRepository');
 
 const NotificationService = require('../modules/notification/services/notificationService');
-const UserSettingService = require('../modules/usersetting/services/userSettingService');
+const UserSettingService = require('../modules/usersetting/services/usersettingService');
 const UserProgressService = require('../modules/userprogress/services/userprogressService');
 const StreakService = require('../modules/userprogress/services/streakService');
 const LeaderboardService = require('../modules/userprogress/services/leaderboardService');
@@ -52,7 +52,7 @@ const grammarController = require('../modules/grammar/controllers/grammarControl
 const pronunciationController = require('../modules/pronunciation/controllers/pronunciationController');
 const storyController = require('../modules/story/controllers/storyController');
 const grammarExerciseController = require('../modules/grammarexercise/controllers/grammarexerciseController');
-const pronunciationExerciseController = require('../modules/pronunciationexercise/controllers/pronunciationExerciseController');
+const pronunciationExerciseController = require('../modules/pronunciationexercise/controllers/pronunciationexerciseController');
 const vocabularyExerciseController = require('../modules/vocabularyexercise/controllers/vocabularyexerciseController');
 const dictationController = require('../modules/dictationexercise/controllers/dictationexerciseController');
 const journeyController = require('../modules/journey/controllers/journeyController');
