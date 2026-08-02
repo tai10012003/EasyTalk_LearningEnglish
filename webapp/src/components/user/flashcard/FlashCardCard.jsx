@@ -2,30 +2,32 @@ import React, { useState } from "react";
 import UpdateFlashCard from "@/components/user/flashcard/UpdateFlashCard.jsx";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const FlashCardCard = ({ flashcard, onUpdate, onDelete, isOwner = false }) => {
+  const { t } = useTranslation();
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const handleDelete = async () => {
     const confirm = await Swal.fire({
-      title: "Xác nhận xóa?",
-      text: "Bạn có chắc chắn muốn xóa flashcard này không?",
+      title: t("flashcardPage.card.deleteConfirmTitle"),
+      text: t("flashcardPage.card.deleteConfirmText"),
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Xóa",
-      cancelButtonText: "Hủy",
+      confirmButtonText: t("flashcardPage.card.deleteConfirm"),
+      cancelButtonText: t("flashcardPage.card.deleteCancel"),
     });
     if (!confirm.isConfirmed) return;
     try {
       const data = await FlashCardService.deleteFlashcard(flashcard._id);
       if (data.success) {
-        await Swal.fire("🗑️ Đã xóa", "Flashcard đã bị xóa thành công!", "success");
+        await Swal.fire(t("flashcardPage.card.deleteSuccessTitle"), t("flashcardPage.card.deleteSuccessText"), "success");
         onDelete();
       } else {
-        Swal.fire("❌ Lỗi", data.message || "Xóa thất bại!", "error");
+        Swal.fire(t("flashcardPage.card.deleteErrorTitle"), data.message || t("flashcardPage.card.deleteFailed"), "error");
       }
     } catch (error) {
-      Swal.fire("❌ Lỗi", "Lỗi khi xóa flashcard: " + error.message, "error");
+      Swal.fire(t("flashcardPage.card.deleteErrorTitle"), t("flashcardPage.card.deleteErrorText", { message: error.message }), "error");
     }
   };
 
@@ -36,7 +38,7 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete, isOwner = false }) => {
       utterance.rate = 1;
       speechSynthesis.speak(utterance);
     } else {
-      Swal.fire("⚠️ Không hỗ trợ", "Trình duyệt của bạn không hỗ trợ phát âm!", "warning");
+      Swal.fire(t("flashcardPage.card.speechUnsupportedTitle"), t("flashcardPage.card.speechUnsupportedText"), "warning");
     }
   };
 
@@ -57,12 +59,12 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete, isOwner = false }) => {
           <em className="pronunciation">({flashcard.pronunciation})</em>
         </h5>
         <p className="definition">
-          <strong>Định nghĩa:</strong> {flashcard.meaning}
+          <strong>{t("flashcardPage.card.definition")}</strong> {flashcard.meaning}
         </p>
         <p className="example">
-          <strong>Ví dụ:</strong> {flashcard.exampleSentence}
+          <strong>{t("flashcardPage.card.example")}</strong> {flashcard.exampleSentence}
         </p>
-        <p>Người tạo: {flashcard.username || 'Unknown'}</p>
+        <p>{t("flashcardPage.card.creator", { username: flashcard.username || t("flashcardPage.card.unknown") })}</p>
       </div>
       <div className="col-md-5 text-center">
         {flashcard.image && (
@@ -80,13 +82,13 @@ const FlashCardCard = ({ flashcard, onUpdate, onDelete, isOwner = false }) => {
               className="btn_4"
               onClick={() => setIsEditModalOpen(true)}
             >
-              <i className="fas fa-edit"></i>Sửa
+              <i className="fas fa-edit"></i>{t("flashcardPage.card.edit")}
             </button>
             <button
               className="btn_4"
               onClick={handleDelete}
             >
-              <i className="fas fa-trash-alt"></i>Xóa
+              <i className="fas fa-trash-alt"></i>{t("flashcardPage.card.delete")}
             </button>
           </div>
         )}

@@ -2,40 +2,44 @@ import React, { useEffect, useState, useRef, useMemo } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarCard from "@/components/user/grammar/GrammarCard.jsx";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { Trans, useTranslation } from "react-i18next";
 import { GrammarService } from "@/services/GrammarService.jsx";
 
 function Grammar() {
+    const { t } = useTranslation();
     const [allGrammars, setAllGrammars] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [unlockedGrammars, setUnlockedGrammars] = useState([]);
     const currentLessonRef = useRef(null);
     const navigate = useNavigate();
+    const currentLanguage = useSelector((state) => state.language.current);
 
-    const levels = [
-        { key: "A1", name: "GIAI ĐOẠN 1: CƠ BẢN - A1 (Người mới bắt đầu)", color: "#4CAF50" },
-        { key: "A2", name: "GIAI ĐOẠN 2: SƠ CẤP - A2 (Sơ cấp)", color: "#8BC34A" },
-        { key: "B1", name: "GIAI ĐOẠN 3: TRUNG CẤP - B1 (Trung cấp)", color: "#FFC107" },
-        { key: "B2", name: "GIAI ĐOẠN 4: TRUNG CẤP CAO - B2 (Thượng cấp)", color: "#FF9800" },
-        { key: "C1", name: "GIAI ĐOẠN 5: CAO CẤP - C1 (Nâng cao)", color: "#F44336" },
-    ];
+    const levels = useMemo(() => [
+        { key: "A1", name: t("grammarPage.list.levels.A1"), color: "#4CAF50" },
+        { key: "A2", name: t("grammarPage.list.levels.A2"), color: "#8BC34A" },
+        { key: "B1", name: t("grammarPage.list.levels.B1"), color: "#FFC107" },
+        { key: "B2", name: t("grammarPage.list.levels.B2"), color: "#FF9800" },
+        { key: "C1", name: t("grammarPage.list.levels.C1"), color: "#F44336" },
+    ], [t]);
 
     const groupedGrammars = useMemo(() => {
         const grouped = {};
         levels.forEach(l => (grouped[l.key] = {}));
         allGrammars.forEach((item, index) => {
             let levelKey = item.level || "A1";
-            let category = item.category || "Module 1: Nền tảng căn bản";
+            let category = item.category || t("grammarPage.list.defaultCategory");
             if (!grouped[levelKey][category]) {
                 grouped[levelKey][category] = [];
             }
             grouped[levelKey][category].push({ ...item, originalIndex: index });
         });
         return grouped;
-    }, [allGrammars]);
+    }, [allGrammars, levels, t]);
 
     useEffect(() => {
-        document.title = "Bài học ngữ pháp - EasyTalk";
+        document.title = t("grammarPage.list.documentTitle");
         GrammarService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
@@ -65,7 +69,7 @@ function Grammar() {
             }
         };
         fetchData();
-    }, [navigate]);
+    }, [navigate, currentLanguage, t]);
 
     const isGrammarUnlocked = (grammarId) => {
         return unlockedGrammars.includes(grammarId.toString());
@@ -92,7 +96,7 @@ function Grammar() {
                 <div className="user-road-header">
                     <div className="container">
                         <h1 className="user-road-title">
-                            <i className="fas fa-language me-2"></i> LỘ TRÌNH HỌC NGỮ PHÁP TỪ A-Z
+                            <i className="fas fa-language me-2"></i> {t("grammarPage.list.title")}
                             <i
                                 className="fas fa-question-circle help-icon"
                                 style={{ cursor: "pointer", marginLeft: "10px" }}
@@ -100,14 +104,14 @@ function Grammar() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {unlockedGrammars.length} / {allGrammars.length}
+                            {t("grammarPage.list.subtitle", { unlocked: unlockedGrammars.length, total: allGrammars.length })}
                         </p>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
                                 <div className="user-progress-fill" style={{ width: `${allGrammars.length > 0 ? (unlockedGrammars.length / allGrammars.length) * 100 : 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {allGrammars.length > 0 ? Math.round((unlockedGrammars.length / allGrammars.length) * 100) : 0}% hoàn thành
+                                {t("grammarPage.list.completePercent", { percent: allGrammars.length > 0 ? Math.round((unlockedGrammars.length / allGrammars.length) * 100) : 0 })}
                             </span>
                         </div>
                     </div>
@@ -150,12 +154,12 @@ function Grammar() {
                     </div>
                 </div>
                 <div className="user-floating-buttons">
-                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title="Cuộn đến bài học hiện tại">
+                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title={t("grammarPage.list.scrollCurrentTitle")}>
                         <i className="fas fa-play-circle"></i>
-                        <span className="user-scroll-current-text">Tiếp tục học</span>
-                        <span className="user-scroll-hot-badge">HOT</span>
+                        <span className="user-scroll-current-text">{t("grammarPage.list.continueLearning")}</span>
+                        <span className="user-scroll-hot-badge">{t("grammarPage.list.hot")}</span>
                     </button>
-                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title="Lên đầu trang">
+                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title={t("grammarPage.list.scrollTopTitle")}>
                         <i className="fas fa-arrow-up"></i>
                     </button>
                 </div>
@@ -167,41 +171,41 @@ function Grammar() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="custom-modal-header">
-                            <h5><i className="fas fa-info-circle me-2"></i>Hướng Dẫn Bài Học Ngữ Pháp</h5>
+                            <h5><i className="fas fa-info-circle me-2"></i>{t("grammarPage.list.guide.title")}</h5>
                             <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                                 &times;
                             </button>
                         </div>
                         <div className="custom-modal-body">
                             <p>
-                                Chào mừng bạn đến với <strong>Lộ trình ngữ pháp từ A-Z</strong>! 
-                                Bạn sẽ học từng âm một cách khoa học, từ cơ bản đến nâng cao.
+                                <Trans i18nKey="grammarPage.list.guide.intro" components={{ strong: <strong /> }} />{" "}
+                                {t("grammarPage.list.guide.intro2")}
                             </p>
-                            <p><strong>Các bước trong mỗi bài học ngữ pháp:</strong></p>
+                            <p><strong>{t("grammarPage.list.guide.stepsTitle")}</strong></p>
                             <ol>
-                                <li><strong>Xem video hướng dẫn</strong> – Quan sát cách sử dụng ngữ pháp của giáo viên bản xứ</li>
-                                <li><strong>Nghe & lặp lại</strong> – Nghe từng câu và luyện nói theo thật chuẩn</li>
-                                <li><strong>So sánh giọng bạn với bản xứ</strong> – Hệ thống sẽ chấm điểm độ giống (0–100)</li>
-                                <li><strong>Luyện tập nhiều lần</strong> – Càng luyện càng lên điểm, càng giống người bản xứ</li>
-                                <li><strong>Làm bài kiểm tra nhỏ</strong> – Để mở khóa bài học tiếp theo</li>
+                                <li><Trans i18nKey="grammarPage.list.guide.step1" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="grammarPage.list.guide.step2" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="grammarPage.list.guide.step3" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="grammarPage.list.guide.step4" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="grammarPage.list.guide.step5" components={{ strong: <strong /> }} /></li>
                             </ol>
-                            <p><strong>Biểu tượng trên lộ trình:</strong></p>
+                            <p><strong>{t("grammarPage.list.guide.iconsTitle")}</strong></p>
                             <ul>
-                                <li><i className="fas fa-check text-success"></i> <strong>Đã hoàn thành</strong> – Bạn có thể ôn lại bất kỳ lúc nào</li>
-                                <li><i className="fas fa-play-circle text-primary"></i> <strong>Bài đang mở</strong> – Hãy học ngay để mở khóa bài tiếp theo!</li>
-                                <li><i className="fas fa-lock text-muted"></i> <strong>Chưa mở khóa</strong> – Hoàn thành bài hiện tại để tiếp tục</li>
+                                <li><i className="fas fa-check text-success"></i> <Trans i18nKey="grammarPage.list.guide.completedIcon" components={{ strong: <strong /> }} /></li>
+                                <li><i className="fas fa-play-circle text-primary"></i> <Trans i18nKey="grammarPage.list.guide.currentIcon" components={{ strong: <strong /> }} /></li>
+                                <li><i className="fas fa-lock text-muted"></i> <Trans i18nKey="grammarPage.list.guide.lockedIcon" components={{ strong: <strong /> }} /></li>
                             </ul>
                             <div className="alert alert-success mt-3" style={{fontSize: '0.95rem'}}>
-                                <strong>Mẹo hay:</strong> Luyện mỗi bài ít nhất <strong>3–5 lần</strong> cho đến khi đạt 
-                                <span className="text-success"> 90+</span> điểm giống bản xứ thì chuyển sang bài mới nhé!
+                                <strong>{t("grammarPage.list.guide.tipLabel")}</strong>{" "}
+                                <Trans i18nKey="grammarPage.list.guide.tipText" components={{ strong: <strong /> }} />
                             </div>
                             <p className="text-center mt-4">
-                                <strong>Chỉ cần kiên trì 10–15 phút mỗi ngày – bạn sẽ nói chuẩn như người bản xứ!</strong>
+                                <strong>{t("grammarPage.list.guide.closing")}</strong>
                             </p>
                         </div>
                         <div className="custom-modal-footer">
                             <button className="footer-btn" onClick={() => setIsModalOpen(false)}>
-                                Đã hiểu, bắt đầu học ngay!
+                                {t("grammarPage.list.guide.confirm")}
                             </button>
                         </div>
                     </div>

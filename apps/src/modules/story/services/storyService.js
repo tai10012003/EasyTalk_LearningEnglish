@@ -14,6 +14,7 @@ class StoryService {
         this.imageService = options.imageService || new storyImageService("easytalk/story");
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     getUserProgressService() {
@@ -24,9 +25,9 @@ class StoryService {
         return this.userProgressService;
     }
 
-    async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user") {
+    async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('story', { page, limit, category, level, search, role });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('story', role), cacheNs.listTags('story')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('story', role), cacheNs.listTags('story')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -38,6 +39,13 @@ class StoryService {
             const { stories, total } = await this.repository.findAll(filter, skip, limit);
             return { stories, totalStory: total };
         });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                stories: await this.englishTranslationService.applyTranslations("story", result.stories, lang)
+            };
+        }
+        return result;
     }
 
     async getStory(id) {
@@ -52,6 +60,14 @@ class StoryService {
         });
     }
 
+    async getLocalizedStoryBySlug(slug, lang = "vi") {
+        const story = await this.getStoryBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("story", story, lang);
+        }
+        return story;
+    }
+
     async _getOrCreateUserProgress(userId) {
         const userProgressService = this.getUserProgressService();
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
@@ -63,7 +79,7 @@ class StoryService {
         return userProgress;
     }
 
-    async getStoryDetails(userId, storyId) {
+    async getStoryDetails(userId, storyId, lang = "vi") {
         const story = await this.getStory(storyId);
         if (!story) {
             return { status: 404, data: { success: false, message: "Story not found" } };
@@ -73,7 +89,10 @@ class StoryService {
         if (!isUnlocked) {
             return { status: 403, data: { success: false, message: "This story is locked for you. Please complete previous stories first." } };
         }
-        return { status: 200, data: { success: true, data: story, userProgress } };
+        const localizedStory = lang === "en" && this.englishTranslationService
+            ? await this.englishTranslationService.applyTranslationToItem("story", story, lang)
+            : story;
+        return { status: 200, data: { success: true, data: localizedStory, userProgress } };
     }
 
     async completeStory(userId, storyId) {
@@ -147,6 +166,9 @@ class StoryService {
             }
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("story", id);
+        }
         await invalidateStoryCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Câu chuyện đã xóa thành công!" } };
     }

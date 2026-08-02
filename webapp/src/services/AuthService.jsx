@@ -1,4 +1,3 @@
-import i18n from "@/i18n";
 const API_URL = import.meta.env.VITE_API_URL;
 let accessToken = null;
 let isRefreshing = false;
@@ -96,9 +95,6 @@ export const AuthService = {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.setItem("role", data.role);
-            const lang = data.language || "vi";
-            localStorage.setItem("language", lang);
-            i18n.changeLanguage(lang);
             this.startTokenRefreshTimer();
             console.log("Login success:", responseData);
             // await PrizeService.checkAndUnlockPrizes();
@@ -171,10 +167,6 @@ export const AuthService = {
             localStorage.removeItem("token");
             if (data.role) {
                 localStorage.setItem("role", data.role);
-            }
-            if (data.language) {
-                localStorage.setItem("language", data.language);
-                i18n.changeLanguage(data.language);
             }
             this.startTokenRefreshTimer();
             console.log("Token refreshed successfully");
@@ -302,9 +294,7 @@ export const AuthService = {
             localStorage.removeItem("token");
             localStorage.removeItem("refreshToken");
             localStorage.removeItem("role");
-            localStorage.removeItem("language");
             localStorage.removeItem("user");
-            i18n.changeLanguage("vi");
             if (this.refreshTimer) {
                 clearTimeout(this.refreshTimer);
             }

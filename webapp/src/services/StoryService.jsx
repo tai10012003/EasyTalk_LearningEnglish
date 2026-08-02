@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
 
 function paginatedResponse(responseData, page) {
     const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
@@ -29,6 +34,7 @@ export const StoryService = {
             if (filters.category) query += `&category=${encodeURIComponent(filters.category)}`;
             if (filters.level) query += `&level=${encodeURIComponent(filters.level)}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story-list${query}`, {
                 method: 'GET',
             });
@@ -56,7 +62,8 @@ export const StoryService = {
 
     async getStoryBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/slug/${encodeURIComponent(slug)}`, {
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/slug/${encodeURIComponent(slug)}${langQuery}`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -72,12 +79,22 @@ export const StoryService = {
         }
     },
 
+    async getStory(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data;
+    },
+
     resetAlertFlag() {
         hasShownAlert = false;
     },
 
     async getStoryDetail(id) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/${id}${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {

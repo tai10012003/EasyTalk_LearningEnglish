@@ -1,7 +1,9 @@
 import React, { useState, useCallback, useMemo } from "react";
 import confetti from "canvas-confetti";
+import { useTranslation } from "react-i18next";
 
 function StoryQuiz({ quiz, onNext }) {
+    const { t } = useTranslation();
     const [selected, setSelected] = useState(null);
     const [isAnswered, setIsAnswered] = useState(false);
     const [hasContinued, setHasContinued] = useState(false);
@@ -68,12 +70,12 @@ function StoryQuiz({ quiz, onNext }) {
                         }`}
                     >
                         {selected == quiz.answer
-                            ? "✅ Chính xác!"
-                            : `❌ Sai rồi. Đáp án đúng: ${quiz.answer}`}
+                            ? `✅ ${t("storyPage.quiz.correct")}`
+                            : `❌ ${t("storyPage.quiz.incorrect", { answer: quiz.answer })}`}
                     </p>
                     {!hasContinued && (
                         <button className="btn_1" onClick={handleNextClick}>
-                            <i className="fas fa-arrow-right ms-2"></i>Tiếp tục
+                            <i className="fas fa-arrow-right ms-2"></i>{t("storyPage.quiz.continue")}
                         </button>
                     )}
                 </div>

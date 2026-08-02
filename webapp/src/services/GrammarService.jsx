@@ -3,11 +3,18 @@ import Swal from "sweetalert2";
 const API_URL = import.meta.env.VITE_API_URL;
 
 let hasShownAlert = false;
+
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
 export const GrammarService = {
     async fetchGrammars(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar-list${query}`, {
                 method: 'GET',
             });
@@ -34,9 +41,19 @@ export const GrammarService = {
         }
     },
 
+    async getGrammar(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data;
+    },
+
     async getGrammarBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/slug/${encodeURIComponent(slug)}`, {
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/slug/${encodeURIComponent(slug)}${langQuery}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
@@ -50,7 +67,8 @@ export const GrammarService = {
     },
 
     async getGrammarDetail(id) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {

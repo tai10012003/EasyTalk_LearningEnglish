@@ -17,18 +17,19 @@ router.get("/api/story-list", verifyToken, asyncHandler(async (req, res) => {
         const level = req.query.level || "";
         const search = req.query.search || "";
         const role = req.user.role || "user";
-        const { stories, totalStory } = await storyService.getStoryList(page, limit, category, level, search, role);
+        const lang = req.query.lang || "vi";
+        const { stories, totalStory } = await storyService.getStoryList(page, limit, category, level, search, role, lang);
         const totalPages = Math.ceil(totalStory / limit);
         res.json({ success: true, data: stories, currentPage: page, totalPages });
 }));
 
 router.get("/api/story/:id", verifyToken, asyncHandler(async (req, res) => {
-        const { status, data } = await storyService.getStoryDetails(req.user.id, req.params.id);
+        const { status, data } = await storyService.getStoryDetails(req.user.id, req.params.id, req.query.lang || "vi");
         return res.status(status).json(data);
 }));
 
 router.get("/api/story/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const story = await storyService.getStoryBySlug(req.params.slug);
+        const story = await storyService.getLocalizedStoryBySlug(req.params.slug, req.query.lang || "vi");
         if (!story) return res.status(404).json({ message: "Story not found" });
         res.json({ data: story });
 }));

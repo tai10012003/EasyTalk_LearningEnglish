@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import Banner from '@/components/user/home/Banner.jsx';
 import AboutLearning from '@/components/user/AboutLearning.jsx';
 import YourJourney from '@/components/user/YourJourney.jsx';
@@ -11,9 +12,13 @@ import "react-toastify/dist/ReactToastify.css";
 
 function Home() {
   const toastShownRef = useRef(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = "Trang chủ - EasyTalk";
+    document.title = t("home.title");
+  }, [t]);
+
+  useEffect(() => {
     const LoggedIn = sessionStorage.getItem("LoggedIn");
     if (!LoggedIn || toastShownRef.current) {
       return;
@@ -22,7 +27,7 @@ function Home() {
     NotificationService.fetchUserNotifications().then((notifications) => {
       const unreadCount = notifications.filter(n => !n.isRead).length;
       if (unreadCount > 0) {
-        toast.info(`Bạn có ${unreadCount} thông báo chưa đọc`, {
+        toast.info(t("home.unreadNotification", { count: unreadCount }), {
           autoClose: 3000,
           position: "top-center",
         });
@@ -30,7 +35,7 @@ function Home() {
     }).finally(() => {
       sessionStorage.removeItem("LoggedIn");
     });
-  }, []);
+  }, [t]);
 
   return (
     <div>

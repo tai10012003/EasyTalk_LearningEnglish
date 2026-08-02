@@ -14,18 +14,21 @@ router.get("/api/grammar-list", verifyToken, asyncHandler(async function (req, r
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
     const role = req.user.role || "user";
-    const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit, "", role);
+    const lang = req.query.lang === "en" ? "en" : "vi";
+    const { grammars, totalGrammars } = await grammarService.getGrammarList(page, limit, "", role, lang);
     const totalPages = Math.ceil(totalGrammars / limit);
     res.json({ grammars, currentPage: page, totalPages });
 }));
 
 router.get("/api/grammar/:id", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await grammarService.getGrammarDetails(req.user.id, req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await grammarService.getGrammarDetails(req.user.id, req.params.id, lang);
         return res.status(status).json(data);
 }));
 
 router.get("/api/grammar/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const grammar = await grammarService.getGrammarBySlug(req.params.slug);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const grammar = await grammarService.getLocalizedGrammarBySlug(req.params.slug, lang);
         if (!grammar) {
             return res.status(404).json({ message: "Grammar not found" });
         }

@@ -14,18 +14,20 @@ router.get("/api/pronunciation-list", verifyToken, asyncHandler(async function (
     const page = parseInt(req.query.page) || 1;
     const limit = 12;
     const role = req.user.role || "user";
-    const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit, "", role);
+    const search = req.query.search || "";
+    const lang = req.query.lang || "vi";
+    const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit, search, role, lang);
     const totalPages = Math.ceil(totalPronunciations / limit);
-    res.json({ pronunciations, currentPage: page, totalPages });
+    res.json({ data: { pronunciations, currentPage: page, totalPages } });
 }));
 
 router.get("/api/pronunciation/:id", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await pronunciationService.getPronunciationDetails(req.user.id, req.params.id);
+        const { status, data } = await pronunciationService.getPronunciationDetails(req.user.id, req.params.id, req.query.lang || "vi");
         return res.status(status).json(data);
 }));
 
 router.get("/api/pronunciation/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const pronunciation = await pronunciationService.getPronunciationBySlug(req.params.slug);
+        const pronunciation = await pronunciationService.getLocalizedPronunciationBySlug(req.params.slug, req.query.lang || "vi");
         if (!pronunciation) {
             return res.status(404).json({ message: "Pronunciation not found" });
         }

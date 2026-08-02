@@ -1,21 +1,23 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from "react-i18next";
 
 const PronunciationCard = ({ item, index, isUnlocked, isCurrent }) => {
+    const { t } = useTranslation();
     return (
         <div className={`user-timeline-item ${index % 2 === 0 ? 'left' : 'right'} ${isUnlocked ? 'unlocked' : ''} ${isCurrent ? 'current' : ''}`}>
             <div className="user-timeline-card">
                 <div className="user-card-inner">
                     <div className="user-card-header">
-                        <span className="user-step-badge">Bước {index + 1}</span>
+                        <span className="user-step-badge">{t("pronunciationPage.card.step", { number: index + 1 })}</span>
                         {isCurrent && isUnlocked && (
-                            <span className="user-badge current">Học ngay</span>
+                            <span className="user-badge current">{t("pronunciationPage.card.current")}</span>
                         )}
                         {isUnlocked && !isCurrent && (
-                            <span className="user-badge completed">Đã hoàn thành</span>
+                            <span className="user-badge completed">{t("pronunciationPage.card.completed")}</span>
                         )}
                         {!isUnlocked && (
-                            <span className="user-badge locked">Chưa mở khóa</span>
+                            <span className="user-badge locked">{t("pronunciationPage.card.locked")}</span>
                         )}
                     </div>
                     <h3 className="user-card-title">{item.title}</h3>
@@ -28,15 +30,15 @@ const PronunciationCard = ({ item, index, isUnlocked, isCurrent }) => {
                     <div className="user-card-footer">
                         {isUnlocked && isCurrent ? (
                             <Link to={`/pronunciation/${item.slug}`} className="user-btn start">
-                                <i className="fas fa-play"></i> Bắt đầu học
+                                <i className="fas fa-play"></i> {t("pronunciationPage.card.start")}
                             </Link>
                         ) : isUnlocked ? (
                             <Link to={`/pronunciation/${item.slug}`} className="user-btn review">
-                                <i className="fas fa-redo"></i> Ôn lại
+                                <i className="fas fa-redo"></i> {t("pronunciationPage.card.review")}
                             </Link>
                         ) : (
                             <button className="user-btn disabled" disabled>
-                                <i className="fas fa-lock"></i> Chưa mở khóa
+                                <i className="fas fa-lock"></i> {t("pronunciationPage.card.locked")}
                             </button>
                         )}
                     </div>

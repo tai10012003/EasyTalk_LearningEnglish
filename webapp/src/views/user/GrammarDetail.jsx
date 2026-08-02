@@ -1,5 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, UNSAFE_NavigationContext } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarSentence from "@/components/user/grammar/GrammarSentence.jsx";
 import GrammarQuiz from "@/components/user/grammar/GrammarQuiz.jsx";
@@ -10,6 +12,7 @@ import Swal from "sweetalert2";
 
 function GrammarDetail() {
     const { slug } = useParams();
+    const { t } = useTranslation();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [grammar, setGrammar] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -25,13 +28,7 @@ function GrammarDetail() {
     const lastInteractionRef = useRef(Date.now());
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
-
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
+    const currentLanguage = useSelector((state) => state.language.current);
 
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
@@ -46,6 +43,13 @@ function GrammarDetail() {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -75,11 +79,11 @@ function GrammarDetail() {
             if (!allowNavigationRef.current && displayContent && !grammarCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang học giữa chừng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("grammarPage.detail.leaveWarningTitle"),
+                    text: t("grammarPage.detail.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("grammarPage.detail.leaveConfirm"),
+                    cancelButtonText: t("grammarPage.detail.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -97,7 +101,7 @@ function GrammarDetail() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, displayContent, grammarCompleted]);
+    }, [navigator, displayContent, grammarCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -114,7 +118,7 @@ function GrammarDetail() {
     }, [grammarCompleted, displayContent]);
 
     useEffect(() => {
-        document.title = "Chi tiết bài học ngữ pháp - EasyTalk";
+        document.title = t("grammarPage.detail.documentTitle");
         const fetchGrammarDetail = async () => {
             setIsLoading(true);
             try {
@@ -137,7 +141,7 @@ function GrammarDetail() {
             }
         };
         fetchGrammarDetail();
-    }, [slug]);
+    }, [slug, currentLanguage, t]);
 
     const handleStepChange = (step, total) => {
         setCurrentStep(step);
@@ -162,9 +166,9 @@ function GrammarDetail() {
             setGrammarCompleted(true);
             Swal.fire({
                 icon: "success",
-                title: "Hoàn thành!",
-                text: "Chúc mừng! Bạn đã hoàn thành bài học ngữ pháp. Bài học ngữ pháp tiếp theo đã được mở khóa.",
-                confirmButtonText: "Quay lại danh sách bài học ngữ pháp",
+                title: t("grammarPage.detail.completeTitle"),
+                text: t("grammarPage.detail.completeText"),
+                confirmButtonText: t("grammarPage.detail.completeConfirm"),
             }).then(() => {
                 window.location.href = "/grammar";
             });
@@ -172,14 +176,14 @@ function GrammarDetail() {
             console.error("Error completing grammar:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                title: t("grammarPage.detail.errorTitle"),
+                text: t("grammarPage.detail.errorText")
             });
         }
     };
 
     if (isLoading) { return <LoadingScreen />; }
-    if (!grammar) return <p className="no-grammar">Đang tải bài học ngữ pháp ...</p>;
+    if (!grammar) return <p className="no-grammar">{t("grammarPage.detail.loading")}</p>;
 
     return (
         <div className="lesson-detail-container container">
@@ -197,7 +201,7 @@ function GrammarDetail() {
                     {progressPercent}%
                 </div>
             </div>
-            <p className="lesson-step-counter">Step {currentStep} / {totalSteps}</p>
+            <p className="lesson-step-counter">{t("grammarPage.detail.stepCounter", { current: currentStep, total: totalSteps })}</p>
             <div ref={contentRef} className="lesson-content" style={{ display: showQuiz && !isComplete ? "none" : "block" }}>
                 <GrammarSentence
                     content={displayContent}

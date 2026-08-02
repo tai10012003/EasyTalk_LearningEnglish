@@ -104,6 +104,7 @@ function initRealtimeAndRoutes() {
   app.use("/writing", controllers.writingAIController);
   app.use("/agent", controllers.learningAgentController);
   app.use("/cache", controllers.cacheController);
+  app.use("/english-translations", controllers.englishTranslationController);
 
   app.use(notFound);
   app.use(errorHandler);

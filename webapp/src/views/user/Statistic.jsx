@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import { PrizeService } from "@/services/PrizeService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import * as XLSX from "xlsx";
 import PptxGenJS from "pptxgenjs";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 import StatisticChart from "@/components/user/statistic/StatisticChart";
 import StatisticAchievements from "@/components/user/statistic/StatisticAchievements";
 import StatisticPrizes from "@/components/user/statistic/StatisticPrizes";
 import FollowListModal from "@/components/user/FollowListModal";
 
 const Statistic = () => {
+    const { t, i18n } = useTranslation();
     const [activeChart, setActiveChart] = useState("time");
     const [period, setPeriod] = useState("week");
     const [chartData, setChartData] = useState([]);
@@ -38,10 +40,11 @@ const Statistic = () => {
     const [currentUserId, setCurrentUserId] = useState(null);
 
     const periods = [
-        { key: "week", label: "Tuần này" },
-        { key: "month", label: "Tháng này" },
-        { key: "year", label: "Năm nay" },
+        { key: "week", label: t("statisticPage.periods.week") },
+        { key: "month", label: t("statisticPage.periods.month") },
+        { key: "year", label: t("statisticPage.periods.year") },
     ];
+    const locale = i18n.language === "en" ? "en-US" : "vi-VN";
 
     const getVNDate = (date = new Date()) => {
         const utc = date.getTime() + date.getTimezoneOffset() * 60000;
@@ -66,8 +69,8 @@ const Statistic = () => {
         setFollowModal({ open: false, type: "followers", userId: null });
     };
 
-    const fetchStats = async () => {
-        document.title = "Thống Kê Tiến Trình Học Tập - EasyTalk";
+    const fetchStats = useCallback(async () => {
+        document.title = t("statisticPage.documentTitle");
         setLoading(true);
         try {
             const stats = await UserProgressService.getUserStatistics(activeChart, period);
@@ -97,8 +100,8 @@ const Statistic = () => {
             console.error("Lỗi tải thống kê:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Không thể tải dữ liệu thống kê. Vui lòng thử lại.",
+                title: t("statisticPage.alert.errorTitle"),
+                text: t("statisticPage.alert.loadStatsFailed"),
                 timer: 3000,
             });
             setChartData([]);
@@ -106,9 +109,9 @@ const Statistic = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeChart, period, t]);
 
-    const fetchMyFollowStats = async () => {
+    const fetchMyFollowStats = useCallback(async () => {
         if (!currentUserId) return;
         try {
             const stats = await UserProgressService.getFollowStats(currentUserId);
@@ -117,15 +120,15 @@ const Statistic = () => {
         } catch (err) {
             console.error("Lỗi tải follow stats:", err);
         }
-    };
+    }, [currentUserId]);
 
     useEffect(() => {
         if (currentUserId) {
             fetchMyFollowStats();
         }
-    }, [currentUserId]); 
+    }, [currentUserId, fetchMyFollowStats]); 
 
-    const fetchPrizes = async () => {
+    const fetchPrizes = useCallback(async () => {
         setPrizesLoading(true);
         try {
             const [prizes, userUnlockedPrizes] = await Promise.all([
@@ -139,31 +142,31 @@ const Statistic = () => {
         } finally {
             setPrizesLoading(false);
         }
-    };
+    }, []);
 
-    const fetchChampionStats = async () => {
+    const fetchChampionStats = useCallback(async () => {
         try {
             const stats = await UserProgressService.getChampionStats();
             setChampionStats(stats);
-        } catch (err) {
+        } catch {
             setChampionStats({ week: 0, month: 0, year: 0, total: 0 });
         }
-    };
+    }, []);
 
     useEffect(() => {
         fetchStats();
         fetchPrizes();
         fetchChampionStats();
-    }, [activeChart, period]);
+    }, [fetchStats, fetchPrizes, fetchChampionStats]);
 
     const getUsername = () => {
         if (currentUser?.userDetails?.username) return currentUser.userDetails.username;
-        return AuthService.getCurrentUser()?.username || "Unknown";
+        return AuthService.getCurrentUser()?.username || t("statisticPage.common.unknown");
     };
 
     const getEmail = () => {
         if (currentUser?.userDetails?.email) return currentUser.userDetails.email;
-        return AuthService.getCurrentUser()?.email || "Unknown";
+        return AuthService.getCurrentUser()?.email || t("statisticPage.common.unknown");
     };
 
     const isPrizeUnlocked = (prizeCode) => {
@@ -225,13 +228,13 @@ const Statistic = () => {
     const exportExcel = () => {
         if (!currentUser) return;
         const personalInfo = [
-            ["THÔNG TIN CÁ NHÂN"],
+            [t("statisticPage.export.personalInfoTitle")],
             ["Username", getUsername()],
             ["Email", getEmail()],
         ];
         const ws1 = XLSX.utils.aoa_to_sheet(personalInfo);
-        const chartTitle = activeChart == "time" ? (period == "week" ? "Thời gian học theo ngày (tuần này)" : period == "month" ? "Thời gian học theo tháng" : "Thời gian học theo năm"): (period == "week" ? "Điểm kinh nghiệm theo ngày (tuần này)" : period == "month" ? "Điểm kinh nghiệm theo tháng" : "Điểm kinh nghiệm theo năm");
-        const headers = ["Ngày", activeChart == "time" ? "Thời gian học (giờ)" : "Điểm kinh nghiệm"];
+        const chartTitle = t(`statisticPage.chart.titles.${activeChart}.${period}`);
+        const headers = [t("statisticPage.export.date"), activeChart == "time" ? t("statisticPage.export.studyTimeHours") : t("statisticPage.export.experiencePoints")];
         const excelData = [ [chartTitle], [], headers ];
         fullDates.forEach(date => {
             const dateStr = formatDateString(date);
@@ -239,11 +242,11 @@ const Statistic = () => {
             const value = found ? found.value : 0;
             let dateLabel;
             if (period == "week") {
-                const weekday = date.toLocaleDateString("vi-VN", { weekday: "long" });
+                const weekday = date.toLocaleDateString(locale, { weekday: "long" });
                 const day = date.getDate().toString().padStart(2, "0");
                 const month = (date.getMonth() + 1).toString().padStart(2, "0");
                 const year = date.getFullYear();
-                dateLabel = `${weekday} - ngày ${day}/${month}/${year}`;
+                dateLabel = t("statisticPage.export.weekDateLabel", { weekday, day, month, year });
             } else {
                 const day = date.getDate().toString().padStart(2, "0");
                 const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -311,8 +314,8 @@ const Statistic = () => {
         styleSheet(ws1, true);
         styleSheet(ws2);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws1, "Thông tin cá nhân");
-        XLSX.utils.book_append_sheet(wb, ws2, "Thống kê biểu đồ");
+        XLSX.utils.book_append_sheet(wb, ws1, t("statisticPage.export.personalInfoSheet"));
+        XLSX.utils.book_append_sheet(wb, ws2, t("statisticPage.export.chartSheet"));
         const vnNow = getVNDate(new Date());
         const hours = new Date().getHours().toString().padStart(2, "0");
         const minutes = new Date().getMinutes().toString().padStart(2, "0");
@@ -328,7 +331,7 @@ const Statistic = () => {
     const exportPpt = () => {
         const pptx = new PptxGenJS();
         const slide1 = pptx.addSlide();
-        slide1.addText("Thông tin cá nhân:", {
+        slide1.addText(t("statisticPage.export.personalInfoTitleWithColon"), {
             x: 0.5,
             y: 1.5,
             fontSize: 24,
@@ -348,7 +351,7 @@ const Statistic = () => {
             color: "475569"
         });
         const slide2 = pptx.addSlide();
-        const chartTitle = activeChart == "time" ? (period == "week" ? "Thời gian học theo ngày" : period == "month" ? "Thời gian học theo tháng" : "Thời gian học theo năm") : (period == "week" ? "Điểm kinh nghiệm theo ngày" : period == "month" ? "Điểm kinh nghiệm theo tháng" : "Điểm kinh nghiệm theo năm");
+        const chartTitle = t(`statisticPage.chart.titles.${activeChart}.${period}`);
         slide2.addText(chartTitle, {
             x: 0.5,
             y: 0.5,
@@ -358,11 +361,11 @@ const Statistic = () => {
         });
         const chartLabels = fullDates.map((date) => {
             if (period == "week") {
-                const weekday = date.toLocaleDateString("vi-VN", { weekday: "long" });
+                const weekday = date.toLocaleDateString(locale, { weekday: "long" });
                 const day = date.getDate().toString().padStart(2, "0");
                 const month = (date.getMonth() + 1).toString().padStart(2, "0");
                 const year = date.getFullYear();
-                return `${weekday} - ngày ${day}/${month}/${year}`;
+                return t("statisticPage.export.weekDateLabel", { weekday, day, month, year });
             } else {
                 const day = date.getDate().toString().padStart(2, "0");
                 const month = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -380,7 +383,7 @@ const Statistic = () => {
                 pptx.ChartType.line,
                 [
                     {
-                        name: "Thời gian học",
+                        name: t("statisticPage.chart.series.time"),
                         labels: chartLabels,
                         values: chartValues,
                     }
@@ -403,7 +406,7 @@ const Statistic = () => {
                     lineSize: 3,
                     valAxisMinVal: 0,
                     valAxisMaxVal: Math.max(...chartValues) > 0 ? Math.max(...chartValues) * 1.1 : 1,
-                    valAxisTitle: "Giờ",
+                    valAxisTitle: t("statisticPage.chart.axis.hours"),
                     valAxisLabelFormatCode: "0.00",
                 }
             );
@@ -412,7 +415,7 @@ const Statistic = () => {
                 pptx.ChartType.bar,
                 [
                     {
-                        name: "Điểm kinh nghiệm",
+                        name: t("statisticPage.chart.series.exp"),
                         labels: chartLabels,
                         values: chartValues,
                     }
@@ -450,20 +453,20 @@ const Statistic = () => {
     return (
         <div className="user-statistic-container container">
             <div className="user-statistic-header">
-                <h2 className="user-statistic-title">THỐNG KÊ TIẾN TRÌNH HỌC TẬP</h2>
+                <h2 className="user-statistic-title">{t("statisticPage.title")}</h2>
                 <p className="user-statistic-subtitle">
-                    Theo dõi thói quen học tập của bạn mỗi ngày
+                    {t("statisticPage.subtitle")}
                 </p>
             </div>
             {loading ? (
                 <div className="user-statistic-loading">
-                    <i className="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                    <i className="fas fa-spinner fa-spin"></i> {t("statisticPage.loading")}
                 </div>
             ) : (
                 currentUser && (
                     <>
                         <div className="user-statistic-info-container">
-                            <h3 className="user-statistic-info-title">Thông tin cá nhân của bạn</h3>
+                            <h3 className="user-statistic-info-title">{t("statisticPage.personalInfo.title")}</h3>
                             <div className="user-statistic-info">
                                 <p><strong>Username:</strong> {getUsername()}</p>
                                 <p><strong>Email:</strong> {getEmail()}</p>
@@ -474,13 +477,13 @@ const Statistic = () => {
                                 onClick={() => openFollowModal("followers")}
                                 style={{ cursor: "pointer" }}
                             >
-                                <strong>{followersCount}</strong> người theo dõi
+                                <strong>{followersCount}</strong> {t("statisticPage.follow.followers")}
                             </div>
                             <div className="user-statistic-follow-item"
                                 onClick={() => openFollowModal("following")}
                                 style={{ cursor: "pointer" }}
                             >
-                                <strong>{followingCount}</strong> người đang theo dõi
+                                <strong>{followingCount}</strong> {t("statisticPage.follow.following")}
                             </div>
                         </div>
                     </>

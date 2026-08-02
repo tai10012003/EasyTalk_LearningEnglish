@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
+  const { t } = useTranslation();
   const [name, setName] = useState(flashcardList.name || "");
   const [description, setDescription] = useState(flashcardList.description || "");
   const [loading, setLoading] = useState(false);
@@ -10,21 +12,21 @@ const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name.trim() || !description.trim()) {
-      Swal.fire("⚠️ Thiếu thông tin", "Vui lòng nhập đầy đủ thông tin!", "warning");
+      Swal.fire(t("flashcardPage.form.missingTitle"), t("flashcardPage.form.missingList"), "warning");
       return;
     }
     setLoading(true);
     try {
       const data = await FlashCardService.updateFlashcardList(flashcardList._id, name, description);
       if (data.success) {
-        await Swal.fire("✅ Thành công", "Cập nhật danh sách flashcard thành công!", "success");
+        await Swal.fire(t("flashcardPage.form.successTitle"), t("flashcardPage.form.updateListSuccess"), "success");
         onUpdated();
         onClose();
       } else {
-        Swal.fire("❌ Lỗi", data.message || "Có lỗi xảy ra.", "error");
+        Swal.fire(t("flashcardPage.form.errorTitle"), data.message || t("flashcardPage.form.genericError"), "error");
       }
     } catch (error) {
-      Swal.fire("❌ Lỗi", "Lỗi khi cập nhật flashcard list: " + error.message, "error");
+      Swal.fire(t("flashcardPage.form.errorTitle"), t("flashcardPage.form.updateListError", { message: error.message }), "error");
     }
     setLoading(false);
   };
@@ -35,7 +37,7 @@ const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
     <div className="custom-modal-overlay" onClick={onClose}>
       <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
         <div className="custom-modal-header">
-          <h5>CHỈNH SỬA DANH SÁCH FLASHCARD</h5>
+          <h5>{t("flashcardPage.form.updateListTitle")}</h5>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -43,28 +45,28 @@ const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
         <form onSubmit={handleSubmit}>
           <div className="custom-modal-body">
             <div className="mb-3">
-              <label className="form-label">Tên danh sách:</label>
+              <label className="form-label">{t("flashcardPage.form.listName")}</label>
               <input
                 type="text"
                 className="form-control"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Nhập tên danh sách"
+                placeholder={t("flashcardPage.form.listNamePlaceholder")}
                 required
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Mô tả:</label>
+              <label className="form-label">{t("flashcardPage.form.description")}</label>
               <textarea
                 className="form-control"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Mô tả danh sách (tối đa 500 ký tự)"
+                placeholder={t("flashcardPage.form.descriptionPlaceholder")}
                 rows={4}
                 maxLength={500}
                 required
               />
-              <small className="text-muted">{description.length}/500 ký tự</small>
+              <small className="text-muted">{t("flashcardPage.form.charCount", { count: description.length })}</small>
             </div>
           </div>
           <div
@@ -76,10 +78,10 @@ const UpdateFlashCardList = ({ isOpen, onClose, flashcardList, onUpdated }) => {
             }}
           >
             <button type="button" className="footer-btn" onClick={onClose} disabled={loading}>
-              <i className="fas fa-times"></i>Đóng
+              <i className="fas fa-times"></i>{t("flashcardPage.form.close")}
             </button>
             <button type="submit" className="footer-btn" disabled={loading}>
-              <i className="fas fa-save"></i>{loading ? "Đang lưu..." : "Lưu"}
+              <i className="fas fa-save"></i>{loading ? t("flashcardPage.form.saving") : t("flashcardPage.form.save")}
             </button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import confetti from "canvas-confetti";
 import Swal from "sweetalert2";
 import html2canvas from "html2canvas";
@@ -8,16 +8,18 @@ import CreateFlashCardList from "@/components/user/flashcardList/CreateFlashCard
 import FlashCardGraph from "@/components/user/flashcardList/FlashCardGraph.jsx";
 import FlashCardGoal from "@/components/user/flashcardList/FlashCardGoal.jsx";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import { useTranslation } from "react-i18next";
 
-const BADGES = [
-    { name: "Tân binh chăm chỉ", threshold: 1000, icon: "🥉" },
-    { name: "Chiến binh ngôn từ", threshold: 3000, icon: "🥈" },
-    { name: "Bậc thầy từ vựng", threshold: 6000, icon: "🥇" },
-    { name: "Huyền thoại ôn tập", threshold: 10000, icon: "🏆" },
-    { name: "Vua từ vựng", threshold: 15000, icon: "👑" },
+const BADGE_DEFS = [
+    { key: "newbie", threshold: 1000, icon: "🥉" },
+    { key: "warrior", threshold: 3000, icon: "🥈" },
+    { key: "master", threshold: 6000, icon: "🥇" },
+    { key: "legend", threshold: 10000, icon: "🏆" },
+    { key: "king", threshold: 15000, icon: "👑" },
 ];
 
 const FlashCardList = () => {
+    const { t } = useTranslation();
     const [flashcards, setFlashcards] = useState([]);
     const [dailyReviews, setDailyReviews] = useState({});
     const [totalFlashcards, setTotalFlashcards] = useState(0);
@@ -34,7 +36,7 @@ const FlashCardList = () => {
     const [lastBadge, setLastBadge] = useState(localStorage.getItem("lastBadge") || "");
     const [monthlyBadges, setMonthlyBadges] = useState({ monthlyTotal: 0, status: [] });
 
-    const loadFlashcards = async (page = currentPage, tab = activeTab) => {
+    const loadFlashcards = useCallback(async (page = currentPage, tab = activeTab) => {
         setIsLoading(true);
         try {
             const data = await FlashCardService.fetchFlashcardLists(page, 3, tab);
@@ -45,9 +47,18 @@ const FlashCardList = () => {
             setFlashcards([]);
         }
         setIsLoading(false);
-    };
+    }, [activeTab, currentPage]);
 
-    const loadDailyGoal = async () => {
+    const triggerConfetti = useCallback(() => {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#bb0000', '#ffffff', '#00bb00']
+        });
+    }, []);
+
+    const loadDailyGoal = useCallback(async () => {
         const data = await FlashCardService.fetchDailyGoal();
         setDailyGoal(data);
         if (data.isAchieved && !showConfetti) {
@@ -55,26 +66,27 @@ const FlashCardList = () => {
             setShowConfetti(true);
             setTimeout(() => setShowConfetti(false), 3000);
         }
-    };
+    }, [showConfetti, triggerConfetti]);
 
-    const triggerConfetti = () => {
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#bb0000', '#ffffff', '#00bb00']
-        });
-    };
+    const loadBadges = useCallback(async () => {
+        try {
+            const data = await FlashCardService.fetchBadges();
+            setMonthlyBadges(data);
+        } catch (err) {
+            console.error("Error loading badges:", err);
+            setMonthlyBadges({ monthlyTotal: 0, status: [] });
+        }
+    }, []);
 
     useEffect(() => {
-        document.title = "Danh sách flashcard - EasyTalk";
+        document.title = t("flashcardPage.list.documentTitle");
         FlashCardService.resetAlertFlag();
         setCurrentPage(1);
-    }, [activeTab]);
+    }, [activeTab, t]);
 
     useEffect(() => {
         loadFlashcards(currentPage, activeTab);
-    }, [currentPage, activeTab]);
+    }, [currentPage, activeTab, loadFlashcards]);
 
     useEffect(() => {
         if (activeTab === "mine") {
@@ -88,17 +100,7 @@ const FlashCardList = () => {
             setDailyGoal({ goal: 20, todayCount: 0, isAchieved: false });
             setMonthlyBadges({ monthlyTotal: 0, status: [] });
         }
-    }, [activeTab]);
-
-    const loadBadges = async () => {
-        try {
-            const data = await FlashCardService.fetchBadges();
-            setMonthlyBadges(data);
-        } catch (err) {
-            console.error("Error loading badges:", err);
-            setMonthlyBadges({ monthlyTotal: 0, status: [] });
-        }
-    };
+    }, [activeTab, loadBadges, loadDailyGoal]);
 
     useEffect(() => {
         if (activeTab === "mine" && flashcards.length > 0) {
@@ -127,19 +129,24 @@ const FlashCardList = () => {
         navigator.clipboard.writeText(text).then(() => {
             Swal.fire({
                 icon: "success",
-                title: "Đã copy!",
-                text: "Chia sẻ tiến độ của bạn.",
+                title: t("flashcardPage.list.copySuccessTitle"),
+                text: t("flashcardPage.list.copySuccessText"),
                 timer: 1500,
             });
         });
     };
 
     const handleShareProgress = async () => {
-        const shareText = `Tôi đã nhớ ${totalRemembered} từ với EasyTalk Flashcard! Cần ôn: ${totalToReview}. Streak: ${dailyGoal.streak || 0} ngày. Thử ngay! ${window.location.origin}/flashcards #EasyTalkVocab`;
+        const shareText = t("flashcardPage.list.shareText", {
+            remembered: totalRemembered,
+            toReview: totalToReview,
+            streak: dailyGoal.streak || 0,
+            url: `${window.location.origin}/flashcards`
+        });
         const section = document.querySelector(".contribution-section");
-        if (!section) return Swal.fire("Lỗi", "Không tìm thấy phần tiến độ để chụp ảnh.", "error");
+        if (!section) return Swal.fire(t("flashcardPage.list.shareCaptureErrorTitle"), t("flashcardPage.list.shareCaptureErrorText"), "error");
         Swal.fire({
-            title: "Đang tạo ảnh chia sẻ...",
+            title: t("flashcardPage.list.shareLoadingTitle"),
             didOpen: async () => {
                 Swal.showLoading();
                 try {
@@ -149,23 +156,23 @@ const FlashCardList = () => {
                         useCORS: true,
                     });
                     const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
-                    const file = new File([blob], "tien-do-easytalk.png", { type: "image/png" });
+                    const file = new File([blob], t("flashcardPage.list.shareImageFile"), { type: "image/png" });
                     const imgUrl = URL.createObjectURL(blob);
                     Swal.close();
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         await navigator.share({
                             files: [file],
                             text: shareText,
-                            title: "Tiến độ Flashcard của tôi",
+                            title: t("flashcardPage.list.shareTitle"),
                         });
                     } else {
                         Swal.fire({
-                            title: "Ảnh tiến độ của bạn",
+                            title: t("flashcardPage.list.shareImageTitle"),
                             html: `
-                                <img src="${imgUrl}" alt="Tiến độ học" style="max-width: 100%; border-radius: 10px; margin-bottom: 10px;">
-                                <p>Bạn có thể lưu ảnh hoặc copy nội dung để chia sẻ:</p>
+                                <img src="${imgUrl}" alt="${t("flashcardPage.list.shareImageAlt")}" style="max-width: 100%; border-radius: 10px; margin-bottom: 10px;">
+                                <p>${t("flashcardPage.list.shareImageHelp")}</p>
                                 <button id="copyShare" class="btn btn-success">
-                                    <i class="fas fa-copy"></i> Copy nội dung chia sẻ
+                                    <i class="fas fa-copy"></i> ${t("flashcardPage.list.copyShare")}
                                 </button>
                             `,
                             didOpen: () => {
@@ -176,7 +183,7 @@ const FlashCardList = () => {
                         });
                     }
                 } catch (err) {
-                    Swal.fire("Lỗi", "Không thể tạo ảnh chia sẻ.", "error");
+                    Swal.fire(t("flashcardPage.list.shareCaptureErrorTitle"), t("flashcardPage.list.shareCreateError"), "error");
                     console.error(err);
                 }
             },
@@ -186,21 +193,24 @@ const FlashCardList = () => {
     useEffect(() => {
         if (activeTab !== "mine" || !monthlyBadges.monthlyTotal) return;
         const totalMonthReviews = monthlyBadges.monthlyTotal;
-        const latestBadge = BADGES.slice().reverse().find(b => totalMonthReviews >= b.threshold);
+        const badges = BADGE_DEFS.map((badge) => ({
+            ...badge,
+            name: t(`flashcardPage.list.badges.${badge.key}`)
+        }));
+        const latestBadge = badges.slice().reverse().find(b => totalMonthReviews >= b.threshold);
         if (latestBadge && latestBadge.name !== lastBadge) {
             setLastBadge(latestBadge.name);
             localStorage.setItem("lastBadge", latestBadge.name);
             confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } });
             Swal.fire({
                 title: `${latestBadge.icon} ${latestBadge.name}!`,
-                html: `<div style="font-size:18px">Bạn đã đạt ${latestBadge.threshold} lượt ôn trong tháng này!<br><br>
-                    <span style="font-size:40px">${latestBadge.icon}</span></div>`,
+                html: `<div style="font-size:18px">${t("flashcardPage.list.badgeReached", { threshold: latestBadge.threshold, icon: latestBadge.icon })}</div>`,
                 background: "#1c1c1c",
                 color: "#fff",
-                confirmButtonText: "Tuyệt vời 🎉",
+                confirmButtonText: t("flashcardPage.list.badgeGreat"),
             });
         }
-    }, [monthlyBadges]);
+    }, [monthlyBadges, lastBadge, activeTab, t]);
 
     const renderPagination = () => {
         const pages = [];
@@ -211,7 +221,7 @@ const FlashCardList = () => {
                         className="page-link"
                         onClick={() => setCurrentPage(currentPage - 1)}
                     >
-                        &laquo; Previous
+                        &laquo; {t("flashcardPage.list.previous")}
                     </button>
                 </li>
             );
@@ -235,7 +245,7 @@ const FlashCardList = () => {
                         className="page-link"
                         onClick={() => setCurrentPage(currentPage + 1)}
                     >
-                        Next &raquo;
+                        {t("flashcardPage.list.next")} &raquo;
                     </button>
                 </li>
             );
@@ -247,34 +257,32 @@ const FlashCardList = () => {
 
     const renderBadges = () => {
         const totalMonthReviews = monthlyBadges.monthlyTotal || 0;
+        const badges = BADGE_DEFS.map((badge) => ({
+            ...badge,
+            name: t(`flashcardPage.list.badges.${badge.key}`)
+        }));
         const handleBadgeClick = (badge, unlocked) => {
             Swal.fire({
-                title: `${badge.icon} ${badge.name}`,
+                title: t("flashcardPage.list.badgeTitle", { icon: badge.icon, name: badge.name }),
                 html: unlocked
-                    ? `<div style="font-size:18px">
-                        🎉 Bạn đã đạt <b>${badge.threshold}</b> lượt ôn trong tháng này!<br><br>
-                        <span style="font-size:40px">${badge.icon}</span>
-                    </div>`
-                    : `<div style="font-size:18px">
-                        Bạn cần thêm <b>${badge.threshold - totalMonthReviews}</b> lượt ôn để đạt huy hiệu này.<br><br>
-                        <span style="font-size:40px; opacity:0.5">${badge.icon}</span>
-                    </div>`,
+                    ? `<div style="font-size:18px">${t("flashcardPage.list.badgeUnlocked", { threshold: badge.threshold, icon: badge.icon })}</div>`
+                    : `<div style="font-size:18px">${t("flashcardPage.list.badgeLocked", { remaining: badge.threshold - totalMonthReviews, icon: badge.icon })}</div>`,
                 background: unlocked ? "#1c1c1c" : "#222",
                 color: "#fff",
-                confirmButtonText: unlocked ? "Tuyệt vời 🎉" : "Cố lên 💪",
+                confirmButtonText: unlocked ? t("flashcardPage.list.badgeGreat") : t("flashcardPage.list.badgeKeepGoing"),
             });
         };
         return (
             <div className="my-badges mt-4 text-center">
-                <h5 className="mb-3">🏅 Huy hiệu tháng này của bạn</h5>
+                <h5 className="mb-3">{t("flashcardPage.list.badgeSectionTitle")}</h5>
                 <div className="badge-grid">
-                    {BADGES.map((b) => {
+                    {badges.map((b) => {
                         const unlocked = totalMonthReviews >= b.threshold;
                         return (
                             <div
                                 key={b.name}
                                 className={`badge-item ${unlocked ? "unlocked" : "locked"}`}
-                                title={`${b.name} - ${b.threshold} review/tháng`}
+                                title={t("flashcardPage.list.badgeReviewTitle", { name: b.name, threshold: b.threshold })}
                                 onClick={() => handleBadgeClick(b, unlocked)}
                             >
                                 <div className="badge-circle">
@@ -292,7 +300,7 @@ const FlashCardList = () => {
     return (
         <div className="lesson-container">
             <div className="hero-mini d-flex justify-content-between align-items-center">
-                <h3 className="hero-title mb-0">DANH SÁCH TỪ VỰNG FLASHCARD</h3>
+                <h3 className="hero-title mb-0">{t("flashcardPage.list.title")}</h3>
             </div>
             <div className="container">
                 <div className="flashcard-menu d-flex justify-content-between align-items-center mb-4">
@@ -301,22 +309,22 @@ const FlashCardList = () => {
                             className={`flashcard-btn ${activeTab == "mine" ? "active" : ""}`}
                             onClick={() => setActiveTab("mine")}
                         >
-                            Dành cho bạn
+                            {t("flashcardPage.list.mine")}
                         </button>
                         <button
                             className={`flashcard-btn ${activeTab == "explore" ? "active" : ""}`}
                             onClick={() => setActiveTab("explore")}
                         >
-                            Khám phá
+                            {t("flashcardPage.list.explore")}
                         </button>
                     </div>
                 </div>
                 {isMine && (
                     <div className="contribution-section mb-4">
                         <div className="goal-header d-flex justify-content-between align-items-center">
-                            <h5>Lịch sử ôn tập của bạn</h5>
+                            <h5>{t("flashcardPage.list.reviewHistory")}</h5>
                             <button className="btn_4 btn-sm" onClick={() => setGoalModalOpen(true)}>
-                                Đặt mục tiêu
+                                {t("flashcardPage.list.setGoal")}
                             </button>
                         </div>
                         {dailyGoal.goal > 0 && (
@@ -334,23 +342,23 @@ const FlashCardList = () => {
                                                 : "text-green"
                                         }`}
                                     >
-                                        {dailyGoal.todayCount}/{dailyGoal.goal} review hôm nay
+                                        {t("flashcardPage.list.reviewToday", { count: dailyGoal.todayCount, goal: dailyGoal.goal })}
                                     </span>
                                 </div>
-                                {dailyGoal.isAchieved && <small className="text-success">🎉 Đã đạt mục tiêu!</small>}
+                                {dailyGoal.isAchieved && <small className="text-success">{t("flashcardPage.list.goalAchieved")}</small>}
                             </div>
                         )}
                         <div className="flashcard-stats-row">
                             <div className="flashcard-stat">
-                                <span className="stat-label">Tổng số flashcard</span>
+                                <span className="stat-label">{t("flashcardPage.list.totalFlashcards")}</span>
                                 <span className="stat-value">{totalFlashcards}</span>
                             </div>
                             <div className="flashcard-stat">
-                                <span className="stat-label">Đã nhớ</span>
+                                <span className="stat-label">{t("flashcardPage.list.remembered")}</span>
                                 <span className="stat-value">{totalRemembered}</span>
                             </div>
                             <div className="flashcard-stat">
-                                <span className="stat-label">Cần ôn tập</span>
+                                <span className="stat-label">{t("flashcardPage.list.toReview")}</span>
                                 <span className="stat-value red">{totalToReview}</span>
                             </div>
                         </div>
@@ -372,10 +380,10 @@ const FlashCardList = () => {
                 {isMine && (
                     <div className="flashcard-action-row d-flex justify-content-between align-items-center mb-4">
                         <button className="btn_1" onClick={() => setIsModalOpen(true)}>
-                            <i className="fas fa-plus mr-2"></i>Tạo mới
+                            <i className="fas fa-plus mr-2"></i>{t("flashcardPage.list.create")}
                         </button>
                         <button className="btn_1 btn-sm" onClick={handleShareProgress}>
-                            <i className="fas fa-share-alt"></i> Share
+                            <i className="fas fa-share-alt"></i> {t("flashcardPage.list.share")}
                         </button>
                     </div>
                 )}
@@ -393,7 +401,7 @@ const FlashCardList = () => {
                             </div>
                         </div>
                     ) : (
-                        <p className="text-center no-stories">Không có flashcard nào.</p>
+                        <p className="text-center no-stories">{t("flashcardPage.list.empty")}</p>
                     )}
                 </div>
                 <nav aria-label="Page navigation">

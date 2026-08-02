@@ -4,7 +4,7 @@ import { StoryService } from "@/services/StoryService.jsx";
 
 function Story() {
     const fetchStory = async (page = 1) => {
-        const data = await StoryService.fetchStories(page, 6);
+        const data = await StoryService.fetchStories(page, 6, { admin: true });
         return {
             stories: data.data || [],
             currentPage: data.currentPage,
@@ -25,6 +25,7 @@ function Story() {
                 dataKey="stories"
                 addUrl="/admin/story/add"
                 updateUrl="/admin/story/update"
+                translateUrl="/admin/story/translate"
             />
         </div>
     );

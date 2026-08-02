@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
+function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl, translateUrl = "" }) {
     const [stories, setStories] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    const loadData = async (page = 1) => {
+    const loadData = useCallback(async (page = 1) => {
         setLoading(true);
         try {
             const data = await fetchData(page);
@@ -21,11 +21,11 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
         } finally {
             setLoading(false);
         }
-    };
+    }, [dataKey, fetchData]);
 
     useEffect(() => {
         loadData(currentPage);
-    }, [currentPage]);
+    }, [currentPage, loadData]);
 
     const handleDelete = async (id, title) => {
         Swal.fire({
@@ -41,7 +41,7 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa câu chuyện "${title}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa câu chuyện "${title}" thất bại!`, 'error');
                 }
             }
@@ -145,6 +145,14 @@ function StoryList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                             >
                                                 Sửa
                                             </a>
+                                            {translateUrl && (
+                                                <a
+                                                    href={`${translateUrl}/${story._id}`}
+                                                    className="admin-story-btn-translate"
+                                                >
+                                                    Dịch EN
+                                                </a>
+                                            )}
                                             <button
                                                 className="admin-story-btn-delete"
                                                 onClick={() => handleDelete(story._id, story.title)}

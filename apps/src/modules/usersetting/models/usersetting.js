@@ -25,12 +25,6 @@ class UserSetting {
                 errors.push('Font size must be between 10 and 24');
             }
         }
-        if(doc.general) {
-            const validLanguages = ['vi', 'en'];
-            if(doc.general.language && !validLanguages.includes(doc.general.language)) {
-                errors.push('Language must be vi or en');
-            }
-        }
         return errors;
     }
 

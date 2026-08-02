@@ -1,54 +1,57 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 import special_cource_1 from "@/assets/images/special_cource/special_cource_1.png";
 import special_cource_2 from "@/assets/images/special_cource/special_cource_2.png";
 import special_cource_3 from "@/assets/images/special_cource/special_cource_3.png";
 
 function SpecialCourse() {
+  const { t } = useTranslation();
+
   return (
     <section className="special_cource">
         <div className="container">
             <div className="section_tittle">
-                <h3>CÁC BÀI HỌC PHỔ BIẾN</h3>
+                <h3>{t("home.specialCourse.title")}</h3>
             </div>
             <div className="row">
                 <div className="col-sm-6 col-lg-4">
                     <div className="single_special_cource">
-                        <img src={special_cource_1} className="special_img" alt="Grammar Course" />
+                        <img src={special_cource_1} className="special_img" alt={t("home.specialCourse.grammarImageAlt")} />
                         <div className="special_cource_text">
-                            <a href="/grammar" className="btn_4">NGỮ PHÁP</a>
+                            <a href="/grammar" className="btn_4">{t("home.specialCourse.grammarCategory")}</a>
                             <a href="/grammar">
-                                <h4>BÀI HỌC NGỮ PHÁP</h4>
+                                <h4>{t("home.specialCourse.grammarTitle")}</h4>
                             </a>
                             <p>
-                                Danh sách bài học ngữ pháp cung cấp các bài học rõ ràng, có cấu trúc để cải thiện kỹ năng ngữ pháp từ cơ bản đến nâng cao.
+                                {t("home.specialCourse.grammarDescription")}
                             </p>
                         </div>
                     </div>
                 </div>
                 <div className="col-sm-6 col-lg-4">
                     <div className="single_special_cource">
-                        <img src={special_cource_2} className="special_img" alt="Vocabulary Course" />
+                        <img src={special_cource_2} className="special_img" alt={t("home.specialCourse.vocabularyImageAlt")} />
                         <div className="special_cource_text">
-                            <a href="/flashcards" className="btn_4">TỪ VỰNG</a>
+                            <a href="/flashcards" className="btn_4">{t("home.specialCourse.vocabularyCategory")}</a>
                             <a href="/flashcards">
-                                <h4>TỪ VỰNG FLASHCARD</h4>
+                                <h4>{t("home.specialCourse.vocabularyTitle")}</h4>
                             </a>
                             <p>
-                                Các bài học Flashcard giúp người học nắm vững vốn từ vựng thông qua các thẻ flashcard trực quan, tương tác để ghi nhớ hiệu quả.
+                                {t("home.specialCourse.vocabularyDescription")}
                             </p>
                         </div>
                     </div>
                 </div>
                 <div className="col-sm-6 col-lg-4">
                     <div className="single_special_cource">
-                        <img src={special_cource_3} className="special_img" alt="Pronunciation Course" />
+                        <img src={special_cource_3} className="special_img" alt={t("home.specialCourse.pronunciationImageAlt")} />
                         <div className="special_cource_text">
-                            <a href="/pronunciation" className="btn_4">PHÁT ÂM</a>
+                            <a href="/pronunciation" className="btn_4">{t("home.specialCourse.pronunciationCategory")}</a>
                             <a href="/pronunciation">
-                                <h4>BÀI HỌC PHÁT ÂM</h4>
+                                <h4>{t("home.specialCourse.pronunciationTitle")}</h4>
                             </a>
                             <p>
-                                Danh sách bài học phát âm giúp cải thiện khả năng nói rõ ràng với hướng dẫn từng bước về âm thanh, trọng âm và ngữ điệu.
+                                {t("home.specialCourse.pronunciationDescription")}
                             </p>
                         </div>
                     </div>

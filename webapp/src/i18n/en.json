@@ -28,8 +28,11 @@
         "reading": "READING",
         "writing": "WRITING WITH AI"
       },
-      "leaderboard": "LEADERBOARD",
-      "statistics": "STATISTICS",
+      "other": "OTHER",
+      "submenu_other": {
+        "leaderboard": "LEADERBOARD",
+        "statistics": "STATISTICS"
+      },
       "login": "Login",
       "submenu_loggedIn": {
         "study_reminders": "STUDY REMINDERS",
@@ -50,15 +53,833 @@
     "copyright": "All rights reserved | This template is created by"
   },
   "home": {
+    "title": "Home - EasyTalk",
+    "unreadNotification": "You have {{count}} unread notification(s)",
     "banner": {
       "explore": "Explore the world of English with us",
       "title": "IMPROVE YOUR ENGLISH SKILLS",
       "description": "Whether you're a beginner or looking to improve your skills, our journey is designed for all levels and will help you confidently use English every day. Start logging in and experience it now!!",
       "description_loggedIn": "Whether you're a beginner or looking to improve your skills, our journey is designed for all levels and will help you confidently use English every day. Start experiencing our English learning features!!",
       "start": "LET'S GET STARTED!!"
+    },
+    "aboutLearning": {
+      "eyebrow": "About us",
+      "title": "LEARN ENGLISH EASILY AND JOYFULLY",
+      "description": "At EasyTalk, we believe learning English should be enjoyable and accessible to everyone. Our platform offers interactive lessons, engaging challenges, and personalized content that helps you improve your skills step by step.",
+      "interactiveLessons": "Interactive lessons that match your learning style and pace",
+      "realPractice": "Practical examples and exercises that build confidence in communication",
+      "imageAlt": "Learning English online"
+    },
+    "journey": {
+      "title": "YOUR JOURNEY",
+      "description": "Start a personalized journey toward English fluency, matched to your progress and goals. Make every step count!",
+      "start": "START NOW",
+      "personalizedTitle": "Personalized lessons",
+      "personalizedDescription": "Your journey is tailored to your skill level and learning pace, helping you reach your goals efficiently.",
+      "challengeTitle": "Engaging challenges",
+      "challengeDescription": "From quizzes to interactive lessons, your journey includes exciting challenges so you can learn while enjoying the process.",
+      "progressTitle": "Track your progress",
+      "progressDescription": "With every completed lesson, you move one step closer to fluency. Your journey helps you stay motivated and focused on your goals."
+    },
+    "specialCourse": {
+      "title": "POPULAR LESSONS",
+      "grammarCategory": "GRAMMAR",
+      "grammarTitle": "GRAMMAR LESSONS",
+      "grammarDescription": "Our grammar lesson list provides clear, structured lessons to improve grammar skills from beginner to advanced levels.",
+      "vocabularyCategory": "VOCABULARY",
+      "vocabularyTitle": "FLASHCARD VOCABULARY",
+      "vocabularyDescription": "Flashcard lessons help learners master vocabulary through visual, interactive cards for effective memorization.",
+      "pronunciationCategory": "PRONUNCIATION",
+      "pronunciationTitle": "PRONUNCIATION LESSONS",
+      "pronunciationDescription": "Pronunciation lessons help improve clear speaking with step-by-step guidance on sounds, stress, and intonation.",
+      "grammarImageAlt": "Grammar course",
+      "vocabularyImageAlt": "Vocabulary course",
+      "pronunciationImageAlt": "Pronunciation course"
+    },
+    "advancedCourse": {
+      "eyebrow": "PRACTICE & IMPROVE",
+      "title": "LEVEL UP YOUR SKILLS WITH OUR INTERACTIVE LEARNING SYSTEM",
+      "description": "Improve your language skills through focused practice sessions in grammar, pronunciation, and vocabulary. Our system is designed to boost your learning anytime, anywhere.",
+      "grammarTitle": "Grammar Practice",
+      "grammarDescription": "Master grammar rules with interactive exercises tailored to your level, helping you build a strong foundation.",
+      "pronunciationTitle": "Pronunciation Practice",
+      "pronunciationDescription": "Refine your pronunciation through guided lessons, helping you speak naturally and clearly in conversation.",
+      "vocabularyTitle": "Vocabulary Practice",
+      "vocabularyDescription": "Learn new words effectively by studying vocabulary grouped by relevant topics, making it easier to remember and use them in context."
+    },
+    "blog": {
+      "title": "NEWS AND EVENTS",
+      "imageAlt": "Blog post",
+      "firstTitle": "English cultural exchange",
+      "firstDescription": "Explore exchange activities that help learners confidently use English in real-world settings.",
+      "secondTitle": "Top 10 finalists in the English-Vietnamese talent search",
+      "secondDescription": "Meet standout participants and inspiring stories from the language talent competition.",
+      "thirdTitle": "English Language Studies - a path for language passion",
+      "thirdDescription": "Discover study opportunities, career paths, and growth journeys for English lovers.",
+      "viewAll": "View all"
     }
   },
-  "setting": {
+  "grammarPage": {
+    "list": {
+      "documentTitle": "Grammar Lessons - EasyTalk",
+      "title": "GRAMMAR ROADMAP FROM A TO Z",
+      "subtitle": "Complete each lesson to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+      "completePercent": "{{percent}}% complete",
+      "defaultCategory": "Module 1: Basic Foundations",
+      "scrollCurrentTitle": "Scroll to current lesson",
+      "continueLearning": "Continue learning",
+      "hot": "HOT",
+      "scrollTopTitle": "Back to top",
+      "levels": {
+        "A1": "STAGE 1: BASIC - A1 (Beginner)",
+        "A2": "STAGE 2: ELEMENTARY - A2 (Elementary)",
+        "B1": "STAGE 3: INTERMEDIATE - B1 (Intermediate)",
+        "B2": "STAGE 4: UPPER INTERMEDIATE - B2",
+        "C1": "STAGE 5: ADVANCED - C1"
+      },
+      "guide": {
+        "title": "Grammar Lesson Guide",
+        "intro": "Welcome to the <strong>Grammar Roadmap from A to Z</strong>!",
+        "intro2": "You will learn each topic step by step, from basic to advanced.",
+        "stepsTitle": "Steps in each grammar lesson:",
+        "step1": "<strong>Read the guide</strong> - Understand grammar structures and usage through clear examples",
+        "step2": "<strong>Read & remember</strong> - Move through small sections to understand the lesson more deeply",
+        "step3": "<strong>Study examples</strong> - Compare correct patterns and common mistakes",
+        "step4": "<strong>Practice several times</strong> - The more you practice, the longer the structures stay with you",
+        "step5": "<strong>Take a short quiz</strong> - Unlock the next lesson",
+        "iconsTitle": "Roadmap icons:",
+        "completedIcon": "<strong>Completed</strong> - You can review it anytime",
+        "currentIcon": "<strong>Current lesson</strong> - Study now to unlock the next lesson!",
+        "lockedIcon": "<strong>Locked</strong> - Complete the current lesson to continue",
+        "tipLabel": "Tip:",
+        "tipText": "Practice each lesson at least <strong>3-5 times</strong> until you understand the structure well, then move to the next lesson.",
+        "closing": "Stay consistent for 10-15 minutes a day, and grammar will become much easier to understand!",
+        "confirm": "Got it, start learning!"
+      }
+    },
+    "card": {
+      "step": "Step {{number}}",
+      "current": "Study now",
+      "completed": "Completed",
+      "locked": "Locked",
+      "start": "Start lesson",
+      "review": "Review"
+    },
+    "detail": {
+      "documentTitle": "Grammar Lesson Detail - EasyTalk",
+      "leaveWarningTitle": "Warning",
+      "leaveWarningText": "You are in the middle of this lesson. If you leave, your progress will not be saved. Are you sure you want to leave?",
+      "leaveConfirm": "Leave",
+      "leaveCancel": "Stay",
+      "completeTitle": "Completed!",
+      "completeText": "Congratulations! You have completed this grammar lesson. The next grammar lesson has been unlocked.",
+      "completeConfirm": "Back to grammar lessons",
+      "errorTitle": "Error",
+      "errorText": "An error occurred while updating your progress.",
+      "loading": "Loading grammar lesson ...",
+      "stepCounter": "Step {{current}} / {{total}}"
+    },
+    "sentence": {
+      "continue": "Continue",
+      "startQuiz": "Take the quiz"
+    },
+    "quiz": {
+      "warningTitle": "Warning",
+      "warningText": "Please answer all questions before checking!",
+      "title": "Grammar practice",
+      "explanationPrefix": "Answer explanation:",
+      "check": "Check",
+      "finish": "Finish"
+    },
+    "complete": {
+      "title": "You have completed this grammar lesson!",
+      "description": "Congratulations, keep practicing!",
+      "unlockNext": "Unlock the next grammar lesson"
+    }
+  },
+    "storyPage": {
+      "list": {
+        "documentTitle": "Story Lessons - EasyTalk",
+        "title": "STORY READING ROADMAP FROM A TO Z",
+        "subtitle": "Complete each lesson to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% complete",
+        "scrollCurrentTitle": "Scroll to current lesson",
+        "continueLearning": "Continue learning",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top",
+        "guide": {
+          "title": "Story Reading Guide",
+          "intro": "Stories are divided into short passages and shown one by one so you can read and understand them easily.",
+          "featuresTitle": "Features:",
+          "next": "<strong>Next:</strong> Press <strong>Next</strong> to move to the next passage.",
+          "back": "<strong>Back:</strong> Press <strong>Back</strong> to read the previous passage again.",
+          "translation": "<strong>Translation:</strong> View the Vietnamese meaning of the current passage.",
+          "listen": "<strong>Listen:</strong> The system reads the current passage aloud in English.",
+          "noteTitle": "Note:",
+          "note1": "Read each passage carefully and make use of the available features.",
+          "note2": "After finishing, you will see the message \"You have completed the story\".",
+          "closing": "Enjoy your learning!",
+          "confirm": "Close"
+        }
+      },
+      "card": {
+        "step": "Step {{number}}",
+        "current": "Read now",
+        "completed": "Completed",
+        "locked": "Locked",
+        "category": "Topic: {{category}}",
+        "level": "Level: {{level}}",
+        "start": "Start reading",
+        "review": "Review"
+      },
+      "detail": {
+        "documentTitle": "Story Lesson Detail - EasyTalk",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of a lesson. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "completeTitle": "Success",
+        "completeText": "Congratulations! You have completed the story lesson. The next story lesson has been unlocked.",
+        "completeConfirm": "Back to story lessons",
+        "errorTitle": "Error",
+        "errorText": "An error occurred while updating your progress.",
+        "loading": "Loading story lesson ...",
+        "stepCounter": "Step {{current}} / {{total}}"
+      },
+      "sentence": {
+        "listenTitle": "Listen again",
+        "vocabulary": "Vocabulary:",
+        "loadingDefinition": "...loading...",
+        "translateFailed": "(Cannot translate)",
+        "startListening": "Start listening to the story",
+        "continue": "Continue"
+      },
+      "quiz": {
+        "correct": "Correct!",
+        "incorrect": "Not quite. Correct answer: {{answer}}",
+        "continue": "Continue"
+      },
+      "vocabQuiz": {
+        "title": "Choose the correct meaning for each word:",
+        "check": "Check",
+        "complete": "Complete",
+        "translateFailed": "(Cannot translate)"
+      },
+      "complete": {
+        "title": "You have completed the story!",
+        "description": "Congratulations, keep practicing!",
+        "summaryTitle": "Quiz summary:",
+        "totalQuestions": "Total questions: {{count}}",
+        "correct": "Correct answers: {{count}}",
+        "incorrect": "Incorrect answers: {{count}}",
+        "unanswered": "Unanswered questions: {{count}}",
+        "accuracy": "Accuracy: {{percent}}%",
+        "unlockNext": "Unlock next story"
+      }
+    },
+    "pronunciationPage": {
+      "list": {
+        "documentTitle": "Pronunciation Lessons - EasyTalk",
+        "title": "PRONUNCIATION ROADMAP FROM A TO Z",
+        "subtitle": "Complete each lesson to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% complete",
+        "defaultCategory": "Module 1: Basic Foundations",
+        "advancedCategory": "Module {{module}}: Advanced Topics",
+        "scrollCurrentTitle": "Scroll to current lesson",
+        "continueLearning": "Continue learning",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top",
+        "levels": {
+          "A1": "STAGE 1: BASIC - A1 (Beginner)",
+          "A2": "STAGE 2: ELEMENTARY - A2 (Elementary)",
+          "B1": "STAGE 3: INTERMEDIATE - B1 (Intermediate)",
+          "B2": "STAGE 4: UPPER INTERMEDIATE - B2",
+          "C1": "STAGE 5: ADVANCED - C1"
+        },
+        "fallbackCategories": {
+          "module1": "Module 1: Basic Foundations",
+          "module2": "Module 2: Present Simple Tense",
+          "module3": "Module 3: Questions and Quantifiers",
+          "module4": "Module 4: Present Continuous Tense"
+        },
+        "guide": {
+          "title": "Pronunciation Lesson Guide",
+          "intro": "Welcome to the <strong>Pronunciation Roadmap from A to Z</strong>! You will learn each sound step by step, from basic to advanced.",
+          "stepsTitle": "Steps in each pronunciation lesson:",
+          "step1": "<strong>Watch the guide</strong> – Observe mouth, tongue, and airflow placement from a native-style model",
+          "step2": "<strong>Listen & repeat</strong> – Listen to each sentence and practice speaking accurately",
+          "step3": "<strong>Compare your voice with native speech</strong> – The system scores similarity from 0–100",
+          "step4": "<strong>Practice many times</strong> – More practice means better scores and more natural pronunciation",
+          "step5": "<strong>Take a short quiz</strong> – Unlock the next lesson after completing it",
+          "iconsTitle": "Roadmap icons:",
+          "completedIcon": "<strong>Completed</strong> – You can review it anytime",
+          "currentIcon": "<strong>Current lesson</strong> – Start now to unlock the next lesson!",
+          "lockedIcon": "<strong>Locked</strong> – Complete the current lesson to continue",
+          "tipLabel": "Tip:",
+          "tipText": "Practice each lesson at least <strong>3–5 times</strong> until you reach a <strong>90+</strong> native-like score before moving on.",
+          "closing": "Stay consistent for 10–15 minutes a day and your pronunciation will become much more natural!",
+          "confirm": "Got it, start learning!"
+        }
+      },
+      "card": {
+        "step": "Step {{number}}",
+        "current": "Learn now",
+        "completed": "Completed",
+        "locked": "Locked",
+        "start": "Start learning",
+        "review": "Review"
+      },
+      "detail": {
+        "documentTitle": "Pronunciation Lesson Detail - EasyTalk",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of a lesson. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "completeTitle": "Completed!",
+        "completeText": "Congratulations! You have completed the pronunciation lesson. The next pronunciation lesson has been unlocked.",
+        "completeConfirm": "Back to pronunciation lessons",
+        "errorTitle": "Error",
+        "errorText": "An error occurred while updating your progress.",
+        "loading": "Loading pronunciation lesson ...",
+        "stepCounter": "Step {{current}} / {{total}}"
+      },
+      "sentence": {
+        "continue": "Continue",
+        "startQuiz": "Take the quiz"
+      },
+      "quiz": {
+        "warningTitle": "Warning",
+        "warningText": "Please answer all questions before checking!",
+        "title": "Pronunciation Quiz",
+        "explanationPrefix": "Answer explanation:",
+        "check": "Check",
+        "finish": "Complete"
+      },
+      "complete": {
+        "title": "You have completed the pronunciation lesson!",
+        "description": "Congratulations, keep practicing!",
+        "unlockNext": "Unlock next pronunciation lesson"
+      }
+    },
+    "flashcardPage": {
+      "detail": {
+        "documentTitle": "Flashcard - EasyTalk",
+        "loadErrorTitle": "Data loading error",
+        "loadErrorText": "Unable to load flashcard list: {{message}}",
+        "notFound": "Flashcard list not found.",
+        "titlePrefix": "Flashcards: {{name}}",
+        "addWord": "Add new word",
+        "editList": "Edit list",
+        "deleteList": "Delete list",
+        "languageNotice": "Note: if your vocabulary list is Chinese, Japanese, or Korean, click edit to change the language. The default audio is British and American English. Other languages are supported only on desktop.",
+        "review": "Practice flashcards",
+        "minWordsWarning": "You need at least <strong>3 words</strong> in the list to start practicing!",
+        "wordListTitle": "VOCABULARY LIST",
+        "empty": "There are no flashcards in this list.",
+        "previous": "Previous",
+        "next": "Next",
+        "deleteConfirmTitle": "Confirm deletion?",
+        "deleteConfirmText": "Are you sure you want to delete this word list?",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleteSuccessTitle": "Deleted!",
+        "deleteSuccessText": "The word list has been deleted successfully.",
+        "deleteFailedTitle": "Failed",
+        "deleteFailedText": "Unable to delete: {{message}}",
+        "unknownError": "Unknown error.",
+        "deleteErrorTitle": "Delete error",
+        "deleteErrorText": "Error deleting list: {{message}}"
+      },
+      "card": {
+        "deleteConfirmTitle": "Confirm deletion?",
+        "deleteConfirmText": "Are you sure you want to delete this flashcard?",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleteSuccessTitle": "Deleted",
+        "deleteSuccessText": "Flashcard has been deleted successfully!",
+        "deleteErrorTitle": "Error",
+        "deleteFailed": "Delete failed!",
+        "deleteErrorText": "Error deleting flashcard: {{message}}",
+        "speechUnsupportedTitle": "Not supported",
+        "speechUnsupportedText": "Your browser does not support speech playback!",
+        "definition": "Definition:",
+        "example": "Example:",
+        "creator": "Creator: {{username}}",
+        "unknown": "Unknown",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "list": {
+        "documentTitle": "Flashcard Lists - EasyTalk",
+        "title": "FLASHCARD VOCABULARY LISTS",
+        "mine": "For you",
+        "explore": "Explore",
+        "reviewHistory": "Your review history",
+        "setGoal": "Set goal",
+        "reviewToday": "{{count}}/{{goal}} reviews today",
+        "goalAchieved": "Goal achieved!",
+        "totalFlashcards": "Total flashcards",
+        "remembered": "Remembered",
+        "toReview": "To review",
+        "create": "Create new",
+        "share": "Share",
+        "empty": "No flashcards found.",
+        "previous": "Previous",
+        "next": "Next",
+        "copySuccessTitle": "Copied!",
+        "copySuccessText": "Share your progress.",
+        "shareText": "I remembered {{remembered}} words with EasyTalk Flashcard! To review: {{toReview}}. Streak: {{streak}} days. Try it now! {{url}} #EasyTalkVocab",
+        "shareCaptureErrorTitle": "Error",
+        "shareCaptureErrorText": "Could not find the progress section to capture.",
+        "shareLoadingTitle": "Creating share image...",
+        "shareImageTitle": "Your progress image",
+        "shareImageAlt": "Learning progress",
+        "shareImageHelp": "You can save the image or copy the text to share:",
+        "copyShare": "Copy share text",
+        "shareImageFile": "easytalk-progress.png",
+        "shareTitle": "My Flashcard Progress",
+        "shareCreateError": "Unable to create share image.",
+        "badgeSectionTitle": "Your badges this month",
+        "badgeTitle": "{{icon}} {{name}}",
+        "badgeUnlocked": "You reached <b>{{threshold}}</b> reviews this month!<br><br><span style=\"font-size:40px\">{{icon}}</span>",
+        "badgeLocked": "You need <b>{{remaining}}</b> more reviews to earn this badge.<br><br><span style=\"font-size:40px; opacity:0.5\">{{icon}}</span>",
+        "badgeReviewTitle": "{{name}} - {{threshold}} reviews/month",
+        "badgeGreat": "Awesome",
+        "badgeKeepGoing": "Keep going",
+        "badgeReached": "You reached {{threshold}} reviews this month!<br><br><span style=\"font-size:40px\">{{icon}}</span>",
+        "badges": {
+          "newbie": "Hard-working Rookie",
+          "warrior": "Word Warrior",
+          "master": "Vocabulary Master",
+          "legend": "Review Legend",
+          "king": "Vocabulary King"
+        }
+      },
+      "listCard": {
+        "words": "{{count}} words",
+        "toReview": "To review: {{count}}",
+        "remembered": "Remembered: {{count}}",
+        "creator": "Creator: {{username}}",
+        "createdAt": "Created: {{date}}",
+        "unknown": "Unknown"
+      },
+      "goal": {
+        "fetchErrorLog": "Error loading goal:",
+        "fetchErrorTitle": "Unable to load current goal",
+        "fetchErrorText": "Please try again later.",
+        "lockedTitle": "Cannot change",
+        "lockedText": "You have already started reviewing today. You can only set the goal on a new day!",
+        "warningTitle": "Warning",
+        "rangeWarning": "Goal must be from 0 to 200 reviews/day.",
+        "successTitle": "Updated successfully!",
+        "successText": "New goal: {{goal}} flashcards/day. Bonus EXP when achieved: +{{bonus}}XP.",
+        "errorTitle": "Error",
+        "errorText": "Unable to update goal.",
+        "loading": "Loading current goal...",
+        "title": "Set Daily Goal",
+        "description": "Choose how many flashcards you want to review each day (0-200):",
+        "placeholder": "Example: 20",
+        "todayLocked": "You have reviewed {{count}} times today, so the goal cannot be changed.",
+        "bonusTitle": "EXP bonus when goal is achieved:",
+        "bonus1": "0-20 reviews: +10XP",
+        "bonus2": "21-70 reviews: +20XP",
+        "bonus3": "71-130 reviews: +30XP",
+        "bonus4": "131-200 reviews: +50XP",
+        "note": "Each time you rate a flashcard difficulty (Easy/Normal/Hard), it counts toward today's progress.",
+        "saving": "Saving...",
+        "save": "Save"
+      },
+      "graph": {
+        "months": ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+        "days": ["Mon", "", "Wed", "", "Fri", "", "Sun"],
+        "reviewCount": "{{date}}: {{count}} reviews{{today}}",
+        "todaySuffix": " (Today)",
+        "sampleTitle": "{{count}} reviews",
+        "less": "Less",
+        "more": "More",
+        "today": "Today",
+        "footer": "Learn how we count contributions",
+        "title": "How Flashcard Review Contributions Are Counted",
+        "intro": "The contribution graph shows your flashcard review history over the past 52 weeks. Each square represents one day, and the color shows how many times you rated flashcard difficulty on that day.",
+        "howTitle": "How it works:",
+        "rule1": "Each time you choose \"Easy\", \"Normal\", or \"Hard\" for a flashcard in a list you created, the system records 1 review for that day.",
+        "rule2": "Only reviews of your own flashcards count (in the \"For you\" tab). Reviews of other people's flashcards (in the \"Explore\" tab) are not counted.",
+        "rule3": "Square colors are based on the number of reviews compared with the highest-review day in the displayed range:",
+        "color0": "0 reviews: light gray",
+        "colorHigh": "Closer to the maximum: darker green",
+        "colorExample": "Example: if the highest day has 100 reviews, then 100 = darkest green, 50 = medium green, and lower values fade gradually.",
+        "noteTitle": "Note:",
+        "note1": "The graph updates daily using the Asia/Ho_Chi_Minh timezone.",
+        "note2": "Weeks start on Monday and end on Sunday.",
+        "note3": "Month labels help you navigate time. Colors are relative to the current data.",
+        "closing": "Keep your review habit going and your graph will get greener!",
+        "close": "Close"
+      },
+      "review": {
+        "documentTitle": "Flashcard Review - EasyTalk",
+        "loadErrorTitle": "Flashcard loading error",
+        "back": "Back",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of flashcard practice. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "removeConfirmTitle": "Confirm vocabulary removal",
+        "removeConfirmText": "Have you remembered this word? The system will automatically remove remembered vocabulary from the practice list.",
+        "removeConfirm": "Yes",
+        "removeCancel": "Cancel",
+        "removeSuccessTitle": "Vocabulary removed",
+        "removeSuccessText": "{{count}} words left to review!",
+        "batchErrorLog": "Batch update error:",
+        "completeTitle": "Completed!",
+        "completeText": "You have completed flashcard practice!",
+        "stopTitle": "Stop studying?",
+        "stopText": "Are you sure you want to stop studying?",
+        "stopConfirm": "Yes, stop",
+        "stopCancel": "Keep studying",
+        "empty": "No flashcards found.",
+        "title": "Practice: {{name}}",
+        "stop": "Stop studying",
+        "allDone": "Congratulations! You have completed all flashcards!",
+        "completeButton": "Complete",
+        "easy": "Easy",
+        "normal": "Normal",
+        "hard": "Hard",
+        "remembered": "Remembered this word",
+        "next": "Next",
+        "loadingNext": "Loading next question... (3s)",
+        "answerToContinue": "Please answer the question to continue"
+      },
+      "reviewCard": {
+        "missingAnswerTitle": "Missing answer!",
+        "missingAnswerText": "Please enter the word before checking.",
+        "definition": "Definition:",
+        "example": "Example:",
+        "choicePrompt": "Choose the correct answer for this example sentence:",
+        "fillPrompt": "Fill in the word for this example sentence:",
+        "placeholder": "Enter word",
+        "wrongAnswer": "Your answer is incorrect. ✅ Correct answer:",
+        "showAnswer": "Show answer",
+        "check": "Check"
+      },
+      "form": {
+        "missingTitle": "Missing information",
+        "missingRequired": "Please enter all required information!",
+        "missingList": "Please enter all required information!",
+        "successTitle": "Success",
+        "errorTitle": "Error",
+        "genericError": "Something went wrong.",
+        "createCardSuccess": "Flashcard created successfully!",
+        "createCardError": "Error creating flashcard: {{message}}",
+        "updateCardSuccess": "Flashcard updated successfully!",
+        "updateCardError": "Error updating flashcard: {{message}}",
+        "createListSuccess": "Flashcard list created successfully!",
+        "createListError": "Error creating flashcard: {{message}}",
+        "updateListSuccess": "Flashcard list updated successfully!",
+        "updateListError": "Error updating flashcard list: {{message}}",
+        "createCardTitle": "ADD NEW WORD",
+        "updateCardTitle": "EDIT WORD",
+        "createListTitle": "CREATE NEW FLASHCARD LIST",
+        "updateListTitle": "EDIT FLASHCARD LIST",
+        "word": "Word:",
+        "wordPlaceholder": "Enter word",
+        "meaning": "Definition:",
+        "meaningPlaceholder": "Enter definition",
+        "pos": "Part of speech:",
+        "posPlaceholder": "Enter part of speech (e.g. noun, verb)",
+        "pronunciation": "Pronunciation:",
+        "pronunciationPlaceholder": "Enter pronunciation (e.g. /ˈæp.əl/)",
+        "example": "Example:",
+        "examplePlaceholder": "Add example",
+        "imageOptional": "Image (optional):",
+        "image": "Image:",
+        "listName": "List name:",
+        "listNamePlaceholder": "Enter list name",
+        "description": "Description:",
+        "descriptionPlaceholder": "List description (up to 500 characters)",
+        "charCount": "{{count}}/500 characters",
+        "close": "Close",
+        "saving": "Saving...",
+        "save": "Save"
+      }
+    },
+    "leaderboardPage": {
+      "documentTitle": "Leaderboard - EasyTalk",
+      "title": "EASYTALK LEADERBOARD",
+      "periodRange": "From {{start}} to {{end}}",
+      "periods": {
+        "all": "All",
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      },
+      "tabs": {
+        "exp": "Experience Points",
+        "time": "Study Time",
+        "streak": "Streak"
+      },
+      "time": {
+        "minutes": "{{count}} min",
+        "hours": "{{count}} hr",
+        "hoursMinutes": "{{hours}} hr {{minutes}} min"
+      },
+      "values": {
+        "exp": "{{value}} XP",
+        "streak": "{{count}} days",
+        "streakConsecutive": "{{count}} consecutive days"
+      },
+      "alert": {
+        "loadFailedTitle": "Unable to load the leaderboard right now",
+        "loadFailedText": "Please try again in a few minutes."
+      },
+      "empty": {
+        "title": "No ranking data yet",
+        "description": "Start learning to climb the leaderboard!"
+      },
+      "table": {
+        "rank": "Rank",
+        "player": "Player",
+        "exp": "XP",
+        "time": "Study time",
+        "streak": "Current streak"
+      },
+      "tooltip": {
+        "viewStats": "Click to view detailed stats",
+        "noInfo": "No information available"
+      },
+      "currentUserBadge": "You",
+      "yourRank": "You",
+      "loading": "Loading leaderboard...",
+      "unknownUser": "Unknown"
+    },
+    "statisticPage": {
+      "documentTitle": "Learning Progress Statistics - EasyTalk",
+      "title": "LEARNING PROGRESS STATISTICS",
+      "subtitle": "Track your study habits every day",
+      "loading": "Loading data...",
+      "periods": {
+        "week": "This week",
+        "month": "This month",
+        "year": "This year"
+      },
+      "common": {
+        "close": "Close",
+        "unknown": "Unknown"
+      },
+      "values": {
+        "days": "{{count}} days",
+        "lessons": "{{count}} lessons",
+        "gates": "{{count}} gates",
+        "stages": "{{count}} stages",
+        "exp": "{{value}} XP"
+      },
+      "alert": {
+        "errorTitle": "Error",
+        "loadStatsFailed": "Unable to load statistics. Please try again."
+      },
+      "personalInfo": {
+        "title": "Your personal information"
+      },
+      "follow": {
+        "followers": "followers",
+        "following": "following"
+      },
+      "export": {
+        "personalInfoTitle": "PERSONAL INFORMATION",
+        "personalInfoTitleWithColon": "Personal information:",
+        "date": "Date",
+        "studyTimeHours": "Study time (hours)",
+        "experiencePoints": "Experience points",
+        "weekDateLabel": "{{weekday}} - {{day}}/{{month}}/{{year}}",
+        "personalInfoSheet": "Personal info",
+        "chartSheet": "Chart statistics"
+      },
+      "chart": {
+        "ownTitle": "Your chart statistics",
+        "userTitle": "{{username}}'s chart statistics",
+        "tabs": {
+          "time": "Study Time",
+          "exp": "Experience Points"
+        },
+        "titles": {
+          "time": {
+            "week": "Daily study time",
+            "month": "Monthly study time",
+            "year": "Yearly study time"
+          },
+          "exp": {
+            "week": "Daily experience points",
+            "month": "Monthly experience points",
+            "year": "Yearly experience points"
+          }
+        },
+        "series": {
+          "time": "Study time",
+          "exp": "Experience points"
+        },
+        "axis": {
+          "hours": "Hours"
+        },
+        "tooltip": {
+          "date": "Date",
+          "dateValue": "{{day}}/{{month}}/{{year}}",
+          "studyTime": "Study time",
+          "experience": "Experience"
+        },
+        "empty": {
+          "title": "No data yet",
+          "description": "Study every day to see your progress!"
+        }
+      },
+      "achievements": {
+        "ownTitle": "Your achievements",
+        "userTitle": "{{username}}'s achievements",
+        "fallback": {
+          "gate": "Untitled gate",
+          "stage": "Untitled stage",
+          "lesson": "Untitled lesson"
+        },
+        "cards": {
+          "currentStreak": "Current streak",
+          "maxStreak": "Best streak",
+          "currentExp": "Current XP",
+          "maxDailyExp": "Daily XP record"
+        },
+        "unlocked": {
+          "gates": "Gates",
+          "stages": "Stages",
+          "story": "Story lessons",
+          "grammar": "Grammar lessons",
+          "pronunciation": "Pronunciation lessons",
+          "grammarPractice": "Grammar practice",
+          "pronunciationPractice": "Pronunciation practice",
+          "vocab": "Vocabulary practice",
+          "dictation": "Dictation practice"
+        },
+        "modals": {
+          "gates": {
+            "title": "Unlocked Gates ({{count}})",
+            "empty": "No gates unlocked yet"
+          },
+          "stages": {
+            "title": "Unlocked Stages ({{count}})",
+            "empty": "No stages unlocked yet"
+          },
+          "story": {
+            "title": "Completed Story Lessons ({{count}})",
+            "empty": "No story lessons completed yet"
+          },
+          "grammar": {
+            "title": "Completed Grammar Lessons ({{count}})",
+            "empty": "No grammar lessons completed yet"
+          },
+          "pronunciation": {
+            "title": "Completed Pronunciation Lessons ({{count}})",
+            "empty": "No pronunciation lessons completed yet"
+          },
+          "grammarPractice": {
+            "title": "Completed Grammar Practice ({{count}})",
+            "empty": "No grammar practice completed yet"
+          },
+          "pronunciationPractice": {
+            "title": "Completed Pronunciation Practice ({{count}})",
+            "empty": "No pronunciation practice completed yet"
+          },
+          "vocab": {
+            "title": "Completed Vocabulary Practice ({{count}})",
+            "empty": "No vocabulary practice completed yet"
+          },
+          "dictation": {
+            "title": "Completed Dictation Practice ({{count}})",
+            "empty": "No dictation practice completed yet"
+          }
+        }
+      },
+      "prizes": {
+        "ownTitle": "Your prizes",
+        "userTitle": "{{username}}'s prizes",
+        "loading": "Loading prizes...",
+        "howToEarn": "How to earn:",
+        "receiveDiamonds": "Receive {{count}} diamonds",
+        "receiveDiamondsShort": "Reward: {{count}} diamonds",
+        "diamonds": "{{count}} diamonds",
+        "viewDetails": "View details →",
+        "tooltip": {
+          "unlocked": "Unlocked: {{name}}",
+          "locked": "Not unlocked: {{name}}",
+          "lockedStreak": "Not unlocked: {{name}} (Requires a {{days}}-day streak)",
+          "lockedExp": "Not unlocked: {{name}} (Requires {{value}} XP)"
+        },
+        "perfectStreak": {
+          "title": "Perfect Week",
+          "description": "Study every day without missing a day to build a perfect streak. Each level requires a different streak length:",
+          "level1": "Level 1: 7 consecutive days",
+          "level2": "Level 2: 14 consecutive days",
+          "level3": "Level 3: 30 consecutive days",
+          "level10": "Level 10: 365 consecutive days (1 perfect year)",
+          "note": "Missing just 1 day will break that perfect streak. Keep it going!"
+        },
+        "knowledgeGod": {
+          "title": "Knowledge Deity",
+          "description": "Earn experience points (XP) by:",
+          "source1": "Completing daily lessons",
+          "source2": "Doing exercises and practice sessions",
+          "source3": "Reaching your daily flashcard goal",
+          "source4": "Unlocking monthly badges",
+          "requirementIntro": "Each level requires total accumulated XP:",
+          "level1": "Level 1: 500 XP",
+          "level2": "Level 2: 1,500 XP",
+          "level3": "Level 3: 5,000 XP",
+          "level10": "Level 10: 100,000 XP",
+          "tip": "Study consistently every day to earn XP faster!"
+        },
+        "champion": {
+          "title": "Leaderboard Champion",
+          "defaultName": "Champion",
+          "description": "Reach Top 1 on the leaderboard at the end of a period. There are 3 prize types:",
+          "weekTitle": "Weekly Champion:",
+          "weekDescription": "Rank 1 at the end of the week (Sunday) on the XP or study time leaderboard",
+          "monthTitle": "Monthly Champion:",
+          "monthDescription": "Rank 1 at the end of the month on the XP or study time leaderboard",
+          "yearTitle": "Yearly Champion:",
+          "yearDescription": "Rank 1 at the end of the year on the XP or study time leaderboard",
+          "note": "Every title is prestigious and comes with a worthy reward. Compete hard for this honor!"
+        },
+        "history": {
+          "weekTitle": "Weekly Champion History",
+          "monthTitle": "Monthly Champion History",
+          "yearTitle": "Yearly Champion History",
+          "weekPeriod": "Week {{week}} - {{year}}",
+          "monthPeriod": "Month {{month}} - {{year}}",
+          "yearPeriod": "Year {{year}}",
+          "empty": "No titles in this category yet",
+          "period": "Period",
+          "reward": "Reward",
+          "receivedDate": "Received date"
+        }
+      },
+      "followModal": {
+        "followersTitle": "Followers",
+        "followingTitle": "Following",
+        "emptyFollowers": "No followers yet",
+        "emptyFollowing": "Not following anyone yet",
+        "follow": "Follow",
+        "unfollow": "Unfollow",
+        "keep": "Keep",
+        "loginRequired": "You need to log in to perform this action.",
+        "selfFollow": "You cannot follow yourself!",
+        "unfollowConfirmTitle": "Unfollow?",
+        "unfollowConfirmText": "Are you sure you want to unfollow {{username}}?",
+        "noticeTitle": "Notice",
+        "alreadyUnfollowed": "You already unfollowed this user.",
+        "unfollowedTitle": "Unfollowed!",
+        "unfollowedText": "You unfollowed {{username}}",
+        "alreadyFollowing": "You are already following {{username}}.",
+        "successTitle": "Success!",
+        "followedText": "You followed {{username}}. Keep learning together!",
+        "actionFailed": "Unable to perform this action"
+      }
+    },
+    "setting": {
     "title": "Account Settings",
     "description": "Manage your account, interface, and study notification settings.",
     "sidebar": {

@@ -107,13 +107,12 @@ class UserService {
         await this.repository.update(user._id.toString(), { lastActive: new Date() });
         await this.userProgressService.checkAndResetStreakOnLogin(user._id.toString());
         await this.userProgressService.checkAndUnlockChampionPrizes(user._id.toString());
-        const language = await this.userSettingService.getUserLanguage(user._id);
         await this.securityAuditService.log("login_success", {
             userId: user._id,
             email: user.email,
             req
         });
-        return { token: accessToken, refreshToken: refreshToken, role: user.role, language };
+        return { token: accessToken, refreshToken: refreshToken, role: user.role };
     }
 
     async loginWithGoogle(code, req = null) {
@@ -140,14 +139,13 @@ class UserService {
         await this.repository.update(user._id.toString(), { lastActive: new Date() });
         await this.userProgressService.checkAndResetStreakOnLogin(user._id.toString());
         await this.userProgressService.checkAndUnlockChampionPrizes(user._id.toString());
-        const language = await this.userSettingService.getUserLanguage(user._id);
         await this.securityAuditService.log("social_login_success", {
             userId: user._id,
             email: user.email,
             metadata: { provider: "google" },
             req
         });
-        return { token: accessToken,  refreshToken: refreshToken,  role: user.role, language };
+        return { token: accessToken,  refreshToken: refreshToken,  role: user.role };
     }
 
     async loginWithFacebook(code, req = null) {
@@ -187,8 +185,7 @@ class UserService {
         }
         const newAccessToken = this.authService.generateAccessToken(user);
         const newRefreshToken = await this.authService.rotateRefreshToken(user, refreshToken, req, session);
-        const language = await this.userSettingService.getUserLanguage(user._id);
-        return { token: newAccessToken, refreshToken: newRefreshToken, role: user.role, language };
+        return { token: newAccessToken, refreshToken: newRefreshToken, role: user.role };
     }
 
     async logout(refreshToken, req = null) {

@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 function PronunciationSentence({ content, onComplete, onStepChange }) {
+    const { t } = useTranslation();
     const [steps, setSteps] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
     const [showButton, setShowButton] = useState(false);
@@ -73,13 +75,13 @@ function PronunciationSentence({ content, onComplete, onStepChange }) {
                         currentIndex < steps.length - 1 ? (
                             showButton && (
                                 <button className="btn_1 mt-4" onClick={handleNext}>
-                                    <i className="fas fa-arrow-right ms-2"></i> Tiếp tục
+                                    <i className="fas fa-arrow-right ms-2"></i> {t("pronunciationPage.sentence.continue")}
                                 </button>
                             )
                         ) : (
                             !quizStarted && (
                                 <button className="btn_1 mt-4" onClick={handleQuizStart}>
-                                    Làm bài quiz
+                                    {t("pronunciationPage.sentence.startQuiz")}
                                 </button>
                             )
                         )

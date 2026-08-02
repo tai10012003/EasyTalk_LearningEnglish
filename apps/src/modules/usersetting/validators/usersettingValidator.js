@@ -14,14 +14,6 @@ function validateUserSettingUpdate(body) {
             }
         }
     }
-    if(body.general) {
-        if(body.general.language) {
-            const validLanguages = ['vi', 'en'];
-            if(!validLanguages.includes(body.general.language)) {
-                errors.push('Language must be vi or en');
-            }
-        }
-    }
     return { valid: errors.length === 0, errors };
 }
 

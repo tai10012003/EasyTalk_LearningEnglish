@@ -28,8 +28,11 @@
         "reading": "LUYỆN ĐỌC",
         "writing": "LUYỆN VIẾT VỚI AI"
       },
-      "leaderboard": "BẢNG XẾP HẠNG",
-      "statistics": "THỐNG KÊ",
+      "other": "KHÁC",
+      "submenu_other": {
+        "leaderboard": "BẢNG XẾP HẠNG",
+        "statistics": "THỐNG KÊ"
+      },
       "login": "Đăng nhập",
       "submenu_loggedIn": {
         "study_reminders": "NHẮC NHỞ HỌC TẬP",
@@ -50,15 +53,833 @@
     "copyright": "Mọi quyền được bảo lưu | Mẫu này được tạo bởi"
   },
   "home": {
+    "title": "Trang chủ - EasyTalk",
+    "unreadNotification": "Bạn có {{count}} thông báo chưa đọc",
     "banner": {
       "explore": "Khám phá thế giới tiếng Anh cùng chúng tôi",
       "title": "CẢI THIỆN KỸ NĂNG TIẾNG ANH CỦA BẠN",
       "description": "Cho dù bạn là người mới bắt đầu hay muốn cải thiện kỹ năng của mình, hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày. Hãy bắt đầu đăng nhập tài khoản của bạn và trải nghiệm nhé !!",
       "description_loggedIn": "Cho dù bạn là người mới bắt đầu hay muốn cải thiện kỹ năng của mình, hành trình của chúng tôi được thiết kế cho mọi trình độ và sẽ giúp bạn tự tin sử dụng tiếng Anh hàng ngày. Hãy bắt đầu trải nghiệm các tính năng học tiếng Anh của chúng tôi !!",
       "start": "BẮT ĐẦU NÀO !!"
+    },
+    "aboutLearning": {
+      "eyebrow": "Về chúng tôi",
+      "title": "HỌC TIẾNG ANH DỄ DÀNG VÀ THÚ VỊ",
+      "description": "Tại EasyTalk, chúng tôi tin rằng việc học tiếng Anh phải thú vị và dễ tiếp cận với tất cả mọi người. Nền tảng của chúng tôi cung cấp các bài học tương tác, thử thách thú vị và nội dung được cá nhân hóa giúp bạn cải thiện kỹ năng của mình từng bước.",
+      "interactiveLessons": "Các bài học tương tác phù hợp với phong cách và tốc độ học tập của bạn",
+      "realPractice": "Các ví dụ và bài tập thực tế giúp xây dựng sự tự tin trong giao tiếp",
+      "imageAlt": "Học tiếng Anh trực tuyến"
+    },
+    "journey": {
+      "title": "HÀNH TRÌNH CỦA BẠN",
+      "description": "Bắt đầu hành trình cá nhân hóa để thành thạo tiếng Anh, phù hợp với tiến trình và mục tiêu của bạn. Hãy tận dụng từng bước đi!",
+      "start": "BẮT ĐẦU NGAY",
+      "personalizedTitle": "Bài học cá nhân hóa",
+      "personalizedDescription": "Hành trình của bạn được thiết kế riêng cho trình độ kỹ năng và tốc độ học tập của bạn, đảm bảo bạn đạt được mục tiêu một cách hiệu quả.",
+      "challengeTitle": "Những thử thách hấp dẫn",
+      "challengeDescription": "Từ các câu đố đến các bài học tương tác, hành trình của bạn bao gồm những thử thách thú vị để đảm bảo bạn vừa học vừa tận hưởng quá trình này.",
+      "progressTitle": "Theo dõi tiến trình của bạn",
+      "progressDescription": "Với mỗi bài học hoàn thành, bạn tiến gần hơn một bước đến sự trôi chảy. Hành trình giúp bạn duy trì động lực và tập trung vào mục tiêu của mình."
+    },
+    "specialCourse": {
+      "title": "CÁC BÀI HỌC PHỔ BIẾN",
+      "grammarCategory": "NGỮ PHÁP",
+      "grammarTitle": "BÀI HỌC NGỮ PHÁP",
+      "grammarDescription": "Danh sách bài học ngữ pháp cung cấp các bài học rõ ràng, có cấu trúc để cải thiện kỹ năng ngữ pháp từ cơ bản đến nâng cao.",
+      "vocabularyCategory": "TỪ VỰNG",
+      "vocabularyTitle": "TỪ VỰNG FLASHCARD",
+      "vocabularyDescription": "Các bài học Flashcard giúp người học nắm vững vốn từ vựng thông qua các thẻ flashcard trực quan, tương tác để ghi nhớ hiệu quả.",
+      "pronunciationCategory": "PHÁT ÂM",
+      "pronunciationTitle": "BÀI HỌC PHÁT ÂM",
+      "pronunciationDescription": "Danh sách bài học phát âm giúp cải thiện khả năng nói rõ ràng với hướng dẫn từng bước về âm thanh, trọng âm và ngữ điệu.",
+      "grammarImageAlt": "Khóa học ngữ pháp",
+      "vocabularyImageAlt": "Khóa học từ vựng",
+      "pronunciationImageAlt": "Khóa học phát âm"
+    },
+    "advancedCourse": {
+      "eyebrow": "LUYỆN TẬP & CẢI THIỆN",
+      "title": "NÂNG CAO KỸ NĂNG CỦA BẠN VỚI HỆ THỐNG HỌC TẬP TƯƠNG TÁC CỦA CHÚNG TÔI",
+      "description": "Cải thiện kỹ năng ngôn ngữ của bạn thông qua các buổi thực hành chuyên biệt về ngữ pháp, phát âm và từ vựng. Hệ thống của chúng tôi được thiết kế để tăng hiệu quả học tập của bạn mọi lúc, mọi nơi.",
+      "grammarTitle": "Luyện Tập Ngữ Pháp",
+      "grammarDescription": "Nắm vững các quy tắc ngữ pháp với các bài tập tương tác được thiết kế riêng theo trình độ của bạn, giúp bạn xây dựng nền tảng vững chắc.",
+      "pronunciationTitle": "Luyện Tập Phát Âm",
+      "pronunciationDescription": "Hoàn thiện cách phát âm của bạn thông qua các bài học có hướng dẫn, đảm bảo bạn nói tự nhiên và rõ ràng trong cuộc trò chuyện.",
+      "vocabularyTitle": "Luyện Tập Từ Vựng",
+      "vocabularyDescription": "Học từ mới hiệu quả bằng cách nghiên cứu từ vựng được nhóm theo chủ đề có liên quan, giúp bạn dễ nhớ và áp dụng chúng vào ngữ cảnh hơn."
+    },
+    "blog": {
+      "title": "TIN TỨC VÀ SỰ KIỆN",
+      "imageAlt": "Bài viết",
+      "firstTitle": "Giao lưu văn hóa anh ngữ",
+      "firstDescription": "Khám phá các hoạt động giao lưu giúp người học tự tin dùng tiếng Anh trong môi trường thực tế.",
+      "secondTitle": "Top 10 thí sinh lọt top cuộc thi tìm kiếm tài năng Anh-Việt",
+      "secondDescription": "Cập nhật những gương mặt nổi bật và câu chuyện truyền cảm hứng từ cuộc thi tài năng ngôn ngữ.",
+      "thirdTitle": "Ngành Ngôn ngữ Anh - con đường của sự đam mê ngoại ngữ Anh",
+      "thirdDescription": "Tìm hiểu cơ hội học tập, nghề nghiệp và hành trình phát triển dành cho người yêu tiếng Anh.",
+      "viewAll": "Xem tất cả"
     }
   },
-  "setting": {
+  "grammarPage": {
+    "list": {
+      "documentTitle": "Bài học ngữ pháp - EasyTalk",
+      "title": "LỘ TRÌNH HỌC NGỮ PHÁP TỪ A-Z",
+      "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+      "completePercent": "{{percent}}% hoàn thành",
+      "defaultCategory": "Module 1: Nền tảng căn bản",
+      "scrollCurrentTitle": "Cuộn đến bài học hiện tại",
+      "continueLearning": "Tiếp tục học",
+      "hot": "HOT",
+      "scrollTopTitle": "Lên đầu trang",
+      "levels": {
+        "A1": "GIAI ĐOẠN 1: CƠ BẢN - A1 (Người mới bắt đầu)",
+        "A2": "GIAI ĐOẠN 2: SƠ CẤP - A2 (Sơ cấp)",
+        "B1": "GIAI ĐOẠN 3: TRUNG CẤP - B1 (Trung cấp)",
+        "B2": "GIAI ĐOẠN 4: TRUNG CẤP CAO - B2 (Thượng cấp)",
+        "C1": "GIAI ĐOẠN 5: CAO CẤP - C1 (Nâng cao)"
+      },
+      "guide": {
+        "title": "Hướng Dẫn Bài Học Ngữ Pháp",
+        "intro": "Chào mừng bạn đến với <strong>Lộ trình ngữ pháp từ A-Z</strong>!",
+        "intro2": "Bạn sẽ học từng chủ điểm một cách khoa học, từ cơ bản đến nâng cao.",
+        "stepsTitle": "Các bước trong mỗi bài học ngữ pháp:",
+        "step1": "<strong>Xem nội dung hướng dẫn</strong> - Nắm cấu trúc và cách dùng ngữ pháp qua ví dụ rõ ràng",
+        "step2": "<strong>Đọc & ghi nhớ</strong> - Đi qua từng phần nhỏ để hiểu bài chắc hơn",
+        "step3": "<strong>Quan sát ví dụ</strong> - So sánh mẫu câu đúng và lỗi thường gặp",
+        "step4": "<strong>Luyện tập nhiều lần</strong> - Càng luyện càng nhớ cấu trúc lâu hơn",
+        "step5": "<strong>Làm bài kiểm tra nhỏ</strong> - Để mở khóa bài học tiếp theo",
+        "iconsTitle": "Biểu tượng trên lộ trình:",
+        "completedIcon": "<strong>Đã hoàn thành</strong> - Bạn có thể ôn lại bất kỳ lúc nào",
+        "currentIcon": "<strong>Bài đang mở</strong> - Hãy học ngay để mở khóa bài tiếp theo!",
+        "lockedIcon": "<strong>Chưa mở khóa</strong> - Hoàn thành bài hiện tại để tiếp tục",
+        "tipLabel": "Mẹo hay:",
+        "tipText": "Luyện mỗi bài ít nhất <strong>3-5 lần</strong> cho đến khi nắm chắc cấu trúc rồi chuyển sang bài mới nhé!",
+        "closing": "Chỉ cần kiên trì 10-15 phút mỗi ngày - ngữ pháp sẽ trở nên dễ hiểu hơn rất nhiều!",
+        "confirm": "Đã hiểu, bắt đầu học ngay!"
+      }
+    },
+    "card": {
+      "step": "Bước {{number}}",
+      "current": "Học ngay",
+      "completed": "Đã hoàn thành",
+      "locked": "Chưa mở khóa",
+      "start": "Bắt đầu học",
+      "review": "Ôn lại"
+    },
+    "detail": {
+      "documentTitle": "Chi tiết bài học ngữ pháp - EasyTalk",
+      "leaveWarningTitle": "Cảnh báo",
+      "leaveWarningText": "Bạn đang học giữa chừng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+      "leaveConfirm": "Rời đi",
+      "leaveCancel": "Ở lại",
+      "completeTitle": "Hoàn thành!",
+      "completeText": "Chúc mừng! Bạn đã hoàn thành bài học ngữ pháp. Bài học ngữ pháp tiếp theo đã được mở khóa.",
+      "completeConfirm": "Quay lại danh sách bài học ngữ pháp",
+      "errorTitle": "Lỗi",
+      "errorText": "Có lỗi xảy ra khi cập nhật tiến độ.",
+      "loading": "Đang tải bài học ngữ pháp ...",
+      "stepCounter": "Bước {{current}} / {{total}}"
+    },
+    "sentence": {
+      "continue": "Tiếp tục",
+      "startQuiz": "Làm bài quiz"
+    },
+    "quiz": {
+      "warningTitle": "Cảnh báo",
+      "warningText": "Vui lòng trả lời hết các câu hỏi trước khi kiểm tra!",
+      "title": "Bài tập ngữ pháp",
+      "explanationPrefix": "Giải thích đáp án:",
+      "check": "Kiểm tra",
+      "finish": "Hoàn thành"
+    },
+    "complete": {
+      "title": "Bạn đã hoàn thành bài học ngữ pháp!",
+      "description": "Chúc mừng bạn, hãy tiếp tục luyện tập nhé!",
+      "unlockNext": "Mở khóa bài ngữ pháp tiếp theo"
+    }
+    },
+    "storyPage": {
+      "list": {
+        "documentTitle": "Bài học câu chuyện - EasyTalk",
+        "title": "LỘ TRÌNH ĐỌC CÂU CHUYỆN TỪ A-Z",
+        "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% hoàn thành",
+        "scrollCurrentTitle": "Cuộn đến bài học hiện tại",
+        "continueLearning": "Tiếp tục học",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang",
+        "guide": {
+          "title": "Hướng Dẫn Đọc Câu Chuyện",
+          "intro": "Câu chuyện được chia thành nhiều đoạn nhỏ, hiển thị từng đoạn để bạn dễ dàng đọc và hiểu.",
+          "featuresTitle": "Các chức năng:",
+          "next": "<strong>Tiếp theo:</strong> Nhấn nút <strong>Tiếp theo</strong> để chuyển sang đoạn tiếp theo.",
+          "back": "<strong>Quay lại:</strong> Nhấn nút <strong>Quay lại</strong> để đọc lại đoạn trước đó.",
+          "translation": "<strong>Dịch nghĩa:</strong> Xem bản dịch tiếng Việt của đoạn hiện tại.",
+          "listen": "<strong>Nghe:</strong> Hệ thống đọc to đoạn hiện tại bằng tiếng Anh.",
+          "noteTitle": "Lưu ý:",
+          "note1": "Đọc kỹ từng đoạn và tận dụng các chức năng.",
+          "note2": "Sau khi hoàn thành, sẽ hiển thị thông báo \"Bạn đã hoàn thành câu chuyện\".",
+          "closing": "Chúc bạn học vui vẻ!",
+          "confirm": "Đóng"
+        }
+      },
+      "card": {
+        "step": "Bước {{number}}",
+        "current": "Đọc ngay",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "category": "Chủ đề: {{category}}",
+        "level": "Mức độ: {{level}}",
+        "start": "Bắt đầu đọc",
+        "review": "Ôn lại"
+      },
+      "detail": {
+        "documentTitle": "Chi tiết bài học câu chuyện - EasyTalk",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang học giữa chừng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "completeTitle": "Thành công",
+        "completeText": "Chúc mừng! Bạn đã hoàn thành bài học câu chuyện. Bài học câu chuyện tiếp theo đã được mở khóa.",
+        "completeConfirm": "Quay lại danh sách bài học câu chuyện",
+        "errorTitle": "Lỗi",
+        "errorText": "Có lỗi xảy ra khi cập nhật tiến độ.",
+        "loading": "Đang tải bài học câu chuyện ...",
+        "stepCounter": "Bước {{current}} / {{total}}"
+      },
+      "sentence": {
+        "listenTitle": "Nghe lại",
+        "vocabulary": "Từ vựng:",
+        "loadingDefinition": "...đang tải...",
+        "translateFailed": "(Không dịch được)",
+        "startListening": "Bắt đầu nghe câu chuyện",
+        "continue": "Tiếp tục"
+      },
+      "quiz": {
+        "correct": "Chính xác!",
+        "incorrect": "Sai rồi. Đáp án đúng: {{answer}}",
+        "continue": "Tiếp tục"
+      },
+      "vocabQuiz": {
+        "title": "Chọn nghĩa đúng cho từ vựng:",
+        "check": "Kiểm tra",
+        "complete": "Hoàn thành",
+        "translateFailed": "(Không dịch được)"
+      },
+      "complete": {
+        "title": "Bạn đã hoàn thành câu chuyện!",
+        "description": "Chúc mừng bạn, hãy tiếp tục luyện tập nhé!",
+        "summaryTitle": "Thống kê quiz:",
+        "totalQuestions": "Tổng số câu hỏi: {{count}}",
+        "correct": "Số câu đúng: {{count}}",
+        "incorrect": "Số câu sai: {{count}}",
+        "unanswered": "Số câu chưa trả lời: {{count}}",
+        "accuracy": "Tỷ lệ chính xác: {{percent}}%",
+        "unlockNext": "Mở khóa câu chuyện tiếp theo"
+      }
+    },
+    "pronunciationPage": {
+      "list": {
+        "documentTitle": "Bài học phát âm - EasyTalk",
+        "title": "LỘ TRÌNH HỌC PHÁT ÂM TỪ A-Z",
+        "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% hoàn thành",
+        "defaultCategory": "Module 1: Nền tảng bảng căn bản",
+        "advancedCategory": "Module {{module}}: Chủ đề nâng cao",
+        "scrollCurrentTitle": "Cuộn đến bài học hiện tại",
+        "continueLearning": "Tiếp tục học",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang",
+        "levels": {
+          "A1": "GIAI ĐOẠN 1: CƠ BẢN - A1 (Người mới bắt đầu)",
+          "A2": "GIAI ĐOẠN 2: SƠ CẤP - A2 (Sơ cấp)",
+          "B1": "GIAI ĐOẠN 3: TRUNG CẤP - B1 (Trung cấp)",
+          "B2": "GIAI ĐOẠN 4: TRUNG CẤP CAO - B2 (Thượng cấp)",
+          "C1": "GIAI ĐOẠN 5: CAO CẤP - C1 (Nâng cao)"
+        },
+        "fallbackCategories": {
+          "module1": "Module 1: Nền tảng bảng căn bản",
+          "module2": "Module 2: Thì Hiện Tại Đơn",
+          "module3": "Module 3: Câu Hỏi và Lượng Từ",
+          "module4": "Module 4: Thì Hiện Tại Tiếp Diễn"
+        },
+        "guide": {
+          "title": "Hướng Dẫn Bài Học Phát Âm",
+          "intro": "Chào mừng bạn đến với <strong>Lộ trình phát âm từ A-Z</strong>! Bạn sẽ học từng âm một cách khoa học, từ cơ bản đến nâng cao.",
+          "stepsTitle": "Các bước trong mỗi bài học phát âm:",
+          "step1": "<strong>Xem video hướng dẫn</strong> – Quan sát miệng, lưỡi, cách đặt hơi của giáo viên bản xứ",
+          "step2": "<strong>Nghe & lặp lại</strong> – Nghe từng câu và luyện nói theo thật chuẩn",
+          "step3": "<strong>So sánh giọng bạn với bản xứ</strong> – Hệ thống sẽ chấm điểm độ giống (0–100)",
+          "step4": "<strong>Luyện tập nhiều lần</strong> – Càng luyện càng lên điểm, càng giống người bản xứ",
+          "step5": "<strong>Làm bài kiểm tra nhỏ</strong> – Để mở khóa bài học tiếp theo",
+          "iconsTitle": "Biểu tượng trên lộ trình:",
+          "completedIcon": "<strong>Đã hoàn thành</strong> – Bạn có thể ôn lại bất kỳ lúc nào",
+          "currentIcon": "<strong>Bài đang mở</strong> – Hãy học ngay để mở khóa bài tiếp theo!",
+          "lockedIcon": "<strong>Chưa mở khóa</strong> – Hoàn thành bài hiện tại để tiếp tục",
+          "tipLabel": "Mẹo hay:",
+          "tipText": "Luyện mỗi bài ít nhất <strong>3–5 lần</strong> cho đến khi đạt <strong>90+</strong> điểm giống bản xứ thì chuyển sang bài mới nhé!",
+          "closing": "Chỉ cần kiên trì 10–15 phút mỗi ngày – bạn sẽ nói chuẩn như người bản xứ!",
+          "confirm": "Đã hiểu, bắt đầu học ngay!"
+        }
+      },
+      "card": {
+        "step": "Bước {{number}}",
+        "current": "Học ngay",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "start": "Bắt đầu học",
+        "review": "Ôn lại"
+      },
+      "detail": {
+        "documentTitle": "Chi tiết bài học phát âm - EasyTalk",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang học giữa chừng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "completeTitle": "Hoàn thành!",
+        "completeText": "Chúc mừng! Bạn đã hoàn thành bài học phát âm. Bài học phát âm tiếp theo đã được mở khóa.",
+        "completeConfirm": "Quay lại danh sách bài học phát âm",
+        "errorTitle": "Lỗi",
+        "errorText": "Có lỗi xảy ra khi cập nhật tiến độ.",
+        "loading": "Đang tải bài học phát âm ...",
+        "stepCounter": "Bước {{current}} / {{total}}"
+      },
+      "sentence": {
+        "continue": "Tiếp tục",
+        "startQuiz": "Làm bài quiz"
+      },
+      "quiz": {
+        "warningTitle": "Cảnh báo",
+        "warningText": "Vui lòng trả lời hết các câu hỏi trước khi kiểm tra!",
+        "title": "Bài tập phát âm",
+        "explanationPrefix": "Giải thích đáp án:",
+        "check": "Kiểm tra",
+        "finish": "Hoàn thành"
+      },
+      "complete": {
+        "title": "Bạn đã hoàn thành bài học phát âm!",
+        "description": "Chúc mừng bạn, hãy tiếp tục luyện tập nhé!",
+        "unlockNext": "Mở khóa bài phát âm tiếp theo"
+      }
+    },
+    "flashcardPage": {
+      "detail": {
+        "documentTitle": "Flashcard - EasyTalk",
+        "loadErrorTitle": "Lỗi tải dữ liệu",
+        "loadErrorText": "Không thể tải danh sách flashcard: {{message}}",
+        "notFound": "Không tìm thấy danh sách flashcards.",
+        "titlePrefix": "Flashcards: {{name}}",
+        "addWord": "Thêm từ mới",
+        "editList": "Chỉnh sửa danh sách",
+        "deleteList": "Xoá danh sách",
+        "languageNotice": "Chú ý: nếu như list từ vựng của bạn là tiếng Trung, Nhật, hay Hàn, click vào nút chỉnh sửa để thay đổi ngôn ngữ. Audio mặc định là tiếng Anh-Anh và Anh-Mỹ. Các ngôn ngữ khác chỉ hỗ trợ trên máy tính.",
+        "review": "Luyện tập flashcards",
+        "minWordsWarning": "Cần ít nhất <strong>3 từ vựng</strong> trong danh sách để bắt đầu luyện tập!",
+        "wordListTitle": "DANH SÁCH TỪ VỰNG",
+        "empty": "Không có flashcards nào trong danh sách này.",
+        "previous": "Previous",
+        "next": "Next",
+        "deleteConfirmTitle": "Xác nhận xóa?",
+        "deleteConfirmText": "Bạn có chắc chắn muốn xóa danh sách từ này không?",
+        "deleteConfirm": "Xóa",
+        "deleteCancel": "Hủy",
+        "deleteSuccessTitle": "Đã xóa!",
+        "deleteSuccessText": "Danh sách từ đã bị xóa thành công.",
+        "deleteFailedTitle": "Thất bại",
+        "deleteFailedText": "Không thể xóa: {{message}}",
+        "unknownError": "Lỗi không xác định.",
+        "deleteErrorTitle": "Lỗi khi xóa",
+        "deleteErrorText": "Lỗi khi xóa danh sách: {{message}}"
+      },
+      "card": {
+        "deleteConfirmTitle": "Xác nhận xóa?",
+        "deleteConfirmText": "Bạn có chắc chắn muốn xóa flashcard này không?",
+        "deleteConfirm": "Xóa",
+        "deleteCancel": "Hủy",
+        "deleteSuccessTitle": "Đã xóa",
+        "deleteSuccessText": "Flashcard đã bị xóa thành công!",
+        "deleteErrorTitle": "Lỗi",
+        "deleteFailed": "Xóa thất bại!",
+        "deleteErrorText": "Lỗi khi xóa flashcard: {{message}}",
+        "speechUnsupportedTitle": "Không hỗ trợ",
+        "speechUnsupportedText": "Trình duyệt của bạn không hỗ trợ phát âm!",
+        "definition": "Định nghĩa:",
+        "example": "Ví dụ:",
+        "creator": "Người tạo: {{username}}",
+        "unknown": "Unknown",
+        "edit": "Sửa",
+        "delete": "Xóa"
+      },
+      "list": {
+        "documentTitle": "Danh sách flashcard - EasyTalk",
+        "title": "DANH SÁCH TỪ VỰNG FLASHCARD",
+        "mine": "Dành cho bạn",
+        "explore": "Khám phá",
+        "reviewHistory": "Lịch sử ôn tập của bạn",
+        "setGoal": "Đặt mục tiêu",
+        "reviewToday": "{{count}}/{{goal}} review hôm nay",
+        "goalAchieved": "Đã đạt mục tiêu!",
+        "totalFlashcards": "Tổng số flashcard",
+        "remembered": "Đã nhớ",
+        "toReview": "Cần ôn tập",
+        "create": "Tạo mới",
+        "share": "Share",
+        "empty": "Không có flashcard nào.",
+        "previous": "Previous",
+        "next": "Next",
+        "copySuccessTitle": "Đã copy!",
+        "copySuccessText": "Chia sẻ tiến độ của bạn.",
+        "shareText": "Tôi đã nhớ {{remembered}} từ với EasyTalk Flashcard! Cần ôn: {{toReview}}. Streak: {{streak}} ngày. Thử ngay! {{url}} #EasyTalkVocab",
+        "shareCaptureErrorTitle": "Lỗi",
+        "shareCaptureErrorText": "Không tìm thấy phần tiến độ để chụp ảnh.",
+        "shareLoadingTitle": "Đang tạo ảnh chia sẻ...",
+        "shareImageTitle": "Ảnh tiến độ của bạn",
+        "shareImageAlt": "Tiến độ học",
+        "shareImageHelp": "Bạn có thể lưu ảnh hoặc copy nội dung để chia sẻ:",
+        "copyShare": "Copy nội dung chia sẻ",
+        "shareImageFile": "tien-do-easytalk.png",
+        "shareTitle": "Tiến độ Flashcard của tôi",
+        "shareCreateError": "Không thể tạo ảnh chia sẻ.",
+        "badgeSectionTitle": "Huy hiệu tháng này của bạn",
+        "badgeTitle": "{{icon}} {{name}}",
+        "badgeUnlocked": "Bạn đã đạt <b>{{threshold}}</b> lượt ôn trong tháng này!<br><br><span style=\"font-size:40px\">{{icon}}</span>",
+        "badgeLocked": "Bạn cần thêm <b>{{remaining}}</b> lượt ôn để đạt huy hiệu này.<br><br><span style=\"font-size:40px; opacity:0.5\">{{icon}}</span>",
+        "badgeReviewTitle": "{{name}} - {{threshold}} review/tháng",
+        "badgeGreat": "Tuyệt vời",
+        "badgeKeepGoing": "Cố lên",
+        "badgeReached": "Bạn đã đạt {{threshold}} lượt ôn trong tháng này!<br><br><span style=\"font-size:40px\">{{icon}}</span>",
+        "badges": {
+          "newbie": "Tân binh chăm chỉ",
+          "warrior": "Chiến binh ngôn từ",
+          "master": "Bậc thầy từ vựng",
+          "legend": "Huyền thoại ôn tập",
+          "king": "Vua từ vựng"
+        }
+      },
+      "listCard": {
+        "words": "{{count}} từ",
+        "toReview": "Cần ôn tập: {{count}}",
+        "remembered": "Đã nhớ: {{count}}",
+        "creator": "Người tạo: {{username}}",
+        "createdAt": "Ngày tạo: {{date}}",
+        "unknown": "Unknown"
+      },
+      "goal": {
+        "fetchErrorLog": "Lỗi khi tải goal:",
+        "fetchErrorTitle": "Không thể tải mục tiêu hiện tại",
+        "fetchErrorText": "Vui lòng thử lại sau.",
+        "lockedTitle": "Không thể thay đổi",
+        "lockedText": "Bạn đã bắt đầu ôn tập hôm nay. Chỉ có thể set goal vào ngày mới!",
+        "warningTitle": "Cảnh báo",
+        "rangeWarning": "Mục tiêu phải từ 0 đến 200 review/ngày.",
+        "successTitle": "Cập nhật thành công!",
+        "successText": "Mục tiêu mới: {{goal}} flashcard/ngày. Bonus EXP khi đạt: +{{bonus}}XP.",
+        "errorTitle": "Lỗi",
+        "errorText": "Không thể cập nhật mục tiêu.",
+        "loading": "Đang tải mục tiêu hiện tại...",
+        "title": "Đặt Mục Tiêu Hàng Ngày",
+        "description": "Chọn số flashcard bạn muốn review mỗi ngày (từ 0-200):",
+        "placeholder": "Ví dụ: 20",
+        "todayLocked": "Hôm nay đã ôn {{count}} lần, không thể thay đổi goal.",
+        "bonusTitle": "Tặng EXP khi đạt mục tiêu:",
+        "bonus1": "0-20 lần: +10XP",
+        "bonus2": "21-70 lần: +20XP",
+        "bonus3": "71-130 lần: +30XP",
+        "bonus4": "131-200 lần: +50XP",
+        "note": "Mỗi khi bạn đánh giá độ khó (Dễ/Thường/Khó) cho flashcard của mình, nó sẽ đếm vào tiến độ hôm nay.",
+        "saving": "Đang lưu...",
+        "save": "Lưu"
+      },
+      "graph": {
+        "months": ["Th1", "Th2", "Th3", "Th4", "Th5", "Th6", "Th7", "Th8", "Th9", "Th10", "Th11", "Th12"],
+        "days": ["T2", "", "T4", "", "T6", "", "CN"],
+        "reviewCount": "{{date}}: {{count}} lần ôn tập{{today}}",
+        "todaySuffix": " (Hôm nay)",
+        "sampleTitle": "{{count}} lần",
+        "less": "Ít",
+        "more": "Nhiều",
+        "today": "Hôm nay",
+        "footer": "Tìm hiểu cách chúng tôi tính đóng góp",
+        "title": "Cách tính đóng góp ôn tập Flashcard",
+        "intro": "Đồ thị đóng góp hiển thị lịch sử ôn tập flashcard của bạn trong 52 tuần qua. Mỗi ô vuông đại diện cho một ngày, và màu sắc thể hiện số lần bạn đã đánh giá độ khó của flashcard trong ngày đó.",
+        "howTitle": "Cách tính:",
+        "rule1": "Mỗi lần bạn chọn \"Dễ\", \"Thường\" hoặc \"Khó\" cho một flashcard trong phần review của danh sách flashcard do bạn tạo, hệ thống sẽ ghi nhận 1 lần ôn tập cho ngày hôm đó.",
+        "rule2": "Chỉ ghi nhận khi bạn ôn tập flashcard của chính mình (trong tab \"Dành cho bạn\"). Ôn tập flashcard của người khác (tab \"Khám phá\") không được tính vào đồ thị.",
+        "rule3": "Màu sắc của ô vuông dựa trên số lần ôn tập so với ngày có nhiều nhất trong khoảng thời gian hiển thị:",
+        "color0": "0 lần: Xám nhạt",
+        "colorHigh": "Càng gần số lần nhiều nhất: Màu xanh càng đậm (tối)",
+        "colorExample": "Ví dụ: Nếu ngày nhiều nhất là 100 lần, thì 100 lần = xanh tối nhất, 50 lần = xanh trung bình, và giảm dần.",
+        "noteTitle": "Lưu ý:",
+        "note1": "Đồ thị được cập nhật hàng ngày dựa trên múi giờ Asia/Ho_Chi_Minh.",
+        "note2": "Tuần bắt đầu từ thứ Hai (T2) và kết thúc vào Chủ Nhật (CN).",
+        "note3": "Nhãn tháng hiển thị để giúp bạn định hướng thời gian. Màu sắc thay đổi tương đối dựa trên dữ liệu hiện tại.",
+        "closing": "Hãy duy trì thói quen ôn tập để đồ thị của bạn ngày càng \"xanh\" hơn!",
+        "close": "Đóng"
+      },
+      "review": {
+        "documentTitle": "Ôn tập flashcard - EasyTalk",
+        "loadErrorTitle": "Lỗi tải flashcard",
+        "back": "Quay lại",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang luyện tập flashcard giữa chừng. Nếu rời trang, tiến độ sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "removeConfirmTitle": "Xác nhận xóa từ vựng",
+        "removeConfirmText": "Bạn đã nhớ từ này rồi chứ? Hệ thống sẽ tự động xóa từ vựng đã ghi nhớ khỏi danh sách luyện tập!",
+        "removeConfirm": "Đúng vậy",
+        "removeCancel": "Hủy",
+        "removeSuccessTitle": "Đã xóa từ vựng",
+        "removeSuccessText": "Còn {{count}} từ để ôn tiếp!",
+        "batchErrorLog": "Lỗi gửi batch update:",
+        "completeTitle": "Hoàn thành!",
+        "completeText": "Bạn đã hoàn thành luyện tập flashcard!",
+        "stopTitle": "Dừng học?",
+        "stopText": "Bạn có chắc chắn muốn dừng học không?",
+        "stopConfirm": "Có, dừng lại",
+        "stopCancel": "Tiếp tục học",
+        "empty": "Không có flashcards nào.",
+        "title": "Luyện tập: {{name}}",
+        "stop": "Dừng học",
+        "allDone": "Chúc mừng! Bạn đã hoàn thành toàn bộ flashcard!",
+        "completeButton": "Hoàn thành",
+        "easy": "Dễ",
+        "normal": "Thường",
+        "hard": "Khó",
+        "remembered": "Đã nhớ từ vựng",
+        "next": "Tiếp theo",
+        "loadingNext": "Đang tải câu hỏi tiếp theo... (3s)",
+        "answerToContinue": "Vui lòng trả lời câu hỏi để tiếp tục"
+      },
+      "reviewCard": {
+        "missingAnswerTitle": "Thiếu câu trả lời!",
+        "missingAnswerText": "Vui lòng nhập từ trước khi kiểm tra.",
+        "definition": "Định nghĩa:",
+        "example": "Ví dụ:",
+        "choicePrompt": "Chọn đáp án đúng cho câu ví dụ sau:",
+        "fillPrompt": "Điền từ cho câu ví dụ sau:",
+        "placeholder": "Nhập từ",
+        "wrongAnswer": "Bạn đã trả lời sai !! ✅ Đáp án đúng là:",
+        "showAnswer": "Hiện đáp án",
+        "check": "Kiểm tra"
+      },
+      "form": {
+        "missingTitle": "Thiếu thông tin",
+        "missingRequired": "Vui lòng nhập đầy đủ thông tin bắt buộc!",
+        "missingList": "Vui lòng nhập đầy đủ thông tin!",
+        "successTitle": "Thành công",
+        "errorTitle": "Lỗi",
+        "genericError": "Có lỗi xảy ra.",
+        "createCardSuccess": "Tạo flashcard thành công!",
+        "createCardError": "Lỗi khi tạo flashcard: {{message}}",
+        "updateCardSuccess": "Cập nhật flashcard thành công!",
+        "updateCardError": "Lỗi khi cập nhật flashcard: {{message}}",
+        "createListSuccess": "Tạo danh sách flashcard thành công!",
+        "createListError": "Lỗi khi tạo flashcard: {{message}}",
+        "updateListSuccess": "Cập nhật danh sách flashcard thành công!",
+        "updateListError": "Lỗi khi cập nhật flashcard list: {{message}}",
+        "createCardTitle": "THÊM TỪ VỰNG MỚI",
+        "updateCardTitle": "CHỈNH SỬA TỪ VỰNG",
+        "createListTitle": "TẠO DANH SÁCH FLASHCARD MỚI",
+        "updateListTitle": "CHỈNH SỬA DANH SÁCH FLASHCARD",
+        "word": "Từ vựng:",
+        "wordPlaceholder": "Nhập từ vựng",
+        "meaning": "Định nghĩa:",
+        "meaningPlaceholder": "Nhập định nghĩa",
+        "pos": "Từ loại:",
+        "posPlaceholder": "Nhập từ loại (VD: noun, verb)",
+        "pronunciation": "Phát âm:",
+        "pronunciationPlaceholder": "Nhập phát âm (VD: /ˈæp.əl/)",
+        "example": "Ví dụ:",
+        "examplePlaceholder": "Thêm ví dụ",
+        "imageOptional": "Hình ảnh (tuỳ chọn):",
+        "image": "Hình ảnh:",
+        "listName": "Tên danh sách:",
+        "listNamePlaceholder": "Nhập tên danh sách",
+        "description": "Mô tả:",
+        "descriptionPlaceholder": "Mô tả danh sách (tối đa 500 ký tự)",
+        "charCount": "{{count}}/500 ký tự",
+        "close": "Đóng",
+        "saving": "Đang lưu...",
+        "save": "Lưu"
+      }
+    },
+    "leaderboardPage": {
+      "documentTitle": "Bảng Xếp Hạng - EasyTalk",
+      "title": "BẢNG XẾP HẠNG EASYTALK",
+      "periodRange": "Từ {{start}} đến {{end}}",
+      "periods": {
+        "all": "Tổng",
+        "week": "Tuần",
+        "month": "Tháng",
+        "year": "Năm"
+      },
+      "tabs": {
+        "exp": "Điểm Kinh Nghiệm",
+        "time": "Thời Gian Học",
+        "streak": "Số Streak"
+      },
+      "time": {
+        "minutes": "{{count}} phút",
+        "hours": "{{count}} giờ",
+        "hoursMinutes": "{{hours}} giờ {{minutes}} phút"
+      },
+      "values": {
+        "exp": "{{value}} KN",
+        "streak": "{{count}} ngày",
+        "streakConsecutive": "{{count}} ngày liên tiếp"
+      },
+      "alert": {
+        "loadFailedTitle": "Tạm thời không tải được bảng xếp hạng",
+        "loadFailedText": "Vui lòng thử lại sau ít phút."
+      },
+      "empty": {
+        "title": "Chưa có dữ liệu xếp hạng",
+        "description": "Học ngay để lên Top nào!"
+      },
+      "table": {
+        "rank": "Hạng",
+        "player": "Người chơi",
+        "exp": "Điểm KN",
+        "time": "Thời gian học",
+        "streak": "Streak hiện tại"
+      },
+      "tooltip": {
+        "viewStats": "Bấm để xem chi tiết thống kê",
+        "noInfo": "Không có thông tin"
+      },
+      "currentUserBadge": "Bạn",
+      "yourRank": "Bạn",
+      "loading": "Đang tải bảng xếp hạng...",
+      "unknownUser": "Không xác định"
+    },
+    "statisticPage": {
+      "documentTitle": "Thống Kê Tiến Trình Học Tập - EasyTalk",
+      "title": "THỐNG KÊ TIẾN TRÌNH HỌC TẬP",
+      "subtitle": "Theo dõi thói quen học tập của bạn mỗi ngày",
+      "loading": "Đang tải dữ liệu...",
+      "periods": {
+        "week": "Tuần này",
+        "month": "Tháng này",
+        "year": "Năm nay"
+      },
+      "common": {
+        "close": "Đóng",
+        "unknown": "Không xác định"
+      },
+      "values": {
+        "days": "{{count}} ngày",
+        "lessons": "{{count}} bài",
+        "gates": "{{count}} cổng",
+        "stages": "{{count}} chặng",
+        "exp": "{{value}} KN"
+      },
+      "alert": {
+        "errorTitle": "Lỗi",
+        "loadStatsFailed": "Không thể tải dữ liệu thống kê. Vui lòng thử lại."
+      },
+      "personalInfo": {
+        "title": "Thông tin cá nhân của bạn"
+      },
+      "follow": {
+        "followers": "người theo dõi",
+        "following": "người đang theo dõi"
+      },
+      "export": {
+        "personalInfoTitle": "THÔNG TIN CÁ NHÂN",
+        "personalInfoTitleWithColon": "Thông tin cá nhân:",
+        "date": "Ngày",
+        "studyTimeHours": "Thời gian học (giờ)",
+        "experiencePoints": "Điểm kinh nghiệm",
+        "weekDateLabel": "{{weekday}} - ngày {{day}}/{{month}}/{{year}}",
+        "personalInfoSheet": "Thông tin cá nhân",
+        "chartSheet": "Thống kê biểu đồ"
+      },
+      "chart": {
+        "ownTitle": "Thống kê biểu đồ của bạn",
+        "userTitle": "Thống kê biểu đồ của {{username}}",
+        "tabs": {
+          "time": "Thời Gian Học",
+          "exp": "Điểm Kinh Nghiệm"
+        },
+        "titles": {
+          "time": {
+            "week": "Thời gian học theo ngày",
+            "month": "Thời gian học theo tháng",
+            "year": "Thời gian học theo năm"
+          },
+          "exp": {
+            "week": "Điểm kinh nghiệm theo ngày",
+            "month": "Điểm kinh nghiệm theo tháng",
+            "year": "Điểm kinh nghiệm theo năm"
+          }
+        },
+        "series": {
+          "time": "Thời gian học",
+          "exp": "Điểm kinh nghiệm"
+        },
+        "axis": {
+          "hours": "Giờ"
+        },
+        "tooltip": {
+          "date": "Ngày",
+          "dateValue": "ngày {{day}}/{{month}}/{{year}}",
+          "studyTime": "Thời gian học",
+          "experience": "Kinh nghiệm"
+        },
+        "empty": {
+          "title": "Chưa có dữ liệu",
+          "description": "Học mỗi ngày để thấy tiến bộ nhé!"
+        }
+      },
+      "achievements": {
+        "ownTitle": "Thành tích của bạn",
+        "userTitle": "Thành tích của {{username}}",
+        "fallback": {
+          "gate": "Cổng không tên",
+          "stage": "Chặng không tên",
+          "lesson": "Bài không tên"
+        },
+        "cards": {
+          "currentStreak": "Streak hiện tại",
+          "maxStreak": "Kỷ lục streak",
+          "currentExp": "Điểm KN hiện tại",
+          "maxDailyExp": "Kỷ lục KN/ngày"
+        },
+        "unlocked": {
+          "gates": "Số cổng",
+          "stages": "Số chặng",
+          "story": "Bài học câu chuyện",
+          "grammar": "Bài học ngữ pháp",
+          "pronunciation": "Bài học phát âm",
+          "grammarPractice": "Luyện ngữ pháp",
+          "pronunciationPractice": "Luyện phát âm",
+          "vocab": "Luyện từ vựng",
+          "dictation": "Luyện Nghe chép chính tả"
+        },
+        "modals": {
+          "gates": {
+            "title": "Cổng Đã Mở Khóa ({{count}})",
+            "empty": "Chưa mở khóa cổng nào"
+          },
+          "stages": {
+            "title": "Chặng Đã Mở Khóa ({{count}})",
+            "empty": "Chưa mở khóa chặng nào"
+          },
+          "story": {
+            "title": "Bài Học Câu Chuyện Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa hoàn thành bài câu chuyện nào"
+          },
+          "grammar": {
+            "title": "Bài Học Ngữ Pháp Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa hoàn thành bài ngữ pháp nào"
+          },
+          "pronunciation": {
+            "title": "Bài Học Phát Âm Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa hoàn thành bài phát âm nào"
+          },
+          "grammarPractice": {
+            "title": "Luyện Ngữ Pháp Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa luyện ngữ pháp nào"
+          },
+          "pronunciationPractice": {
+            "title": "Luyện Phát Âm Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa luyện phát âm nào"
+          },
+          "vocab": {
+            "title": "Luyện Từ Vựng Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa luyện từ vựng nào"
+          },
+          "dictation": {
+            "title": "Luyện Nghe Chép Chính Tả Đã Hoàn Thành ({{count}})",
+            "empty": "Chưa luyện nghe chép chính tả nào"
+          }
+        }
+      },
+      "prizes": {
+        "ownTitle": "Giải thưởng của bạn",
+        "userTitle": "Giải thưởng của {{username}}",
+        "loading": "Đang tải giải thưởng...",
+        "howToEarn": "Cách đạt được:",
+        "receiveDiamonds": "Nhận {{count}} kim cương",
+        "receiveDiamondsShort": "Nhận: {{count}} KC",
+        "diamonds": "{{count}} kim cương",
+        "viewDetails": "Xem chi tiết →",
+        "tooltip": {
+          "unlocked": "Đã đạt được: {{name}}",
+          "locked": "Chưa đạt: {{name}}",
+          "lockedStreak": "Chưa đạt: {{name}} (Cần {{days}} ngày streak)",
+          "lockedExp": "Chưa đạt: {{name}} (Cần {{value}} KN)"
+        },
+        "perfectStreak": {
+          "title": "Tuần Hoàn Hảo",
+          "description": "Học liên tục mỗi ngày không nghỉ để tích lũy streak hoàn hảo. Mỗi cấp độ yêu cầu số ngày streak khác nhau:",
+          "level1": "Cấp 1: 7 ngày liên tiếp",
+          "level2": "Cấp 2: 14 ngày liên tiếp",
+          "level3": "Cấp 3: 30 ngày liên tiếp",
+          "level10": "Cấp 10: 365 ngày liên tiếp (1 năm hoàn hảo)",
+          "note": "Chỉ cần nghỉ 1 ngày, bạn sẽ mất chuỗi hoàn hảo đó! Hãy cố gắng giữ vững chuỗi streak nhé!"
+        },
+        "knowledgeGod": {
+          "title": "Vị Thần Kiến Thức",
+          "description": "Tích lũy điểm kinh nghiệm (KN) bằng cách:",
+          "source1": "Hoàn thành bài học hàng ngày",
+          "source2": "Làm bài tập và luyện tập",
+          "source3": "Đạt mục tiêu flashcard mỗi ngày",
+          "source4": "Mở khóa huy hiệu tháng",
+          "requirementIntro": "Mỗi cấp độ yêu cầu tổng KN tích lũy:",
+          "level1": "Cấp 1: 500 KN",
+          "level2": "Cấp 2: 1,500 KN",
+          "level3": "Cấp 3: 5,000 KN",
+          "level10": "Cấp 10: 100,000 KN",
+          "tip": "Học đều đặn mỗi ngày để tích lũy KN nhanh hơn!"
+        },
+        "champion": {
+          "title": "Quán Quân Bảng Xếp Hạng",
+          "defaultName": "Quán Quân",
+          "description": "Giành vị trí Top 1 trên bảng xếp hạng vào cuối kỳ. Có 3 loại giải thưởng:",
+          "weekTitle": "Quán Quân Tuần:",
+          "weekDescription": "Đạt rank 1 vào cuối tuần (Chủ nhật) trên bảng xếp hạng KN hoặc Thời gian học",
+          "monthTitle": "Quán Quân Tháng:",
+          "monthDescription": "Đạt rank 1 vào cuối tháng trên bảng xếp hạng KN hoặc Thời gian học",
+          "yearTitle": "Quán Quân Năm:",
+          "yearDescription": "Đạt rank 1 vào cuối năm trên bảng xếp hạng KN hoặc Thời gian học",
+          "note": "Mỗi giải đạt được đều danh giá và phần thưởng xứng đáng! Cạnh tranh gay gắt để giành danh hiệu cao quý này!"
+        },
+        "history": {
+          "weekTitle": "Lịch sử Quán quân Tuần",
+          "monthTitle": "Lịch sử Quán quân Tháng",
+          "yearTitle": "Lịch sử Quán quân Năm",
+          "weekPeriod": "Tuần {{week}} - {{year}}",
+          "monthPeriod": "Tháng {{month}} - {{year}}",
+          "yearPeriod": "Năm {{year}}",
+          "empty": "Chưa có danh hiệu nào trong hạng mục này",
+          "period": "Kỳ",
+          "reward": "Nhận thưởng",
+          "receivedDate": "Ngày nhận"
+        }
+      },
+      "followModal": {
+        "followersTitle": "Người theo dõi",
+        "followingTitle": "Người đang theo dõi",
+        "emptyFollowers": "Chưa có người theo dõi",
+        "emptyFollowing": "Chưa có người nào đang theo dõi",
+        "follow": "Theo dõi",
+        "unfollow": "Hủy theo dõi",
+        "keep": "Giữ lại",
+        "loginRequired": "Bạn cần đăng nhập để thực hiện thao tác này.",
+        "selfFollow": "Bạn không thể theo dõi chính mình!",
+        "unfollowConfirmTitle": "Hủy theo dõi?",
+        "unfollowConfirmText": "Bạn có chắc muốn hủy theo dõi {{username}}?",
+        "noticeTitle": "Thông báo",
+        "alreadyUnfollowed": "Bạn đã hủy theo dõi từ trước rồi!",
+        "unfollowedTitle": "Đã hủy!",
+        "unfollowedText": "Bạn đã hủy theo dõi {{username}}",
+        "alreadyFollowing": "Bạn đã theo dõi {{username}} từ trước rồi!",
+        "successTitle": "Thành công!",
+        "followedText": "Bạn đã theo dõi {{username}}! Cùng cố lên nào!",
+        "actionFailed": "Không thể thực hiện thao tác"
+      }
+    },
+    "setting": {
     "title": "Cài đặt tài khoản",
     "description": "Quản lý cài đặt tài khoản, giao diện và thông báo học tập của bạn.",
     "sidebar": {

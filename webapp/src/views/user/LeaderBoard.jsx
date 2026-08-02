@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import UserDetailModal from "@/components/user/UserDetailModal";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const LeaderBoard = () => {
+    const { t, i18n } = useTranslation();
     const [activeTab, setActiveTab] = useState("exp");
     const [activePeriod, setActivePeriod] = useState("all");
     const [leaderboard, setLeaderboard] = useState([]);
@@ -15,16 +17,16 @@ const LeaderBoard = () => {
     const [selectedUsername, setSelectedUsername] = useState("");
 
     const periods = [
-        { key: "all", label: "Tổng" },
-        { key: "week", label: "Tuần" },
-        { key: "month", label: "Tháng" },
-        { key: "year", label: "Năm" }
+        { key: "all", label: t("leaderboardPage.periods.all") },
+        { key: "week", label: t("leaderboardPage.periods.week") },
+        { key: "month", label: t("leaderboardPage.periods.month") },
+        { key: "year", label: t("leaderboardPage.periods.year") }
     ];
 
     const tabs = [
-        { key: "exp", label: "Điểm Kinh Nghiệm", icon: "trophy" },
-        { key: "time", label: "Thời Gian Học", icon: "clock" },
-        { key: "streak", label: "Số Streak", icon: "fire" }
+        { key: "exp", label: t("leaderboardPage.tabs.exp"), icon: "trophy" },
+        { key: "time", label: t("leaderboardPage.tabs.time"), icon: "clock" },
+        { key: "streak", label: t("leaderboardPage.tabs.streak"), icon: "fire" }
     ];
 
     const getPeriodRangeText = () => {
@@ -46,12 +48,13 @@ const LeaderBoard = () => {
         } else {
             return null;
         }
-        const format = (date) => date.toLocaleDateString("vi-VN");
-        return `Từ ${format(start)} đến ${format(end)}`;
+        const locale = i18n.language === "en" ? "en-US" : "vi-VN";
+        const format = (date) => date.toLocaleDateString(locale);
+        return t("leaderboardPage.periodRange", { start: format(start), end: format(end) });
     };
 
-    const fetchLeaderboard = async () => {
-        document.title = "Bảng Xếp Hạng - EasyTalk";
+    const fetchLeaderboard = useCallback(async () => {
+        document.title = t("leaderboardPage.documentTitle");
         setLoading(true);
         try {
             const data = await UserProgressService.getLeaderboard(activeTab, activePeriod, 50);
@@ -59,7 +62,7 @@ const LeaderBoard = () => {
             try {
                 const userProgress = await UserProgressService.getCurrentUserProgress();
                 setCurrentUser(userProgress);
-            } catch (err) {
+            } catch {
                 setCurrentUser(null);
             }
         } catch (err) {
@@ -67,26 +70,27 @@ const LeaderBoard = () => {
             setLeaderboard([]);
             Swal.fire({
                 icon: "warning",
-                title: "Tạm thời không tải được bảng xếp hạng",
-                text: "Vui lòng thử lại sau ít phút.",
+                title: t("leaderboardPage.alert.loadFailedTitle"),
+                text: t("leaderboardPage.alert.loadFailedText"),
                 timer: 3000,
                 showConfirmButton: false
             });
         } finally {
             setLoading(false);
         }
-    };
+    }, [activeTab, activePeriod, t]);
 
     useEffect(() => {
         fetchLeaderboard();
-    }, [activeTab, activePeriod]);
+    }, [fetchLeaderboard]);
 
     const formatTime = (hours) => {
-        if (!hours || hours < 0.01) return "0 phút";
-        if (hours < 1) return `${Math.round(hours * 60)} phút`;
+        if (!hours || hours < 0.01) return t("leaderboardPage.time.minutes", { count: 0 });
+        if (hours < 1) return t("leaderboardPage.time.minutes", { count: Math.round(hours * 60) });
         const h = Math.floor(hours);
         const m = Math.round((hours - h) * 60);
-        return `${h} giờ${m > 0 ? ` ${m} phút` : ""}`;
+        if (m > 0) return t("leaderboardPage.time.hoursMinutes", { hours: h, minutes: m });
+        return t("leaderboardPage.time.hours", { count: h });
     };
 
     const isCurrentUser = (username) => {
@@ -98,13 +102,13 @@ const LeaderBoard = () => {
 
     const getCurrentUsername = () => {
         if (currentUser?.userDetails?.username) return currentUser.userDetails.username;
-        return AuthService.getCurrentUser()?.username || "Unknown";
+        return AuthService.getCurrentUser()?.username || t("leaderboardPage.unknownUser");
     };
 
     const getValueDisplay = (item) => {
-        if (activeTab == "exp") return `${Math.round(item.value).toLocaleString()} KN`;
+        if (activeTab == "exp") return t("leaderboardPage.values.exp", { value: Math.round(item.value).toLocaleString() });
         if (activeTab == "time") return formatTime(item.value);
-        if (activeTab == "streak") return `${item.streak || 0} ngày`;
+        if (activeTab == "streak") return t("leaderboardPage.values.streak", { count: item.streak || 0 });
         return "-";
     };
 
@@ -114,7 +118,7 @@ const LeaderBoard = () => {
         const userId = item.userId || item._id || item.user;
         const userIdString = typeof userId === 'object' && userId.$oid ? userId.$oid : (userId.toString ? userId.toString() : String(userId));
         setSelectedUserId(userIdString);
-        setSelectedUsername(item.username || "Unknown");
+        setSelectedUsername(item.username || t("leaderboardPage.unknownUser"));
         setShowUserModal(true);
     };
 
@@ -127,7 +131,7 @@ const LeaderBoard = () => {
     return (
         <div className="user-leaderboard-container container">
             <div className="user-leaderboard-header">
-                <h2 className="user-leaderboard-title">BẢNG XẾP HẠNG EASYTALK</h2>
+                <h2 className="user-leaderboard-title">{t("leaderboardPage.title")}</h2>
             </div>
             <div className="user-leaderboard-tabs">
                 {tabs.map(tab => (
@@ -166,24 +170,24 @@ const LeaderBoard = () => {
             <div className="user-leaderboard-table-container">
                 {loading ? (
                     <div className="user-leaderboard-loading">
-                        <i className="fas fa-spinner fa-spin"></i> Đang tải bảng xếp hạng...
+                        <i className="fas fa-spinner fa-spin"></i> {t("leaderboardPage.loading")}
                     </div>
                 ) : leaderboard.length == 0 ? (
                     <div className="user-leaderboard-empty">
                         <i className="fas fa-trophy fa-3x"></i>
-                        <p>Chưa có dữ liệu xếp hạng</p>
-                        <small>Học ngay để lên Top nào!</small>
+                        <p>{t("leaderboardPage.empty.title")}</p>
+                        <small>{t("leaderboardPage.empty.description")}</small>
                     </div>
                 ) : (
                     <table className="user-leaderboard-table">
                         <thead>
                             <tr>
-                                <th>Hạng</th>
-                                <th>Người chơi</th>
+                                <th>{t("leaderboardPage.table.rank")}</th>
+                                <th>{t("leaderboardPage.table.player")}</th>
                                 <th>
-                                    {activeTab == "exp" && "Điểm KN"}
-                                    {activeTab == "time" && "Thời gian học"}
-                                    {activeTab == "streak" && "Streak hiện tại"}
+                                    {activeTab == "exp" && t("leaderboardPage.table.exp")}
+                                    {activeTab == "time" && t("leaderboardPage.table.time")}
+                                    {activeTab == "streak" && t("leaderboardPage.table.streak")}
                                 </th>
                             </tr>
                         </thead>
@@ -200,7 +204,7 @@ const LeaderBoard = () => {
                                             style={{
                                                 cursor: hasUserId ? 'pointer' : 'default',
                                             }}
-                                            title={hasUserId ? "Bấm để xem chi tiết thống kê" : "Không có thông tin"}
+                                            title={hasUserId ? t("leaderboardPage.tooltip.viewStats") : t("leaderboardPage.tooltip.noInfo")}
                                         >
                                             {idx < 3 ? (
                                                 <div className={`rank-medal rank-${idx + 1}`}>
@@ -216,11 +220,11 @@ const LeaderBoard = () => {
                                             style={{
                                                 cursor: hasUserId ? 'pointer' : 'default',
                                             }}
-                                            title={hasUserId ? "Bấm để xem chi tiết thống kê" : "Không có thông tin"}
+                                            title={hasUserId ? t("leaderboardPage.tooltip.viewStats") : t("leaderboardPage.tooltip.noInfo")}
                                         >
                                             <span className="username-text">{item.username}</span>
                                             {isCurrentUser(item.username) && (
-                                                <span className="current-user-badge">Bạn</span>
+                                                <span className="current-user-badge">{t("leaderboardPage.currentUserBadge")}</span>
                                             )}
                                         </td>
                                         <td className="user-leaderboard-value"
@@ -228,7 +232,7 @@ const LeaderBoard = () => {
                                             style={{
                                                 cursor: hasUserId ? 'pointer' : 'default',
                                             }}
-                                            title={hasUserId ? "Bấm để xem chi tiết thống kê" : "Không có thông tin"}
+                                            title={hasUserId ? t("leaderboardPage.tooltip.viewStats") : t("leaderboardPage.tooltip.noInfo")}
                                         >
                                             {getValueDisplay(item)}
                                         </td>
@@ -241,10 +245,10 @@ const LeaderBoard = () => {
             </div>
             {currentUser && !loading && leaderboard.length > 0 && !leaderboard.some(u => isCurrentUser(u.username)) && (
                 <div className="user-leaderboard-your-rank">
-                    <strong>Bạn:</strong> {getCurrentUsername()} - 
-                    {" "} {activeTab == "exp" && `${currentUser.experiencePoints || 0} KN`}
+                    <strong>{t("leaderboardPage.yourRank")}:</strong> {getCurrentUsername()} -
+                    {" "} {activeTab == "exp" && t("leaderboardPage.values.exp", { value: currentUser.experiencePoints || 0 })}
                     {activeTab == "time" && ` ${formatTime(currentUser.studyTimes || 0)}`}
-                    {activeTab == "streak" && ` ${currentUser.streak || 0} ngày liên tiếp`}
+                    {activeTab == "streak" && ` ${t("leaderboardPage.values.streakConsecutive", { count: currentUser.streak || 0 })}`}
                 </div>
             )}
             {showUserModal && selectedUserId && (

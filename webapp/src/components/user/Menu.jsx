@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
 import { UserProgressService } from '@/services/UserProgressService.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
 import { NotificationService } from '@/services/NotificationService.jsx';
 import { SocketService } from '@/services/SocketService.jsx';
+import { setLanguage } from '@/store/language/languageSlice';
 import logo from '@/assets/images/logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -26,6 +28,8 @@ const isTokenExpired = (token) => {
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const currentLanguage = useSelector((state) => state.language.current);
   const [username, setUsername] = useState('User');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -34,6 +38,7 @@ function Menu() {
     practice: false,
     more: false,
     login: false,
+    language: false,
   });
   const [streakData, setStreakData] = useState({ streak: 0 });
   const [leaderData, setLeaderData] = useState({ experiencePoints: 0 });
@@ -56,6 +61,11 @@ function Menu() {
   ];
   const coachRoutes = ['/coach'];
   const moreRoutes = ['/leaderboard', '/statistic'];
+  const languages = [
+    { value: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
+    { value: 'en', label: 'English', shortLabel: 'EN' },
+  ];
+  const selectedLanguage = languages.find((lang) => lang.value === currentLanguage) || languages[0];
   const isLessonsActive = lessonRoutes.some((p) => location.pathname == p);
   const isPracticeActive = practiceRoutes.some((p) => location.pathname == p);
   const isCoachActive = coachRoutes.some((p) => location.pathname == p);
@@ -262,6 +272,9 @@ function Menu() {
       if (!e.target.closest('.notification-wrapper')) {
         setShowNotificationDropdown(false);
       }
+      if (!e.target.closest('.language-switcher')) {
+        setDropdownOpen((prev) => ({ ...prev, language: false }));
+      }
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
@@ -306,7 +319,12 @@ function Menu() {
 
   const handleLinkClick = () => {
     setMenuOpen(false);
-    setDropdownOpen({ lessons: false, practice: false, more: false, login: false });
+    setDropdownOpen({ lessons: false, practice: false, more: false, login: false, language: false });
+  };
+
+  const handleLanguageChange = (language) => {
+    dispatch(setLanguage(language));
+    setDropdownOpen((prev) => ({ ...prev, language: false }));
   };
 
   return (
@@ -319,6 +337,37 @@ function Menu() {
                 {t("header.topbar.marquee")}
               </span>
             </div>
+          </div>
+          <div className={`language-switcher ${dropdownOpen.language ? 'show' : ''}`}>
+            <button
+              type="button"
+              className="language-switcher-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleDropdown('language');
+              }}
+              aria-expanded={dropdownOpen.language}
+              aria-label="Change language"
+            >
+              <i className="fas fa-globe"></i>
+              <span>{selectedLanguage.shortLabel}</span>
+              <i className="fas fa-chevron-down"></i>
+            </button>
+            {dropdownOpen.language && (
+              <div className="language-switcher-menu">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.value}
+                    type="button"
+                    className={`language-switcher-item ${currentLanguage === lang.value ? 'active' : ''}`}
+                    onClick={() => handleLanguageChange(lang.value)}
+                  >
+                    <span className="language-switcher-code">{lang.shortLabel}</span>
+                    <span>{lang.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           {isLoggedIn && (
             <div className="top-bar-right d-flex align-items-center">
@@ -618,7 +667,7 @@ function Menu() {
                         role="button"
                         aria-expanded={showMore}
                       >
-                        <i className="fas fa-ellipsis-h me-2"></i>KHÁC
+                        <i className="fas fa-ellipsis-h me-2"></i> {t("header.menu.other")}
                       </a>
                       <div
                         className={`dropdown-menu ${showMore ? 'show' : ''}`}
@@ -629,14 +678,14 @@ function Menu() {
                           to="/leaderboard"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-trophy me-2"></i>{t("header.menu.leaderboard")}
+                          <i className="fas fa-trophy me-2"></i>{t("header.menu.submenu_other.leaderboard")}
                         </NavLink>
                         <NavLink
                           className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
                           to="/statistic"
                           onClick={handleLinkClick}
                         >
-                          <i className="fas fa-chart-line me-2"></i>{t("header.menu.statistics")}
+                          <i className="fas fa-chart-line me-2"></i>{t("header.menu.submenu_other.statistics")}
                         </NavLink>
                       </div>
                     </li>
@@ -662,7 +711,7 @@ function Menu() {
                         role="button"
                         aria-expanded={dropdownOpen.login}
                       >
-                        <i className="fas fa-user-circle me-2"></i>{isLoggedIn ? username : "Đăng nhập"}
+                        <i className="fas fa-user-circle me-2"></i>{isLoggedIn ? username : t("header.menu.login")}
                       </a>
                       {isLoggedIn && (
                         <div

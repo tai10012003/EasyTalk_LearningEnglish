@@ -100,7 +100,6 @@ export const UserSettingService = {
                 fontFamily: "Inter"
             },
             general: {
-                language: "vn",
                 timezone: "Asia/Ho_Chi_Minh",
                 dateFormat: "DD/MM/YYYY"
             },

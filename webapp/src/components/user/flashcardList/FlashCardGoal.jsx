@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
+import { useTranslation } from "react-i18next";
 
 const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
+    const { t } = useTranslation();
     const [goal, setGoal] = useState(20);
     const [isLoading, setIsLoading] = useState(false);
     const [todayCount, setTodayCount] = useState(0);
@@ -30,33 +32,33 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
                     setTodayCount(currentGoal.todayCount || 0);
                 }
             } catch (error) {
-                console.error("Lỗi khi tải goal:", error);
+                console.error(t("flashcardPage.goal.fetchErrorLog"), error);
                 Swal.fire({
                     icon: "error",
-                    title: "Không thể tải mục tiêu hiện tại",
-                    text: "Vui lòng thử lại sau.",
+                    title: t("flashcardPage.goal.fetchErrorTitle"),
+                    text: t("flashcardPage.goal.fetchErrorText"),
                 });
             } finally {
                 setIsFetching(false);
             }
         };
         fetchGoal();
-    }, [isOpen]);
+    }, [isOpen, currentGoal, t]);
 
     const handleSave = async () => {
         if (todayCount > 0) {
             Swal.fire({
                 icon: "warning",
-                title: "Không thể thay đổi",
-                text: "Bạn đã bắt đầu ôn tập hôm nay. Chỉ có thể set goal vào ngày mới!",
+                title: t("flashcardPage.goal.lockedTitle"),
+                text: t("flashcardPage.goal.lockedText"),
             });
             return;
         }
         if (goal < 0 || goal > 200) {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Mục tiêu phải từ 0 đến 200 review/ngày.",
+                title: t("flashcardPage.goal.warningTitle"),
+                text: t("flashcardPage.goal.rangeWarning"),
             });
             return;
         }
@@ -66,17 +68,17 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
             const bonus = getBonusByGoal(goal);
             Swal.fire({
                 icon: "success",
-                title: "Cập nhật thành công!",
-                text: `Mục tiêu mới: ${goal} flashcard/ngày. Bonus EXP khi đạt: +${bonus}XP.`,
+                title: t("flashcardPage.goal.successTitle"),
+                text: t("flashcardPage.goal.successText", { goal, bonus }),
             }).then(() => {
                 onClose(goal);
                 window.location.reload();
             });
-        } catch (error) {
+        } catch {
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Không thể cập nhật mục tiêu.",
+                title: t("flashcardPage.goal.errorTitle"),
+                text: t("flashcardPage.goal.errorText"),
             });
         } finally {
             setIsLoading(false);
@@ -88,7 +90,7 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
         return (
             <div className="custom-modal-overlay">
                 <div className="custom-modal text-center">
-                    <p>Đang tải mục tiêu hiện tại...</p>
+                    <p>{t("flashcardPage.goal.loading")}</p>
                 </div>
             </div>
         );
@@ -98,11 +100,11 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
         <div className="custom-modal-overlay" onClick={onClose}>
             <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="custom-modal-header">
-                    <h5>Đặt Mục Tiêu Hàng Ngày</h5>
+                    <h5>{t("flashcardPage.goal.title")}</h5>
                     <button className="close-btn" onClick={onClose}>&times;</button>
                 </div>
                 <div className="custom-modal-body">
-                    <p>Chọn số flashcard bạn muốn review mỗi ngày (từ 0-200):</p>
+                    <p>{t("flashcardPage.goal.description")}</p>
                     <input
                         type="number"
                         value={goal}
@@ -110,29 +112,29 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
                         min="0"
                         max="200"
                         className="form-control mb-3"
-                        placeholder="Ví dụ: 20"
+                        placeholder={t("flashcardPage.goal.placeholder")}
                         disabled={todayCount > 0}
                     />
                     {todayCount > 0 && (
                         <small className="text-warning d-block mb-2">
-                            Hôm nay đã ôn {todayCount} lần, không thể thay đổi goal.
+                            {t("flashcardPage.goal.todayLocked", { count: todayCount })}
                         </small>
                     )}
-                    <p><strong>Tặng EXP khi đạt mục tiêu:</strong></p>
+                    <p><strong>{t("flashcardPage.goal.bonusTitle")}</strong></p>
                     <ul className="mb-0">
-                        <li>0-20 lần: +10XP</li>
-                        <li>21-70 lần: +20XP</li>
-                        <li>71-130 lần: +30XP</li>
-                        <li>131-200 lần: +50XP</li>
+                        <li>{t("flashcardPage.goal.bonus1")}</li>
+                        <li>{t("flashcardPage.goal.bonus2")}</li>
+                        <li>{t("flashcardPage.goal.bonus3")}</li>
+                        <li>{t("flashcardPage.goal.bonus4")}</li>
                     </ul>
                     <p className="small text-info mt-2">
-                        Mỗi khi bạn đánh giá độ khó (Dễ/Thường/Khó) cho flashcard của mình, nó sẽ đếm vào tiến độ hôm nay.
+                        {t("flashcardPage.goal.note")}
                     </p>
                 </div>
                 {todayCount == 0 && (
                     <div className="custom-modal-footer">
                         <button className="footer-btn" onClick={handleSave} disabled={isLoading}>
-                            {isLoading ? "Đang lưu..." : "Lưu"}
+                            {isLoading ? t("flashcardPage.goal.saving") : t("flashcardPage.goal.save")}
                         </button>
                     </div>
                 )}

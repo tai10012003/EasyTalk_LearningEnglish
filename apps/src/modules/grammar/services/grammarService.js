@@ -14,6 +14,7 @@ class GrammarService {
         this.imageService = options.imageService || new grammarImageService("easytalk/grammar");
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     getUserProgressService() {
@@ -24,9 +25,9 @@ class GrammarService {
         return this.userProgressService;
     }
 
-    async getGrammarList(page = 1, limit = 12, search = "", role = "user") {
+    async getGrammarList(page = 1, limit = 12, search = "", role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('grammar', { page, limit, search, role });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammar', role), cacheNs.listTags('grammar')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammar', role), cacheNs.listTags('grammar')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -36,6 +37,13 @@ class GrammarService {
             const { grammars, total } = await this.repository.findAll(filter, skip, limit);
             return { grammars, totalGrammars: total };
         });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                grammars: await this.englishTranslationService.applyTranslations("grammar", result.grammars, lang)
+            };
+        }
+        return result;
     }
 
     async getGrammar(id) {
@@ -50,6 +58,14 @@ class GrammarService {
         });
     }
 
+    async getLocalizedGrammarBySlug(slug, lang = "vi") {
+        const grammar = await this.getGrammarBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("grammar", grammar, lang);
+        }
+        return grammar;
+    }
+
     async _getOrCreateUserProgress(userId) {
         const userProgressService = this.getUserProgressService();
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
@@ -61,7 +77,7 @@ class GrammarService {
         return userProgress;
     }
 
-    async getGrammarDetails(userId, grammarId) {
+    async getGrammarDetails(userId, grammarId, lang = "vi") {
         const grammar = await this.getGrammar(grammarId);
         if (!grammar) {
             return { status: 404, data: { message: "Grammar not found" } };
@@ -71,7 +87,10 @@ class GrammarService {
         if (!isUnlocked) {
             return { status: 403, data: { success: false, message: "This grammar is locked for you. Please complete previous grammars first." } };
         }
-        return { status: 200, data: { grammar, userProgress } };
+        const localizedGrammar = lang === "en" && this.englishTranslationService
+            ? await this.englishTranslationService.applyTranslationToItem("grammar", grammar, lang)
+            : grammar;
+        return { status: 200, data: { grammar: localizedGrammar, userProgress } };
     }
 
     async completeGrammar(userId, grammarId) {
@@ -147,6 +166,9 @@ class GrammarService {
             if (publicId) await this.imageService.deleteImage(publicId);
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("grammar", id);
+        }
         await invalidateGrammarCache({ id, slug: existing.slug });
         return { status: 200, data: { message: "Bài học ngữ pháp đã xóa thành công !" } };
     }

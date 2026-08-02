@@ -12,6 +12,7 @@ const FollowService = require('../modules/userprogress/services/followService');
 const PrizeService = require('../modules/prize/services/prizeService');
 const FlashcardService = require('../modules/flashcard/services/flashcardService');
 const GrammarService = require('../modules/grammar/services/grammarService');
+const EnglishTranslationService = require('../modules/englishtranslation/services/englishtranslationService');
 const PronunciationService = require('../modules/pronunciation/services/pronunciationService');
 const StoryService = require('../modules/story/services/storyService');
 const GrammarExerciseService = require('../modules/grammarexercise/services/grammarexerciseService');
@@ -65,6 +66,7 @@ const chatAIController = require('../modules/chatAI/controllers/chatAIController
 const writingAIController = require('../modules/writingAI/controllers/writingAIController');
 const learningAgentController = require('../modules/learningAgent/controllers/learningAgentController');
 const cacheController = require('../modules/cache/controllers/cacheController');
+const englishTranslationController = require('../modules/englishtranslation/controllers/englishtranslationController');
 
 function buildDependencies(options = {}) {
     const repositories = {
@@ -82,6 +84,7 @@ function buildDependencies(options = {}) {
         prizeService: new PrizeService(),
         followService: new FollowService(),
         flashcardService: new FlashcardService(),
+        englishTranslationService: new EnglishTranslationService(),
         cacheService
     };
 
@@ -95,9 +98,18 @@ function buildDependencies(options = {}) {
         userProgressService: services.userProgressService
     };
 
-    services.grammarService = new GrammarService(learningServiceDeps);
-    services.pronunciationService = new PronunciationService(learningServiceDeps);
-    services.storyService = new StoryService(learningServiceDeps);
+    services.grammarService = new GrammarService({
+        ...learningServiceDeps,
+        englishTranslationService: services.englishTranslationService
+    });
+    services.pronunciationService = new PronunciationService({
+        ...learningServiceDeps,
+        englishTranslationService: services.englishTranslationService
+    });
+    services.storyService = new StoryService({
+        ...learningServiceDeps,
+        englishTranslationService: services.englishTranslationService
+    });
     services.grammarExerciseService = new GrammarExerciseService(learningServiceDeps);
     services.pronunciationExerciseService = new PronunciationExerciseService(learningServiceDeps);
     services.vocabularyExerciseService = new VocabularyExerciseService(learningServiceDeps);
@@ -209,6 +221,7 @@ function buildDependencies(options = {}) {
     learningAgentController.setAgentLearningEventService(services.agentLearningEventService);
     learningAgentController.setAgentModeService(services.agentModeService);
     writingAIController.setWritingAIService(services.writingAIService);
+    englishTranslationController.setEnglishTranslationService(services.englishTranslationService);
 
     services.userProgressService.setStreakService(services.streakService);
     services.userProgressService.setLeaderboardService(services.leaderboardService);
@@ -267,7 +280,8 @@ function buildDependencies(options = {}) {
         chatAIController,
         writingAIController,
         learningAgentController,
-        cacheController
+        cacheController,
+        englishTranslationController
     };
 
     return {

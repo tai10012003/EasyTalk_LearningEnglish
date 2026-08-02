@@ -7,12 +7,15 @@ import UpdateStage from "@/views/admin/stage/UpdateStagePage"
 import Grammar from "@/views/admin/grammar/Grammar";
 import AddGrammar from "@/views/admin/grammar/AddGrammar";
 import UpdateGrammar from "@/views/admin/grammar/UpdateGrammar"
+import TranslateGrammar from "@/views/admin/grammar/TranslateGrammar";
 import Pronunciation from "@/views/admin/pronunciation/Pronunciation";
 import AddPronunciation from "@/views/admin/pronunciation/AddPronunciation";
 import UpdatePronunciation from "@/views/admin/pronunciation/UpdatePronunciation"
+import TranslatePronunciation from "@/views/admin/pronunciation/TranslatePronunciation";
 import Story from "@/views/admin/story/Story";
 import AddStory from "@/views/admin/story/AddStoryPage";
 import UpdateStory from "@/views/admin/story/UpdateStoryPage"
+import TranslateStory from "@/views/admin/story/TranslateStory";
 import GrammarExercise from "@/views/admin/grammarexercise/GrammarExercise";
 import AddGrammarExercise from "@/views/admin/grammarexercise/AddGrammarExercise";
 import UpdateGrammarExercise from "@/views/admin/grammarexercise/UpdateGrammarExercise";
@@ -111,6 +114,14 @@ const AdminRoute = [
         ),
     },
     {
+        path: "grammar/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateGrammar />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "pronunciation",
         element: (
             <PrivateRoute roles={["admin"]}>
@@ -135,6 +146,14 @@ const AdminRoute = [
         ),
     },
     {
+        path: "pronunciation/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslatePronunciation />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "story",
         element: (
             <PrivateRoute roles={["admin"]}>
@@ -155,6 +174,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateStory />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "story/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateStory />
             </PrivateRoute>
         ),
     },

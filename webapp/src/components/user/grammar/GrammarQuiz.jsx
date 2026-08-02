@@ -1,9 +1,10 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { isAnswerCorrect } from '@/utils/englishTextNormalizer';
 import Swal from "sweetalert2";
 
 function GrammarQuiz({ quizzes, onComplete }) {
-  // Hàm shuffle chuẩn Fisher–Yates
+  const { t } = useTranslation();
   const shuffleArray = (array) => {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
@@ -28,8 +29,8 @@ function GrammarQuiz({ quizzes, onComplete }) {
     if (answers.some(a => a.trim() == "")) {
       Swal.fire({
         icon: "warning",
-        title: "Cảnh báo",
-        text: "Vui lòng trả lời hết các câu hỏi trước khi kiểm tra!"
+        title: t("grammarPage.quiz.warningTitle"),
+        text: t("grammarPage.quiz.warningText")
       });
       return;
     }
@@ -43,7 +44,7 @@ function GrammarQuiz({ quizzes, onComplete }) {
 
   return (
     <div className="lesson-quiz-container">
-      <h4>Bài tập ngữ pháp</h4>
+      <h4>{t("grammarPage.quiz.title")}</h4>
       {shuffledQuizzes.map((quiz, idx) => (
         <div key={idx} className="mb-4">
           <p className="lesson-quiz-question">{idx + 1}. {quiz.question}</p>
@@ -92,19 +93,19 @@ function GrammarQuiz({ quizzes, onComplete }) {
                 : "incorrect"
               }`}
             >
-              Giải thích đáp án: {quiz.explanation}
+              {t("grammarPage.quiz.explanationPrefix")} {quiz.explanation}
             </div>
           )}
         </div>
       ))}
       {!checked && !finished && (
         <button className="btn_1 mt_4" onClick={handleCheck}>
-          <i className="fas fa-check"></i> Kiểm tra
+          <i className="fas fa-check"></i> {t("grammarPage.quiz.check")}
         </button>
       )}
       {checked && !finished && (
         <button className="btn_1 mt_4" onClick={handleFinish}>
-          Hoàn thành
+          {t("grammarPage.quiz.finish")}
         </button>
       )}
     </div>

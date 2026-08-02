@@ -14,6 +14,7 @@ class PronunciationService {
         this.imageService = options.imageService || new pronunciationImageService("easytalk/pronunciation");
         this.cache = options.cacheService || cache;
         this._userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     getUserProgressService() {
@@ -24,9 +25,9 @@ class PronunciationService {
         return this._userProgressService;
     }
 
-    async getPronunciationList(page = 1, limit = 12, search = "", role = "user") {
+    async getPronunciationList(page = 1, limit = 12, search = "", role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('pronunciation', { page, limit, search, role });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('pronunciation', role), cacheNs.listTags('pronunciation')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('pronunciation', role), cacheNs.listTags('pronunciation')), async () => {
             const skip = (page - 1) * limit;
             const filter = {};
             if (role !== "admin") {
@@ -36,6 +37,13 @@ class PronunciationService {
             const { pronunciations, total } = await this.repository.findAll(filter, skip, limit);
             return { pronunciations, totalPronunciations: total };
         });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                pronunciations: await this.englishTranslationService.applyTranslations("pronunciation", result.pronunciations, lang)
+            };
+        }
+        return result;
     }
 
     async getPronunciation(id) {
@@ -50,6 +58,14 @@ class PronunciationService {
         });
     }
 
+    async getLocalizedPronunciationBySlug(slug, lang = "vi") {
+        const pronunciation = await this.getPronunciationBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("pronunciation", pronunciation, lang);
+        }
+        return pronunciation;
+    }
+
     async _getOrCreateUserProgress(userId) {
         const userProgressService = this.getUserProgressService();
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
@@ -61,7 +77,7 @@ class PronunciationService {
         return userProgress;
     }
 
-    async getPronunciationDetails(userId, pronunciationId) {
+    async getPronunciationDetails(userId, pronunciationId, lang = "vi") {
         const pronunciation = await this.getPronunciation(pronunciationId);
         if (!pronunciation) {
             return { status: 404, data: { message: "Pronunciation not found" } };
@@ -71,7 +87,10 @@ class PronunciationService {
         if (!isUnlocked) {
             return { status: 403, data: { success: false, message: "This pronunciation is locked for you. Please complete previous pronunciations first." } };
         }
-        return { status: 200, data: { pronunciation, userProgress } };
+        const localizedPronunciation = lang === "en" && this.englishTranslationService
+            ? await this.englishTranslationService.applyTranslationToItem("pronunciation", pronunciation, lang)
+            : pronunciation;
+        return { status: 200, data: { pronunciation: localizedPronunciation, userProgress } };
     }
 
     async completePronunciation(userId, pronunciationId) {
@@ -147,6 +166,9 @@ class PronunciationService {
             if (publicId) await this.imageService.deleteImage(publicId);
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("pronunciation", id);
+        }
         await invalidatePronunciationCache({ id, slug: existing.slug });
         return { status: 200, data: { message: "Bài học phát âm đã xóa thành công !" } };
     }

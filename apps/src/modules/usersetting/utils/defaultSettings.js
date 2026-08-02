@@ -5,7 +5,6 @@ const DEFAULT_SETTINGS = {
         fontFamily: "Roboto"
     },
     general: {
-        language: "vi",
         timezone: "Asia/Ho_Chi_Minh",
         dateFormat: "DD/MM/YYYY"
     },

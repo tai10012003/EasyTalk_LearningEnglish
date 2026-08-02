@@ -8,6 +8,17 @@ class UserSettingService {
         this.repository = deps.repository || new UserSettingRepository();
     }
 
+    sanitizeSettingsUpdate(updateData = {}) {
+        if(!updateData.general || !Object.prototype.hasOwnProperty.call(updateData.general, "language")) {
+            return updateData;
+        }
+        const { language, ...general } = updateData.general;
+        return {
+            ...updateData,
+            general
+        };
+    }
+
     async getUserSettingByUserId(userId) {
         let setting = await this.repository.findByUserId(userId);
         if(!setting) {
@@ -19,7 +30,7 @@ class UserSettingService {
     }
 
     async updateUserSetting(userId, updateData) {
-        return await this.repository.update(userId, updateData);
+        return await this.repository.update(userId, this.sanitizeSettingsUpdate(updateData));
     }
 
     async updateSection(userId, section, data) {
@@ -27,15 +38,10 @@ class UserSettingService {
         if(!validSections.includes(section)) {
             throw new Error("Invalid setting section");
         }
-        return await this.repository.update(userId,{ [section]: data });
-    }
-
-    async getUserLanguage(userId) {
-        const setting = await this.repository.findByUserId(userId);
-        if(setting && setting.general && setting.general.language) {
-            return setting.general.language;
-        }
-        return "vi";
+        const sanitizedData = section === "general"
+            ? this.sanitizeSettingsUpdate({ general: data }).general
+            : data;
+        return await this.repository.update(userId,{ [section]: sanitizedData });
     }
 
     async deleteUserSetting(userId) {

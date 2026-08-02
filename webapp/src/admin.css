@@ -1460,6 +1460,27 @@
   background-color: #fbbf24;
 }
 
+.admin-lesson-btn-translate {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #2563eb;
+  color: #fff;
+  transition: 0.2s;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.admin-lesson-btn-translate:hover {
+  background-color: #1d4ed8;
+  color: #fff;
+  text-decoration: none;
+}
+
 .admin-lesson-btn-delete {
   padding: 6px 12px;
   margin: 10px 0;
@@ -1475,6 +1496,144 @@
 
 .admin-lesson-btn-delete:hover {
   background-color: #dc2626;
+}
+
+.admin-translation-page {
+  padding: 24px;
+}
+
+.admin-translation-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.admin-translation-header h1 {
+  margin: 0 0 6px;
+  color: #111827;
+  font-size: 24px;
+}
+
+.admin-translation-header p {
+  margin: 0;
+  color: #64748b;
+}
+
+.admin-translation-back,
+.admin-translation-save,
+.admin-translation-delete {
+  border: 0;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.admin-translation-back {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.admin-translation-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+}
+
+.admin-translation-panel {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 18px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.admin-translation-panel h3 {
+  margin: 0 0 16px;
+  color: #1f2937;
+  font-size: 18px;
+}
+
+.admin-translation-panel label {
+  display: block;
+  margin: 14px 0 7px;
+  color: #334155;
+  font-weight: 700;
+}
+
+.admin-translation-panel input,
+.admin-translation-panel textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #111827;
+  background: #fff;
+  font: inherit;
+}
+
+.admin-translation-panel textarea {
+  resize: vertical;
+}
+
+.admin-translation-panel input:focus,
+.admin-translation-panel textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.admin-translation-preview {
+  min-height: 42px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  color: #1f2937;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-translation-preview.multiline {
+  max-height: 320px;
+  overflow: auto;
+}
+
+.admin-translation-preview.json {
+  max-height: 240px;
+  overflow: auto;
+  font-size: 12px;
+}
+
+.admin-translation-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.admin-translation-save {
+  background: #2563eb;
+  color: #fff;
+}
+
+.admin-translation-save:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.admin-translation-delete {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+@media (max-width: 991px) {
+  .admin-translation-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-lesson-pagination {
@@ -1977,9 +2136,28 @@
 }
 
 .admin-story-btn-edit:hover {
-  background-color: #fbbf24;
-}
+    background-color: #fbbf24;
+  }
 
+.admin-story-btn-translate {
+    padding: 6px 12px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    text-decoration: none;
+    background-color: #2563eb;
+    color: #fff;
+    transition: 0.2s;
+    margin-right: 10px;
+  }
+
+.admin-story-btn-translate:hover {
+    background-color: #1d4ed8;
+    color: #fff;
+  }
+  
 .admin-story-btn-delete {
   padding: 6px 12px;
   margin: 10px 0;

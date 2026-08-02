@@ -4,7 +4,7 @@ import { GrammarService } from "@/services/GrammarService.jsx";
 
 function Grammar() {
     const fetchGrammar = async (page = 1) => {
-        const data = await GrammarService.fetchGrammars(page, 6);
+        const data = await GrammarService.fetchGrammars(page, 6, { admin: true });
         return {
             lessons: data.grammars || [],
             currentPage: data.currentPage,
@@ -25,6 +25,7 @@ function Grammar() {
                 dataKey="lessons"
                 addUrl="/admin/grammar/add"
                 updateUrl="/admin/grammar/update"
+                translateUrl="/admin/grammar/translate"
             />
         </div>
     );

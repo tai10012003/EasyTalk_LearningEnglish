@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function StoryVocabularyQuiz({ vocabulary, onNext }) {
+    const { t } = useTranslation();
     const [answers, setAnswers] = useState({});
     const [showResult, setShowResult] = useState(false);
     const [options, setOptions] = useState({});
@@ -21,11 +23,11 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                         if (data && data[0] && data[0][0] && data[0][0][0]) {
                             results[word] = data[0][0][0];
                         } else {
-                            results[word] = "(Không dịch được)";
+                            results[word] = t("storyPage.vocabQuiz.translateFailed");
                         }
                     } catch (err) {
                         console.error("Google Translate API error:", err);
-                        results[word] = "(Không dịch được)";
+                        results[word] = t("storyPage.vocabQuiz.translateFailed");
                     }
                 })
             );
@@ -35,7 +37,7 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
         if (vocabulary && vocabulary.length > 0) {
             fetchDefinitions();
         }
-    }, [vocabulary]);
+    }, [vocabulary, t]);
 
     useEffect(() => {
         if (!vocabulary || Object.keys(definitions).length == 0) return;
@@ -80,7 +82,7 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
 
     return (
         <div className="vocab-quiz">
-            <h5>Chọn nghĩa đúng cho từ vựng:</h5>
+            <h5>{t("storyPage.vocabQuiz.title")}</h5>
             {vocabulary.map((word, idx) => (
                 <div key={idx} className="vocab-word">
                     <strong>{idx + 1}. {word}</strong>
@@ -114,11 +116,11 @@ function StoryVocabularyQuiz({ vocabulary, onNext }) {
                         onClick={handleSubmit}
                         disabled={Object.keys(options).length == 0}
                     >
-                        <i className="fas fa-check me-2"></i> Kiểm tra
+                        <i className="fas fa-check me-2"></i> {t("storyPage.vocabQuiz.check")}
                     </button>
                 ) : (
                     <button className="btn_1 mt-4" onClick={handleContinue}>
-                        <i className="fas fa-flag-checkered ms-2"></i>Hoàn thành
+                        <i className="fas fa-flag-checkered ms-2"></i>{t("storyPage.vocabQuiz.complete")}
                     </button>
                 )
             )}
