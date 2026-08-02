@@ -39,7 +39,7 @@ function getAllowedClientOrigins() {
     });
 }
 
-const { connectRedis } = require('../apps/src/shared/utils/redisClient');
+const { connectRedis } = require('./src/shared/utils/redisClient');
 async function initRedis() {
   try {
     const connected = await connectRedis(5000);
@@ -71,7 +71,7 @@ app.use(responseFormatter);
 
 app.use("/static", express.static(__dirname + "/public"));
 
-const { initSocket } = require('../apps/src/shared/utils/socket');
+const { initSocket } = require('./src/shared/utils/socket');
 const { buildDependencies } = require('./src/bootstrap/dependencies');
 let controllers = null;
 let routesInitialized = false;
