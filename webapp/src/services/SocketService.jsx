@@ -50,7 +50,7 @@ async function reconnectWithFreshToken() {
 }
 
 function createSocket() {
-    const nextSocket = io(API_URL, {
+    const nextSocket = io(getSocketUrl(), {
         autoConnect: false,
         transports: getSocketTransports(),
     });
@@ -73,6 +73,13 @@ function createSocket() {
     nextSocket.on("new-notification", notifySubscribers);
 
     return nextSocket;
+}
+
+function getSocketUrl() {
+    if (!API_URL || API_URL.startsWith("/")) {
+        return window.location.origin;
+    }
+    return API_URL;
 }
 
 function getSocketTransports() {
