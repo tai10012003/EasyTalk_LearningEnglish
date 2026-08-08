@@ -1,6 +1,7 @@
 const express = require("express");
 const http = require("http");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require('dotenv');
 const path = require("path");
@@ -24,6 +25,7 @@ process.on('uncaughtException', (error) => {
 
 const app = express();
 const server = http.createServer(app);
+app.enable('trust proxy');
 
 function getAllowedClientOrigins() {
   return (process.env.CLIENT_URL || "http://localhost:5173")
@@ -60,14 +62,25 @@ app.use(cors({
     if (getAllowedClientOrigins().includes(origin)) {
       return callback(null, true);
     }
+    logger.warn(`CORS blocked for origin: ${origin}`);
     return callback(new Error(`CORS origin not allowed: ${origin}`));
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200
 }));
 
+app.options('*', cors());
+
+app.use(cookieParser());
 app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
 app.use(responseFormatter);
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
 
 app.use("/static", express.static(__dirname + "/public"));
 
