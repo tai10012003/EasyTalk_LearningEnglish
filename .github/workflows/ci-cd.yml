@@ -1,4 +1,4 @@
-name: Learning English CI/CD Pipeline
+name: Deploy Learning English App
 
 on:
   push:
@@ -6,29 +6,65 @@ on:
       - refactor-structure # master là branch chính của dự án
 
 jobs:
-  build-and-deploy:
+  # ==========================================
+  # JOB 1: BUILD & DEPLOY FRONTEND UP S3
+  # ==========================================
+  deploy-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          cache-dependency-path: webapp/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd webapp
+          npm ci
+
+      - name: Build Frontend
+        run: |
+          cd webapp
+          npm run build
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy static files to S3
+        run: |
+          # Sync thư mục dist lên S3, xóa các file cũ không còn tồn tại trên build mới
+          aws s3 sync webapp/dist s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete
+
+  # ==========================================
+  # JOB 2: BUILD & DEPLOY BACKEND + REDIS TO EC2
+  # ==========================================
+  deploy-backend:
     runs-on: ubuntu-latest
     env:
       BACKEND_IMAGE: taidepzai/backend_learningenglish
-      FRONTEND_IMAGE: taidepzai/frontend_learningenglish
 
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # 2️⃣ Set up Docker Buildx (Giúp cache layers build Docker nhanh gấp đôi)
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
-      # 3️⃣ Login to Docker Hub
       - name: Login to Docker Hub
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4️⃣ Build & push backend Docker image
       - name: Build & push backend Docker image
         uses: docker/build-push-action@v5
         with:
@@ -41,21 +77,7 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      # 5️⃣ Build & push frontend Docker image
-      - name: Build & push frontend Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./webapp/Dockerfile
-          push: true
-          tags: |
-            ${{ env.FRONTEND_IMAGE }}:latest
-            ${{ env.FRONTEND_IMAGE }}:${{ github.sha }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # 6️⃣ Deploy lên EC2 qua SSH Action chuẩn hóa
-      - name: Deploy to EC2 via SSH
+      - name: Deploy Backend & Redis to EC2 via SSH
         uses: appleboy/ssh-action@v1.0.0
         env:
           ENV_CONTENT: ${{ secrets.ENV_PRODUCTION }}
@@ -67,20 +89,19 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           envs: ENV_CONTENT,DOCKER_PASS,DOCKER_USER
           script: |
-            # 1. Chuyển vào thư mục app trên Amazon Linux
             cd /home/ec2-user/app
             
-            # 2. Login Docker Hub trên EC2
+            # Login Docker Hub trên EC2
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             
-            # 3. An toàn ghi đè nội dung file .env
+            # Cập nhật file .env
             echo "$ENV_CONTENT" > .env
             
-            # 4. Pull image mới nhất về
-            docker compose -f docker-compose.prod.yml pull
+            # Pull image backend mới nhất
+            docker compose -f docker-compose.prod.yml pull backend
             
-            # 5. Cập nhật container (Zero downtime)
-            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            # Restart 2 container backend và redis
+            docker compose -f docker-compose.prod.yml up -d --force-recreate backend redis
             
-            # 6. Xóa các Docker image cũ không dùng
+            # Dọn dẹp image thừa để tiết kiệm bộ nhớ EC2
             docker image prune -f
