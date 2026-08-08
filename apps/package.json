@@ -9,6 +9,7 @@
     "dev": "node --watch app.js",
     "seed:agent-modes": "node scripts/seedAgentModes.js",
     "seed:grammar-english-translations": "node scripts/seedGrammarEnglishTranslations.js",
+    "seed:grammar-exercise-english-translations": "node scripts/seedGrammarExerciseEnglishTranslations.js",
     "seed:story-english-translations": "node scripts/seedStoryEnglishTranslations.js",
     "seed:pronunciation-english-translations": "node scripts/seedPronunciationEnglishTranslations.js",
     "migrate:remove-user-setting-language": "node scripts/removeUserSettingLanguage.js"

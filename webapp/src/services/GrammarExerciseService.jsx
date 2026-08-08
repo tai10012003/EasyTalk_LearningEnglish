@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
 function paginatedResponse(responseData, page) {
     const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
     const meta = responseData?.meta || responseData?.data || responseData || {};
@@ -18,6 +23,7 @@ export const GrammarExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises${query}`, {
                 method: 'GET',
             });
@@ -45,10 +51,11 @@ export const GrammarExerciseService = {
 
     async getGrammarExerciseBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/slug/${slug}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/slug/${slug}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = responseData.data || responseData;
             return data;
         } catch (err) {
             console.error(err);
@@ -57,39 +64,41 @@ export const GrammarExerciseService = {
     },
 
     async getGrammarExerciseDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            return data;
-        } catch (error) {
-            throw error;
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/${id}${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = responseData.data || responseData;
+        return data;
+    },
+
+    async getGrammarExerciseAdmin(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     async completeGrammarExercise(grammarexerciseId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/complete/${grammarexerciseId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/complete/${grammarexerciseId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = responseData.data;
+        return data;
     },
 
     resetAlertFlag() {

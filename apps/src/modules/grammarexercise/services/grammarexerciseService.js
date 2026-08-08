@@ -12,6 +12,7 @@ class GrammarExerciseService {
         this.repository = options.repository || new GrammarExerciseRepository();
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     getUserProgressService() {
@@ -22,9 +23,9 @@ class GrammarExerciseService {
         return this.userProgressService;
     }
 
-    async getGrammarexerciseList(page = 1, limit = 12, role = "user") {
+    async getGrammarexerciseList(page = 1, limit = 12, role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('grammarexercise', { page, limit, role });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammarexercise', role), cacheNs.listTags('grammarexercise')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammarexercise', role), cacheNs.listTags('grammarexercise')), async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -32,6 +33,13 @@ class GrammarExerciseService {
             const { exercises, total } = await this.repository.findAll(filter, page, limit);
             return { grammarexercises: exercises, totalExercises: total };
         });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                grammarexercises: await this.englishTranslationService.applyTranslations("grammarExercise", result.grammarexercises, lang)
+            };
+        }
+        return result;
     }
 
     async getGrammarexerciseById(id) {
@@ -46,6 +54,14 @@ class GrammarExerciseService {
         });
     }
 
+    async getLocalizedGrammarexerciseBySlug(slug, lang = "vi") {
+        const grammarExercise = await this.getGrammarexerciseBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("grammarExercise", grammarExercise, lang);
+        }
+        return grammarExercise;
+    }
+
     async _getOrCreateUserProgress(userId) {
         const userProgressService = this.getUserProgressService();
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
@@ -57,7 +73,7 @@ class GrammarExerciseService {
         return userProgress;
     }
 
-    async getGrammarExerciseDetails(userId, grammarExerciseId) {
+    async getGrammarExerciseDetails(userId, grammarExerciseId, lang = "vi") {
         const grammarExercise = await this.getGrammarexerciseById(grammarExerciseId);
         if (!grammarExercise) {
             return { status: 404, data: { message: "Grammar exercise not found." } };
@@ -67,7 +83,10 @@ class GrammarExerciseService {
         if (!isUnlockedGrammarExercise) {
             return { status: 403, data: { success: false, message: "You cannot complete a locked grammar exercise." } };
         }
-        return { status: 200, data: { grammarExercise, userProgress } };
+        const localizedGrammarExercise = lang === "en" && this.englishTranslationService
+            ? await this.englishTranslationService.applyTranslationToItem("grammarExercise", grammarExercise, lang)
+            : grammarExercise;
+        return { status: 200, data: { grammarExercise: localizedGrammarExercise, userProgress } };
     }
 
     async completeGrammarExercise(userId, grammarExerciseId) {
@@ -126,6 +145,9 @@ class GrammarExerciseService {
             return { status: 404, data: { success: false, message: "Bài luyện tập ngữ pháp không tìm thấy." } };
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("grammarExercise", id);
+        }
         await invalidateGrammarExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài luyện tập ngữ pháp đã xóa thành công !" } };
     }

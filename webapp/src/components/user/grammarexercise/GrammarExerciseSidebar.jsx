@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const GrammarExerciseSidebar = ({
         timeRemaining,
@@ -14,20 +15,21 @@ const GrammarExerciseSidebar = ({
         selectedDuration,
         answeredCount
     }) => {
+        const { t } = useTranslation();
         const handleSubmitClick = useCallback(() => {
             Swal.fire({
-                title: 'Xác nhận',
-                text: 'Bạn có chắc chắn muốn nộp bài?',
+                title: t("grammarExercisePage.sidebar.confirmTitle"),
+                text: t("grammarExercisePage.sidebar.confirmText"),
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy'
+                confirmButtonText: t("grammarExercisePage.sidebar.confirm"),
+                cancelButtonText: t("grammarExercisePage.sidebar.cancel")
             }).then((result) => {
                 if (result.isConfirmed) {
                     onSubmitQuiz();
                 }
             });
-        }, [onSubmitQuiz]);
+        }, [onSubmitQuiz, t]);
 
         const getCompletedTime = () => {
             const timeTaken = selectedDuration - timeRemaining;
@@ -38,7 +40,7 @@ const GrammarExerciseSidebar = ({
 
         const getQuestionButtonColor = (index) => {
         const result = questionResults[index];
-        if (!result || result.userAnswer == "Chưa trả lời") {
+        if (!result || result.userAnswer == t("grammarExercisePage.detail.unanswered")) {
             return {};
         }
 
@@ -56,7 +58,7 @@ const GrammarExerciseSidebar = ({
             {!isCompleted ? (
                 <>
                     <div className="exercise-time-remaining text-center">
-                        <span id="exercise-timeLabel">Thời gian còn lại: </span>
+                        <span id="exercise-timeLabel">{t("grammarExercisePage.sidebar.timeRemaining")} </span>
                         <span id="exercise-time">{formatTime(timeRemaining)}</span>
                     </div>
                     {allQuestionsAnswered && (
@@ -66,15 +68,15 @@ const GrammarExerciseSidebar = ({
                             style={{ width: '100%' }}
                             onClick={handleSubmitClick}
                         >
-                            <i className="fas fa-paper-plane"></i> Nộp bài
+                            <i className="fas fa-paper-plane"></i> {t("grammarExercisePage.sidebar.submit")}
                         </button>
                     )}
                     {!allQuestionsAnswered && (
                         <div className="text-center mb-4">
-                            Đã trả lời: {answeredCount}/{questions.length} câu
+                            {t("grammarExercisePage.sidebar.answered", { answered: answeredCount, total: questions.length })}
                         </div>
                     )}
-                    <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>
+                    <h5 id="exercise-questionListTitle">{t("grammarExercisePage.sidebar.questionList")}</h5>
                     <div className="exercise-question-list mt-3" id="exercise-question-list">
                         {questions.map((_, index) => (
                             <button
@@ -93,13 +95,13 @@ const GrammarExerciseSidebar = ({
                 </>
             ) : (
                 <div id="exercise-completed-info" className="text-center">
-                    <h4>Thời gian đã làm: <span id="exercise-completedTime">{getCompletedTime()}</span></h4>
+                    <h4>{t("grammarExercisePage.sidebar.completedTime")} <span id="exercise-completedTime">{getCompletedTime()}</span></h4>
                     <button
                         className="btn btn-secondary mt-3"
                         id="exercise-viewHistoryBtn"
                         onClick={onShowHistory}
                     >
-                        Xem lịch sử
+                        {t("grammarExercisePage.sidebar.viewHistory")}
                     </button>
                 </div>
             )}

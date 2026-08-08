@@ -10,7 +10,8 @@ router.get("/api/grammar-exercises", verifyToken, asyncHandler(async (req, res) 
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 12;
     const role = req.user.role || "user";
-    const { grammarexercises, totalExercises } = await grammarexerciseService.getGrammarexerciseList(page, limit, role);
+    const lang = req.query.lang === "en" ? "en" : "vi";
+    const { grammarexercises, totalExercises } = await grammarexerciseService.getGrammarexerciseList(page, limit, role, lang);
     const totalPages = Math.ceil(totalExercises / limit);
     res.json({
         success: true,
@@ -21,13 +22,15 @@ router.get("/api/grammar-exercises", verifyToken, asyncHandler(async (req, res) 
 }));
 
 router.get("/api/grammar-exercises/:id", verifyToken, asyncHandler(async function (req, res) {
-    const { status, data } = await grammarexerciseService.getGrammarExerciseDetails(req.user.id, req.params.id);
+    const lang = req.query.lang === "en" ? "en" : "vi";
+    const { status, data } = await grammarexerciseService.getGrammarExerciseDetails(req.user.id, req.params.id, lang);
     return res.status(status).json(data);
 }));
 
 router.get("/api/grammar-exercises/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
     const slug = req.params.slug;
-    const exercise = await grammarexerciseService.getGrammarexerciseBySlug(slug);
+    const lang = req.query.lang === "en" ? "en" : "vi";
+    const exercise = await grammarexerciseService.getLocalizedGrammarexerciseBySlug(slug, lang);
     if (!exercise) {
         return res.status(404).json({ message: "Grammar exercise not found" });
     }

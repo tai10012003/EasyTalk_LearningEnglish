@@ -19,6 +19,7 @@ import TranslateStory from "@/views/admin/story/TranslateStory";
 import GrammarExercise from "@/views/admin/grammarexercise/GrammarExercise";
 import AddGrammarExercise from "@/views/admin/grammarexercise/AddGrammarExercise";
 import UpdateGrammarExercise from "@/views/admin/grammarexercise/UpdateGrammarExercise";
+import TranslateGrammarExercise from "@/views/admin/grammarexercise/TranslateGrammarExercise";
 import VocabularyExercise from "@/views/admin/vocabularyexercise/VocabularyExercise";
 import AddVocabularyExercise from "@/views/admin/vocabularyexercise/AddVocabularyExercise";
 import UpdateVocabularyExercise from "@/views/admin/vocabularyexercise/UpdateVocabularyExercise";
@@ -206,6 +207,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateGrammarExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "grammar-exercise/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateGrammarExercise />
             </PrivateRoute>
         ),
     },

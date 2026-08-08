@@ -197,6 +197,121 @@
       "unlockNext": "Unlock the next grammar lesson"
     }
   },
+    "grammarExercisePage": {
+      "common": {
+        "close": "Close"
+      },
+      "list": {
+        "documentTitle": "Grammar Exercises - EasyTalk",
+        "title": "GRAMMAR PRACTICE ROADMAP FROM A TO Z",
+        "subtitle": "Complete each exercise to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% complete",
+        "scrollCurrentTitle": "Scroll to current grammar exercise",
+        "continuePractice": "Continue practicing",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top",
+        "guide": {
+          "title": "Grammar Exercise Guide",
+          "intro": "Choose the grammar exercise you want to practice from the list.",
+          "description": "Each exercise includes grammar questions such as multiple choice, fill in the blank, and translation.",
+          "questionTypes": "Question types:",
+          "multipleChoice": "<strong>Multiple Choice:</strong> Choose the best answer from the given options.",
+          "fillBlank": "<strong>Fill in the Blank:</strong> Enter the correct word to complete the sentence.",
+          "translation": "<strong>Translation:</strong> Translate the sentence from Vietnamese to English or the other way around.",
+          "noteTitle": "Notes:",
+          "noteCheck": "Press <strong>Check</strong> after answering each question to view the answer and explanation.",
+          "noteComplete": "Each set has a different number of questions, so try to complete them all.",
+          "noteTime": "The default time is 20 minutes. Try to finish on time.",
+          "noteSubmit": "Press <strong>Submit</strong> and the system will show your result, including total questions, correct answers, incorrect answers, and accuracy. Press <strong>View history</strong> to review what you answered and see where you were right or wrong.",
+          "closing": "Practice well and keep improving your grammar!"
+        }
+      },
+      "card": {
+        "step": "Step {{number}}",
+        "current": "Practice now",
+        "completed": "Completed",
+        "locked": "Locked",
+        "questionCount": "Questions: {{count}}",
+        "start": "Start practice",
+        "retry": "Try again"
+      },
+      "detail": {
+        "documentTitle": "Grammar Exercise Detail - EasyTalk",
+        "defaultTitle": "Grammar exercise",
+        "unanswered": "Not answered",
+        "noAnswer": "No answer",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of a grammar exercise. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "warningTitle": "Warning",
+        "speechUnsupported": "Your browser does not support Speech Synthesis.",
+        "completeTitle": "Completed!",
+        "completeText": "Congratulations! You have completed this grammar exercise. The next grammar exercise has been unlocked.",
+        "completeConfirm": "Back to grammar exercises",
+        "errorTitle": "Error",
+        "errorText": "An error occurred while updating your progress.",
+        "noQuestions": "There are no questions in this exercise.",
+        "chooseTime": "Choose exercise time:",
+        "minutes": "{{count}} minutes",
+        "start": "Start"
+      },
+      "carousel": {
+        "translationNotFound": "Meaning not found",
+        "translationError": "Translation error",
+        "warningTitle": "Warning",
+        "answerRequired": "Please enter or select an answer!",
+        "arrangePlaceholder": "Click the words below to arrange them into a sentence",
+        "answerPlaceholder": "Enter your English answer ...",
+        "questionTypes": {
+          "multipleChoice": "Choose the correct answer:",
+          "fillBlank": "Fill in the blank:",
+          "translation": "Translate the Vietnamese sentence below into English:",
+          "arrange": "Arrange the words into a complete sentence:",
+          "default": "Question:"
+        },
+        "speakTitle": "Pronounce question",
+        "correct": "Your answer is correct!",
+        "incorrect": "Your answer is incorrect.",
+        "correctAnswer": "The correct answer is",
+        "explanation": "Explanation",
+        "check": "Check",
+        "back": "Back",
+        "next": "Next"
+      },
+      "sidebar": {
+        "confirmTitle": "Confirm",
+        "confirmText": "Are you sure you want to submit?",
+        "confirm": "Submit",
+        "cancel": "Cancel",
+        "timeRemaining": "Time remaining:",
+        "submit": "Submit",
+        "answered": "Answered: {{answered}}/{{total}} questions",
+        "questionList": "Question list:",
+        "completedTime": "Time spent:",
+        "viewHistory": "View history"
+      },
+      "result": {
+        "title": "GRAMMAR EXERCISE RESULT",
+        "totalQuestions": "Total questions",
+        "correctAnswers": "Correct answers",
+        "incorrectAnswers": "Incorrect answers",
+        "accuracy": "Accuracy",
+        "iconAlt": "Result icon",
+        "unlockNext": "Unlock the next grammar exercise"
+      },
+      "history": {
+        "title": "GRAMMAR EXERCISE HISTORY",
+        "empty": "No history data.",
+        "question": "Question {{number}}",
+        "yourAnswer": "Your answer",
+        "correctAnswer": "Correct answer",
+        "result": "Result",
+        "correct": "✓ Correct",
+        "incorrect": "✗ Incorrect",
+        "explanation": "Explanation"
+      }
+    },
     "storyPage": {
       "list": {
         "documentTitle": "Story Lessons - EasyTalk",

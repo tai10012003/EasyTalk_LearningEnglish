@@ -110,7 +110,10 @@ function buildDependencies(options = {}) {
         ...learningServiceDeps,
         englishTranslationService: services.englishTranslationService
     });
-    services.grammarExerciseService = new GrammarExerciseService(learningServiceDeps);
+    services.grammarExerciseService = new GrammarExerciseService({
+        ...learningServiceDeps,
+        englishTranslationService: services.englishTranslationService
+    });
     services.pronunciationExerciseService = new PronunciationExerciseService(learningServiceDeps);
     services.vocabularyExerciseService = new VocabularyExerciseService(learningServiceDeps);
     services.dictationExerciseService = new DictationExerciseService(learningServiceDeps);

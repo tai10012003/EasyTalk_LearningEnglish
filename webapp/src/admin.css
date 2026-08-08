@@ -2776,6 +2776,27 @@
   background-color: #fbbf24;
 }
 
+.admin-exercise-btn-translate {
+  padding: 6px 12px;
+  font-size: 13px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: none;
+  background-color: #2563eb;
+  color: #fff;
+  transition: 0.2s;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+.admin-exercise-btn-translate:hover {
+  background-color: #1d4ed8;
+  color: #fff;
+  text-decoration: none;
+}
+
 .admin-exercise-btn-delete {
   padding: 6px 12px;
   margin: 10px 0;

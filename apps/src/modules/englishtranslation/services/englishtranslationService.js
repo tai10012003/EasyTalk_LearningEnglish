@@ -1,6 +1,6 @@
 const EnglishTranslationRepository = require("../repositories/englishtranslationRepository");
 
-const ALLOWED_CONTENT_TYPES = new Set(["grammar", "story", "pronunciation"]);
+const ALLOWED_CONTENT_TYPES = new Set(["grammar", "story", "pronunciation", "grammarExercise"]);
 const RESERVED_FIELD_NAMES = new Set([
     "_id",
     "id",

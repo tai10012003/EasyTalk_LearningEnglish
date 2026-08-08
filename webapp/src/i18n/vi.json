@@ -197,6 +197,121 @@
       "unlockNext": "Mở khóa bài ngữ pháp tiếp theo"
     }
     },
+    "grammarExercisePage": {
+      "common": {
+        "close": "Đóng"
+      },
+      "list": {
+        "documentTitle": "Bài luyện tập ngữ pháp - EasyTalk",
+        "title": "LỘ TRÌNH LUYỆN TẬP NGỮ PHÁP TỪ A-Z",
+        "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% hoàn thành",
+        "scrollCurrentTitle": "Cuộn đến bài luyện tập hiện tại",
+        "continuePractice": "Tiếp tục luyện tập",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang",
+        "guide": {
+          "title": "Hướng Dẫn Bài Luyện Tập Ngữ Pháp",
+          "intro": "Chọn bài tập ngữ pháp mà bạn muốn luyện tập từ danh sách.",
+          "description": "Mỗi bài tập sẽ có các câu hỏi ngữ pháp bao gồm các dạng câu hỏi như: trắc nghiệm, điền từ vào lỗ trống và dịch nghĩa.",
+          "questionTypes": "Dạng câu hỏi:",
+          "multipleChoice": "<strong>Trắc Nghiệm:</strong> Chọn đáp án đúng nhất trong các lựa chọn được đưa ra.",
+          "fillBlank": "<strong>Điền Từ Vào Chỗ Trống:</strong> Điền từ thích hợp vào ô trống để hoàn thành câu.",
+          "translation": "<strong>Dịch Nghĩa:</strong> Dịch câu từ Tiếng Việt sang Tiếng Anh hoặc ngược lại.",
+          "noteTitle": "Lưu ý:",
+          "noteCheck": "Nhấn <strong>Kiểm tra</strong> sau khi trả lời mỗi câu hỏi để xem đáp án và giải thích.",
+          "noteComplete": "Mỗi bộ đề có số lượng câu hỏi khác nhau, hãy cố gắng hoàn thành hết các câu hỏi.",
+          "noteTime": "Thời gian làm bài là 20 phút. Hãy cố gắng hoàn thành đúng giờ nhé.",
+          "noteSubmit": "Nhấn <strong>Nộp bài</strong> thì hệ thống sẽ hiển thị kết quả bài luyện tập gồm có: số câu hỏi, số câu đúng, số câu sai, tỷ lệ chính xác (%). Nhấn <strong>Xem lịch sử</strong> để thấy những câu mình đã làm, để biết mình đúng hoặc sai chỗ nào.",
+          "closing": "Chúc bạn luyện tập tốt và cải thiện ngữ pháp của mình!"
+        }
+      },
+      "card": {
+        "step": "Bước {{number}}",
+        "current": "Luyện tập ngay",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "questionCount": "Số câu hỏi: {{count}}",
+        "start": "Bắt đầu luyện tập",
+        "retry": "Làm lại"
+      },
+      "detail": {
+        "documentTitle": "Chi tiết luyện tập ngữ pháp - EasyTalk",
+        "defaultTitle": "Bài luyện tập ngữ pháp",
+        "unanswered": "Chưa trả lời",
+        "noAnswer": "Không trả lời",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang làm bài luyện ngữ pháp. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "warningTitle": "Cảnh báo",
+        "speechUnsupported": "Trình duyệt của bạn không hỗ trợ Speech Synthesis.",
+        "completeTitle": "Hoàn thành!",
+        "completeText": "Chúc mừng! Bạn đã hoàn thành bài luyện tập ngữ pháp. Bài luyện tập ngữ pháp tiếp theo đã được mở khóa.",
+        "completeConfirm": "Quay lại danh sách bài luyện tập ngữ pháp",
+        "errorTitle": "Lỗi",
+        "errorText": "Có lỗi xảy ra khi cập nhật tiến độ.",
+        "noQuestions": "Không có câu hỏi nào trong bài tập này.",
+        "chooseTime": "Chọn thời gian làm bài:",
+        "minutes": "{{count}} phút",
+        "start": "Bắt đầu"
+      },
+      "carousel": {
+        "translationNotFound": "Không tìm thấy nghĩa",
+        "translationError": "Lỗi dịch",
+        "warningTitle": "Cảnh báo",
+        "answerRequired": "Vui lòng nhập hoặc chọn câu trả lời!",
+        "arrangePlaceholder": "Bấm vào các từ bên dưới để sắp xếp thành câu",
+        "answerPlaceholder": "Nhập câu trả lời Tiếng Anh của bạn ...",
+        "questionTypes": {
+          "multipleChoice": "Chọn đáp án đúng:",
+          "fillBlank": "Điền vào chỗ trống:",
+          "translation": "Dịch câu (Tiếng Việt) dưới đây sang câu (Tiếng Anh):",
+          "arrange": "Sắp xếp các từ thành câu hoàn chỉnh:",
+          "default": "Câu hỏi:"
+        },
+        "speakTitle": "Phát âm câu hỏi",
+        "correct": "Bạn đã trả lời đúng!",
+        "incorrect": "Bạn đã trả lời sai.",
+        "correctAnswer": "Đáp án đúng là",
+        "explanation": "Giải thích",
+        "check": "Kiểm tra",
+        "back": "Quay lại",
+        "next": "Tiếp theo"
+      },
+      "sidebar": {
+        "confirmTitle": "Xác nhận",
+        "confirmText": "Bạn có chắc chắn muốn nộp bài?",
+        "confirm": "Đồng ý",
+        "cancel": "Hủy",
+        "timeRemaining": "Thời gian còn lại:",
+        "submit": "Nộp bài",
+        "answered": "Đã trả lời: {{answered}}/{{total}} câu",
+        "questionList": "Danh sách câu hỏi:",
+        "completedTime": "Thời gian đã làm:",
+        "viewHistory": "Xem lịch sử"
+      },
+      "result": {
+        "title": "KẾT QUẢ BÀI LUYỆN TẬP NGỮ PHÁP",
+        "totalQuestions": "Tổng số câu",
+        "correctAnswers": "Số câu đúng",
+        "incorrectAnswers": "Số câu sai",
+        "accuracy": "Tỷ lệ đúng",
+        "iconAlt": "Icon kết quả",
+        "unlockNext": "Mở khóa bài luyện tập ngữ pháp tiếp theo"
+      },
+      "history": {
+        "title": "LỊCH SỬ LÀM BÀI LUYỆN TẬP NGỮ PHÁP",
+        "empty": "Không có dữ liệu lịch sử.",
+        "question": "Câu {{number}}",
+        "yourAnswer": "Đáp án của bạn",
+        "correctAnswer": "Đáp án đúng",
+        "result": "Kết quả",
+        "correct": "✓ Đúng",
+        "incorrect": "✗ Sai",
+        "explanation": "Giải thích"
+      }
+    },
     "storyPage": {
       "list": {
         "documentTitle": "Bài học câu chuyện - EasyTalk",
