@@ -91,7 +91,7 @@ async function authenticateSocket(socket, next) {
     }
 }
 
-function initRedisAdapter(ioInstance) {
+async function initRedisAdapter(ioInstance) {
     if (!isRedisEnabled() || process.env.SOCKET_REDIS_ADAPTER_ENABLED === "false") {
         logger.info("Socket.IO Redis adapter disabled");
         return;
@@ -118,8 +118,17 @@ function initRedisAdapter(ioInstance) {
         subClient.on("error", (err) => {
             logger.warn("Socket.IO Redis subscriber error", { message: err.message });
         });
-        subClient.on("ready", () => {
-            logger.info("Socket.IO Redis subscriber ready");
+        await new Promise((resolve, reject) => {
+            if (subClient.status === "ready") {
+                return resolve();
+            }
+            subClient.once("ready", () => {
+                logger.info("Socket.IO Redis subscriber ready");
+                resolve();
+            });
+            subClient.once("error", (err) => {
+                reject(err);
+            });
         });
 
         ioInstance.adapter(createAdapter(pubClient, subClient));
@@ -167,7 +176,7 @@ function getSocketTransports() {
     return process.env.NODE_ENV === "production" ? ["websocket"] : ["websocket", "polling"];
 }
 
-function initSocket(server, allowedOrigins = ["http://localhost:5173"]) {
+async function initSocket(server, allowedOrigins = ["http://localhost:5173"]) {
     io = new Server(server, {
         transports: getSocketTransports(),
         cors: {
@@ -176,7 +185,7 @@ function initSocket(server, allowedOrigins = ["http://localhost:5173"]) {
         }
     });
 
-    initRedisAdapter(io);
+    await initRedisAdapter(io);
     io.use(authenticateSocket);
 
     io.on("connection", (socket) => {

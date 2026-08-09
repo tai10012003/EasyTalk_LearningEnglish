@@ -89,9 +89,9 @@ const { buildDependencies } = require('./src/bootstrap/dependencies');
 let controllers = null;
 let routesInitialized = false;
 
-function initRealtimeAndRoutes() {
-  if (routesInitialized) return;
-  const io = initSocket(server, getAllowedClientOrigins());
+async function initRealtimeAndRoutes() {
+if (routesInitialized) return;
+  const io = await initSocket(server, getAllowedClientOrigins());
   logger.info('Socket.IO initialized');
   controllers = buildDependencies({ io }).controllers;
 
@@ -151,7 +151,7 @@ const PORT = process.env.PORT || 3000;
 async function startServer() {
   try {
     await initRedis();
-    initRealtimeAndRoutes();
+    await initRealtimeAndRoutes();
     await initBackgroundTasks();
     await initCacheWarmUp();
     server.listen(PORT, () => {
