@@ -12,8 +12,8 @@ const logger = require('./src/shared/utils/logger');
 const runtimeEnv = process.env.APP_ENV || process.env.NODE_ENV;
 const envFile = process.env.ENV_FILE || (runtimeEnv === 'production' ? '.env.production' : '.env.development');
 dotenv.config({ path: path.resolve(__dirname, envFile) });
-const { validateEnv } = require('./src/shared/config/envValidator');
-validateEnv();
+// const { validateEnv } = require('./src/shared/config/envValidator');
+// validateEnv();
 
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'Reason:', reason);

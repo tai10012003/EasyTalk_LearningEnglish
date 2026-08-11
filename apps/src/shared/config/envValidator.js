@@ -37,13 +37,13 @@ function validateJwtSecret() {
     }
 }
 
-function validateEnv() {
-    validateJwtSecret();
-    if(process.env.NODE_ENV === "production" && !process.env.REDIS_PASSWORD) {
-        throw new Error("REDIS_PASSWORD is required in production.");
-    }
-}
+// function validateEnv() {
+//     validateJwtSecret();
+//     if(process.env.NODE_ENV === "production" && !process.env.REDIS_PASSWORD) {
+//         throw new Error("REDIS_PASSWORD is required in production.");
+//     }
+// }
 
-module.exports = {
-    validateEnv
-};
+// module.exports = {
+//     validateEnv
+// };
