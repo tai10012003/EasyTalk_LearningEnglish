@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { isAnswerCorrect } from '@/utils/englishTextNormalizer'
 import Swal from "sweetalert2";
 import { useTranslation } from "react-i18next";
 
 const GrammarExerciseCarousel = ({
     questions,
     currentQuestionIndex,
+    onCheckAnswer,
     onAnswerSubmit,
     onQuestionNavigation,
     onSpeakText,
@@ -20,6 +20,7 @@ const GrammarExerciseCarousel = ({
     const [hoveredWord, setHoveredWord] = useState(null);
     const [translation, setTranslation] = useState('');
     const [translationLoading, setTranslationLoading] = useState(false);
+    const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
 
     const shuffleArray = useCallback((array) => {
         const arr = [...array];
@@ -99,7 +100,7 @@ const GrammarExerciseCarousel = ({
         }
     }, [answeredQuestions, onAnsweredQuestionsChange]);
 
-    const handleSubmitAnswer = useCallback(() => {
+    const handleSubmitAnswer = useCallback(async () => {
         const userAnswer = userAnswers[currentQuestionIndex];
         if (!userAnswer || userAnswer.toString().trim() == '') {
             Swal.fire({
@@ -110,11 +111,22 @@ const GrammarExerciseCarousel = ({
             return;
         }
         const rawUserAnswer = userAnswer.toString().trim();
-        const correctAnswer = currentQuestion.correctAnswer?.trim() || "";
-        const isCorrect = isAnswerCorrect(rawUserAnswer, correctAnswer);
-        onAnswerSubmit(currentQuestionIndex, rawUserAnswer, isCorrect);
-        setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
-    }, [currentQuestionIndex, userAnswers, currentQuestion, onAnswerSubmit, t]);
+        try {
+            setIsCheckingAnswer(true);
+            const result = await onCheckAnswer(currentQuestionIndex, rawUserAnswer);
+            onAnswerSubmit(currentQuestionIndex, result);
+            setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
+        } catch (error) {
+            console.error("Error checking grammar exercise answer:", error);
+            Swal.fire({
+                icon: "error",
+                title: t("grammarExercisePage.detail.errorTitle"),
+                text: error.message || t("grammarExercisePage.detail.errorText")
+            });
+        } finally {
+            setIsCheckingAnswer(false);
+        }
+    }, [currentQuestionIndex, userAnswers, onCheckAnswer, onAnswerSubmit, t]);
 
     const handleNextQuestion = useCallback(() => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -149,7 +161,7 @@ const GrammarExerciseCarousel = ({
             selected: savedSelected,
             available: words.filter(w => !savedSelected.includes(w))
         };
-        const correctWords = currentQuestion.correctAnswer.trim().split(" ");
+        const correctWords = questionResult?.correctAnswer ? questionResult.correctAnswer.trim().split(" ") : [];
         const isWordCorrectAtPosition = (word, index) => {
             if (index >= correctWords.length) return false;
             return word.toLowerCase() === correctWords[index].toLowerCase().replace(/[.,?!]/g, '');
@@ -218,6 +230,7 @@ const GrammarExerciseCarousel = ({
                                 onChange={() => handleAnswerChange(option)}
                                 checked={userAnswers[currentQuestionIndex] == option}
                                 disabled={isQuestionAnswered}
+                                readOnly={isQuestionAnswered}
                             />
                             <label
                                 className={`exercise-form-check-label ${
@@ -332,8 +345,9 @@ const GrammarExerciseCarousel = ({
                             type="button"
                             className="exercise-submit-answer mt-4 mb-4"
                             onClick={handleSubmitAnswer}
+                            disabled={isCheckingAnswer}
                         >
-                            <i className="fas fa-check me-2"></i> {t("grammarExercisePage.carousel.check")}
+                            <i className="fas fa-check me-2"></i> {isCheckingAnswer ? t("common.loading", { defaultValue: "Đang kiểm tra..." }) : t("grammarExercisePage.carousel.check")}
                         </button>
                     )}
                 </div>

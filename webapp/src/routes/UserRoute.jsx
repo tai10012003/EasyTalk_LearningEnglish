@@ -18,6 +18,8 @@ import FlashCard from "@/views/user/FlashCard.jsx";
 import FlashCardReview from "@/views/user/FlashCardReview.jsx";
 import GrammarExercise from "@/views/user/GrammarExercise.jsx";
 import GrammarExerciseDetail from "@/views/user/GrammarExerciseDetail.jsx";
+import GrammarExerciseAttemptHistory from "@/views/user/GrammarExerciseAttemptHistory.jsx";
+import GrammarExerciseAttemptHistoryDetail from "@/views/user/GrammarExerciseAttemptHistoryDetail.jsx";
 import VocabularyExercise from "@/views/user/VocabularyExercise.jsx";
 import VocabularyExerciseDetail from "@/views/user/VocabularyExerciseDetail.jsx";
 import PronunciationExercise from "@/views/user/PronunciationExercise.jsx";
@@ -145,6 +147,22 @@ const UserRoute = [
         element: (
         <PrivateRoute>
             <GrammarExercise />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/grammar-exercise/history",
+        element: (
+        <PrivateRoute>
+            <GrammarExerciseAttemptHistory />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/grammar-exercise/history/:attemptId",
+        element: (
+        <PrivateRoute>
+            <GrammarExerciseAttemptHistoryDetail />
         </PrivateRoute>
         ),
     },

@@ -55,7 +55,7 @@ export const GrammarExerciseService = {
             const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/slug/${slug}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data || responseData;
+            const data = responseData.data?.grammarExercise || responseData.data || responseData;
             return data;
         } catch (err) {
             console.error(err);
@@ -76,6 +76,117 @@ export const GrammarExerciseService = {
         const responseData = await res.json();
         const data = responseData.data || responseData;
         return data;
+    },
+
+    async fetchGrammarExerciseRoadmap() {
+        try {
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/roadmap${langQuery}`, {
+                method: "GET",
+            });
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            hasShownAlert = false;
+            return responseData.data || { items: [], progress: { unlockedCount: 0, totalCount: 0, percent: 0 } };
+        } catch (error) {
+            console.error("Error fetching grammar exercise roadmap:", error.message);
+            if (!hasShownAlert) {
+                hasShownAlert = true;
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                });
+            }
+            return { items: [], progress: { unlockedCount: 0, totalCount: 0, percent: 0 } };
+        }
+    },
+
+    async startGrammarExerciseAttempt(grammarExerciseId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/grammar-exercises/${grammarExerciseId}/attempts`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data;
+    },
+
+    async checkGrammarExerciseQuestion(attemptId, questionIndex, answer) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/attempts/${attemptId}/questions/${questionIndex}/check`, {
+            method: "POST",
+            body: JSON.stringify({ answer }),
+        });
+        if (!res.ok) {
+            const responseData = await res.json().catch(() => ({}));
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data;
+    },
+
+    async finishGrammarExerciseAttempt(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/attempts/${attemptId}/finish`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const responseData = await res.json().catch(() => ({}));
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data;
+    },
+
+    async fetchGrammarExerciseAttemptHistory(page = 1, limit = 10) {
+        const query = new URLSearchParams({ page: page.toString(), limit: limit.toString() }).toString();
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/attempts/history?${query}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const responseData = await res.json().catch(() => ({}));
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || { items: [], currentPage: page, totalPages: 1, totalItems: 0 };
+    },
+
+    async getGrammarExerciseAttemptDetail(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/attempts/${attemptId}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const responseData = await res.json().catch(() => ({}));
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data;
+    },
+
+    async deleteGrammarExerciseAttemptHistory(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar-exercise/api/attempts/${attemptId}`, {
+            method: "DELETE",
+        });
+        if (!res.ok) {
+            const responseData = await res.json().catch(() => ({}));
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     async getGrammarExerciseAdmin(id) {

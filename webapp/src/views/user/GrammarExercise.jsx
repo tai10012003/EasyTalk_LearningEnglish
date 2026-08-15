@@ -11,6 +11,7 @@ function GrammarExercise() {
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [unlockedGrammarExercises, setUnlockedGrammarExercises] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
     const navigate = useNavigate();
 
@@ -20,32 +21,22 @@ function GrammarExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await GrammarExerciseService.fetchGrammarExercise(1, 10000);
-                const all = allResp.data || [];
-                setAllGrammarExercises(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await GrammarExerciseService.getGrammarExerciseDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedGrammarExercises) ? userProg.unlockedGrammarExercises.map(s => s.toString()) : [];
-                        setUnlockedGrammarExercises(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedGrammarExercises([]);
-                    }
-                } else {
-                    setUnlockedGrammarExercises([]);
-                }
+                const roadmap = await GrammarExerciseService.fetchGrammarExerciseRoadmap();
+                const items = roadmap.items || [];
+                setAllGrammarExercises(items);
+                setUnlockedGrammarExercises(items.filter(item => item.isUnlocked).map(item => item._id.toString()));
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: items.length, percent: 0 });
             } catch (err) {
                 console.error("Error fetching grammar exercises:", err);
                 setAllGrammarExercises([]);
                 setUnlockedGrammarExercises([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [navigate, t, i18n.language]);
+    }, [t, i18n.language]);
 
     const isGrammarExerciseUnlocked = (grammarExerciseId) => {
         return unlockedGrammarExercises.includes(grammarExerciseId.toString());
@@ -80,14 +71,17 @@ function GrammarExercise() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            {t("grammarExercisePage.list.subtitle", { unlocked: unlockedGrammarExercises.length, total: allGrammarExercises.length })}
+                            {t("grammarExercisePage.list.subtitle", { unlocked: roadmapProgress.unlockedCount, total: roadmapProgress.totalCount })}
                         </p>
+                        <button className="btn_2 mb-4" type="button" onClick={() => navigate("/grammar-exercise/history")}>
+                            <i className="fas fa-history"></i> {t("grammarExercisePage.history.title")}
+                        </button>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allGrammarExercises.length > 0 ? (unlockedGrammarExercises.length / allGrammarExercises.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {t("grammarExercisePage.list.completePercent", { percent: allGrammarExercises.length > 0 ? Math.round((unlockedGrammarExercises.length / allGrammarExercises.length) * 100) : 0 })}
+                                {t("grammarExercisePage.list.completePercent", { percent: roadmapProgress.percent })}
                             </span>
                         </div>
                     </div>
@@ -95,9 +89,9 @@ function GrammarExercise() {
                 <div className="container">
                     <div className="user-road-timeline">
                         {allGrammarExercises.map((item, index) => {
-                            const isUnlocked = isGrammarExerciseUnlocked(item._id);
+                            const isUnlocked = item.isUnlocked ?? isGrammarExerciseUnlocked(item._id);
                             const currentIndex = findCurrentGrammarExerciseIndex();
-                            const isCurrent = index === currentIndex;
+                            const isCurrent = item.isCurrent ?? index === currentIndex;
                             return (
                                 <div key={item._id} ref={isCurrent ? currentLessonRef : null} >
                                     <GrammarExerciseCard item={item} index={index} isUnlocked={isUnlocked} isCurrent={isCurrent} />

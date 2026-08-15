@@ -13,7 +13,8 @@ const GrammarExerciseSidebar = ({
         onQuestionNavigation,
         onShowHistory,
         selectedDuration,
-        answeredCount
+        answeredCount,
+        isSubmitting = false
     }) => {
         const { t } = useTranslation();
         const handleSubmitClick = useCallback(() => {
@@ -67,8 +68,9 @@ const GrammarExerciseSidebar = ({
                             className="btn_1 mb-4"
                             style={{ width: '100%' }}
                             onClick={handleSubmitClick}
+                            disabled={isSubmitting}
                         >
-                            <i className="fas fa-paper-plane"></i> {t("grammarExercisePage.sidebar.submit")}
+                            <i className="fas fa-paper-plane"></i> {isSubmitting ? t("common.loading", { defaultValue: "Đang nộp..." }) : t("grammarExercisePage.sidebar.submit")}
                         </button>
                     )}
                     {!allQuestionsAnswered && (

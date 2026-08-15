@@ -3,66 +3,92 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 
 let hasShownAlert = false;
+const requestCache = new Map();
+const REQUEST_CACHE_TTL = 10000;
+
+function getCachedRequest(key, fetcher) {
+    const now = Date.now();
+    const cached = requestCache.get(key);
+    if (cached && cached.expiresAt > now) {
+        return cached.promise;
+    }
+
+    const promise = fetcher().catch((error) => {
+        requestCache.delete(key);
+        throw error;
+    });
+    requestCache.set(key, {
+        promise,
+        expiresAt: now + REQUEST_CACHE_TTL
+    });
+    return promise;
+}
 
 export const LearningAgentService = {
     async getDailyPlan(targetMinutes = null, options = {}) {
         const { showAlert = true } = options;
-        try {
-            const query = targetMinutes ? `?${new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString()}` : "";
-            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/daily-plan${query}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.message || errorData.error || `HTTP error! Status: ${res.status}`);
-            }
-            const responseData = await res.json();
-            hasShownAlert = false;
-            return responseData.data;
-        } catch (error) {
-            console.error("Error fetching AI daily plan:", error.message);
-            if (showAlert && !hasShownAlert) {
-                hasShownAlert = true;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Tạm thời chưa tải được kế hoạch AI",
-                    text: "Bạn có thể thử lại sau ít phút.",
-                    timer: 3000,
-                    showConfirmButton: false
+        const cacheKey = `daily-plan:${targetMinutes ?? "default"}`;
+        return getCachedRequest(cacheKey, async () => {
+            try {
+                const query = targetMinutes ? `?${new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString()}` : "";
+                const res = await AuthService.fetchWithAuth(`${API_URL}/agent/daily-plan${query}`, {
+                    method: "GET",
                 });
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || errorData.error || `HTTP error! Status: ${res.status}`);
+                }
+                const responseData = await res.json();
+                hasShownAlert = false;
+                return responseData.data;
+            } catch (error) {
+                console.error("Error fetching AI daily plan:", error.message);
+                if (showAlert && !hasShownAlert) {
+                    hasShownAlert = true;
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Tạm thời chưa tải được kế hoạch AI",
+                        text: "Bạn có thể thử lại sau ít phút.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+                throw error;
             }
-            throw error;
-        }
+        });
     },
 
     async getCoachGuide(targetMinutes = null, options = {}) {
         const { showAlert = true } = options;
-        try {
-            const query = targetMinutes ? `?${new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString()}` : "";
-            const res = await AuthService.fetchWithAuth(`${API_URL}/agent/guide/coach${query}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.message || errorData.error || `HTTP error! Status: ${res.status}`);
-            }
-            const responseData = await res.json();
-            hasShownAlert = false;
-            return responseData.data || responseData;
-        } catch (error) {
-            console.error("Error fetching AI coach guide:", error.message);
-            if (showAlert && !hasShownAlert) {
-                hasShownAlert = true;
-                Swal.fire({
-                    icon: "warning",
-                    title: "Tạm thời chưa tải được hướng dẫn AI",
-                    text: "Bạn vẫn có thể xem kế hoạch học như bình thường.",
-                    timer: 3000,
-                    showConfirmButton: false
+        const cacheKey = `coach-guide:${targetMinutes ?? "default"}`;
+        return getCachedRequest(cacheKey, async () => {
+            try {
+                const query = targetMinutes ? `?${new URLSearchParams({ targetMinutes: targetMinutes.toString() }).toString()}` : "";
+                const res = await AuthService.fetchWithAuth(`${API_URL}/agent/guide/coach${query}`, {
+                    method: "GET",
                 });
+                if (!res.ok) {
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.message || errorData.error || `HTTP error! Status: ${res.status}`);
+                }
+                const responseData = await res.json();
+                hasShownAlert = false;
+                return responseData.data || responseData;
+            } catch (error) {
+                console.error("Error fetching AI coach guide:", error.message);
+                if (showAlert && !hasShownAlert) {
+                    hasShownAlert = true;
+                    Swal.fire({
+                        icon: "warning",
+                        title: "Tạm thời chưa tải được hướng dẫn AI",
+                        text: "Bạn vẫn có thể xem kế hoạch học như bình thường.",
+                        timer: 3000,
+                        showConfirmButton: false
+                    });
+                }
+                throw error;
             }
-            throw error;
-        }
+        });
     },
 
     async getMemory() {
@@ -113,6 +139,7 @@ export const LearningAgentService = {
             }
             const responseData = await res.json();
             hasShownAlert = false;
+            requestCache.clear();
             return responseData.data?.memory || responseData.data;
         } catch (error) {
             console.error("Error updating learner memory:", error.message);
@@ -132,6 +159,7 @@ export const LearningAgentService = {
             }
             const responseData = await res.json();
             hasShownAlert = false;
+            requestCache.clear();
             return responseData.data?.memory || responseData.data?.memory || responseData.data;
         } catch (error) {
             console.error("Error updating study preferences:", error.message);

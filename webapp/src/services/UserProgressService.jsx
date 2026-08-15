@@ -1,87 +1,113 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
+import Swal from "sweetalert2";
 let hasShownAlert = false;
+const requestCache = new Map();
+const REQUEST_CACHE_TTL = 10000;
+
+function getCachedRequest(key, fetcher) {
+    const now = Date.now();
+    const cached = requestCache.get(key);
+    if (cached && cached.expiresAt > now) {
+        return cached.promise;
+    }
+    const promise = fetcher().catch((error) => {
+        requestCache.delete(key);
+        throw error;
+    });
+    requestCache.set(key, {
+        promise,
+        expiresAt: now + REQUEST_CACHE_TTL
+    });
+    return promise;
+}
 
 export const UserProgressService = {
     async getUserStreak() {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/streak`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            hasShownAlert = false;
-            return data;
-        } catch (err) {
-            console.error("Error fetching streak data:", err);
-            if (!hasShownAlert) {
-                hasShownAlert = true;
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+        return getCachedRequest("user-streak", async () => {
+            try {
+                const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/streak`, {
+                    method: "GET",
                 });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+                }
+                const responseData = await res.json();
+                const data = responseData.data;
+                hasShownAlert = false;
+                return data;
+            } catch (err) {
+                console.error("Error fetching streak data:", err);
+                if (!hasShownAlert) {
+                    hasShownAlert = true;
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi",
+                        text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                    });
+                }
+                throw err;
             }
-            throw err;
-        }
+        });
     },
 
     async getUserExperiencePoints() {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/experiencepoint`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            hasShownAlert = false;
-            return data;
-        } catch (err) {
-            console.error("Error fetching experience points data:", err);
-            if (!hasShownAlert) {
-                hasShownAlert = true;
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+        return getCachedRequest("user-experience-points", async () => {
+            try {
+                const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/experiencepoint`, {
+                    method: "GET",
                 });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+                }
+                const responseData = await res.json();
+                const data = responseData.data;
+                hasShownAlert = false;
+                return data;
+            } catch (err) {
+                console.error("Error fetching experience points data:", err);
+                if (!hasShownAlert) {
+                    hasShownAlert = true;
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi",
+                        text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                    });
+                }
+                throw err;
             }
-            throw err;
-        }
+        });
     },
 
     async getUserDiamonds() {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/diamonds`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const errorData = await res.json();
-                throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
-            }
-            const responseData = await res.json();
-            const data = responseData.data;
-            hasShownAlert = false;
-            return data;
-        } catch (err) {
-            console.error("Error fetching diamonds data:", err);
-            if (!hasShownAlert) {
-                hasShownAlert = true;
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+        return getCachedRequest("user-diamonds", async () => {
+            try {
+                const res = await AuthService.fetchWithAuth(`${API_URL}/userprogress/diamonds`, {
+                    method: "GET",
                 });
+                if (!res.ok) {
+                    const errorData = await res.json();
+                    throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
+                }
+                const responseData = await res.json();
+                const data = responseData.data;
+                hasShownAlert = false;
+                return data;
+            } catch (err) {
+                console.error("Error fetching diamonds data:", err);
+                if (!hasShownAlert) {
+                    hasShownAlert = true;
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi",
+                        text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                    });
+                }
+                throw err;
             }
-            throw err;
-        }
+        });
     },
 
     async recordStudyTime(seconds) {

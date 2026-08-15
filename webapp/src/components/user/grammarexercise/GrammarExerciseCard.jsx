@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 
 const GrammarExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
     const { t } = useTranslation();
+    const questionCount = item.questionCount ?? (item.questions ? item.questions.length : 0);
     return (
         <div className={`user-timeline-item ${index % 2 === 0 ? 'left' : 'right'} ${isUnlocked ? 'unlocked' : ''} ${isCurrent ? 'current' : ''}`}>
             <div className="user-timeline-card">
@@ -22,7 +23,7 @@ const GrammarExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
                     </div>
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">
-                        {t("grammarExercisePage.card.questionCount", { count: item.questions ? item.questions.length : 0 })}
+                        {t("grammarExercisePage.card.questionCount", { count: questionCount })}
                     </p>
                     <div className="user-card-footer">
                         {isUnlocked && isCurrent ? (
