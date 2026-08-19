@@ -37,11 +37,11 @@ function GrammarExerciseAttemptHistoryDetail() {
 
     if (!attempt || !Array.isArray(attempt.questionResults) || attempt.questionResults.length === 0) {
         return (
-            <div className="grammar-history-detail-page">
-                <div className="container grammar-history-detail-content">
-                    <div className="grammar-history-empty">
+            <div className="exercise-history-detail-page">
+                <div className="container exercise-history-detail-content">
+                    <div className="exercise-history-empty">
                         <p>{t("grammarExercisePage.history.empty")}</p>
-                        <button className="grammar-history-back-btn mt-3" type="button" onClick={() => navigate("/grammar-exercise/history")}>
+                        <button className="exercise-history-back-btn mt-3" type="button" onClick={() => navigate("/grammar-exercise/history")}>
                             <i className="fas fa-arrow-left"></i> {t("grammarExercisePage.carousel.back")}
                         </button>
                     </div>
@@ -51,27 +51,27 @@ function GrammarExerciseAttemptHistoryDetail() {
     }
 
     return (
-        <div className="grammar-history-detail-page">
-            <div className="grammar-history-detail-hero">
-                <div className="container grammar-history-detail-hero-inner">
+        <div className="exercise-history-detail-page">
+            <div className="exercise-history-detail-hero">
+                <div className="container exercise-history-detail-hero-inner">
                     <div>
-                        <span className="grammar-history-detail-eyebrow">
+                        <span className="exercise-history-detail-eyebrow">
                             <i className="fas fa-history"></i> {t("grammarExercisePage.history.title")}
                         </span>
-                        <h1 className="grammar-history-detail-title">{attempt.grammarExerciseContent?.title}</h1>
-                        <div className="grammar-history-detail-stats">
+                        <h1 className="exercise-history-detail-title">{attempt.grammarExerciseContent?.title}</h1>
+                        <div className="exercise-history-detail-stats">
                             <span><i className="fas fa-check-circle"></i> {attempt.correctCount}/{attempt.totalQuestions} {t("grammarExercisePage.history.correct").toLowerCase()}</span>
                             <span><i className="fas fa-chart-line"></i> {Math.round(attempt.score || 0)}%</span>
                         </div>
                     </div>
-                    <button className="grammar-history-detail-back" type="button" onClick={() => navigate("/grammar-exercise/history")}>
+                    <button className="exercise-history-detail-back" type="button" onClick={() => navigate("/grammar-exercise/history")}>
                         <i className="fas fa-arrow-left"></i> {t("grammarExercisePage.carousel.back")}
                     </button>
                 </div>
             </div>
 
-            <div className="container grammar-history-detail-content">
-            <div className="row grammar-history-detail-grid">
+            <div className="container exercise-history-detail-content">
+            <div className="row exercise-history-detail-grid">
                 <div className="col-md-7">
                     <div className="exercise-content-container">
                         <GrammarExerciseHistoryReviewCarousel

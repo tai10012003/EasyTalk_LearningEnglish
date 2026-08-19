@@ -1,5 +1,4 @@
 import React, { useState, useCallback } from 'react';
-import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
 import Swal from "sweetalert2";
 
 function buildDetailedAnalysis(correctSentence, transcription) {
@@ -25,9 +24,16 @@ function buildDetailedAnalysis(correctSentence, transcription) {
     });
 }
 
+function normalizeOptions(options = []) {
+    if (!Array.isArray(options)) return [];
+    return options.map(option => String(option || "").trim()).filter(Boolean);
+}
+
 const PronunciationExerciseCarousel = ({
     questions,
     currentQuestionIndex,
+    onCheckAnswer,
+    onAnalyzePronunciation,
     onAnswerSubmit,
     onQuestionNavigation,
     onSpeakText,
@@ -37,10 +43,13 @@ const PronunciationExerciseCarousel = ({
     const [recordingState, setRecordingState] = useState({});
     const [audioSrc, setAudioSrc] = useState({});
     const [analysisResults, setAnalysisResults] = useState({});
+    const [analyzingState, setAnalyzingState] = useState({});
     const [mediaRecorders, setMediaRecorders] = useState({});
-    const exerciseId = window.location.pathname.split('/').pop();
+    const [checkingState, setCheckingState] = useState({});
     const currentQuestion = questions[currentQuestionIndex];
     const isQuestionAnswered = questionResults[currentQuestionIndex]?.userAnswer !== "Chưa trả lời";
+    const currentAnalysisResult = analysisResults[currentQuestionIndex];
+    const isAnalyzing = Boolean(analyzingState[currentQuestionIndex]);
     const [micError, setMicError] = useState(null);
     const [userAnswers, setUserAnswers] = useState({});
     const [pronunciationAttempts, setPronunciationAttempts] = useState({});
@@ -84,31 +93,40 @@ const PronunciationExerciseCarousel = ({
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 const audioURL = URL.createObjectURL(audioBlob);
                 setAudioSrc(prev => ({ ...prev, [questionIndex]: audioURL }));
-                const response = await PronunciationExerciseService.analyzePronunciation(
-                    exerciseId,
-                    questionIndex,
-                    audioBlob
-                );
-
-                if (response?.success) {
-                    response.detailedAnalysisWords = buildDetailedAnalysis(
-                        currentQuestion.question,
-                        response.transcription
+                setAnalyzingState(prev => ({ ...prev, [questionIndex]: true }));
+                try {
+                    const response = await onAnalyzePronunciation(
+                        questionIndex,
+                        audioBlob
                     );
+
+                    if (response?.success) {
+                        response.detailedAnalysisWords = buildDetailedAnalysis(
+                            response.correctAnswer || currentQuestion.question,
+                            response.transcription || ""
+                        );
+                    }
+                    setAnalysisResults(prev => ({ ...prev, [questionIndex]: response }));
+                    setPronunciationAttempts(prev => ({
+                        ...prev,
+                        [questionIndex]: (prev[questionIndex] || 0) + 1
+                    }));
+
+                    if (response?.success) {
+                        onAnswerSubmit(questionIndex, response);
+                    }
+                } catch (error) {
+                    setAnalysisResults(prev => ({
+                        ...prev,
+                        [questionIndex]: {
+                            success: false,
+                            message: error.message || "Không thể phân tích phát âm. Vui lòng thử lại."
+                        }
+                    }));
+                } finally {
+                    setAnalyzingState(prev => ({ ...prev, [questionIndex]: false }));
+                    stream.getTracks().forEach(track => track.stop());
                 }
-                setAnalysisResults(prev => ({ ...prev, [questionIndex]: response }));
-                setPronunciationAttempts(prev => ({
-                    ...prev,
-                    [questionIndex]: (prev[questionIndex] || 0) + 1
-                }));
-                const accuracy = Number(response?.accuracy || 0);
-                const isCorrect = accuracy >= 50;
-                onAnswerSubmit(
-                    questionIndex,
-                    response?.transcription || "Không rõ",
-                    isCorrect,
-                    accuracy
-                );
             };
             setMicError(null);
             mediaRecorder.start();
@@ -124,9 +142,9 @@ const PronunciationExerciseCarousel = ({
                 setMicError("Không thể truy cập micro: " + err.message);
             }
         }
-    }, [currentQuestionIndex, exerciseId, mediaRecorders, recordingState, currentQuestion]);
+    }, [currentQuestionIndex, mediaRecorders, recordingState, currentQuestion, onAnalyzePronunciation, onAnswerSubmit]);
 
-    const handleMultipleChoiceSubmit = useCallback(() => {
+    const handleMultipleChoiceSubmit = useCallback(async () => {
         const questionIndex = currentQuestionIndex;
         const selectedInput = document.querySelector(`input[name="answer-${questionIndex}"]:checked`);
         if (!selectedInput) {
@@ -138,9 +156,21 @@ const PronunciationExerciseCarousel = ({
             return;
         }
         const userAnswer = selectedInput.value;
-        const isCorrect = userAnswer == currentQuestion.correctAnswer;
-        onAnswerSubmit(questionIndex, userAnswer, isCorrect);
-    }, [currentQuestionIndex, currentQuestion, onAnswerSubmit]);
+        try {
+            setCheckingState(prev => ({ ...prev, [questionIndex]: true }));
+            const result = await onCheckAnswer(questionIndex, userAnswer);
+            onAnswerSubmit(questionIndex, result);
+        } catch (error) {
+            console.error("Error checking pronunciation exercise answer:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: error.message || "Có lỗi xảy ra khi kiểm tra câu trả lời."
+            });
+        } finally {
+            setCheckingState(prev => ({ ...prev, [questionIndex]: false }));
+        }
+    }, [currentQuestionIndex, onCheckAnswer, onAnswerSubmit]);
 
     const handleAnswerChange = useCallback((value) => {
         setUserAnswers(prev => ({
@@ -177,8 +207,7 @@ const PronunciationExerciseCarousel = ({
                                 )}
                             </h5>
                             <div className="exercise-question-form">
-                                {currentQuestion.options
-                                .filter(option => option.trim() !== "")
+                                {normalizeOptions(currentQuestion.options)
                                 .map((option, optIndex) => (
                                     <div key={optIndex} className="exercise-form-check">
                                         <input
@@ -193,7 +222,7 @@ const PronunciationExerciseCarousel = ({
                                         />
                                         <label
                                             className={`exercise-form-check-label ${
-                                                isQuestionAnswered && currentQuestion.correctAnswer == option
+                                                isQuestionAnswered && questionResults[currentQuestionIndex].correctAnswer == option
                                                     ? 'exercise-correct-answer'
                                                     : isQuestionAnswered && questionResults[currentQuestionIndex].userAnswer == option
                                                     ? 'exercise-incorrect-answer'
@@ -210,8 +239,9 @@ const PronunciationExerciseCarousel = ({
                                         type="button"
                                         className="exercise-submit-answer mt-4 mb-4"
                                         onClick={handleMultipleChoiceSubmit}
+                                        disabled={Boolean(checkingState[currentQuestionIndex])}
                                     >
-                                        <i className="fas fa-check me-2"></i> Kiểm tra
+                                        <i className="fas fa-check me-2"></i> {checkingState[currentQuestionIndex] ? "Đang kiểm tra..." : "Kiểm tra"}
                                     </button>
                                 )}
                             </div>
@@ -240,8 +270,9 @@ const PronunciationExerciseCarousel = ({
                                     type="button"
                                     className="btn btn_1"
                                     onClick={handleRecordToggle}
+                                    disabled={isAnalyzing || isCompleted}
                                 >
-                                    {recordingState[currentQuestionIndex] ? 'Dừng ghi âm' : 'Ghi âm'}
+                                    {recordingState[currentQuestionIndex] ? 'Dừng ghi âm' : isAnalyzing ? 'Đang phân tích...' : 'Ghi âm'}
                                 </button>
                             )}
                             {micError && (
@@ -255,44 +286,60 @@ const PronunciationExerciseCarousel = ({
                                 </div>
                             )}
 
-                            {analysisResults[currentQuestionIndex]?.success && (
+                            {isAnalyzing && (
+                                <div className="exercise-explanation mt-4">
+                                    <p><strong>Đang phân tích phát âm...</strong></p>
+                                </div>
+                            )}
+
+                            {currentAnalysisResult && !currentAnalysisResult.success && !isAnalyzing && (
+                                <div className="exercise-explanation mt-4">
+                                    <p>
+                                        <strong>Chưa phân tích được phát âm.</strong>
+                                        <br />
+                                        {currentAnalysisResult.message || "Vui lòng ghi âm lại và thử thêm lần nữa."}
+                                    </p>
+                                </div>
+                            )}
+
+                            {currentAnalysisResult?.success && (
                                 <div className="exercise-explanation mt-4">
                                     <h5>
                                         Độ chính xác:{' '}
                                         <span
                                             style={{
                                                 color:
-                                                    Number(analysisResults[currentQuestionIndex].accuracy || 0) >= 75
+                                                    Number(currentAnalysisResult.accuracy || 0) >= 75
                                                         ? 'green'
-                                                        : Number(analysisResults[currentQuestionIndex].accuracy || 0) >= 50
+                                                        : Number(currentAnalysisResult.accuracy || 0) >= 50
                                                         ? 'orange'
                                                         : 'red'
                                             }}
                                         >
-                                            {Number(analysisResults[currentQuestionIndex].accuracy || 0).toFixed(2)}%
+                                            {Number(currentAnalysisResult.accuracy || 0).toFixed(2)}%
                                         </span>
                                     </h5>
 
                                     <p
                                         style={{
                                             color:
-                                                Number(analysisResults[currentQuestionIndex].accuracy || 0) < 50
+                                                Number(currentAnalysisResult.accuracy || 0) < 50
                                                     ? 'red'
-                                                    : Number(analysisResults[currentQuestionIndex].accuracy || 0) < 75
+                                                    : Number(currentAnalysisResult.accuracy || 0) < 75
                                                     ? 'orange'
                                                     : 'green'
                                         }}
                                     >
-                                        {analysisResults[currentQuestionIndex].message}
+                                        {currentAnalysisResult.message || "Đã phân tích phát âm của bạn."}
                                     </p>
 
                                     <p style={{ marginTop: '15px' }}>
-                                        <strong>Kết quả phân tích:</strong> "{analysisResults[currentQuestionIndex].transcription}"
-                                    </p>
+                                    <strong>Kết quả phân tích:</strong> "{currentAnalysisResult.transcription}"
+                                </p>
 
                                     <p>
                                         <strong>Chi tiết phát âm: </strong>
-                                        {(analysisResults[currentQuestionIndex].detailedAnalysisWords || []).map((word, idx) => (
+                                        {(currentAnalysisResult.detailedAnalysisWords || []).map((word, idx) => (
                                             <span key={idx} style={{ marginRight: "12px" }}>
                                             {word.isCorrect ? (
                                                 <span style={{ color: "green", fontWeight: "bold" }}>{word.correct}</span>
@@ -323,7 +370,7 @@ const PronunciationExerciseCarousel = ({
                                 </p>
                             ) : (
                                 <p>
-                                    <strong>Bạn đã trả lời sai.</strong> Đáp án đúng: <strong>{currentQuestion.correctAnswer}</strong>
+                                    <strong>Bạn đã trả lời sai.</strong> Đáp án đúng: <strong>{questionResults[currentQuestionIndex].correctAnswer}</strong>
                                     <br />
                                     Giải thích: {questionResults[currentQuestionIndex].explanation}
                                 </p>

@@ -19,17 +19,19 @@ router.get("/api/pronunciation-exercises", verifyToken, asyncHandler(async (req,
         res.json({ success: true, data: pronunciationexercises, currentPage: page, totalPages });
 }));
 
+router.get("/api/pronunciation-exercises/roadmap", verifyToken, asyncHandler(async function (req, res) {
+        const { status, data } = await pronunciationexerciseService.getPronunciationExerciseRoadmap(req.user.id);
+        return res.status(status).json(data);
+}));
+
 router.get("/api/pronunciation-exercises/:id", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await pronunciationexerciseService.getPronunciationexerciseDetails(req.user.id, req.params.id);
         return res.status(status).json(data);
 }));
 
 router.get("/api/pronunciation-exercises/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const exercise = await pronunciationexerciseService.getPronunciationexerciseBySlug(req.params.slug);
-        if (!exercise) {
-            return res.status(404).json({ message: "Pronunciation exercise not found" });
-        }
-        res.json(exercise);
+        const { status, data } = await pronunciationexerciseService.getPronunciationexerciseDetailsBySlug(req.user.id, req.params.slug);
+        return res.status(status).json(data);
 }));
 
 router.post('/analyze/:id/:index', verifyToken, upload.single('audio'), asyncHandler(async (req, res) => {
@@ -41,6 +43,54 @@ router.post('/analyze/:id/:index', verifyToken, upload.single('audio'), asyncHan
 
 router.post("/api/pronunciation-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {
         const { status, data } = await pronunciationexerciseService.completePronunciationexercise(req.user.id, req.params.id);
+        return res.status(status).json(data);
+}));
+
+router.post("/api/pronunciation-exercises/:id/attempts", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await pronunciationexerciseService.startAttempt(req.user.id, req.params.id);
+        return res.status(status).json(data);
+}));
+
+router.get("/api/attempts/history", verifyToken, asyncHandler(async (req, res) => {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const { status, data } = await pronunciationexerciseService.getAttemptHistory(req.user.id, page, limit);
+        return res.status(status).json(data);
+}));
+
+router.get("/api/attempts/:attemptId", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await pronunciationexerciseService.getAttemptDetail(req.user.id, req.params.attemptId);
+        return res.status(status).json(data);
+}));
+
+router.delete("/api/attempts/:attemptId", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await pronunciationexerciseService.deleteAttemptHistory(req.user.id, req.params.attemptId);
+        return res.status(status).json(data);
+}));
+
+router.post("/api/attempts/:attemptId/questions/:questionIndex/check", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await pronunciationexerciseService.checkAttemptQuestion(
+            req.user.id,
+            req.params.attemptId,
+            req.params.questionIndex,
+            req.body.answer
+        );
+        return res.status(status).json(data);
+}));
+
+router.post("/api/attempts/:attemptId/questions/:questionIndex/analyze", verifyToken, upload.single('audio'), asyncHandler(async (req, res) => {
+        const audioBuffer = req.file ? req.file.buffer : null;
+        const { status, data } = await pronunciationexerciseService.analyzeAttemptQuestion(
+            audioBuffer,
+            req.user.id,
+            req.params.attemptId,
+            req.params.questionIndex
+        );
+        return res.status(status).json(data);
+}));
+
+router.post("/api/attempts/:attemptId/finish", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await pronunciationexerciseService.finishAttempt(req.user.id, req.params.attemptId);
         return res.status(status).json(data);
 }));
 

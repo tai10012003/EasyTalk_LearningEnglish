@@ -22,8 +22,12 @@ import GrammarExerciseAttemptHistory from "@/views/user/GrammarExerciseAttemptHi
 import GrammarExerciseAttemptHistoryDetail from "@/views/user/GrammarExerciseAttemptHistoryDetail.jsx";
 import VocabularyExercise from "@/views/user/VocabularyExercise.jsx";
 import VocabularyExerciseDetail from "@/views/user/VocabularyExerciseDetail.jsx";
+import VocabularyExerciseAttemptHistory from "@/views/user/VocabularyExerciseAttemptHistory.jsx";
+import VocabularyExerciseAttemptHistoryDetail from "@/views/user/VocabularyExerciseAttemptHistoryDetail.jsx";
 import PronunciationExercise from "@/views/user/PronunciationExercise.jsx";
 import PronunciationExerciseDetail from "@/views/user/PronunciationExerciseDetail.jsx";
+import PronunciationExerciseAttemptHistory from "@/views/user/PronunciationExerciseAttemptHistory.jsx";
+import PronunciationExerciseAttemptHistoryDetail from "@/views/user/PronunciationExerciseAttemptHistoryDetail.jsx";
 import DictationExercise from "@/views/user/DictationExercise.jsx";
 import DictationExerciseDetail from "@/views/user/DictationExerciseDetail.jsx";
 import ChatAI from "@/views/user/ChatAI.jsx";
@@ -183,6 +187,22 @@ const UserRoute = [
         ),
     },
     {
+        path: "/vocabulary-exercise/history",
+        element: (
+        <PrivateRoute>
+            <VocabularyExerciseAttemptHistory />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/vocabulary-exercise/history/:attemptId",
+        element: (
+        <PrivateRoute>
+            <VocabularyExerciseAttemptHistoryDetail />
+        </PrivateRoute>
+        ),
+    },
+    {
         path: "/vocabulary-exercise/:slug",
         element: (
         <PrivateRoute>
@@ -195,6 +215,22 @@ const UserRoute = [
         element: (
         <PrivateRoute>
             <PronunciationExercise />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/pronunciation-exercise/history",
+        element: (
+        <PrivateRoute>
+            <PronunciationExerciseAttemptHistory />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/pronunciation-exercise/history/:attemptId",
+        element: (
+        <PrivateRoute>
+            <PronunciationExerciseAttemptHistoryDetail />
         </PrivateRoute>
         ),
     },

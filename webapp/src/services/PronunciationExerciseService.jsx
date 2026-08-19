@@ -48,12 +48,123 @@ export const PronunciationExerciseService = {
             const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = responseData.data?.pronunciationExercise || responseData.data || responseData;
             return data;
         } catch (err) {
             console.error(err);
             return null;
         }
+    },
+
+    async fetchPronunciationExerciseRoadmap() {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/roadmap`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async startPronunciationExerciseAttempt(pronunciationExerciseId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${pronunciationExerciseId}/attempts`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async checkPronunciationExerciseQuestion(attemptId, questionIndex, answer) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}/questions/${questionIndex}/check`, {
+            method: "POST",
+            body: JSON.stringify({ answer }),
+        });
+        const responseData = await res.json();
+        if (!res.ok) {
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        return responseData.data || responseData;
+    },
+
+    async analyzePronunciationAttemptQuestion(attemptId, questionIndex, audioBlob) {
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}/questions/${questionIndex}/analyze`, {
+                method: 'POST',
+                body: formData,
+            });
+            const responseData = await res.json();
+            if (!res.ok) {
+                throw new Error(responseData?.message || responseData?.error || `HTTP error! Status: ${res.status}`);
+            }
+            return responseData.data || responseData;
+        } catch (err) {
+            console.error("Error analyzing audio:", err);
+            return { success: false, message: err.message || "Lỗi khi phân tích giọng nói." };
+        }
+    },
+
+    async finishPronunciationExerciseAttempt(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}/finish`, {
+            method: "POST",
+        });
+        const responseData = await res.json();
+        if (!res.ok) {
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        return responseData.data || responseData;
+    },
+
+    async fetchPronunciationExerciseAttemptHistory(page = 1, limit = 10) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/history?page=${page}&limit=${limit}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async getPronunciationExerciseAttemptDetail(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async deletePronunciationExerciseAttemptHistory(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}`, {
+            method: "DELETE",
+        });
+        const responseData = await res.json();
+        if (!res.ok) {
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        return responseData.data || responseData;
     },
 
     async analyzePronunciation(exerciseId, questionIndex, audioBlob) {
@@ -66,13 +177,15 @@ export const PronunciationExerciseService = {
                 body: formData,
             });
 
-            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            if (!res.ok) {
+                throw new Error(responseData?.message || responseData?.error || `HTTP error! Status: ${res.status}`);
+            }
+            const data = responseData.data || responseData;
             return data;
         } catch (err) {
             console.error("Error analyzing audio:", err);
-            return { success: false, message: "Lỗi khi phân tích giọng nói." };
+            return { success: false, message: err.message || "Lỗi khi phân tích giọng nói." };
         }
     },
 
@@ -86,7 +199,7 @@ export const PronunciationExerciseService = {
             throw err;
         }
         const responseData = await res.json();
-        const data = responseData.data;
+        const data = responseData.data || responseData;
         return data;
     },
 
@@ -100,7 +213,7 @@ export const PronunciationExerciseService = {
             throw err;
         }
         const responseData = await res.json();
-        const data = responseData.data;
+        const data = responseData.data || responseData;
         return data;
     },
 

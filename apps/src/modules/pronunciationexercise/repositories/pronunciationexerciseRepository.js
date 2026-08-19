@@ -18,6 +18,9 @@ class PronunciationExerciseRepository {
     }
 
     async findById(id) {
+        if (!ObjectId.isValid(id)) {
+            return null;
+        }
         return await this.collection.findOne({ _id: new ObjectId(id) });
     }
 

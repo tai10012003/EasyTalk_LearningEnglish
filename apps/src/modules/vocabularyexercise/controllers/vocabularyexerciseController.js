@@ -20,6 +20,11 @@ router.get("/api/vocabulary-exercises", verifyToken, asyncHandler(async (req, re
         });
 }));
 
+router.get("/api/vocabulary-exercises/roadmap", verifyToken, asyncHandler(async function (req, res) {
+        const { status, data } = await vocabularyexerciseService.getVocabularyExerciseRoadmap(req.user.id);
+        return res.status(status).json(data);
+}));
+
 router.get("/api/vocabulary-exercises/:id", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await vocabularyexerciseService.getVocabularyExerciseDetails(req.user.id, req.params.id);
         return res.status(status).json(data);
@@ -27,15 +32,49 @@ router.get("/api/vocabulary-exercises/:id", verifyToken, asyncHandler(async func
 
 router.get("/api/vocabulary-exercises/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
         const slug = req.params.slug;
-        const exercise = await vocabularyexerciseService.getVocabularyexerciseBySlug(slug);
-        if (!exercise) {
-            return res.status(404).json({ message: "Vocabulary exercise not found" });
-        }
-        res.json(exercise);
+        const { status, data } = await vocabularyexerciseService.getVocabularyExerciseDetailsBySlug(req.user.id, slug);
+        return res.status(status).json(data);
 }));
 
 router.post("/api/vocabulary-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {
         const { status, data } = await vocabularyexerciseService.completeVocabularyExercise(req.user.id, req.params.id);
+        return res.status(status).json(data);
+}));
+
+router.post("/api/vocabulary-exercises/:id/attempts", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await vocabularyexerciseService.startAttempt(req.user.id, req.params.id);
+        return res.status(status).json(data);
+}));
+
+router.get("/api/attempts/history", verifyToken, asyncHandler(async (req, res) => {
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const { status, data } = await vocabularyexerciseService.getAttemptHistory(req.user.id, page, limit);
+        return res.status(status).json(data);
+}));
+
+router.get("/api/attempts/:attemptId", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await vocabularyexerciseService.getAttemptDetail(req.user.id, req.params.attemptId);
+        return res.status(status).json(data);
+}));
+
+router.delete("/api/attempts/:attemptId", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await vocabularyexerciseService.deleteAttemptHistory(req.user.id, req.params.attemptId);
+        return res.status(status).json(data);
+}));
+
+router.post("/api/attempts/:attemptId/questions/:questionIndex/check", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await vocabularyexerciseService.checkAttemptQuestion(
+            req.user.id,
+            req.params.attemptId,
+            req.params.questionIndex,
+            req.body.answer
+        );
+        return res.status(status).json(data);
+}));
+
+router.post("/api/attempts/:attemptId/finish", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await vocabularyexerciseService.finishAttempt(req.user.id, req.params.attemptId);
         return res.status(status).json(data);
 }));
 

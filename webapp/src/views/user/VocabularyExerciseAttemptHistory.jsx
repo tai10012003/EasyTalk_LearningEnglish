@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
-import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
-import { useTranslation } from "react-i18next";
+import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.jsx";
 import Swal from "sweetalert2";
 
 const formatDateTime = (value) => {
@@ -10,8 +9,7 @@ const formatDateTime = (value) => {
     return new Date(value).toLocaleString("vi-VN");
 };
 
-function GrammarExerciseAttemptHistory() {
-    const { t } = useTranslation();
+function VocabularyExerciseAttemptHistory() {
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -19,18 +17,18 @@ function GrammarExerciseAttemptHistory() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        document.title = t("grammarExercisePage.history.title");
-    }, [t]);
+        document.title = "Lịch sử làm bài luyện tập từ vựng - EasyTalk";
+    }, []);
 
     useEffect(() => {
         const fetchHistory = async () => {
             try {
                 setIsLoading(true);
-                const data = await GrammarExerciseService.fetchGrammarExerciseAttemptHistory(currentPage, 10);
+                const data = await VocabularyExerciseService.fetchVocabularyExerciseAttemptHistory(currentPage, 10);
                 setItems(data.items || []);
                 setTotalPages(data.totalPages || 1);
             } catch (error) {
-                console.error("Error fetching grammar exercise history:", error);
+                console.error("Error fetching vocabulary exercise history:", error);
                 setItems([]);
                 setTotalPages(1);
             } finally {
@@ -43,30 +41,30 @@ function GrammarExerciseAttemptHistory() {
     const handleDeleteHistory = async (attemptId) => {
         const result = await Swal.fire({
             icon: "warning",
-            title: t("grammarExercisePage.history.deleteTitle", { defaultValue: "Xóa lịch sử làm bài?" }),
-            text: t("grammarExercisePage.history.deleteText", { defaultValue: "Lịch sử này sẽ bị xóa khỏi tài khoản của bạn." }),
+            title: "Xóa lịch sử làm bài?",
+            text: "Lịch sử này sẽ bị xóa khỏi tài khoản của bạn.",
             showCancelButton: true,
-            confirmButtonText: t("grammarExercisePage.history.deleteConfirm", { defaultValue: "Xóa" }),
-            cancelButtonText: t("grammarExercisePage.sidebar.cancel"),
+            confirmButtonText: "Xóa",
+            cancelButtonText: "Hủy",
             confirmButtonColor: "#dc3545",
             cancelButtonColor: "#6b7280",
         });
         if (!result.isConfirmed) return;
         try {
-            await GrammarExerciseService.deleteGrammarExerciseAttemptHistory(attemptId);
+            await VocabularyExerciseService.deleteVocabularyExerciseAttemptHistory(attemptId);
             setItems(prev => prev.filter(item => item.attemptId !== attemptId));
             Swal.fire({
                 icon: "success",
-                title: t("grammarExercisePage.history.deleteSuccess", { defaultValue: "Đã xóa lịch sử" }),
+                title: "Đã xóa lịch sử",
                 timer: 1200,
                 showConfirmButton: false
             });
         } catch (error) {
-            console.error("Error deleting grammar exercise history:", error);
+            console.error("Error deleting vocabulary exercise history:", error);
             Swal.fire({
                 icon: "error",
-                title: t("grammarExercisePage.detail.errorTitle"),
-                text: error.message || t("grammarExercisePage.detail.errorText")
+                title: "Lỗi",
+                text: error.message || "Có lỗi xảy ra khi xóa lịch sử."
             });
         }
     };
@@ -77,20 +75,20 @@ function GrammarExerciseAttemptHistory() {
         <div className="exercise-history-page">
             <div className="exercise-history-hero">
                 <h1 className="exercise-history-title">
-                    <i className="fas fa-history me-2"></i> {t("grammarExercisePage.history.title")}
+                    <i className="fas fa-history me-2"></i> LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG
                 </h1>
             </div>
 
             <div className="container exercise-history-content">
                 <div className="exercise-history-toolbar">
-                    <button className="exercise-history-back-btn" type="button" onClick={() => navigate("/grammar-exercise")}>
-                        <i className="fas fa-arrow-left"></i> {t("grammarExercisePage.carousel.back")}
+                    <button className="exercise-history-back-btn" type="button" onClick={() => navigate("/vocabulary-exercise")}>
+                        <i className="fas fa-arrow-left"></i> Quay lại
                     </button>
                 </div>
 
                 {items.length === 0 ? (
                     <div className="exercise-history-empty">
-                        <p>{t("grammarExercisePage.history.empty")}</p>
+                        <p>Chưa có lịch sử làm bài nào.</p>
                     </div>
                 ) : (
                     <div className="exercise-history-list">
@@ -98,20 +96,18 @@ function GrammarExerciseAttemptHistory() {
                             <div className="exercise-history-card" key={item.attemptId}>
                                 <div className="exercise-history-card-main">
                                     <div className="exercise-history-card-icon">
-                                        <i className="fas fa-pen"></i>
+                                        <i className="fas fa-spell-check"></i>
                                     </div>
                                     <div className="exercise-history-card-info">
                                         <div className="exercise-history-card-top">
                                             <span className={`exercise-history-status ${item.status === "completed" ? "completed" : "in-progress"}`}>
-                                                {item.status === "completed"
-                                                    ? t("grammarExercisePage.history.completed", { defaultValue: "Đã hoàn thành" })
-                                                    : t("grammarExercisePage.history.inProgress", { defaultValue: "Chưa hoàn thành" })}
+                                                {item.status === "completed" ? "Đã hoàn thành" : "Chưa hoàn thành"}
                                             </span>
                                             <span className="exercise-history-date">{formatDateTime(item.completedAt || item.startedAt)}</span>
                                         </div>
                                         <h3 className="exercise-history-card-title">{item.title}</h3>
                                         <div className="exercise-history-meta">
-                                            <span><i className="fas fa-check-circle"></i> {item.correctCount}/{item.totalQuestions} {t("grammarExercisePage.history.correct").toLowerCase()}</span>
+                                            <span><i className="fas fa-check-circle"></i> {item.correctCount}/{item.totalQuestions} câu đúng</span>
                                             <span><i className="fas fa-list-ol"></i> {item.answeredCount}/{item.totalQuestions}</span>
                                         </div>
                                     </div>
@@ -122,16 +118,16 @@ function GrammarExerciseAttemptHistory() {
                                         className="exercise-history-delete-btn"
                                         type="button"
                                         onClick={() => handleDeleteHistory(item.attemptId)}
-                                        title={t("grammarExercisePage.history.deleteConfirm", { defaultValue: "Xóa" })}
+                                        title="Xóa"
                                     >
                                         <i className="fas fa-trash"></i>
                                     </button>
                                     <button
                                         className="exercise-history-detail-btn"
                                         type="button"
-                                        onClick={() => navigate(`/grammar-exercise/history/${item.attemptId}`)}
+                                        onClick={() => navigate(`/vocabulary-exercise/history/${item.attemptId}`)}
                                     >
-                                        <i className="fas fa-eye"></i> {t("grammarExercisePage.history.viewDetail", { defaultValue: "Xem chi tiết" })}
+                                        <i className="fas fa-eye"></i> Xem chi tiết
                                     </button>
                                 </div>
                             </div>
@@ -155,4 +151,4 @@ function GrammarExerciseAttemptHistory() {
     );
 }
 
-export default GrammarExerciseAttemptHistory;
+export default VocabularyExerciseAttemptHistory;

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { isAnswerCorrect } from '@/utils/englishTextNormalizer'
 import Swal from "sweetalert2";
 
 const VocabularyExerciseCarousel = ({
     questions,
     currentQuestionIndex,
+    onCheckAnswer,
     onAnswerSubmit,
     onQuestionNavigation,
     onSpeakText,
@@ -18,6 +18,7 @@ const VocabularyExerciseCarousel = ({
     const [hoveredWord, setHoveredWord] = useState(null);
     const [translation, setTranslation] = useState('');
     const [translationLoading, setTranslationLoading] = useState(false);
+    const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
 
     const shuffleArray = useCallback((array) => {
         const arr = [...array];
@@ -42,7 +43,7 @@ const VocabularyExerciseCarousel = ({
 
     const isEnglishQuestion = (text) => {
         if (!text) return false;
-        const cleanText = text.replace(/[0-9\s.,?!()_\-]/g, '');
+        const cleanText = text.replace(/[0-9\s.,?!()_-]/g, '');
         const vietnameseRegex = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
         if (vietnameseRegex.test(cleanText)) return false;
         const englishRegex = /[a-z]/i;
@@ -97,7 +98,7 @@ const VocabularyExerciseCarousel = ({
         }
     }, [answeredQuestions, onAnsweredQuestionsChange]);
 
-    const handleSubmitAnswer = useCallback(() => {
+    const handleSubmitAnswer = useCallback(async () => {
         const userAnswer = userAnswers[currentQuestionIndex];
         if (!userAnswer || userAnswer.toString().trim() == '') {
             Swal.fire({
@@ -108,11 +109,22 @@ const VocabularyExerciseCarousel = ({
             return;
         }
         const rawUserAnswer = userAnswer.toString().trim();
-        const correctAnswer = currentQuestion.correctAnswer?.trim() || "";
-        const isCorrect = isAnswerCorrect(rawUserAnswer, correctAnswer);
-        onAnswerSubmit(currentQuestionIndex, rawUserAnswer, isCorrect);
-        setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
-    }, [currentQuestionIndex, userAnswers, currentQuestion, onAnswerSubmit]);
+        try {
+            setIsCheckingAnswer(true);
+            const result = await onCheckAnswer(currentQuestionIndex, rawUserAnswer);
+            onAnswerSubmit(currentQuestionIndex, result);
+            setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
+        } catch (error) {
+            console.error("Error checking vocabulary exercise answer:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: error.message || "Có lỗi xảy ra khi kiểm tra đáp án."
+            });
+        } finally {
+            setIsCheckingAnswer(false);
+        }
+    }, [currentQuestionIndex, userAnswers, onCheckAnswer, onAnswerSubmit]);
 
     const handleNextQuestion = useCallback(() => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -147,7 +159,7 @@ const VocabularyExerciseCarousel = ({
             selected: savedSelected,
             available: words.filter(w => !savedSelected.includes(w))
         };
-        const correctWords = currentQuestion.correctAnswer.trim().split(" ");
+        const correctWords = questionResult?.correctAnswer ? questionResult.correctAnswer.trim().split(" ") : [];
         const isWordCorrectAtPosition = (word, index) => {
             if (index >= correctWords.length) return false;
             return word.toLowerCase() === correctWords[index].toLowerCase().replace(/[.,?!]/g, '');
@@ -330,8 +342,9 @@ const VocabularyExerciseCarousel = ({
                             type="button"
                             className="exercise-submit-answer mt-4 mb-4"
                             onClick={handleSubmitAnswer}
+                            disabled={isCheckingAnswer}
                         >
-                            <i className="fas fa-check me-2"></i> Kiểm tra
+                            <i className="fas fa-check me-2"></i> {isCheckingAnswer ? "Đang kiểm tra..." : "Kiểm tra"}
                         </button>
                     )}
                 </div>

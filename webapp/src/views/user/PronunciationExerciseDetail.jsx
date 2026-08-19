@@ -23,22 +23,19 @@ const PronunciationExerciseDetail = () => {
     const [showHistory, setShowHistory] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [exerciseTitle, setExerciseTitle] = useState("");
+    const [attemptId, setAttemptId] = useState(null);
+    const [isStartingAttempt, setIsStartingAttempt] = useState(false);
+    const [isFinishingAttempt, setIsFinishingAttempt] = useState(false);
     const allowNavigationRef = React.useRef(false);
     const [exerciseCompleted, setExerciseCompleted] = useState(false);
-    const [timer, setTimer] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [hasStarted, setHasStarted] = useState(false);
     const [activeTime, setActiveTime] = useState(0);
     const lastInteractionRef = useRef(Date.now());
     const intervalRef = useRef(null);
+    const quizTimerRef = useRef(null);
     const hasRecordedRef = useRef(false);
-
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
+    const hasFinishedAttemptRef = useRef(false);
 
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
@@ -53,6 +50,44 @@ const PronunciationExerciseDetail = () => {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
+
+    const handleSubmitQuiz = useCallback(async () => {
+        if (quizTimerRef.current) {
+            clearInterval(quizTimerRef.current);
+            quizTimerRef.current = null;
+        }
+        if (attemptId && !hasFinishedAttemptRef.current) {
+            try {
+                setIsFinishingAttempt(true);
+                const summary = await PronunciationExerciseService.finishPronunciationExerciseAttempt(attemptId);
+                if (typeof summary.correctCount === "number") {
+                    setCorrectAnswers(summary.correctCount);
+                } else if (typeof summary.correctAnswers === "number") {
+                    setCorrectAnswers(summary.correctAnswers);
+                }
+                hasFinishedAttemptRef.current = true;
+            } catch (error) {
+                console.error("Error finishing pronunciation exercise attempt:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: "Lỗi",
+                    text: error.message || "Có lỗi xảy ra khi nộp bài."
+                });
+                return;
+            } finally {
+                setIsFinishingAttempt(false);
+            }
+        }
+        setIsCompleted(true);
+        setShowResult(true);
+    }, [attemptId]);
 
     useEffect(() => {
         const events = [
@@ -129,13 +164,13 @@ const PronunciationExerciseDetail = () => {
                 if (data && data.questions && data.questions.length > 0) {
                     setExerciseId(data._id);
                     setQuestions(data.questions);
-                    setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
+                    setExerciseTitle(data.title || "Bài luyện tập phát âm");
                     const initialResults = data.questions.map(question => ({
                         question: question.question,
                         userAnswer: "Chưa trả lời",
-                        correctAnswer: question.correctAnswer,
+                        correctAnswer: null,
                         isCorrect: false,
-                        explanation: question.explanation,
+                        explanation: null,
                         questionType: question.type
                     }));
                     setQuestionResults(initialResults);
@@ -159,20 +194,24 @@ const PronunciationExerciseDetail = () => {
                 setTimeRemaining(prev => {
                     if (prev <= 1) {
                         clearInterval(timerInterval);
+                        quizTimerRef.current = null;
                         handleSubmitQuiz();
                         return 0;
                     }
                     return prev - 1;
                 });
             }, 1000);
-            setTimer(timerInterval);
+            quizTimerRef.current = timerInterval;
             return () => {
                 if (timerInterval) {
                     clearInterval(timerInterval);
+                    if (quizTimerRef.current === timerInterval) {
+                        quizTimerRef.current = null;
+                    }
                 }
             };
         }
-    }, [isCompleted, hasStarted, questions]);
+    }, [isCompleted, hasStarted, questions, handleSubmitQuiz]);
 
     const formatTime = (seconds) => {
         const minutes = Math.floor(seconds / 60);
@@ -180,18 +219,70 @@ const PronunciationExerciseDetail = () => {
         return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
     };
 
-    const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect, accuracy = null) => {
+    const handleStartExercise = async () => {
+        if (!exerciseId) return;
+        try {
+            setIsStartingAttempt(true);
+            const attempt = await PronunciationExerciseService.startPronunciationExerciseAttempt(exerciseId);
+            setAttemptId(attempt.attemptId);
+            if (Array.isArray(attempt.questions) && attempt.questions.length > 0) {
+                setQuestions(attempt.questions);
+                setQuestionResults(attempt.questions.map(question => ({
+                    question: question.question,
+                    userAnswer: "Chưa trả lời",
+                    correctAnswer: null,
+                    isCorrect: false,
+                    explanation: null,
+                    questionType: question.type
+                })));
+                setCurrentQuestionIndex(0);
+            }
+            setTimeRemaining(selectedDuration);
+            setHasStarted(true);
+        } catch (error) {
+            console.error("Error starting pronunciation exercise attempt:", error);
+            Swal.fire({
+                icon: "error",
+                title: "Lỗi",
+                text: error.message || "Có lỗi xảy ra khi bắt đầu bài luyện tập."
+            });
+        } finally {
+            setIsStartingAttempt(false);
+        }
+    };
+
+    const handleCheckAnswer = useCallback(async (questionIndex, userAnswer) => {
+        if (!attemptId) {
+            throw new Error("Attempt has not been started.");
+        }
+        return await PronunciationExerciseService.checkPronunciationExerciseQuestion(attemptId, questionIndex, userAnswer);
+    }, [attemptId]);
+
+    const handleAnalyzePronunciation = useCallback(async (questionIndex, audioBlob) => {
+        if (!attemptId) {
+            throw new Error("Attempt has not been started.");
+        }
+        return await PronunciationExerciseService.analyzePronunciationAttemptQuestion(attemptId, questionIndex, audioBlob);
+    }, [attemptId]);
+
+    const handleAnswerSubmit = useCallback((questionIndex, result) => {
         setQuestionResults(prev => {
             const newResults = [...prev];
             newResults[questionIndex] = {
                 ...newResults[questionIndex],
-                userAnswer: userAnswer || "Không trả lời",
-                isCorrect,
-                ...(accuracy != null ? { accuracy } : {})
+                userAnswer: result.userAnswer || result.transcription || "Không trả lời",
+                transcription: result.transcription || "",
+                correctAnswer: result.correctAnswer,
+                isCorrect: result.isCorrect,
+                explanation: result.explanation,
+                accuracy: result.accuracy ?? null,
+                detailedResult: result.detailedResult || []
             };
             return newResults;
         });
-        if (isCorrect) {
+        if (typeof result.correctCount === "number") {
+            setCorrectAnswers(result.correctCount);
+        } else if (result.isCorrect) {
             setCorrectAnswers(prev => prev + 1);
         }
     }, []);
@@ -200,14 +291,6 @@ const PronunciationExerciseDetail = () => {
         setCurrentQuestionIndex(index);
     }, []);
 
-    const handleSubmitQuiz = useCallback(() => {
-        if (timer) {
-            clearInterval(timer);
-        }
-        setIsCompleted(true);
-        setShowResult(true);
-    }, [timer]);
-
     const handleShowHistory = useCallback(() => {
         setShowHistory(true);
     }, []);
@@ -215,25 +298,6 @@ const PronunciationExerciseDetail = () => {
     const handleCloseHistory = useCallback(() => {
         setShowHistory(false);
     }, []);
-
-    const handleRestart = useCallback(() => {
-        setTimeRemaining(selectedDuration);
-        setCorrectAnswers(0);
-        setCurrentQuestionIndex(0);
-        setIsCompleted(false);
-        setShowHistory(false);
-        setShowResult(false);
-        setHasStarted(false);
-        const resetResults = questions.map(question => ({
-            question: question.question,
-            userAnswer: "Chưa trả lời",
-            correctAnswer: question.correctAnswer,
-            isCorrect: false,
-            explanation: question.explanation,
-            questionType: question.type
-        }));
-        setQuestionResults(resetResults);
-    }, [questions, selectedDuration]);
 
     const speakText = useCallback((text) => {
         if ('speechSynthesis' in window) {
@@ -314,12 +378,10 @@ const PronunciationExerciseDetail = () => {
                     </div>
                     <button
                         className="btn_1 mt-4"
-                        onClick={() => {
-                            setTimeRemaining(selectedDuration);
-                            setHasStarted(true);
-                        }}
+                        onClick={handleStartExercise}
+                        disabled={isStartingAttempt}
                     >
-                        <i className="fas fa-play"></i> Bắt đầu
+                        <i className="fas fa-play"></i> {isStartingAttempt ? "Đang tải..." : "Bắt đầu"}
                     </button>
                 </div>
             </div>
@@ -339,8 +401,11 @@ const PronunciationExerciseDetail = () => {
                             />
                         ) : (
                             <PronunciationExerciseCarousel
+                                exerciseId={exerciseId}
                                 questions={questions}
                                 currentQuestionIndex={currentQuestionIndex}
+                                onCheckAnswer={handleCheckAnswer}
+                                onAnalyzePronunciation={handleAnalyzePronunciation}
                                 onAnswerSubmit={handleAnswerSubmit}
                                 onQuestionNavigation={handleQuestionNavigation}
                                 onSpeakText={speakText}
@@ -363,6 +428,7 @@ const PronunciationExerciseDetail = () => {
                         onQuestionNavigation={handleQuestionNavigation}
                         onShowHistory={handleShowHistory}
                         selectedDuration={selectedDuration}
+                        isSubmitting={isFinishingAttempt}
                     />
                 </div>
             </div>

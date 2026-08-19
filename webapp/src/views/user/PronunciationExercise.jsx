@@ -8,7 +8,7 @@ function PronunciationExercise() {
     const [allPronunciationExercises, setAllPronunciationExercises] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [unlockedPronunciationExercises, setUnlockedPronunciationExercises] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
     const navigate = useNavigate();
 
@@ -18,26 +18,13 @@ function PronunciationExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await PronunciationExerciseService.fetchPronunciationExercise(1, 10000);
-                const all = allResp.data || [];
-                setAllPronunciationExercises(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await PronunciationExerciseService.getPronunciationExerciseDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedPronunciationExercises) ? userProg.unlockedPronunciationExercises.map(s => s.toString()) : [];
-                        setUnlockedPronunciationExercises(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedPronunciationExercises([]);
-                    }
-                } else {
-                    setUnlockedPronunciationExercises([]);
-                }
+                const roadmap = await PronunciationExerciseService.fetchPronunciationExerciseRoadmap();
+                setAllPronunciationExercises(roadmap.items || []);
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: 0, percent: 0 });
             } catch (err) {
                 console.error("Error fetching pronunciation exercises:", err);
                 setAllPronunciationExercises([]);
-                setUnlockedPronunciationExercises([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
@@ -45,14 +32,8 @@ function PronunciationExercise() {
         fetchData();
     }, [navigate]);
 
-    const isPronunciationExerciseUnlocked = (pronunciationExerciseId) => {
-        return unlockedPronunciationExercises.includes(pronunciationExerciseId.toString());
-    };
-
     const findCurrentPronunciationExerciseIndex = () => {
-        if (unlockedPronunciationExercises.length === 0) return -1;
-        const lastUnlockedId = unlockedPronunciationExercises[unlockedPronunciationExercises.length - 1];
-        return allPronunciationExercises.findIndex(item => item._id.toString() === lastUnlockedId);
+        return allPronunciationExercises.findIndex(item => item.isCurrent);
     };
 
     const scrollToCurrentLesson = () => {
@@ -78,14 +59,17 @@ function PronunciationExercise() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {unlockedPronunciationExercises.length} / {allPronunciationExercises.length}
+                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {roadmapProgress.unlockedCount} / {roadmapProgress.totalCount || allPronunciationExercises.length}
                         </p>
+                        <button className="btn_2 mb-4" type="button" onClick={() => navigate("/pronunciation-exercise/history")}>
+                            <i className="fas fa-history"></i> LỊCH SỬ LÀM BÀI LUYỆN TẬP PHÁT ÂM
+                        </button>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allPronunciationExercises.length > 0 ? (unlockedPronunciationExercises.length / allPronunciationExercises.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent || 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {allPronunciationExercises.length > 0 ? Math.round((unlockedPronunciationExercises.length / allPronunciationExercises.length) * 100) : 0}% hoàn thành
+                                {roadmapProgress.percent || 0}% hoàn thành
                             </span>
                         </div>
                     </div>
@@ -93,7 +77,7 @@ function PronunciationExercise() {
                 <div className="container">
                     <div className="user-road-timeline">
                         {allPronunciationExercises.map((item, index) => {
-                            const isUnlocked = isPronunciationExerciseUnlocked(item._id);
+                            const isUnlocked = Boolean(item.isUnlocked);
                             const currentIndex = findCurrentPronunciationExerciseIndex();
                             const isCurrent = index === currentIndex;
                             return (

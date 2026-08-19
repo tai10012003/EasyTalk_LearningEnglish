@@ -9,6 +9,7 @@ function VocabularyExercise() {
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [unlockedVocabularyExercises, setUnlockedVocabularyExercises] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
     const navigate = useNavigate();
 
@@ -18,32 +19,22 @@ function VocabularyExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await VocabularyExerciseService.fetchVocabularyExercise(1, 10000);
-                const all = allResp.data || [];
-                setAllVocabularyExercises(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await VocabularyExerciseService.getVocabularyExerciseDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedVocabularyExercises) ? userProg.unlockedVocabularyExercises.map(s => s.toString()) : [];
-                        setUnlockedVocabularyExercises(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedVocabularyExercises([]);
-                    }
-                } else {
-                    setUnlockedVocabularyExercises([]);
-                }
+                const roadmap = await VocabularyExerciseService.fetchVocabularyExerciseRoadmap();
+                const items = roadmap.items || [];
+                setAllVocabularyExercises(items);
+                setUnlockedVocabularyExercises(items.filter(item => item.isUnlocked).map(item => item._id.toString()));
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: items.length, percent: 0 });
             } catch (err) {
                 console.error("Error fetching vocabulary exercises:", err);
                 setAllVocabularyExercises([]);
                 setUnlockedVocabularyExercises([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [navigate]);
+    }, []);
 
     const isVocabularyExerciseUnlocked = (vocabularyExerciseId) => {
         return unlockedVocabularyExercises.includes(vocabularyExerciseId.toString());
@@ -78,14 +69,17 @@ function VocabularyExercise() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {unlockedVocabularyExercises.length} / {allVocabularyExercises.length}
+                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {roadmapProgress.unlockedCount} / {roadmapProgress.totalCount}
                         </p>
+                        <button className="btn_2 mb-4" type="button" onClick={() => navigate("/vocabulary-exercise/history")}>
+                            <i className="fas fa-history"></i> LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG
+                        </button>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allVocabularyExercises.length > 0 ? (unlockedVocabularyExercises.length / allVocabularyExercises.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {allVocabularyExercises.length > 0 ? Math.round((unlockedVocabularyExercises.length / allVocabularyExercises.length) * 100) : 0}% hoàn thành
+                                {roadmapProgress.percent}% hoàn thành
                             </span>
                         </div>
                     </div>
@@ -93,9 +87,9 @@ function VocabularyExercise() {
                 <div className="container">
                     <div className="user-road-timeline">
                         {allVocabularyExercises.map((item, index) => {
-                            const isUnlocked = isVocabularyExerciseUnlocked(item._id);
+                            const isUnlocked = item.isUnlocked ?? isVocabularyExerciseUnlocked(item._id);
                             const currentIndex = findCurrentVocabularyExerciseIndex();
-                            const isCurrent = index === currentIndex;
+                            const isCurrent = item.isCurrent ?? index === currentIndex;
                             return (
                                 <div key={item._id} ref={isCurrent ? currentLessonRef : null} >
                                     <VocabularyExerciseCard item={item} index={index} isUnlocked={isUnlocked} isCurrent={isCurrent} />

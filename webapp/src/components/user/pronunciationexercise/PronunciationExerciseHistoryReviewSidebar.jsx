@@ -1,14 +1,11 @@
 import React from 'react';
-import { useTranslation } from "react-i18next";
 
-const GrammarExerciseHistoryReviewSidebar = ({
+const PronunciationExerciseHistoryReviewSidebar = ({
     questionResults,
     currentQuestionIndex,
     onQuestionNavigation,
     summary
 }) => {
-    const { t } = useTranslation();
-
     const getQuestionButtonColor = (index) => {
         const result = questionResults[index];
         if (!result || !result.userAnswer) {
@@ -25,13 +22,13 @@ const GrammarExerciseHistoryReviewSidebar = ({
             <div className="text-center mb-4">
                 <h4>{Math.round(summary.score || 0)}%</h4>
                 <p className="mb-1">
-                    {summary.correctCount}/{summary.totalQuestions} {t("grammarExercisePage.history.correct").toLowerCase()}
+                    {summary.correctCount}/{summary.totalQuestions} câu đúng
                 </p>
                 <p className={`exercise-history-review-status ${summary.status === "completed" ? "completed" : "in-progress"}`}>
-                    {summary.status === "completed" ? t("grammarExercisePage.history.completed", { defaultValue: "Đã hoàn thành" }) : t("grammarExercisePage.history.inProgress", { defaultValue: "Chưa hoàn thành" })}
+                    {summary.status === "completed" ? "Đã hoàn thành" : "Chưa hoàn thành"}
                 </p>
             </div>
-            <h5 id="exercise-questionListTitle">{t("grammarExercisePage.sidebar.questionList")}</h5>
+            <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>
             <div className="exercise-question-list mt-3" id="exercise-question-list">
                 {questionResults.map((_, index) => (
                     <button
@@ -39,7 +36,7 @@ const GrammarExerciseHistoryReviewSidebar = ({
                         className={`exercise-question-number ${
                             index === currentQuestionIndex ? 'active' : ''
                         }`}
-                        id={`history-question-btn-${index}`}
+                        id={`pronunciation-history-question-btn-${index}`}
                         onClick={() => onQuestionNavigation(index)}
                         style={getQuestionButtonColor(index)}
                     >
@@ -51,4 +48,4 @@ const GrammarExerciseHistoryReviewSidebar = ({
     );
 };
 
-export default GrammarExerciseHistoryReviewSidebar;
+export default PronunciationExerciseHistoryReviewSidebar;

@@ -20,7 +20,7 @@ const PronunciationExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
                     </div>
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">
-                        Số câu hỏi: {item.questions ? item.questions.length : 0}
+                        Số câu hỏi: {item.questionCount ?? (item.questions ? item.questions.length : 0)}
                     </p>
                     <div className="user-card-footer">
                         {isUnlocked && isCurrent ? (

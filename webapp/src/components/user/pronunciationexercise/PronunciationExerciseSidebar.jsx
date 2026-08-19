@@ -11,7 +11,8 @@ const PronunciationExerciseSidebar = ({
         onSubmitQuiz,
         onQuestionNavigation,
         onShowHistory,
-        selectedDuration
+        selectedDuration,
+        isSubmitting = false
     }) => {
         const handleSubmitClick = useCallback(() => {
             Swal.fire({
@@ -62,8 +63,9 @@ const PronunciationExerciseSidebar = ({
                         className="btn_1 mb-4"
                         style ={{ width: '100%' }}
                         onClick={handleSubmitClick}
+                        disabled={isSubmitting}
                     >
-                        <i className="fas fa-paper-plane"></i> Nộp bài
+                        <i className="fas fa-paper-plane"></i> {isSubmitting ? "Đang nộp..." : "Nộp bài"}
                     </button>
                     
                     <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>

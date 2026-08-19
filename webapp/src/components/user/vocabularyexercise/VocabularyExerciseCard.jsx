@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const VocabularyExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
+    const questionCount = item.questionCount ?? (item.questions ? item.questions.length : 0);
     return (
         <div className={`user-timeline-item ${index % 2 === 0 ? 'left' : 'right'} ${isUnlocked ? 'unlocked' : ''} ${isCurrent ? 'current' : ''}`}>
             <div className="user-timeline-card">
@@ -20,7 +21,7 @@ const VocabularyExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
                     </div>
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">
-                        Số câu hỏi: {item.questions ? item.questions.length : 0}
+                        Số câu hỏi: {questionCount}
                     </p>
                     <div className="user-card-footer">
                         {isUnlocked && isCurrent ? (

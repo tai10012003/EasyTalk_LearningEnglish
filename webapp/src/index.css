@@ -5512,12 +5512,12 @@ p {
 /* ===============================================
    GRAMMAR EXERCISE HISTORY
    =============================================== */
-.grammar-history-page {
+.exercise-history-page {
   min-height: 100vh;
   background: #f8f9ff;
 }
 
-.grammar-history-hero {
+.exercise-history-hero {
   min-height: 215px;
   padding: 64px 20px;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -5528,7 +5528,7 @@ p {
   box-shadow: 0 8px 24px rgba(78, 59, 156, 0.18);
 }
 
-.grammar-history-title {
+.exercise-history-title {
   color: #fff;
   font-size: 2rem;
   font-weight: 800;
@@ -5537,24 +5537,24 @@ p {
   text-transform: uppercase;
 }
 
-.grammar-history-help {
+.exercise-history-help {
   margin-left: 12px;
   font-size: 0.9em;
 }
 
-.grammar-history-content {
+.exercise-history-content {
   padding-top: 34px;
   padding-bottom: 64px;
 }
 
-.grammar-history-toolbar {
+.exercise-history-toolbar {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 34px;
 }
 
-.grammar-history-back-btn,
-.grammar-history-detail-btn {
+.exercise-history-back-btn,
+.exercise-history-detail-btn {
   border: none;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: #fff;
@@ -5570,14 +5570,14 @@ p {
   box-shadow: 0 10px 24px rgba(102, 126, 234, 0.24);
 }
 
-.grammar-history-back-btn:hover,
-.grammar-history-detail-btn:hover {
+.exercise-history-back-btn:hover,
+.exercise-history-detail-btn:hover {
   color: #fff;
   transform: translateY(-2px);
   box-shadow: 0 14px 30px rgba(118, 75, 162, 0.28);
 }
 
-.grammar-history-empty {
+.exercise-history-empty {
   min-height: 170px;
   display: flex;
   align-items: center;
@@ -5588,13 +5588,13 @@ p {
   text-align: center;
 }
 
-.grammar-history-list {
+.exercise-history-list {
   display: flex;
   flex-direction: column;
   gap: 18px;
 }
 
-.grammar-history-card {
+.exercise-history-card {
   width: 100%;
   background: #fff;
   border: 1px solid rgba(102, 126, 234, 0.16);
@@ -5608,13 +5608,13 @@ p {
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
-.grammar-history-card:hover {
+.exercise-history-card:hover {
   transform: translateY(-3px);
   border-color: rgba(118, 75, 162, 0.34);
   box-shadow: 0 18px 36px rgba(35, 32, 68, 0.12);
 }
 
-.grammar-history-card-main {
+.exercise-history-card-main {
   display: flex;
   align-items: center;
   gap: 18px;
@@ -5622,7 +5622,7 @@ p {
   flex: 1;
 }
 
-.grammar-history-card-icon {
+.exercise-history-card-icon {
   width: 54px;
   height: 54px;
   border-radius: 16px;
@@ -5635,42 +5635,42 @@ p {
   flex: 0 0 auto;
 }
 
-.grammar-history-card-info {
+.exercise-history-card-info {
   min-width: 0;
   flex: 1;
 }
 
-.grammar-history-card-top,
-.grammar-history-meta {
+.exercise-history-card-top,
+.exercise-history-meta {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 12px;
 }
 
-.grammar-history-status {
+.exercise-history-status {
   border-radius: 999px;
   padding: 5px 12px;
   font-size: 0.82rem;
   font-weight: 700;
 }
 
-.grammar-history-status.completed {
+.exercise-history-status.completed {
   color: #fff;
   background: #15803d;
 }
 
-.grammar-history-status.in-progress {
+.exercise-history-status.in-progress {
   color: #fff;
   background: #dc2626;
 }
 
-.grammar-history-date {
+.exercise-history-date {
   color: #71717a;
   font-size: 0.92rem;
 }
 
-.grammar-history-card-title {
+.exercise-history-card-title {
   margin: 15px 0;
   color: #1f2937;
   font-size: 1.18rem;
@@ -5681,24 +5681,24 @@ p {
   white-space: nowrap;
 }
 
-.grammar-history-meta {
+.exercise-history-meta {
   color: #4b5563;
   font-size: 0.95rem;
 }
 
-.grammar-history-meta i {
+.exercise-history-meta i {
   color: #667eea;
   margin-right: 6px;
 }
 
-.grammar-history-card-actions {
+.exercise-history-card-actions {
   display: flex;
   align-items: center;
   gap: 12px;
   flex: 0 0 auto;
 }
 
-.grammar-history-score {
+.exercise-history-score {
   min-width: 74px;
   height: 54px;
   padding: 0 14px;
@@ -5712,12 +5712,12 @@ p {
   justify-content: center;
 }
 
-.grammar-history-detail-btn {
+.exercise-history-detail-btn {
   min-width: 150px;
   padding-inline: 22px;
 }
 
-.grammar-history-delete-btn {
+.exercise-history-delete-btn {
   width: 48px;
   height: 48px;
   border: none;
@@ -5730,13 +5730,13 @@ p {
   transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
 }
 
-.grammar-history-delete-btn:hover {
+.exercise-history-delete-btn:hover {
   background: #dc2626;
   color: #fff;
   transform: translateY(-2px);
 }
 
-.grammar-history-pagination {
+.exercise-history-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5744,7 +5744,7 @@ p {
   margin-top: 34px;
 }
 
-.grammar-history-pagination button {
+.exercise-history-pagination button {
   width: 42px;
   height: 42px;
   border: none;
@@ -5753,62 +5753,62 @@ p {
   background: #0d6efd;
 }
 
-.grammar-history-pagination button:disabled {
+.exercise-history-pagination button:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
-.grammar-history-pagination span {
+.exercise-history-pagination span {
   font-weight: 700;
   color: #374151;
 }
 
 @media (max-width: 768px) {
-  .grammar-history-hero {
+  .exercise-history-hero {
     min-height: 170px;
     padding: 42px 16px;
   }
 
-  .grammar-history-title {
+  .exercise-history-title {
     font-size: 1.45rem;
   }
 
-  .grammar-history-content {
+  .exercise-history-content {
     padding-top: 24px;
   }
 
-  .grammar-history-card {
+  .exercise-history-card {
     align-items: flex-start;
     flex-direction: column;
     padding: 18px;
   }
 
-  .grammar-history-card-main {
+  .exercise-history-card-main {
     width: 100%;
   }
 
-  .grammar-history-card-actions {
+  .exercise-history-card-actions {
     width: 100%;
     justify-content: space-between;
   }
 
-  .grammar-history-detail-btn {
+  .exercise-history-detail-btn {
     flex: 1;
   }
 }
 
-.grammar-history-detail-page {
+.exercise-history-detail-page {
   min-height: 100vh;
   background: #f8f9ff;
 }
 
-.grammar-history-detail-hero {
+.exercise-history-detail-hero {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   padding: 42px 0;
   box-shadow: 0 8px 24px rgba(78, 59, 156, 0.16);
 }
 
-.grammar-history-detail-hero-inner {
+.exercise-history-detail-hero-inner {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5817,7 +5817,7 @@ p {
   text-align: center;
 }
 
-.grammar-history-detail-eyebrow {
+.exercise-history-detail-eyebrow {
   color: rgba(255, 255, 255, 0.88);
   display: inline-flex;
   align-items: center;
@@ -5827,7 +5827,7 @@ p {
   margin-bottom: 10px;
 }
 
-.grammar-history-detail-title {
+.exercise-history-detail-title {
   color: #fff;
   font-size: 1.85rem;
   font-weight: 800;
@@ -5835,7 +5835,7 @@ p {
   margin: 0 0 12px;
 }
 
-.grammar-history-detail-stats {
+.exercise-history-detail-stats {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5843,7 +5843,7 @@ p {
   gap: 12px;
 }
 
-.grammar-history-detail-stats span {
+.exercise-history-detail-stats span {
   color: #fff;
   background: rgba(255, 255, 255, 0.16);
   border: 1px solid rgba(255, 255, 255, 0.22);
@@ -5852,11 +5852,11 @@ p {
   font-weight: 700;
 }
 
-.grammar-history-detail-stats i {
+.exercise-history-detail-stats i {
   margin-right: 6px;
 }
 
-.grammar-history-detail-back {
+.exercise-history-detail-back {
   border: 1px solid rgba(255, 255, 255, 0.55);
   background: rgba(255, 255, 255, 0.14);
   color: #fff;
@@ -5871,41 +5871,41 @@ p {
   transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.grammar-history-detail-back:hover {
+.exercise-history-detail-back:hover {
   color: #fff;
   background: rgba(255, 255, 255, 0.22);
   transform: translateY(-2px);
 }
 
-.grammar-history-detail-content {
+.exercise-history-detail-content {
   padding-top: 36px;
   padding-bottom: 64px;
 }
 
-.grammar-history-detail-grid {
+.exercise-history-detail-grid {
   align-items: flex-start;
 }
 
-.grammar-history-detail-page .exercise-question-title {
+.exercise-history-detail-page .exercise-question-title {
   color: #4f46a5;
   font-size: 1.05rem;
   font-weight: 800;
   margin-bottom: 18px;
 }
 
-.grammar-history-detail-page .exercise-question-text {
+.exercise-history-detail-page .exercise-question-text {
   color: #111827;
   font-size: 1.08rem;
   line-height: 1.65;
 }
 
-.grammar-history-detail-page .exercise-sidebar h4 {
+.exercise-history-detail-page .exercise-sidebar h4 {
   color: #4f46a5;
   font-size: 1.65rem;
   font-weight: 800;
 }
 
-.grammar-history-review-status {
+.exercise-history-review-status {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5916,34 +5916,34 @@ p {
   margin: 8px 0 0;
 }
 
-.grammar-history-review-status.completed {
+.exercise-history-review-status.completed {
   background: #15803d;
 }
 
-.grammar-history-review-status.in-progress {
+.exercise-history-review-status.in-progress {
   background: #dc2626;
 }
 
-.grammar-history-detail-page .exercise-question-number.active {
+.exercise-history-detail-page .exercise-question-number.active {
   background: #667eea !important;
   color: #fff !important;
   border-color: #667eea !important;
 }
 
 @media (max-width: 768px) {
-  .grammar-history-detail-hero {
+  .exercise-history-detail-hero {
     padding: 32px 0;
   }
 
-  .grammar-history-detail-hero-inner {
+  .exercise-history-detail-hero-inner {
     flex-direction: column;
   }
 
-  .grammar-history-detail-title {
+  .exercise-history-detail-title {
     font-size: 1.45rem;
   }
 
-  .grammar-history-detail-back {
+  .exercise-history-detail-back {
     width: auto;
   }
 }
