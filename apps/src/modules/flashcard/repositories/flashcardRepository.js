@@ -15,6 +15,38 @@ class FlashcardRepository {
         const skip = (page - 1) * limit;
         const pipeline = buildFlashcardListQuery();
         pipeline.unshift({ $match: filter });
+        pipeline.push({
+            $lookup: {
+                from: "flashcards",
+                localField: "_id",
+                foreignField: "flashcardList",
+                as: "flashcardStats"
+            }
+        });
+        pipeline.push({
+            $addFields: {
+                wordCount: { $size: "$flashcardStats" },
+                remembered: {
+                    $size: {
+                        $filter: {
+                            input: "$flashcardStats",
+                            as: "card",
+                            cond: { $eq: [{ $ifNull: ["$$card.difficulty", 2] }, 1] }
+                        }
+                    }
+                },
+                toReview: {
+                    $size: {
+                        $filter: {
+                            input: "$flashcardStats",
+                            as: "card",
+                            cond: { $in: [{ $ifNull: ["$$card.difficulty", 2] }, [2, 3]] }
+                        }
+                    }
+                }
+            }
+        });
+        pipeline.push({ $project: { flashcardStats: 0 } });
         pipeline.push({ $skip: skip });
         pipeline.push({ $limit: limit });
         const flashcardLists = await this.flashcardListsCollection.aggregate(pipeline).toArray();
@@ -37,6 +69,39 @@ class FlashcardRepository {
         const cardsPipeline = buildFlashcardByListQuery(id);
         const flashcards = await this.flashcardsCollection.aggregate(cardsPipeline).toArray();
         return { flashcardList, flashcards };
+    }
+
+    async findFlashcardListPageById(id, page = 1, limit = 12) {
+        const listPipeline = buildFlashcardListByIdQuery(id);
+        const flashcardList = await this.flashcardListsCollection.aggregate(listPipeline).next();
+        if(!flashcardList) {
+            return { flashcardList: null, flashcards: [], totalFlashcards: 0 };
+        }
+        const skip = (page - 1) * limit;
+        const listObjectId = new ObjectId(id);
+        const [flashcards, totalFlashcards] = await Promise.all([
+            this.flashcardsCollection.aggregate([
+                { $match: { flashcardList: listObjectId } },
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "user",
+                        foreignField: "_id",
+                        as: "userObj"
+                    }
+                },
+                {
+                    $addFields: {
+                        username: { $arrayElemAt: ["$userObj.username", 0] }
+                    }
+                },
+                { $project: { userObj: 0 } },
+                { $skip: skip },
+                { $limit: limit }
+            ]).toArray(),
+            this.flashcardsCollection.countDocuments({ flashcardList: listObjectId })
+        ]);
+        return { flashcardList, flashcards, totalFlashcards };
     }
 
     async findFlashcardListByIdOnly(id) {

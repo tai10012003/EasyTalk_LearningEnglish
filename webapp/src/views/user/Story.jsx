@@ -10,7 +10,7 @@ function Story() {
     const [allStories, setAllStories] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [unlockedStories, setUnlockedStories] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
     const navigate = useNavigate();
 
@@ -20,26 +20,13 @@ function Story() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await StoryService.fetchStories(1, 10000);
-                const all = allResp.data || [];
-                setAllStories(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await StoryService.getStoryDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedStories) ? userProg.unlockedStories.map(s => s.toString()) : [];
-                        setUnlockedStories(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedStories([]);
-                    }
-                } else {
-                    setUnlockedStories([]);
-                }
+                const roadmap = await StoryService.fetchStoryRoadmap();
+                setAllStories(roadmap.items || []);
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: 0, percent: 0 });
             } catch (err) {
                 console.error("Error fetching stories:", err);
                 setAllStories([]);
-                setUnlockedStories([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
@@ -47,14 +34,8 @@ function Story() {
         fetchData();
     }, [navigate, t]);
 
-    const isStoryUnlocked = (storyId) => {
-        return unlockedStories.includes(storyId.toString());
-    };
-
     const findCurrentStoryIndex = () => {
-        if (unlockedStories.length === 0) return -1;
-        const lastUnlockedId = unlockedStories[unlockedStories.length - 1];
-        return allStories.findIndex(item => item._id.toString() === lastUnlockedId);
+        return allStories.findIndex(item => item.isCurrent);
     };
 
     const scrollToCurrentLesson = () => {
@@ -80,14 +61,14 @@ function Story() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            {t("storyPage.list.subtitle", { unlocked: unlockedStories.length, total: allStories.length })}
+                            {t("storyPage.list.subtitle", { unlocked: roadmapProgress.unlockedCount, total: roadmapProgress.totalCount || allStories.length })}
                         </p>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allStories.length > 0 ? (unlockedStories.length / allStories.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent || 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {t("storyPage.list.completePercent", { percent: allStories.length > 0 ? Math.round((unlockedStories.length / allStories.length) * 100) : 0 })}
+                                {t("storyPage.list.completePercent", { percent: roadmapProgress.percent || 0 })}
                             </span>
                         </div>
                     </div>
@@ -95,7 +76,7 @@ function Story() {
                 <div className="container">
                     <div className="user-road-timeline">
                         {allStories.map((item, index) => {
-                            const isUnlocked = isStoryUnlocked(item._id);
+                            const isUnlocked = Boolean(item.isUnlocked);
                             const currentIndex = findCurrentStoryIndex();
                             const isCurrent = index === currentIndex;
                             return (

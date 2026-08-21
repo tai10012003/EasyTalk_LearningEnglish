@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import PronunciationCard from "@/components/user/pronunciation/PronunciationCard.jsx";
-import { useNavigate } from "react-router-dom";
 import { PronunciationService } from "@/services/PronunciationService.jsx";
 import { Trans, useTranslation } from "react-i18next";
 
@@ -10,9 +9,8 @@ function Pronunciation() {
     const [allPronunciations, setAllPronunciations] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [unlockedPronunciations, setUnlockedPronunciations] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
-    const navigate = useNavigate();
 
     const levels = useMemo(() => [
         { key: "A1", name: t("pronunciationPage.list.levels.A1"), color: "#4CAF50" },
@@ -54,42 +52,23 @@ function Pronunciation() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await PronunciationService.fetchPronunciations(1, 10000);
-                const all = allResp.data.pronunciations || [];
-                setAllPronunciations(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await PronunciationService.getPronunciationDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedPronunciations) ? userProg.unlockedPronunciations.map(s => s.toString()) : [];
-                        setUnlockedPronunciations(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedPronunciations([]);
-                    }
-                } else {
-                    setUnlockedPronunciations([]);
-                }
+                const roadmap = await PronunciationService.fetchPronunciationRoadmap();
+                setAllPronunciations(roadmap.items || []);
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: 0, percent: 0 });
             } catch (err) {
                 console.error("Error fetching pronunciations:", err);
                 setAllPronunciations([]);
-                setUnlockedPronunciations([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [navigate, t]);
-
-    const isPronunciationUnlocked = (pronunciationId) => {
-        return unlockedPronunciations.includes(pronunciationId.toString());
-    };
+    }, [t]);
 
     const currentIndex = useMemo(() => {
-        if (unlockedPronunciations.length === 0 || allPronunciations.length === 0) return -1;
-        const lastUnlockedId = unlockedPronunciations[unlockedPronunciations.length - 1];
-        return allPronunciations.findIndex(item => item._id.toString() === lastUnlockedId);
-    }, [unlockedPronunciations, allPronunciations]);
+        return allPronunciations.findIndex(item => item.isCurrent);
+    }, [allPronunciations]);
 
     const scrollToCurrentLesson = () => {
         if (currentLessonRef.current) {
@@ -114,14 +93,14 @@ function Pronunciation() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            {t("pronunciationPage.list.subtitle", { unlocked: unlockedPronunciations.length, total: allPronunciations.length })}
+                            {t("pronunciationPage.list.subtitle", { unlocked: roadmapProgress.unlockedCount, total: roadmapProgress.totalCount || allPronunciations.length })}
                         </p>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allPronunciations.length > 0 ? (unlockedPronunciations.length / allPronunciations.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent || 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {t("pronunciationPage.list.completePercent", { percent: allPronunciations.length > 0 ? Math.round((unlockedPronunciations.length / allPronunciations.length) * 100) : 0 })}
+                                {t("pronunciationPage.list.completePercent", { percent: roadmapProgress.percent || 0 })}
                             </span>
                         </div>
                     </div>
@@ -145,7 +124,7 @@ function Pronunciation() {
                                                 </div>
                                                 <div className="user-module-cards">
                                                     {items.map((item) => {
-                                                        const isUnlocked = isPronunciationUnlocked(item._id);
+                                                        const isUnlocked = Boolean(item.isUnlocked);
                                                         const isCurrent = item.originalIndex === currentIndex;
                                                         return (
                                                             <div key={item._id} ref={isCurrent ? currentLessonRef : null}

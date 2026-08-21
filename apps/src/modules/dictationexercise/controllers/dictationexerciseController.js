@@ -21,17 +21,19 @@ router.get("/api/dictation-exercises", verifyToken, asyncHandler(async (req, res
         });
 }));
 
+router.get("/api/dictation-exercises/roadmap", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await dictationexerciseService.getDictationExerciseRoadmap(req.user.id);
+        return res.status(status).json(data);
+}));
+
 router.get("/api/dictationexercise/:id", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await dictationexerciseService.getDictationExerciseDetails(req.user.id, req.params.id);
         return res.status(status).json(data);
 }));
 
 router.get("/api/dictationexercise/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const dictationExercise = await dictationexerciseService.getDictationBySlug(req.params.slug);
-        if (!dictationExercise) {
-            return res.status(404).json({ success: false, message: "Dictation exercise not found" });
-        }
-        res.json({ success: true, data: dictationExercise });
+        const { status, data } = await dictationexerciseService.getDictationExerciseDetailsBySlug(req.user.id, req.params.slug);
+        return res.status(status).json(data);
 }));
 
 router.post("/api/dictation-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {

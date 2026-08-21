@@ -20,6 +20,12 @@ router.get("/api/grammar-list", verifyToken, asyncHandler(async function (req, r
     res.json({ grammars, currentPage: page, totalPages });
 }));
 
+router.get("/api/grammar/roadmap", verifyToken, asyncHandler(async function (req, res) {
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await grammarService.getGrammarRoadmap(req.user.id, lang);
+        return res.status(status).json(data);
+}));
+
 router.get("/api/grammar/:id", verifyToken, asyncHandler(async function (req, res) {
         const lang = req.query.lang === "en" ? "en" : "vi";
         const { status, data } = await grammarService.getGrammarDetails(req.user.id, req.params.id, lang);
@@ -28,11 +34,8 @@ router.get("/api/grammar/:id", verifyToken, asyncHandler(async function (req, re
 
 router.get("/api/grammar/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
         const lang = req.query.lang === "en" ? "en" : "vi";
-        const grammar = await grammarService.getLocalizedGrammarBySlug(req.params.slug, lang);
-        if (!grammar) {
-            return res.status(404).json({ message: "Grammar not found" });
-        }
-        res.json({ grammar });
+        const { status, data } = await grammarService.getGrammarDetailsBySlug(req.user.id, req.params.slug, lang);
+        return res.status(status).json(data);
 }));
 
 router.post("/api/grammar/complete/:id", verifyToken, asyncHandler(async (req, res) => {

@@ -158,12 +158,13 @@ const FlashCard = () => {
           {t("flashcardPage.detail.languageNotice")}
         </div>
         {flashcards.length >= 3 ? (
-          <a
+          <button
+            type="button"
             className="btn_1 btn-lg btn-block flashcard-detail-review"
-            href={`/flashcards/flashcardlist/${flashcardList._id}/review`}
+            onClick={() => navigate(`/flashcards/flashcardlist/${flashcardList._id}/review`)}
           >
             <i className="fas fa-dumbbell"></i>{t("flashcardPage.detail.review")}
-          </a>
+          </button>
         ) : (
           <div className="alert alert-error text-center mt-3">
             <Trans i18nKey="flashcardPage.detail.minWordsWarning" components={{ strong: <strong /> }} />

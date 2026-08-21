@@ -75,6 +75,14 @@ class StoryService {
             const firstStoryPage = await this.getStoryList(1, 1);
             const firstStory = firstStoryPage?.stories?.[0] || null;
             userProgress = await userProgressService.createUserProgress(userId, null, firstStory?._id || null, null, null);
+        } else if (!Array.isArray(userProgress.unlockedStories) || userProgress.unlockedStories.length === 0) {
+            const firstStoryPage = await this.getStoryList(1, 1);
+            const firstStory = firstStoryPage?.stories?.[0] || null;
+            if (firstStory?._id) {
+                userProgress.unlockedStories = [firstStory._id];
+                await userProgressService.updateUserProgress(userProgress);
+                userProgress = await userProgressService.getUserProgressByUserId(userId);
+            }
         }
         return userProgress;
     }
@@ -92,7 +100,73 @@ class StoryService {
         const localizedStory = lang === "en" && this.englishTranslationService
             ? await this.englishTranslationService.applyTranslationToItem("story", story, lang)
             : story;
-        return { status: 200, data: { success: true, data: localizedStory, userProgress } };
+        return { status: 200, data: { success: true, data: { story: localizedStory } } };
+    }
+
+    async getStoryDetailsBySlug(userId, slug, lang = "vi") {
+        const story = await this.getStoryBySlug(slug);
+        if (!story) {
+            return { status: 404, data: { success: false, message: "Story not found" } };
+        }
+        return await this.getStoryDetails(userId, story._id, lang);
+    }
+
+    _buildRoadmapItem(story, unlockedIds, studyStats) {
+        const id = story._id.toString();
+        const stats = studyStats[id] || {};
+        const content = Array.isArray(story.content) ? story.content : [];
+        return {
+            _id: story._id,
+            title: story.title,
+            description: story.description,
+            image: story.image,
+            level: story.level,
+            category: story.category,
+            slug: story.slug,
+            sort: story.sort,
+            sentenceCount: story.sentenceCount ?? content.length,
+            quizCount: story.quizCount ?? content.filter(sentence => sentence?.quiz).length,
+            isUnlocked: unlockedIds.has(id),
+            isCurrent: false,
+            studyCount: stats.studyCount || 0,
+            firstStudiedAt: stats.firstStudiedAt || null,
+            lastStudiedAt: stats.lastStudiedAt || null
+        };
+    }
+
+    async getStoryRoadmap(userId, lang = "vi") {
+        const filter = { display: true };
+        const result = typeof this.repository.findRoadmapItems === "function"
+            ? await this.repository.findRoadmapItems(filter)
+            : await this.getStoryList(1, 10000, "", "", "", "user", lang);
+        let stories = result.stories || [];
+        const totalStory = result.total ?? result.totalStory ?? stories.length;
+        if (lang === "en" && this.englishTranslationService) {
+            stories = await this.englishTranslationService.applyTranslations("story", stories, lang);
+        }
+        const userProgress = await this._getOrCreateUserProgress(userId);
+        const unlockedIds = new Set((userProgress.unlockedStories || []).map(id => id.toString()));
+        const studyStats = userProgress.storyStudyStats || {};
+        const items = stories.map(story => this._buildRoadmapItem(story, unlockedIds, studyStats));
+        const unlockedCount = items.filter(item => item.isUnlocked).length;
+        const currentIndex = items.map(item => item.isUnlocked).lastIndexOf(true);
+        if (currentIndex >= 0) {
+            items[currentIndex].isCurrent = true;
+        }
+        return {
+            status: 200,
+            data: {
+                success: true,
+                data: {
+                    items,
+                    progress: {
+                        unlockedCount,
+                        totalCount: totalStory,
+                        percent: totalStory > 0 ? Math.round((unlockedCount / totalStory) * 100) : 0
+                    }
+                }
+            }
+        };
     }
 
     async completeStory(userId, storyId) {
@@ -111,12 +185,20 @@ class StoryService {
             unlockNext: userProgressService.unlockNextStory.bind(userProgressService),
             unlockedField: "unlockedStories"
         });
+        await userProgressService.recordStoryStudy(userId, storyId);
+        const latestProgress = await userProgressService.getUserProgressByUserId(userId);
+        const storyStats = latestProgress?.storyStudyStats?.[storyId.toString()] || {};
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextStory ? "Story completed. Next story unlocked." : "Story completed. You have finished all stories.",
-                userProgress: completedProgress
+                userProgress: latestProgress || completedProgress,
+                studyStats: {
+                    studyCount: storyStats.studyCount || 0,
+                    firstStudiedAt: storyStats.firstStudiedAt || null,
+                    lastStudiedAt: storyStats.lastStudiedAt || null
+                }
             }
         };
     }

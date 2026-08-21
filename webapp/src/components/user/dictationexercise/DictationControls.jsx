@@ -85,7 +85,7 @@ function DictationControls({
             return;
         }
         try {
-            let cleanedSentence = sentence.replace(/\?/g, "? ").replace(/\!/g, "! ").replace(/\./g, ". ").replace(/\,/g, ", ").replace(/\;/g, "; ").replace(/\:/g, ": ").replace(/\s+/g, " ").trim();
+            let cleanedSentence = sentence.replace(/\?/g, "? ").replace(/!/g, "! ").replace(/\./g, ". ").replace(/,/g, ", ").replace(/;/g, "; ").replace(/:/g, ": ").replace(/\s+/g, " ").trim();
             if (cleanedSentence.length > 400) {
                 cleanedSentence = cleanedSentence.substring(0, 400) + "...";
             }

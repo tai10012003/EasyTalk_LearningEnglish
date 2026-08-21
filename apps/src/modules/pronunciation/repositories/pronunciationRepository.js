@@ -16,6 +16,29 @@ class PronunciationRepository {
         return { pronunciations, total };
     }
 
+    async findRoadmapItems(filter = {}) {
+        const pipeline = [
+            { $match: filter },
+            { $sort: { sort: 1 } },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    category: 1,
+                    level: 1,
+                    images: 1,
+                    slug: 1,
+                    sort: 1,
+                    display: 1,
+                    quizCount: { $size: { $ifNull: ["$quizzes", []] } }
+                }
+            }
+        ];
+        const pronunciations = await this.collection.aggregate(pipeline).toArray();
+        const total = await this.collection.countDocuments(filter);
+        return { pronunciations, total };
+    }
+
     async findById(id) {
         return await this.collection.findOne({ _id: new ObjectId(id) });
     }

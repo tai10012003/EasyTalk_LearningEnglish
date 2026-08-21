@@ -1,13 +1,30 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 const FlashCardListCard = ({ flashcardLists, isMine }) => {
     const { t } = useTranslation();
+    const navigate = useNavigate();
+
+    const openFlashcardList = () => {
+        navigate(`/flashcards/flashcardlist/${flashcardLists._id}`);
+    };
+
+    const handleKeyDown = (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openFlashcardList();
+        }
+    };
+
     return (
         <div className="col-md-4 col-lg-4 mb-4">
             <div
                 className="lesson-card"
-                onClick={() => window.location.href = `/flashcards/flashcardlist/${flashcardLists._id}`}
+                onClick={openFlashcardList}
+                onKeyDown={handleKeyDown}
+                role="button"
+                tabIndex={0}
             >
                 <h5 className="lesson-title">{flashcardLists.name}</h5>
                 <div className="lesson-content">

@@ -60,6 +60,21 @@ export const StoryService = {
         }
     },
 
+    async fetchStoryRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/story/api/story/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
+    },
+
     async getStoryBySlug(slug) {
         try {
             const langQuery = getCurrentLanguageQuery().replace("&", "?");
@@ -72,7 +87,7 @@ export const StoryService = {
             const responseData = await res.json();
             const data = unwrapResponseData(responseData);
             console.log("Fetch story detail success:", data);
-            return data?.data || data;
+            return data?.story || data?.data || data;
         } catch (error) {
             console.error("Error fetching story detail:", error.message);
             return null;
@@ -104,7 +119,7 @@ export const StoryService = {
         }
         const responseData = await res.json();
         const data = unwrapResponseData(responseData);
-        return data;
+        return data?.story || data;
     },
 
     async completeStory(storyId) {

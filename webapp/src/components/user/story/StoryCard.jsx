@@ -23,6 +23,7 @@ const StoryCard = ({ item, index, isUnlocked, isCurrent }) => {
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">{t("storyPage.card.category", { category: item.category })}</p>
                     <p className="user-card-desc">{t("storyPage.card.level", { level: item.level })}</p>
+                    <p className="user-card-desc">Đã học: {item.studyCount || 0} lần</p>
                     {(item.image || item.images) && (
                         <img src={item.image || item.images} alt={item.title} className="user-card-img" />
                     )}

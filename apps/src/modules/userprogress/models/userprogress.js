@@ -17,6 +17,10 @@ class UserProgress {
         this.unlockedPronunciationExercises = doc.unlockedPronunciationExercises || [];
         this.unlockedVocabularyExercises = doc.unlockedVocabularyExercises || [];
         this.unlockedDictations = doc.unlockedDictations || [];
+        this.grammarStudyStats = doc.grammarStudyStats || {};
+        this.pronunciationStudyStats = doc.pronunciationStudyStats || {};
+        this.storyStudyStats = doc.storyStudyStats || {};
+        this.dictationStudyStats = doc.dictationStudyStats || {};
         this.experiencePoints = doc.experiencePoints || 0;
         this.dailyExperiencePoints = doc.dailyExperiencePoints || {};
         this.studyTimes = doc.studyTimes || 0;
@@ -106,6 +110,10 @@ class UserProgress {
             unlockedPronunciationExercises: initialPronunciationExercise ? [new ObjectId(initialPronunciationExercise)] : [],
             unlockedVocabularyExercises: initialVocabularyExercise ? [new ObjectId(initialVocabularyExercise)] : [],
             unlockedDictations: initialDictation ? [new ObjectId(initialDictation)] : [],
+            grammarStudyStats: {},
+            pronunciationStudyStats: {},
+            storyStudyStats: {},
+            dictationStudyStats: {},
             studyTimes: 0,
             dailyStudyTimes: {},
             experiencePoints: 0,

@@ -21,17 +21,19 @@ router.get("/api/pronunciation-list", verifyToken, asyncHandler(async function (
     res.json({ data: { pronunciations, currentPage: page, totalPages } });
 }));
 
+router.get("/api/pronunciation/roadmap", verifyToken, asyncHandler(async function (req, res) {
+        const { status, data } = await pronunciationService.getPronunciationRoadmap(req.user.id, req.query.lang || "vi");
+        return res.status(status).json(data);
+}));
+
 router.get("/api/pronunciation/:id", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await pronunciationService.getPronunciationDetails(req.user.id, req.params.id, req.query.lang || "vi");
         return res.status(status).json(data);
 }));
 
 router.get("/api/pronunciation/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const pronunciation = await pronunciationService.getLocalizedPronunciationBySlug(req.params.slug, req.query.lang || "vi");
-        if (!pronunciation) {
-            return res.status(404).json({ message: "Pronunciation not found" });
-        }
-        res.json({ pronunciation });
+        const { status, data } = await pronunciationService.getPronunciationDetailsBySlug(req.user.id, req.params.slug, req.query.lang || "vi");
+        return res.status(status).json(data);
 }));
 
 router.post("/api/pronunciation/complete/:id", verifyToken, asyncHandler(async (req, res) => {

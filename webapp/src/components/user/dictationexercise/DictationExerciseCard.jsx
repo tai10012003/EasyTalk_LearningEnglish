@@ -20,7 +20,10 @@ const DictationExerciseCard = ({ item, index, isUnlocked, isCurrent }) => {
                     </div>
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">
-                        Số câu: {item.content ? item.content.split('.').length : 0}
+                        Số câu: {item.sentenceCount ?? (item.content ? item.content.split('.').filter(Boolean).length : 0)}
+                    </p>
+                    <p className="user-card-desc">
+                        Đã học: {item.studyCount || 0} lần
                     </p>
                     <div className="user-card-footer">
                         {isUnlocked && isCurrent ? (

@@ -16,6 +16,38 @@ class StoryRepository {
         return { stories, total };
     }
 
+    async findRoadmapItems(filter = {}) {
+        const pipeline = [
+            { $match: filter },
+            { $sort: { sort: 1 } },
+            {
+                $project: {
+                    title: 1,
+                    description: 1,
+                    image: 1,
+                    level: 1,
+                    category: 1,
+                    slug: 1,
+                    sort: 1,
+                    display: 1,
+                    sentenceCount: { $size: { $ifNull: ["$content", []] } },
+                    quizCount: {
+                        $size: {
+                            $filter: {
+                                input: { $ifNull: ["$content", []] },
+                                as: "sentence",
+                                cond: { $ne: ["$$sentence.quiz", null] }
+                            }
+                        }
+                    }
+                }
+            }
+        ];
+        const stories = await this.collection.aggregate(pipeline).toArray();
+        const total = await this.collection.countDocuments(filter);
+        return { stories, total };
+    }
+
     async findById(id) {
         return await this.collection.findOne({ _id: new ObjectId(id) });
     }

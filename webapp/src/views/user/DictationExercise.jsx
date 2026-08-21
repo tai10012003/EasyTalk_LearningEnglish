@@ -1,16 +1,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import DictationExerciseCard from "@/components/user/dictationexercise/DictationExerciseCard.jsx";
-import { useNavigate } from "react-router-dom";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 
 function DictationExercise() {
     const [allDictationExercises, setAllDictationExercises] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [unlockedDictationExercises, setUnlockedDictationExercises] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
-    const navigate = useNavigate();
 
     useEffect(() => {
         document.title = "Bài luyện tập nghe chép chính tả - EasyTalk";
@@ -18,41 +16,22 @@ function DictationExercise() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await DictationExerciseService.fetchDictationExercise(1, 10000);
-                const all = allResp.dictationExercises || [];
-                setAllDictationExercises(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await DictationExerciseService.getDictationExerciseDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedDictations) ? userProg.unlockedDictations.map(s => s.toString()) : [];
-                        setUnlockedDictationExercises(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedDictationExercises([]);
-                    }
-                } else {
-                    setUnlockedDictationExercises([]);
-                }
+                const roadmap = await DictationExerciseService.fetchDictationExerciseRoadmap();
+                setAllDictationExercises(roadmap.items || []);
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: 0, percent: 0 });
             } catch (err) {
                 console.error("Error fetching dictation exercises:", err);
                 setAllDictationExercises([]);
-                setUnlockedDictationExercises([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [navigate]);
-
-    const isDictationExerciseUnlocked = (dictationExerciseId) => {
-        return unlockedDictationExercises.includes(dictationExerciseId.toString());
-    };
+    }, []);
 
     const findCurrentDictationExerciseIndex = () => {
-        if (unlockedDictationExercises.length === 0) return -1;
-        const lastUnlockedId = unlockedDictationExercises[unlockedDictationExercises.length - 1];
-        return allDictationExercises.findIndex(item => item._id.toString() === lastUnlockedId);
+        return allDictationExercises.findIndex(item => item.isCurrent);
     };
 
     const scrollToCurrentLesson = () => {
@@ -78,14 +57,14 @@ function DictationExercise() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {unlockedDictationExercises.length} / {allDictationExercises.length}
+                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {roadmapProgress.unlockedCount} / {roadmapProgress.totalCount || allDictationExercises.length}
                         </p>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allDictationExercises.length > 0 ? (unlockedDictationExercises.length / allDictationExercises.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent || 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {allDictationExercises.length > 0 ? Math.round((unlockedDictationExercises.length / allDictationExercises.length) * 100) : 0}% hoàn thành
+                                {roadmapProgress.percent || 0}% hoàn thành
                             </span>
                         </div>
                     </div>
@@ -93,7 +72,7 @@ function DictationExercise() {
                 <div className="container">
                     <div className="user-road-timeline">
                         {allDictationExercises.map((item, index) => {
-                            const isUnlocked = isDictationExerciseUnlocked(item._id);
+                            const isUnlocked = Boolean(item.isUnlocked);
                             const currentIndex = findCurrentDictationExerciseIndex();
                             const isCurrent = index === currentIndex;
                             return (

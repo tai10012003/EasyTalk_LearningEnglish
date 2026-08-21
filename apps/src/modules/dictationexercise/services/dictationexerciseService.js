@@ -6,6 +6,11 @@ const { invalidateDictationExerciseCache } = require('../utils/cacheHelper');
 const DictationExercise = require('../models/dictationexercise');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
 
+function countSentences(content = "") {
+    if (typeof content !== "string") return 0;
+    return content.split(/(?<=[.!?])\s+/).map(sentence => sentence.trim()).filter(Boolean).length;
+}
+
 class DictationExerciseService {
     constructor(deps = {}) {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
@@ -80,7 +85,57 @@ class DictationExerciseService {
         if (!isUnlockedDictation) {
             return { status: 403, data: { success: false, message: "This dictation exercise is locked for you. Please complete previous dictation exercise first." } };
         }
-        return { status: 200, data: { success: true, data: dictationExercise, userProgress } };
+        return { status: 200, data: { success: true, data: { dictationExercise } } };
+    }
+
+    async getDictationExerciseDetailsBySlug(userId, slug) {
+        const dictationExercise = await this.getDictationBySlug(slug);
+        if (!dictationExercise) {
+            return { status: 404, data: { success: false, message: "Dictation exercise not found" } };
+        }
+        return await this.getDictationExerciseDetails(userId, dictationExercise._id);
+    }
+
+    async getDictationExerciseRoadmap(userId) {
+        const { dictationExercises, totalDictationExercises } = await this.getDictationList(1, 10000, "user");
+        const userProgress = await this._getOrCreateUserProgress(userId);
+        const unlockedIds = new Set((userProgress.unlockedDictations || []).map(id => id.toString()));
+        const studyStats = userProgress.dictationStudyStats || {};
+        const items = dictationExercises.map(dictationExercise => {
+            const id = dictationExercise._id.toString();
+            const stats = studyStats[id] || {};
+            return {
+                _id: dictationExercise._id,
+                title: dictationExercise.title,
+                slug: dictationExercise.slug,
+                sort: dictationExercise.sort,
+                sentenceCount: countSentences(dictationExercise.content),
+                isUnlocked: unlockedIds.has(id),
+                isCurrent: false,
+                studyCount: stats.studyCount || 0,
+                firstStudiedAt: stats.firstStudiedAt || null,
+                lastStudiedAt: stats.lastStudiedAt || null
+            };
+        });
+        const unlockedCount = items.filter(item => item.isUnlocked).length;
+        const currentIndex = items.map(item => item.isUnlocked).lastIndexOf(true);
+        if (currentIndex >= 0) {
+            items[currentIndex].isCurrent = true;
+        }
+        return {
+            status: 200,
+            data: {
+                success: true,
+                data: {
+                    items,
+                    progress: {
+                        unlockedCount,
+                        totalCount: totalDictationExercises,
+                        percent: totalDictationExercises > 0 ? Math.round((unlockedCount / totalDictationExercises) * 100) : 0
+                    }
+                }
+            }
+        };
     }
 
     async completeDictationExercise(userId, dictationId) {
@@ -103,13 +158,21 @@ class DictationExerciseService {
             unlockNext: userProgressService.unlockNextDictation.bind(userProgressService),
             unlockedField: "unlockedDictations"
         });
+        await userProgressService.recordDictationStudy(userId, dictationId);
+        const latestProgress = await userProgressService.getUserProgressByUserId(userId);
+        const dictationStats = latestProgress?.dictationStudyStats?.[dictationId.toString()] || {};
         await this.recordDictationLearningEvent(userId, dictationExercise);
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextDictationExercise ? "Dictation exercise completed. Next dictation exercise unlocked." : "Dictation exercise completed. You have finished all Dictation exercise.",
-                userProgress: completedProgress
+                userProgress: latestProgress || completedProgress,
+                studyStats: {
+                    studyCount: dictationStats.studyCount || 0,
+                    firstStudiedAt: dictationStats.firstStudiedAt || null,
+                    lastStudiedAt: dictationStats.lastStudiedAt || null
+                }
             }
         };
     }

@@ -31,6 +31,9 @@ router.get("/api/flashcard-list", verifyToken, asyncHandler(async (req, res) => 
     const tab = req.query.tab || "explore";
     const userId = req.user.id;
     const data = await flashcardService.getFlashcardList(page, limit, tab, userId);
+    if (tab === "mine" && userProgressService?.getFlashcardProgressOverview) {
+        data.progressOverview = await userProgressService.getFlashcardProgressOverview(userId);
+    }
     res.json({ success: true, ...data });
 }));
 

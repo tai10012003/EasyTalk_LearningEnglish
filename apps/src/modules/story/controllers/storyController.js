@@ -23,15 +23,20 @@ router.get("/api/story-list", verifyToken, asyncHandler(async (req, res) => {
         res.json({ success: true, data: stories, currentPage: page, totalPages });
 }));
 
+router.get("/api/story/roadmap", verifyToken, asyncHandler(async (req, res) => {
+        const lang = req.query.lang || "vi";
+        const { status, data } = await storyService.getStoryRoadmap(req.user.id, lang);
+        return res.status(status).json(data);
+}));
+
 router.get("/api/story/:id", verifyToken, asyncHandler(async (req, res) => {
         const { status, data } = await storyService.getStoryDetails(req.user.id, req.params.id, req.query.lang || "vi");
         return res.status(status).json(data);
 }));
 
 router.get("/api/story/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const story = await storyService.getLocalizedStoryBySlug(req.params.slug, req.query.lang || "vi");
-        if (!story) return res.status(404).json({ message: "Story not found" });
-        res.json({ data: story });
+        const { status, data } = await storyService.getStoryDetailsBySlug(req.user.id, req.params.slug, req.query.lang || "vi");
+        return res.status(status).json(data);
 }));
 
 router.post("/api/story/complete/:id", verifyToken, asyncHandler(async (req, res) => {

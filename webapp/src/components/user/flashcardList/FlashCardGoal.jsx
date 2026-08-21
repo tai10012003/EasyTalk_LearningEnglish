@@ -3,7 +3,7 @@ import Swal from "sweetalert2";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import { useTranslation } from "react-i18next";
 
-const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
+const FlashCardGoal = ({ isOpen, onClose, onUpdate, currentGoal }) => {
     const { t } = useTranslation();
     const [goal, setGoal] = useState(20);
     const [isLoading, setIsLoading] = useState(false);
@@ -71,8 +71,11 @@ const FlashCardGoal = ({ isOpen, onClose, currentGoal }) => {
                 title: t("flashcardPage.goal.successTitle"),
                 text: t("flashcardPage.goal.successText", { goal, bonus }),
             }).then(() => {
-                onClose(goal);
-                window.location.reload();
+                if (onUpdate) {
+                    onUpdate(goal);
+                } else {
+                    onClose();
+                }
             });
         } catch {
             Swal.fire({

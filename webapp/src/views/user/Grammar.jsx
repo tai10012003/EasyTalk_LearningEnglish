@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import GrammarCard from "@/components/user/grammar/GrammarCard.jsx";
-import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Trans, useTranslation } from "react-i18next";
 import { GrammarService } from "@/services/GrammarService.jsx";
@@ -11,9 +10,8 @@ function Grammar() {
     const [allGrammars, setAllGrammars] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [unlockedGrammars, setUnlockedGrammars] = useState([]);
+    const [roadmapProgress, setRoadmapProgress] = useState({ unlockedCount: 0, totalCount: 0, percent: 0 });
     const currentLessonRef = useRef(null);
-    const navigate = useNavigate();
     const currentLanguage = useSelector((state) => state.language.current);
 
     const levels = useMemo(() => [
@@ -44,42 +42,23 @@ function Grammar() {
         const fetchData = async () => {
             setIsLoading(true);
             try {
-                const allResp = await GrammarService.fetchGrammars(1, 10000);
-                const all = allResp.grammars || [];
-                setAllGrammars(all);
-                if (all.length > 0) {
-                    try {
-                        const detailResp = await GrammarService.getGrammarDetail(all[0]._id);
-                        const userProg = detailResp?.userProgress || null;
-                        const unlockedIds = Array.isArray(userProg?.unlockedGrammars) ? userProg.unlockedGrammars.map(s => s.toString()) : [];
-                        setUnlockedGrammars(unlockedIds);
-                    } catch (err) {
-                        console.error("Error fetching user progress:", err);
-                        setUnlockedGrammars([]);
-                    }
-                } else {
-                    setUnlockedGrammars([]);
-                }
+                const roadmap = await GrammarService.fetchGrammarRoadmap();
+                setAllGrammars(roadmap.items || []);
+                setRoadmapProgress(roadmap.progress || { unlockedCount: 0, totalCount: 0, percent: 0 });
             } catch (err) {
                 console.error("Error fetching grammars:", err);
                 setAllGrammars([]);
-                setUnlockedGrammars([]);
+                setRoadmapProgress({ unlockedCount: 0, totalCount: 0, percent: 0 });
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [navigate, currentLanguage, t]);
-
-    const isGrammarUnlocked = (grammarId) => {
-        return unlockedGrammars.includes(grammarId.toString());
-    };
+    }, [currentLanguage, t]);
 
     const currentIndex = useMemo(() => {
-        if (unlockedGrammars.length === 0 || allGrammars.length === 0) return -1;
-        const lastUnlockedId = unlockedGrammars[unlockedGrammars.length - 1];
-        return allGrammars.findIndex(item => item._id.toString() === lastUnlockedId);
-    }, [unlockedGrammars, allGrammars]);
+        return allGrammars.findIndex(item => item.isCurrent);
+    }, [allGrammars]);
 
     const scrollToCurrentLesson = () => {
         if (currentLessonRef.current) {
@@ -104,14 +83,14 @@ function Grammar() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            {t("grammarPage.list.subtitle", { unlocked: unlockedGrammars.length, total: allGrammars.length })}
+                            {t("grammarPage.list.subtitle", { unlocked: roadmapProgress.unlockedCount, total: roadmapProgress.totalCount || allGrammars.length })}
                         </p>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
-                                <div className="user-progress-fill" style={{ width: `${allGrammars.length > 0 ? (unlockedGrammars.length / allGrammars.length) * 100 : 0}%` }}/>
+                                <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent || 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {t("grammarPage.list.completePercent", { percent: allGrammars.length > 0 ? Math.round((unlockedGrammars.length / allGrammars.length) * 100) : 0 })}
+                                {t("grammarPage.list.completePercent", { percent: roadmapProgress.percent || 0 })}
                             </span>
                         </div>
                     </div>
@@ -135,7 +114,7 @@ function Grammar() {
                                                 </div>
                                                 <div className="user-module-cards">
                                                     {items.map((item) => {
-                                                        const isUnlocked = isGrammarUnlocked(item._id);
+                                                        const isUnlocked = Boolean(item.isUnlocked);
                                                         const isCurrent = item.originalIndex === currentIndex;
                                                         return (
                                                             <div key={item._id} ref={isCurrent ? currentLessonRef : null}

@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    return responseData.data || responseData;
+}
+
 export const FlashCardService = {
     async fetchFlashcardLists(page = 1, limit = 12, tab = "mine") {
         try {
@@ -12,7 +17,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -36,7 +41,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error fetching daily reviews:", error.message);
@@ -52,7 +57,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -76,7 +81,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -99,7 +104,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -122,7 +127,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -146,7 +151,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -170,7 +175,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -194,7 +199,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error updating difficulty:", error.message);
@@ -209,7 +214,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error fetching daily goal:", error.message);
@@ -225,7 +230,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error updating daily goal:", error.message);
@@ -240,7 +245,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error fetching badges:", error.message);
@@ -255,7 +260,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -278,7 +283,7 @@ export const FlashCardService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {

@@ -1,7 +1,6 @@
 const { ObjectId } = require('mongodb');
 const FlashcardRepository = require('../repositories/flashcardRepository');
 const FlashcardImageService = require('./flashcardImageService');
-const { calculateDifficultyStats } = require('../repositories/queries/flashcardCalculator');
 // const { invalidateFlashcardCache } = require('../utils/cacheHelper');
 
 class FlashcardService {
@@ -23,19 +22,6 @@ class FlashcardService {
             filter.user = { $ne: new ObjectId(userId) };
         }
         const { flashcardLists, totalFlashcardLists } = await this.repository.findFlashcardLists(filter, page, limit);
-        for(let list of flashcardLists) {
-            list.wordCount = await this.repository.getWordCountForList(list._id.toString());
-        }
-        if(tab === "mine") {
-            for(let list of flashcardLists) {
-                const stats = await calculateDifficultyStats(
-                    this.repository.flashcardsCollection, 
-                    list._id
-                );
-                list.toReview = stats.toReview;
-                list.remembered = stats.remembered;
-            }
-        }
         return {
             flashcardLists,
             currentPage: page,
@@ -44,20 +30,20 @@ class FlashcardService {
     }
 
     async getFlashcardListById(id, page = 1, limit = 12, userId) {
-        const { flashcardList, flashcards } = await this.repository.findFlashcardListById(id);
+        const { flashcardList, flashcards, totalFlashcards } = typeof this.repository.findFlashcardListPageById === "function"
+            ? await this.repository.findFlashcardListPageById(id, page, limit)
+            : await this.repository.findFlashcardListById(id);
         if(!flashcardList) {
             throw new Error("Không tìm thấy danh sách flashcards.");
         }
         const isOwner = flashcardList.user.toString() === userId;
-        const totalFlashcards = flashcards.length;
-        const skip = (page - 1) * limit;
-        const paginatedFlashcards = flashcards.slice(skip, skip + limit);
+        const total = totalFlashcards ?? flashcards.length;
         return {
             flashcardList,
-            flashcards: paginatedFlashcards,
+            flashcards,
             currentPage: page,
-            totalPages: Math.ceil(totalFlashcards / limit),
-            totalFlashcards,
+            totalPages: Math.ceil(total / limit),
+            totalFlashcards: total,
             isOwner
         };
     }

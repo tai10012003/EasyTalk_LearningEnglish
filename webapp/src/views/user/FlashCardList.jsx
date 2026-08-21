@@ -26,7 +26,7 @@ const FlashCardList = () => {
     const [totalRemembered, setTotalRemembered] = useState(0);
     const [totalToReview, setTotalToReview] = useState(0);
     const [dailyGoal, setDailyGoal] = useState({ goal: 20, todayCount: 0, isAchieved: false });
-    const [showConfetti, setShowConfetti] = useState(false);
+    const showConfettiRef = React.useRef(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [isLoading, setIsLoading] = useState(false);
@@ -36,47 +36,40 @@ const FlashCardList = () => {
     const [lastBadge, setLastBadge] = useState(localStorage.getItem("lastBadge") || "");
     const [monthlyBadges, setMonthlyBadges] = useState({ monthlyTotal: 0, status: [] });
 
+    const applyProgressOverview = useCallback((overview) => {
+        if (!overview) return;
+        setDailyReviews(overview.dailyFlashcardReviews || {});
+        setDailyGoal(overview.dailyGoal || { goal: 20, todayCount: 0, isAchieved: false });
+        setMonthlyBadges(overview.badges || { monthlyTotal: 0, status: [] });
+        if (overview.dailyGoal?.isAchieved && !showConfettiRef.current) {
+            confetti({
+                particleCount: 100,
+                spread: 70,
+                origin: { y: 0.6 },
+                colors: ['#bb0000', '#ffffff', '#00bb00']
+            });
+            showConfettiRef.current = true;
+            setTimeout(() => {
+                showConfettiRef.current = false;
+            }, 3000);
+        }
+    }, []);
+
     const loadFlashcards = useCallback(async (page = currentPage, tab = activeTab) => {
         setIsLoading(true);
         try {
             const data = await FlashCardService.fetchFlashcardLists(page, 3, tab);
             setFlashcards(data.flashcardLists || []);
             setTotalPages(data.totalPages);
+            if (tab === "mine") {
+                applyProgressOverview(data.progressOverview);
+            }
         } catch (err) {
             console.error(err);
             setFlashcards([]);
         }
         setIsLoading(false);
-    }, [activeTab, currentPage]);
-
-    const triggerConfetti = useCallback(() => {
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-            colors: ['#bb0000', '#ffffff', '#00bb00']
-        });
-    }, []);
-
-    const loadDailyGoal = useCallback(async () => {
-        const data = await FlashCardService.fetchDailyGoal();
-        setDailyGoal(data);
-        if (data.isAchieved && !showConfetti) {
-            triggerConfetti();
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 3000);
-        }
-    }, [showConfetti, triggerConfetti]);
-
-    const loadBadges = useCallback(async () => {
-        try {
-            const data = await FlashCardService.fetchBadges();
-            setMonthlyBadges(data);
-        } catch (err) {
-            console.error("Error loading badges:", err);
-            setMonthlyBadges({ monthlyTotal: 0, status: [] });
-        }
-    }, []);
+    }, [activeTab, applyProgressOverview, currentPage]);
 
     useEffect(() => {
         document.title = t("flashcardPage.list.documentTitle");
@@ -89,18 +82,12 @@ const FlashCardList = () => {
     }, [currentPage, activeTab, loadFlashcards]);
 
     useEffect(() => {
-        if (activeTab === "mine") {
-            FlashCardService.fetchDailyReviews().then((data) => {
-                setDailyReviews(data.dailyFlashcardReviews || {});
-            });
-            loadDailyGoal();
-            loadBadges();
-        } else {
+        if (activeTab !== "mine") {
             setDailyReviews({});
             setDailyGoal({ goal: 20, todayCount: 0, isAchieved: false });
             setMonthlyBadges({ monthlyTotal: 0, status: [] });
         }
-    }, [activeTab, loadBadges, loadDailyGoal]);
+    }, [activeTab]);
 
     useEffect(() => {
         if (activeTab === "mine" && flashcards.length > 0) {

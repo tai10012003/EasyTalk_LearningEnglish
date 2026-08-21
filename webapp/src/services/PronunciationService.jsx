@@ -9,6 +9,11 @@ const getCurrentLanguageQuery = () => {
     return language === "en" ? "&lang=en" : "";
 };
 
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    return responseData.data || responseData;
+}
+
 export const PronunciationService = {
     async fetchPronunciations(page = 1, limit = 12, filters = {}) {
         try {
@@ -23,7 +28,7 @@ export const PronunciationService = {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -41,6 +46,20 @@ export const PronunciationService = {
         }
     },
 
+    async fetchPronunciationRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return unwrapResponseData(responseData);
+    },
+
     async getPronunciationBySlug(slug) {
         try {
             const langQuery = getCurrentLanguageQuery().replace("&", "?");
@@ -49,8 +68,8 @@ export const PronunciationService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data || responseData;
-            return data;
+            const data = unwrapResponseData(responseData);
+            return data?.pronunciation ? { pronunciation: data.pronunciation } : data;
         } catch (err) {
             console.error("Error fetching pronunciation by slug:", err);
             return null;
@@ -68,8 +87,8 @@ export const PronunciationService = {
             throw err;
         }
         const responseData = await res.json();
-        const data = responseData.data || responseData;
-        return data;
+        const data = unwrapResponseData(responseData);
+        return data?.pronunciation ? { pronunciation: data.pronunciation } : data;
     },
 
     async getPronunciation(id) {
@@ -78,7 +97,7 @@ export const PronunciationService = {
         });
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const responseData = await res.json();
-        return responseData.data || responseData;
+        return unwrapResponseData(responseData);
     },
 
     async completePronunciation(pronunciationId) {
@@ -91,7 +110,7 @@ export const PronunciationService = {
             throw err;
         }
         const responseData = await res.json();
-        const data = responseData.data;
+        const data = unwrapResponseData(responseData);
         return data;
     },
 

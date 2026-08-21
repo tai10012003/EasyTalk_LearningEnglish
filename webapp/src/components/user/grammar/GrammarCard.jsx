@@ -23,8 +23,9 @@ const GrammarCard = ({ item, index, isUnlocked, isCurrent }) => {
                     </div>
                     <h3 className="user-card-title">{item.title}</h3>
                     <p className="user-card-desc">
-                        {item.description.length > 85 ? `${item.description.substring(0, 85)}...`: item.description}
+                        {(item.description || "").length > 85 ? `${item.description.substring(0, 85)}...`: item.description}
                     </p>
+                    <p className="user-card-desc">Đã học: {item.studyCount || 0} lần</p>
                     {item.images && (
                         <img src={item.images} alt={item.title} className="user-card-img" />
                     )}

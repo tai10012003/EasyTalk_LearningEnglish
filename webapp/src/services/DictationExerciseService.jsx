@@ -5,10 +5,17 @@ let hasShownAlert = false;
 
 function unwrapResponseData(responseData) {
     if (!responseData || typeof responseData !== "object") return responseData;
+    if (Array.isArray(responseData.dictationExercises)) {
+        return {
+            data: responseData.dictationExercises,
+            currentPage: responseData.currentPage || 1,
+            totalPages: responseData.totalPages || 1,
+        };
+    }
     if (responseData.meta && typeof responseData.data === "object" && responseData.data !== null && !Array.isArray(responseData.data)) {
         return { ...responseData.data, ...responseData.meta };
     }
-    return responseData.data;
+    return responseData.data || responseData;
 }
 
 export const DictationExerciseService = {
@@ -59,7 +66,7 @@ export const DictationExerciseService = {
             const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = unwrapResponseData(responseData);
+            const data = responseData.data?.dictationExercise || unwrapResponseData(responseData);
             return data;
         } catch (err) {
             console.error(err);
@@ -67,40 +74,45 @@ export const DictationExerciseService = {
         }
     },
 
-    async getDictationExerciseDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = unwrapResponseData(responseData);
-            return data;
-        } catch (error) {
-            throw error;
+    async fetchDictationExerciseRoadmap() {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/roadmap`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async getDictationExerciseDetail(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        const data = responseData.data?.dictationExercise || unwrapResponseData(responseData);
+        return data;
     },
 
     async completeDictationExercise(dictationexerciseId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/complete/${dictationexerciseId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const responseData = await res.json();
-            const data = unwrapResponseData(responseData);
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/complete/${dictationexerciseId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
     },
 
     resetAlertFlag() {

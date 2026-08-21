@@ -73,6 +73,14 @@ class GrammarService {
             const firstGrammarPage = await this.getGrammarList(1, 1);
             const firstGrammar = (firstGrammarPage && firstGrammarPage.grammars && firstGrammarPage.grammars[0]) ? firstGrammarPage.grammars[0] : null;
             userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
+        } else if (!Array.isArray(userProgress.unlockedGrammars) || userProgress.unlockedGrammars.length === 0) {
+            const firstGrammarPage = await this.getGrammarList(1, 1);
+            const firstGrammar = firstGrammarPage?.grammars?.[0] || null;
+            if (firstGrammar?._id) {
+                userProgress.unlockedGrammars = [firstGrammar._id];
+                await userProgressService.updateUserProgress(userProgress);
+                userProgress = await userProgressService.getUserProgressByUserId(userId);
+            }
         }
         return userProgress;
     }
@@ -90,7 +98,72 @@ class GrammarService {
         const localizedGrammar = lang === "en" && this.englishTranslationService
             ? await this.englishTranslationService.applyTranslationToItem("grammar", grammar, lang)
             : grammar;
-        return { status: 200, data: { grammar: localizedGrammar, userProgress } };
+        return { status: 200, data: { success: true, data: { grammar: localizedGrammar } } };
+    }
+
+    async getGrammarDetailsBySlug(userId, slug, lang = "vi") {
+        const grammar = await this.getGrammarBySlug(slug);
+        if (!grammar) {
+            return { status: 404, data: { success: false, message: "Grammar not found" } };
+        }
+        return await this.getGrammarDetails(userId, grammar._id, lang);
+    }
+
+    _buildRoadmapItem(grammar, unlockedIds, studyStats) {
+        const id = grammar._id.toString();
+        const stats = studyStats[id] || {};
+        const quizzes = Array.isArray(grammar.quizzes) ? grammar.quizzes : [];
+        return {
+            _id: grammar._id,
+            title: grammar.title,
+            description: grammar.description,
+            category: grammar.category,
+            level: grammar.level,
+            images: grammar.images,
+            slug: grammar.slug,
+            sort: grammar.sort,
+            quizCount: grammar.quizCount ?? quizzes.length,
+            isUnlocked: unlockedIds.has(id),
+            isCurrent: false,
+            studyCount: stats.studyCount || 0,
+            firstStudiedAt: stats.firstStudiedAt || null,
+            lastStudiedAt: stats.lastStudiedAt || null
+        };
+    }
+
+    async getGrammarRoadmap(userId, lang = "vi") {
+        const filter = { display: true };
+        const result = typeof this.repository.findRoadmapItems === "function"
+            ? await this.repository.findRoadmapItems(filter)
+            : await this.getGrammarList(1, 10000, "", "user", lang);
+        let grammars = result.grammars || [];
+        const totalGrammars = result.total ?? result.totalGrammars ?? grammars.length;
+        if (lang === "en" && this.englishTranslationService) {
+            grammars = await this.englishTranslationService.applyTranslations("grammar", grammars, lang);
+        }
+        const userProgress = await this._getOrCreateUserProgress(userId);
+        const unlockedIds = new Set((userProgress.unlockedGrammars || []).map(id => id.toString()));
+        const studyStats = userProgress.grammarStudyStats || {};
+        const items = grammars.map(grammar => this._buildRoadmapItem(grammar, unlockedIds, studyStats));
+        const unlockedCount = items.filter(item => item.isUnlocked).length;
+        const currentIndex = items.map(item => item.isUnlocked).lastIndexOf(true);
+        if (currentIndex >= 0) {
+            items[currentIndex].isCurrent = true;
+        }
+        return {
+            status: 200,
+            data: {
+                success: true,
+                data: {
+                    items,
+                    progress: {
+                        unlockedCount,
+                        totalCount: totalGrammars,
+                        percent: totalGrammars > 0 ? Math.round((unlockedCount / totalGrammars) * 100) : 0
+                    }
+                }
+            }
+        };
     }
 
     async completeGrammar(userId, grammarId) {
@@ -113,12 +186,20 @@ class GrammarService {
             unlockNext: userProgressService.unlockNextGrammar.bind(userProgressService),
             unlockedField: "unlockedGrammars"
         });
+        await userProgressService.recordGrammarStudy(userId, grammarId);
+        const latestProgress = await userProgressService.getUserProgressByUserId(userId);
+        const grammarStats = latestProgress?.grammarStudyStats?.[grammarId.toString()] || {};
         return {
             status: 200,
             data: {
                 success: true,
                 message: nextGrammar ? "Grammar completed. Next grammar unlocked." : "Grammar completed. You have finished all grammars.",
-                userProgress: completedProgress
+                userProgress: latestProgress || completedProgress,
+                studyStats: {
+                    studyCount: grammarStats.studyCount || 0,
+                    firstStudiedAt: grammarStats.firstStudiedAt || null,
+                    lastStudiedAt: grammarStats.lastStudiedAt || null
+                }
             }
         };
     }

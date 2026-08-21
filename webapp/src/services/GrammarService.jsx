@@ -9,6 +9,11 @@ const getCurrentLanguageQuery = () => {
     return language === "en" ? "&lang=en" : "";
 };
 
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    return responseData.data || responseData;
+}
+
 export const GrammarService = {
     async fetchGrammars(page = 1, limit = 12, filters = {}) {
         try {
@@ -23,7 +28,7 @@ export const GrammarService = {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -41,13 +46,27 @@ export const GrammarService = {
         }
     },
 
+    async fetchGrammarRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return unwrapResponseData(responseData);
+    },
+
     async getGrammar(id) {
         const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/${id}`, {
             method: "GET",
         });
         if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
         const responseData = await res.json();
-        return responseData.data;
+        return unwrapResponseData(responseData);
     },
 
     async getGrammarBySlug(slug) {
@@ -58,8 +77,8 @@ export const GrammarService = {
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
-            return data;
+            const data = unwrapResponseData(responseData);
+            return data?.grammar ? { grammar: data.grammar } : data;
         } catch (err) {
             console.error("Error fetching grammar by slug:", err);
             return null;
@@ -77,8 +96,8 @@ export const GrammarService = {
             throw err;
         }
         const responseData = await res.json();
-        const data = responseData.data;
-        return data;
+        const data = unwrapResponseData(responseData);
+        return data?.grammar ? { grammar: data.grammar } : data;
     },
 
     async completeGrammar(grammarId) {
@@ -92,7 +111,7 @@ export const GrammarService = {
             throw err;
         }
         const responseData = await res.json();
-        const data = responseData.data;
+        const data = unwrapResponseData(responseData);
         return data;
     },
 
