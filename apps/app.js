@@ -24,6 +24,12 @@ process.on('uncaughtException', (error) => {
 });
 
 const app = express();
+const AWSXRay = require('./src/shared/utils/xray');
+
+if (AWSXRay) {
+  app.use(AWSXRay.express.openSegment('easytalk-backend'));
+}
+
 const server = http.createServer(app);
 app.enable('trust proxy');
 
@@ -90,7 +96,7 @@ let controllers = null;
 let routesInitialized = false;
 
 async function initRealtimeAndRoutes() {
-if (routesInitialized) return;
+  if (routesInitialized) return;
   const io = await initSocket(server, getAllowedClientOrigins());
   logger.info('Socket.IO initialized');
   controllers = buildDependencies({ io }).controllers;
@@ -118,6 +124,9 @@ if (routesInitialized) return;
   app.use("/agent", controllers.learningAgentController);
   app.use("/cache", controllers.cacheController);
   app.use("/english-translations", controllers.englishTranslationController);
+  if (AWSXRay) {
+    app.use(AWSXRay.express.closeSegment());
+  }
 
   app.use(notFound);
   app.use(errorHandler);
