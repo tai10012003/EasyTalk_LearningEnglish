@@ -1,14 +1,27 @@
-const cloudinary = require("cloudinary").v2;
-const streamifier = require("streamifier");
 const { ObjectId } = require('mongodb');
+const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
 const config = require('../../../shared/config/setting');
 const DatabaseConnection = require('../../../shared/database/database');
 
-cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+const s3Client = new S3Client({ region: config.aws.region });
+
+function getRequiredS3Config() {
+    if (!config.aws.region || !config.aws.s3Bucket) {
+        throw new Error("Missing AWS S3 config: AWS_REGION and AWS_S3_BUCKET are required");
+    }
+    return {
+        region: config.aws.region,
+        bucket: config.aws.s3Bucket,
+    };
+}
+
+function encodeS3Key(key) {
+    return key.split("/").map(encodeURIComponent).join("/");
+}
+
+function sanitizeFolderPart(value) {
+    return String(value || "").replace(/[\\/]+/g, "-").trim();
+}
 
 class FlashcardImageService {
     constructor() {
@@ -27,58 +40,49 @@ class FlashcardImageService {
     extractPublicIdFromUrl(url) {
         try {
             if (!url) return null;
-            const match = url.match(/\/([^\/\?]+)\.[^\/\?]+$/);
-            return match ? match[1] : null;
+            const parsed = new URL(url);
+            const base = decodeURIComponent(parsed.pathname).split("/").pop();
+            return base ? base.split(".")[0] : null;
         } catch (err) {
-            return null;
+            const match = url.match(/\/([^\/\?]+)(?:\.[^\/\?]+)?$/);
+            return match ? match[1] : null;
         }
+    }
+
+    buildPublicUrl(key) {
+        const { region, bucket } = getRequiredS3Config();
+        return `https://${bucket}.s3.${region}.amazonaws.com/${encodeS3Key(key)}`;
+    }
+
+    async uploadBuffer(fileBuffer, key, contentType = "image/jpeg") {
+        const { bucket } = getRequiredS3Config();
+        await s3Client.send(new PutObjectCommand({
+            Bucket: bucket,
+            Key: key,
+            Body: fileBuffer,
+            ContentType: contentType,
+            CacheControl: "public, max-age=0, must-revalidate",
+        }));
+        return this.buildPublicUrl(key);
     }
 
     async uploadNewImage(fileBuffer, userId) {
         if(!fileBuffer || !userId) return null;
         const username = await this.getUsername(userId);
         if(!username) throw new Error("User not found");
-        const folder = `${this.baseFolder}/${username}`;
+        const folder = `${this.baseFolder}/${sanitizeFolderPart(username)}`;
         const publicId = `flashcard-${Date.now()}`;
-        return new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    public_id: publicId,
-                    folder: folder,
-                    overwrite: true,
-                    resource_type: "image",
-                },
-                (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result.secure_url);
-                }
-            );
-            streamifier.createReadStream(fileBuffer).pipe(uploadStream);
-        });
+        return this.uploadBuffer(fileBuffer, `${folder}/${publicId}`);
     }
 
     async uploadReplacementImage(fileBuffer, existingImageUrl, userId) {
         if(!fileBuffer || !existingImageUrl || !userId) return null;
         const username = await this.getUsername(userId);
         if(!username) throw new Error("User not found");
-        const folder = `${this.baseFolder}/${username}`;
+        const folder = `${this.baseFolder}/${sanitizeFolderPart(username)}`;
         const publicId = this.extractPublicIdFromUrl(existingImageUrl);
         if(!publicId) throw new Error("Invalid image URL");
-        return new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    public_id: publicId,
-                    folder: folder,
-                    overwrite: true,
-                    resource_type: "image",
-                },
-                (error, result) => {
-                    if (error) return reject(error);
-                    resolve(result.secure_url);
-                }
-            );
-            streamifier.createReadStream(fileBuffer).pipe(uploadStream);
-        });
+        return this.uploadBuffer(fileBuffer, `${folder}/${publicId}`);
     }
 
     async deleteImage(imageUrl, userId) {
@@ -86,11 +90,12 @@ class FlashcardImageService {
         const username = await this.getUsername(userId);
         const publicId = this.extractPublicIdFromUrl(imageUrl);
         if(publicId && username) {
-            const fullPublicId = `${this.baseFolder}/${username}/${publicId}`;
+            const key = `${this.baseFolder}/${sanitizeFolderPart(username)}/${publicId}`;
             try {
-                await cloudinary.uploader.destroy(fullPublicId);
+                const { bucket } = getRequiredS3Config();
+                await s3Client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
             } catch (err) {
-                console.warn("Không thể xóa ảnh Cloudinary:", err.message);
+                console.warn("Không thể xóa ảnh S3:", err.message);
             }
         }
     }
@@ -102,11 +107,12 @@ class FlashcardImageService {
             if(flashcard.image) {
                 const publicId = this.extractPublicIdFromUrl(flashcard.image);
                 if(publicId) {
-                    const fullPublicId = `${this.baseFolder}/${username}/${publicId}`;
+                    const key = `${this.baseFolder}/${sanitizeFolderPart(username)}/${publicId}`;
                     try {
-                        await cloudinary.uploader.destroy(fullPublicId);
+                        const { bucket } = getRequiredS3Config();
+                        await s3Client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
                     } catch (err) {
-                        console.warn("Không thể xóa ảnh Cloudinary:", err.message);
+                        console.warn("Không thể xóa ảnh S3:", err.message);
                     }
                 }
             }

@@ -11,9 +11,8 @@ module.exports = {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
-    cloudiary: {
-        name: process.env.CLOUDINARY_CLOUD_NAME,
-        key: process.env.CLOUDINARY_API_KEY,
-        secret: process.env.CLOUDINARY_API_SECRET,
+    aws: {
+        region: process.env.AWS_REGION,
+        s3Bucket: process.env.AWS_S3_BUCKET,
     }
 };
