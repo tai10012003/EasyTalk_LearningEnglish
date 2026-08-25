@@ -17,7 +17,7 @@ class Question {
         if (!q.type) {
             errors.push('Question type is required');
         }
-        const validTypes = ['multiple-choice', 'fill-in-blank'];
+        const validTypes = ['multiple-choice', 'fill-in-the-blank'];
         if (q.type && !validTypes.includes(q.type)) {
             errors.push(`Question type must be one of: ${validTypes.join(', ')}`);
         }

@@ -10,7 +10,7 @@ const VocabularyExerciseHistoryReviewCarousel = ({
     const getQuestionTitle = () => {
         switch (currentQuestion?.type) {
             case 'multiple-choice': return 'Chọn đáp án đúng:';
-            case 'fill-in-blank': return 'Điền vào chỗ trống:';
+            case 'fill-in-the-blank': return 'Điền vào chỗ trống:';
             default: return 'Câu hỏi:';
         }
     };

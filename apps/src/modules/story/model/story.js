@@ -17,7 +17,7 @@ class StoryQuiz {
         if(!quiz.type) {
             errors.push('Quiz type is required');
         }
-        const validTypes = ['multiple-choice', 'true-false', 'fill-in-blank'];
+        const validTypes = ['multiple-choice', 'true-false', 'fill-in-the-blank'];
         if(quiz.type && !validTypes.includes(quiz.type)) {
             errors.push(`Quiz type must be one of: ${validTypes.join(', ')}`);
         }

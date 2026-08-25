@@ -17,7 +17,7 @@ class PronunciationQuestion {
         if (!q.type) {
             errors.push('Question type is required');
         }
-        const validTypes = ['multiple-choice', 'true-false', 'fill-in-blank'];
+        const validTypes = ['multiple-choice', 'true-false', 'fill-in-the-blank'];
         if (q.type && !validTypes.includes(q.type)) {
             errors.push(`Question type must be one of: ${validTypes.join(', ')}`);
         }
