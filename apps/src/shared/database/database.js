@@ -5,6 +5,14 @@ class DatabaseConnection {
     static client = null;
     static url = null;
 
+    static getMongoOptions() {
+        return {
+            maxPoolSize: 5,
+            minPoolSize: 1,
+            serverSelectionTimeoutMS: 5000
+        };
+    }
+
     static buildMongoUrl() {
         if(process.env.MONGODB_URI) {
             return process.env.MONGODB_URI;
@@ -17,7 +25,7 @@ class DatabaseConnection {
     static getMongoClient() {
         if(!this.client) {
             this.url = this.buildMongoUrl();
-            this.client = new MongoClient(this.url);
+            this.client = new MongoClient(this.url, this.getMongoOptions());
         }
         return this.client;
     }
