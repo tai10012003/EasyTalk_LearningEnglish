@@ -51,7 +51,7 @@ class AuthenticationService {
                 tokenVersion: user.tokenVersion || 0
             }, 
             config.jwt.secret, 
-            { expiresIn: "15m", algorithm: JWT_ALGORITHM }
+            { expiresIn: "1h", algorithm: JWT_ALGORITHM }
         );
     }
 
