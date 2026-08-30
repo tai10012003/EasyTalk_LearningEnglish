@@ -7,9 +7,10 @@ class DatabaseConnection {
 
     static getMongoOptions() {
         return {
-            maxPoolSize: 5,
-            minPoolSize: 1,
-            serverSelectionTimeoutMS: 5000
+            maxPoolSize: 30,
+            minPoolSize: 5,
+            serverSelectionTimeoutMS: 5000,
+            socketTimeoutMS: 45000,
         };
     }
 
