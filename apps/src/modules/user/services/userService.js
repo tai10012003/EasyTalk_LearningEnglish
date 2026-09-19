@@ -1,18 +1,26 @@
 const UserRepository = require('../repositories/userRepository');
-const AuthenticationService = require('./authenticationService');
-const EmailService = require('./emailService');
-const SocialAuthService = require('./socialAuthService');
-const SecurityAuditService = require('./securityAuditService');
 const { hashPassword, comparePassword, generateTempPassword, generateVerificationCode } = require('../utils/passwordUtils');
 const tokenManager = require('../utils/tokenManager');
 
 class UserService {
     constructor(deps = {}) {
         this.repository = deps.repository || new UserRepository();
-        this.authService = deps.authService || new AuthenticationService();
-        this.emailService = deps.emailService || new EmailService();
-        this.socialAuthService = deps.socialAuthService || new SocialAuthService();
-        this.securityAuditService = deps.securityAuditService || new SecurityAuditService();
+        if (!deps.authService) {
+            throw new Error("UserService requires authService");
+        }
+        if (!deps.emailService) {
+            throw new Error("UserService requires emailService");
+        }
+        if (!deps.socialAuthService) {
+            throw new Error("UserService requires socialAuthService");
+        }
+        if (!deps.securityAuditService) {
+            throw new Error("UserService requires securityAuditService");
+        }
+        this.authService = deps.authService;
+        this.emailService = deps.emailService;
+        this.socialAuthService = deps.socialAuthService;
+        this.securityAuditService = deps.securityAuditService;
         this.notificationService = deps.notificationService || null;
         this.userSettingService = deps.userSettingService || null;
         this.userProgressService = deps.userProgressService || null;
@@ -86,7 +94,7 @@ class UserService {
         };
         const result = await this.repository.insert(user);
         user._id = result.insertedId;
-        await this.userProgressService.createUserProgress(user._id);
+        await this.userProgressService.createUserProgress(user._id, {});
         tokenManager.deleteVerificationCode(email);
         return user;
     }
@@ -118,7 +126,7 @@ class UserService {
     async loginWithGoogle(code, req = null) {
         const { user, isNewUser, tempPassword } = await this.socialAuthService.handleGoogleLogin(code, this.repository);
         if (isNewUser) {
-            await this.userProgressService.createUserProgress(user._id);
+            await this.userProgressService.createUserProgress(user._id, {});
             if(tempPassword) {
                 this.emailService.sendWelcomeWithTempPassword(user.email, user.username, tempPassword).catch(err => console.error("Gửi email thất bại:", err));
             }

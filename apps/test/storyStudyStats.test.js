@@ -62,6 +62,7 @@ test('story roadmap returns compact items with study counts', async () => {
     const service = new StoryService({
         repository,
         userProgressService,
+        imageService: {},
         cacheService: passthroughCache
     });
 
@@ -131,6 +132,7 @@ test('complete story increments study count', async () => {
     const service = new StoryService({
         repository,
         userProgressService,
+        imageService: {},
         cacheService: passthroughCache
     });
 

@@ -1,17 +1,25 @@
 const { ObjectId } = require('mongodb');
 const FlashcardRepository = require('../repositories/flashcardRepository');
-const FlashcardImageService = require('./flashcardImageService');
+const { buildDifficultyUpdateOperations } = require("../repositories/queries/flashcardCalculator");
 // const { invalidateFlashcardCache } = require('../utils/cacheHelper');
 
 class FlashcardService {
     constructor(deps = {}) {
         this.repository = deps.repository || new FlashcardRepository();
-        this.imageService = deps.imageService || new FlashcardImageService();
+        if (!deps.imageService) {
+            throw new Error("FlashcardService requires imageService");
+        }
+        this.imageService = deps.imageService;
         this.agentLearningEventService = deps.agentLearningEventService || null;
+        this.userProgressService = deps.userProgressService || null;
     }
 
     setAgentLearningEventService(service) {
         this.agentLearningEventService = service;
+    }
+
+    setUserProgressService(service) {
+        this.userProgressService = service;
     }
 
     async getFlashcardList(page = 1, limit = 12, tab = "explore", userId) {
@@ -143,6 +151,15 @@ class FlashcardService {
     async updateFlashcardDifficulty(bulkOps, userId = null, updates = []) {
         const result = await this.repository.updateFlashcardBulkWrite(bulkOps);
         await this.recordFlashcardLearningEvent(userId, updates);
+        return result;
+    }
+
+    async updateFlashcardDifficulties(updates, userId) {
+        const bulkOps = buildDifficultyUpdateOperations(updates, userId);
+        const result = await this.updateFlashcardDifficulty(bulkOps, userId, updates);
+        if (this.userProgressService?.incrementDailyFlashcardReview) {
+            await this.userProgressService.incrementDailyFlashcardReview(userId, updates.length);
+        }
         return result;
     }
 

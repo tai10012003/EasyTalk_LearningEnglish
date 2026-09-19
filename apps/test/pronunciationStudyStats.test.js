@@ -59,6 +59,7 @@ test('pronunciation roadmap returns compact items with study counts', async () =
     const service = new PronunciationService({
         repository,
         userProgressService,
+        imageService: {},
         cacheService: passthroughCache
     });
 
@@ -129,6 +130,7 @@ test('complete pronunciation increments study count', async () => {
     const service = new PronunciationService({
         repository,
         userProgressService,
+        imageService: {},
         cacheService: passthroughCache
     });
 

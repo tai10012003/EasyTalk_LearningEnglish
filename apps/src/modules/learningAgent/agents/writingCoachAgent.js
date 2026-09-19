@@ -1,29 +1,21 @@
-const WritingAnalyzerService = require('../../writingAI/services/writingAnalyzerService');
-const LearningEventTool = require('../tools/learningEventTool');
-
 class WritingCoachAgent {
     constructor(deps = {}) {
-        this.writingAnalyzer = deps.writingAnalyzer || new WritingAnalyzerService();
+        if (!deps.writingAnalyzer) {
+            throw new Error("WritingCoachAgent requires writingAnalyzer");
+        }
+        if (!deps.learningEventTool) {
+            throw new Error("WritingCoachAgent requires learningEventTool");
+        }
+        this.writingAnalyzer = deps.writingAnalyzer;
         this.agentModeService = deps.agentModeService || null;
         this.aiProviderService = deps.aiProviderService || null;
-        this.learningEventTool = deps.learningEventTool || new LearningEventTool({
-            agentLearningEventService: deps.agentLearningEventService
-        });
+        this.learningEventTool = deps.learningEventTool;
     }
 
     async analyzeWriting(userText, userId = null, options = {}) {
-        const modeConfig = this.agentModeService
-            ? await this.agentModeService.getModeOrDefault(options.mode || 'quick_correction', 'writing', 'quick_correction')
-            : null;
-        const result = this.aiProviderService
-            ? await this.aiProviderService.generateWritingFeedback({
-                userId,
-                text: userText,
-                modeConfig
-            })
-            : await this.writingAnalyzer.analyzeWriting(userText, { modeConfig });
+        const modeConfig = this.agentModeService ? await this.agentModeService.getModeOrDefault(options.mode || 'quick_correction', 'writing', 'quick_correction') : null;
+        const result = this.aiProviderService ? await this.aiProviderService.generateWritingFeedback({ userId, text: userText, modeConfig }) : await this.writingAnalyzer.analyzeWriting(userText, { modeConfig });
         const normalizedResult = this.normalizeWritingResult(result);
-
         if (userId) {
             const eventPromise = this.learningEventTool.recordWritingAnalysis(userId, {
                 score: normalizedResult.score,
@@ -37,11 +29,7 @@ class WritingCoachAgent {
                 });
             }
         }
-
-        return {
-            ...normalizedResult,
-            mode: modeConfig
-        };
+        return { ...normalizedResult, mode: modeConfig };
     }
 
     normalizeWritingResult(result = {}) {

@@ -2,7 +2,6 @@ const cache = require('../../../shared/utils/cacheService');
 const cacheNs = require('../../../shared/utils/cacheNamespaces');
 const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const StoryRepository = require('../repositories/storyRepository');
-const storyImageService = require('./storyImageService');
 const { invalidateStoryCache } = require('../utils/cacheHelper');
 const { Story } = require('../model/story');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
@@ -11,7 +10,10 @@ class StoryService {
     constructor(deps = {}) {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
         this.repository = options.repository || new StoryRepository();
-        this.imageService = options.imageService || new storyImageService("easytalk/story");
+        if (!options.imageService) {
+            throw new Error("StoryService requires imageService");
+        }
+        this.imageService = options.imageService;
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
         this.englishTranslationService = options.englishTranslationService || null;
@@ -19,8 +21,7 @@ class StoryService {
 
     getUserProgressService() {
         if (!this.userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this.userProgressService = new UserProgressService();
+            throw new Error("StoryService requires userProgressService");
         }
         return this.userProgressService;
     }
@@ -74,7 +75,7 @@ class StoryService {
         if (!userProgress) {
             const firstStoryPage = await this.getStoryList(1, 1);
             const firstStory = firstStoryPage?.stories?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, firstStory?._id || null, null, null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { story: firstStory?._id || null }});
         } else if (!Array.isArray(userProgress.unlockedStories) || userProgress.unlockedStories.length === 0) {
             const firstStoryPage = await this.getStoryList(1, 1);
             const firstStory = firstStoryPage?.stories?.[0] || null;

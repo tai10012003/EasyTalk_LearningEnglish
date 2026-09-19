@@ -26,8 +26,7 @@ class DictationExerciseService {
 
     getUserProgressService() {
         if (!this.userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this.userProgressService = new UserProgressService();
+            throw new Error("DictationExerciseService requires userProgressService");
         }
         return this.userProgressService;
     }
@@ -62,7 +61,7 @@ class DictationExerciseService {
         if (!userProgress) {
             const firstDictationExercisePage = await this.getDictationList(1, 1);
             const firstDictationExercise = firstDictationExercisePage?.dictationExercises?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, null, null, firstDictationExercise ? firstDictationExercise._id : null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { dictation: firstDictationExercise ? firstDictationExercise._id : null }});
         } else if (!Array.isArray(userProgress.unlockedDictations) || userProgress.unlockedDictations.length === 0) {
             const firstDictationExercisePage = await this.getDictationList(1, 1);
             const firstDictationExercise = firstDictationExercisePage?.dictationExercises?.[0] || null;

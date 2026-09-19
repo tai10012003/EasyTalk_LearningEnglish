@@ -1,17 +1,24 @@
-const DailyPlanAgent = require('../agents/dailyPlanAgent');
-const ProgressTool = require('../tools/progressTool');
-const MemoryTool = require('../tools/memoryTool');
-const DailyPlanCacheService = require('./dailyPlanCacheService');
-
 class LearningAgentService {
     constructor(deps = {}) {
         this.userProgressService = deps.userProgressService || null;
         this.learnerMemoryService = deps.learnerMemoryService || null;
         this.aiProviderService = deps.aiProviderService || null;
-        this.dailyPlanAgent = deps.dailyPlanAgent || new DailyPlanAgent();
-        this.progressTool = deps.progressTool || new ProgressTool({ userProgressService: this.userProgressService });
-        this.memoryTool = deps.memoryTool || new MemoryTool({ learnerMemoryService: this.learnerMemoryService });
-        this.dailyPlanCacheService = deps.dailyPlanCacheService || new DailyPlanCacheService();
+        if (!deps.dailyPlanAgent) {
+            throw new Error("LearningAgentService requires dailyPlanAgent");
+        }
+        if (!deps.progressTool) {
+            throw new Error("LearningAgentService requires progressTool");
+        }
+        if (!deps.memoryTool) {
+            throw new Error("LearningAgentService requires memoryTool");
+        }
+        if (!deps.dailyPlanCacheService) {
+            throw new Error("LearningAgentService requires dailyPlanCacheService");
+        }
+        this.dailyPlanAgent = deps.dailyPlanAgent;
+        this.progressTool = deps.progressTool;
+        this.memoryTool = deps.memoryTool;
+        this.dailyPlanCacheService = deps.dailyPlanCacheService;
     }
 
     setUserProgressService(service) {
@@ -37,16 +44,13 @@ class LearningAgentService {
             this.progressTool.getUserProgress(userId),
             this.memoryTool.getOrCreateMemory(userId)
         ]);
-        const targetResolution = this.learnerMemoryService?.resolveTargetStudyMinutes
-            ? this.learnerMemoryService.resolveTargetStudyMinutes(memory, options.targetMinutes)
-            : { effectiveTargetMinutes: this.dailyPlanAgent.normalizeTargetMinutes(options.targetMinutes) };
+        const targetResolution = this.learnerMemoryService?.resolveTargetStudyMinutes ? this.learnerMemoryService.resolveTargetStudyMinutes(memory, options.targetMinutes) : { effectiveTargetMinutes: this.dailyPlanAgent.normalizeTargetMinutes(options.targetMinutes) };
         const targetMinutes = this.dailyPlanAgent.normalizeTargetMinutes(targetResolution.effectiveTargetMinutes);
         const cachedPlan = await this.dailyPlanCacheService.get({ userId, targetMinutes, memory });
         if (cachedPlan) {
             const safeCachedPlan = this.attachStudyPreferences(cachedPlan.plan, memory, targetResolution);
             return this.markCacheHit(safeCachedPlan, cachedPlan.metadata);
         }
-
         const basePlan = this.dailyPlanAgent.buildPlan(progress, memory, {
             ...options,
             targetMinutes
@@ -62,12 +66,10 @@ class LearningAgentService {
             }
         };
         let plan = basePlan;
-
         if (this.aiProviderService) {
             plan = await this.aiProviderService.enhanceDailyPlan(basePlan, { userId });
         }
         plan = this.attachStudyPreferences(plan, memory, targetResolution);
-
         const cacheKey = await this.dailyPlanCacheService.set({
             userId,
             targetMinutes,
@@ -78,7 +80,6 @@ class LearningAgentService {
                 memoryVersion: memory?.memoryVersion || "learner-memory-v1"
             }
         });
-
         return this.markCacheMiss(plan, cacheKey);
     }
 

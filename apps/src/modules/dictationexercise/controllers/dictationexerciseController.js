@@ -1,17 +1,18 @@
 const express = require("express");
-const router = express.Router();
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
-const DictationExerciseService = require("../../dictationexercise/services/dictationexerciseService");
 const { validateDictationExerciseInput, buildDictationExerciseDataFromRequest } = require("../validators/dictationexerciseValidator");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-let dictationexerciseService = new DictationExerciseService();
-
-router.get("/api/dictation-exercises", verifyToken, asyncHandler(async (req, res) => {
+function createDictationExerciseController({ dictationExerciseService }) {
+    if (!dictationExerciseService) {
+        throw new Error("createDictationExerciseController requires dictationExerciseService");
+    }
+    const router = express.Router();
+    router.get("/api/dictation-exercises", verifyToken, asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
         const role = req.user.role || "user";
-        const { dictationExercises, totalDictationExercises } = await dictationexerciseService.getDictationList(page, limit, role);
+        const { dictationExercises, totalDictationExercises } = await dictationExerciseService.getDictationList(page, limit, role);
         const totalPages = Math.ceil(totalDictationExercises / limit);
         res.json({
             success: true,
@@ -19,60 +20,51 @@ router.get("/api/dictation-exercises", verifyToken, asyncHandler(async (req, res
             currentPage: page,
             totalPages,
         });
-}));
-
-router.get("/api/dictation-exercises/roadmap", verifyToken, asyncHandler(async (req, res) => {
-        const { status, data } = await dictationexerciseService.getDictationExerciseRoadmap(req.user.id);
+    }));
+    router.get("/api/dictation-exercises/roadmap", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await dictationExerciseService.getDictationExerciseRoadmap(req.user.id);
         return res.status(status).json(data);
-}));
-
-router.get("/api/dictationexercise/:id", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await dictationexerciseService.getDictationExerciseDetails(req.user.id, req.params.id);
+    }));
+    router.get("/api/dictationexercise/:id", verifyToken, asyncHandler(async function (req, res) {
+        const { status, data } = await dictationExerciseService.getDictationExerciseDetails(req.user.id, req.params.id);
         return res.status(status).json(data);
-}));
-
-router.get("/api/dictationexercise/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await dictationexerciseService.getDictationExerciseDetailsBySlug(req.user.id, req.params.slug);
+    }));
+    router.get("/api/dictationexercise/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
+        const { status, data } = await dictationExerciseService.getDictationExerciseDetailsBySlug(req.user.id, req.params.slug);
         return res.status(status).json(data);
-}));
-
-router.post("/api/dictation-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {
-        const { status, data } = await dictationexerciseService.completeDictationExercise(req.user.id, req.params.id);
+    }));
+    router.post("/api/dictation-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {
+        const { status, data } = await dictationExerciseService.completeDictationExercise(req.user.id, req.params.id);
         return res.status(status).json(data);
-}));
-
-router.post("/add", verifyAdmin, asyncHandler(async function (req, res) {
+    }));
+    router.post("/add", verifyAdmin, asyncHandler(async function (req, res) {
         const validation = validateDictationExerciseInput(req.body);
         if (!validation.valid) {
             return res.status(400).json({ success: false, message: validation.errors.join(', ') });
         }
-        const { status, data } = await dictationexerciseService.insertDictation(buildDictationExerciseDataFromRequest(req.body));
+        const { status, data } = await dictationExerciseService.insertDictation(buildDictationExerciseDataFromRequest(req.body));
         res.status(status).json(data);
-}));
-
-router.get("/api/:id", verifyAdmin, asyncHandler(async function (req, res) {
-        const exercise = await dictationexerciseService.getDictation(req.params.id);
+    }));
+    router.get("/api/:id", verifyAdmin, asyncHandler(async function (req, res) {
+        const exercise = await dictationExerciseService.getDictation(req.params.id);
         if (!exercise) {
             return res.status(404).json({ message: "Dictation Exercise not found" });
         }
         res.json(exercise);
-}));
-
-router.put("/update/:id", verifyAdmin, asyncHandler(async function (req, res) {
+    }));
+    router.put("/update/:id", verifyAdmin, asyncHandler(async function (req, res) {
         const validation = validateDictationExerciseInput(req.body);
         if (!validation.valid) {
             return res.status(400).json({ success: false, message: validation.errors.join(', ') });
         }
-        const { status, data } = await dictationexerciseService.updateDictation(req.params.id, buildDictationExerciseDataFromRequest(req.body));
+        const { status, data } = await dictationExerciseService.updateDictation(req.params.id, buildDictationExerciseDataFromRequest(req.body));
         res.status(status).json(data);
-}));
-
-router.delete("/delete/:id", verifyAdmin, asyncHandler(async function (req, res) {
-        const { status, data } = await dictationexerciseService.deleteDictation(req.params.id);
+    }));
+    router.delete("/delete/:id", verifyAdmin, asyncHandler(async function (req, res) {
+        const { status, data } = await dictationExerciseService.deleteDictation(req.params.id);
         return res.status(status).json(data);
-}));
+    }));
+    return router;
+}
 
-module.exports = router;
-module.exports.setDictationExerciseService = (service) => {
-    dictationexerciseService = service;
-};
+module.exports = { createDictationExerciseController };

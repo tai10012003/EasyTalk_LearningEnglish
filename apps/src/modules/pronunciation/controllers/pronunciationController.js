@@ -1,74 +1,67 @@
 const express = require("express");
-const router = express.Router();
 const multer = require("multer");
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
-const PronunciationService = require("../services/pronunciationService");
 const { validatePronunciationInput, buildPronunciationDataFromRequest } = require("../validators/pronunciationValidator");
-let pronunciationService = new PronunciationService();
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage });
+const upload = multer({ storage });
 
-router.get("/api/pronunciation-list", verifyToken, asyncHandler(async function (req, res) {
-    const page = parseInt(req.query.page) || 1;
-    const limit = 12;
-    const role = req.user.role || "user";
-    const search = req.query.search || "";
-    const lang = req.query.lang || "vi";
-    const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit, search, role, lang);
-    const totalPages = Math.ceil(totalPronunciations / limit);
-    res.json({ data: { pronunciations, currentPage: page, totalPages } });
-}));
-
-router.get("/api/pronunciation/roadmap", verifyToken, asyncHandler(async function (req, res) {
+function createPronunciationController({ pronunciationService }) {
+    if (!pronunciationService) {
+        throw new Error("createPronunciationController requires pronunciationService");
+    }
+    const router = express.Router();
+    router.get("/api/pronunciation-list", verifyToken, asyncHandler(async function (req, res) {
+        const page = parseInt(req.query.page) || 1;
+        const limit = 12;
+        const role = req.user.role || "user";
+        const search = req.query.search || "";
+        const lang = req.query.lang || "vi";
+        const { pronunciations, totalPronunciations } = await pronunciationService.getPronunciationList(page, limit, search, role, lang);
+        const totalPages = Math.ceil(totalPronunciations / limit);
+        res.json({ data: { pronunciations, currentPage: page, totalPages } });
+    }));
+    router.get("/api/pronunciation/roadmap", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await pronunciationService.getPronunciationRoadmap(req.user.id, req.query.lang || "vi");
         return res.status(status).json(data);
-}));
-
-router.get("/api/pronunciation/:id", verifyToken, asyncHandler(async function (req, res) {
+    }));
+    router.get("/api/pronunciation/:id", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await pronunciationService.getPronunciationDetails(req.user.id, req.params.id, req.query.lang || "vi");
         return res.status(status).json(data);
-}));
-
-router.get("/api/pronunciation/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
+    }));
+    router.get("/api/pronunciation/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
         const { status, data } = await pronunciationService.getPronunciationDetailsBySlug(req.user.id, req.params.slug, req.query.lang || "vi");
         return res.status(status).json(data);
-}));
-
-router.post("/api/pronunciation/complete/:id", verifyToken, asyncHandler(async (req, res) => {
+    }));
+    router.post("/api/pronunciation/complete/:id", verifyToken, asyncHandler(async (req, res) => {
         const { status, data } = await pronunciationService.completePronunciation(req.user.id, req.params.id);
         return res.status(status).json(data);
-}));
-
-router.post("/api/add", verifyAdmin, upload.single("image"), asyncHandler(async function (req, res) {
+    }));
+    router.post("/api/add", verifyAdmin, upload.single("image"), asyncHandler(async function (req, res) {
         const validation = validatePronunciationInput(req.body);
         if (!validation.valid) return res.status(400).json({ message: validation.errors.join(', ') });
         const { status, data } = await pronunciationService.insertPronunciation(buildPronunciationDataFromRequest(req.body), req.file || null);
         return res.status(status).json(data);
-}));
-
-router.get("/api/:id", verifyAdmin, asyncHandler(async function (req, res) {
+    }));
+    router.get("/api/:id", verifyAdmin, asyncHandler(async function (req, res) {
         const pronunciation = await pronunciationService.getPronunciation(req.params.id);
         if (!pronunciation) {
             return res.status(404).json({ message: "Pronunciation not found" });
         }
         res.json(pronunciation);
-}));
-
-router.put("/api/update/:id", verifyAdmin, upload.single("image"), asyncHandler(async function (req, res) {
+    }));
+    router.put("/api/update/:id", verifyAdmin, upload.single("image"), asyncHandler(async function (req, res) {
         const validation = validatePronunciationInput(req.body);
         if (!validation.valid) return res.status(400).json({ message: validation.errors.join(', ') });
         const { status, data } = await pronunciationService.updatePronunciation(req.params.id, buildPronunciationDataFromRequest(req.body), req.file || null);
         return res.status(status).json(data);
-}));
-
-router.delete("/api/pronunciation/:id", verifyAdmin, asyncHandler(async function (req, res) {
+    }));
+    router.delete("/api/pronunciation/:id", verifyAdmin, asyncHandler(async function (req, res) {
         const { status, data } = await pronunciationService.deletePronunciation(req.params.id);
         return res.status(status).json(data);
-}));
+    }));
+    return router;
+}
 
-module.exports = router;
-module.exports.setPronunciationService = (service) => {
-    pronunciationService = service;
-};
+module.exports = { createPronunciationController };

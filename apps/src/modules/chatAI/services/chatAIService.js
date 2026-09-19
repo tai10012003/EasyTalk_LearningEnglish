@@ -1,10 +1,13 @@
-const OpenAIService = require('./openAIService');
-const ConversationFlowService = require('./conversationFlowService');
-
 class ChatAIService {
     constructor(deps = {}) {
-        this.openAIService = deps.openAIService || new OpenAIService();
-        this.conversationFlowService = deps.conversationFlowService || new ConversationFlowService(this.openAIService);
+        if (!deps.openAIService) {
+            throw new Error("ChatAIService requires openAIService");
+        }
+        if (!deps.conversationFlowService) {
+            throw new Error("ChatAIService requires conversationFlowService");
+        }
+        this.openAIService = deps.openAIService;
+        this.conversationFlowService = deps.conversationFlowService;
     }
 
     async startConversation() {

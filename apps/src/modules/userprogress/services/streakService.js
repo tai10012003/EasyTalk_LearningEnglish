@@ -2,14 +2,16 @@ const { ObjectId } = require('mongodb');
 const nodemailer = require('nodemailer');
 const config = require('../../../shared/config/setting');
 const UserProgressRepository = require('../repositories/userprogressRepository');
-const NotificationService = require('../../notification/services/notificationService');
 const { invalidateUserProgressCache } = require('../utils/cacheHelper');
 const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 
 class StreakService {
     constructor(deps = {}) {
         this.userProgressRepository = deps.repository || new UserProgressRepository();
-        this.notificationService = deps.notificationService || new NotificationService();
+        if (!deps.notificationService) {
+            throw new Error("StreakService requires notificationService");
+        }
+        this.notificationService = deps.notificationService;
         this.transporter = deps.transporter || nodemailer.createTransport({
             service: 'gmail',
             auth: {

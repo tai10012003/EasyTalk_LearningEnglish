@@ -2,7 +2,6 @@ const cache = require('../../../shared/utils/cacheService');
 const cacheNs = require('../../../shared/utils/cacheNamespaces');
 const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const PronunciationRepository = require('../repositories/pronunciationRepository');
-const pronunciationImageService = require('../services/pronunciationImageService');
 const { invalidatePronunciationCache } = require('../utils/cacheHelper');
 const { Pronunciation } = require('../models/pronunciation');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
@@ -11,7 +10,10 @@ class PronunciationService {
     constructor(deps = {}) {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
         this.repository = options.repository || new PronunciationRepository();
-        this.imageService = options.imageService || new pronunciationImageService("easytalk/pronunciation");
+        if (!options.imageService) {
+            throw new Error("PronunciationService requires imageService");
+        }
+        this.imageService = options.imageService;
         this.cache = options.cacheService || cache;
         this._userProgressService = options.userProgressService || null;
         this.englishTranslationService = options.englishTranslationService || null;
@@ -19,8 +21,7 @@ class PronunciationService {
 
     getUserProgressService() {
         if (!this._userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this._userProgressService = new UserProgressService();
+            throw new Error("PronunciationService requires userProgressService");
         }
         return this._userProgressService;
     }
@@ -72,7 +73,7 @@ class PronunciationService {
         if (!userProgress) {
             const firstPronunciationPage = await this.getPronunciationList(1, 1);
             const firstPronunciation = firstPronunciationPage?.pronunciations?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, firstPronunciation ? firstPronunciation._id : null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { pronunciation: firstPronunciation ? firstPronunciation._id : null }});
         } else if (!Array.isArray(userProgress.unlockedPronunciations) || userProgress.unlockedPronunciations.length === 0) {
             const firstPronunciationPage = await this.getPronunciationList(1, 1);
             const firstPronunciation = firstPronunciationPage?.pronunciations?.[0] || null;

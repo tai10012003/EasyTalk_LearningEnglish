@@ -5,7 +5,6 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require('dotenv');
 const path = require("path");
-const { errorHandler, notFound } = require('./src/shared/middleware/errorHandler');
 const responseFormatter = require('./src/shared/middleware/responseFormatter');
 const logger = require('./src/shared/utils/logger');
 
@@ -92,6 +91,7 @@ app.use("/static", express.static(__dirname + "/public"));
 
 const { initSocket } = require('./src/shared/utils/socket');
 const { buildDependencies } = require('./src/bootstrap/dependencies');
+const { registerRoutes } = require('./src/bootstrap/routes');
 let controllers = null;
 let routesInitialized = false;
 
@@ -100,36 +100,7 @@ async function initRealtimeAndRoutes() {
   const io = await initSocket(server, getAllowedClientOrigins());
   logger.info('Socket.IO initialized');
   controllers = buildDependencies({ io }).controllers;
-
-  app.use("/user", controllers.userController);
-  app.use("/userprogress", controllers.userProgressController);
-  app.use("/prize", controllers.prizeController);
-  app.use("/notification", controllers.notificationController);
-  app.use("/grammar", controllers.grammarController);
-  app.use("/pronunciation", controllers.pronunciationController);
-  app.use("/grammar-exercise", controllers.grammarExerciseController);
-  app.use("/story", controllers.storyController);
-  app.use("/vocabulary-exercise", controllers.vocabularyExerciseController);
-  app.use("/pronunciation-exercise", controllers.pronunciationExerciseController);
-  app.use("/dictation-exercise", controllers.dictationController);
-  app.use("/journey", controllers.journeyController);
-  app.use("/gate", controllers.gateController);
-  app.use("/stage", controllers.stageController);
-  app.use("/flashcards", controllers.flashcardController);
-  app.use("/reminder", controllers.reminderController);
-  app.use("/setting", controllers.userSettingController);
-  app.use("/dashboard", controllers.dashboardController);
-  app.use("/chat", controllers.chatAIController);
-  app.use("/writing", controllers.writingAIController);
-  app.use("/agent", controllers.learningAgentController);
-  app.use("/cache", controllers.cacheController);
-  app.use("/english-translations", controllers.englishTranslationController);
-  if (AWSXRay) {
-    app.use(AWSXRay.express.closeSegment());
-  }
-
-  app.use(notFound);
-  app.use(errorHandler);
+  registerRoutes(app, controllers, { AWSXRay });
   routesInitialized = true;
 }
 

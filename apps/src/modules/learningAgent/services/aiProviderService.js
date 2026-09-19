@@ -1,12 +1,3 @@
-const PromptTemplateService = require('./promptTemplateService');
-const AIResponseSchemaGuard = require('../schemas/aiResponseSchemaGuard');
-const MockAIResponseService = require('./mockAIResponseService');
-const ProviderFactory = require('../adapters/providerFactory');
-const AICostReporter = require('../telemetry/aiCostReporter');
-const AILatencyReporter = require('../telemetry/aiLatencyReporter');
-const FallbackReporter = require('../telemetry/fallbackReporter');
-const AITraceService = require('../telemetry/aiTraceService');
-
 class AIProviderService {
     constructor(options = {}) {
         this.provider = options.provider || process.env.AI_PROVIDER || 'mock';
@@ -40,14 +31,38 @@ class AIProviderService {
         };
         this.inputPricePerMillion = Number.parseFloat(options.inputPricePerMillion || process.env.AI_INPUT_PRICE_PER_MILLION || "0");
         this.outputPricePerMillion = Number.parseFloat(options.outputPricePerMillion || process.env.AI_OUTPUT_PRICE_PER_MILLION || "0");
-        this.promptTemplateService = options.promptTemplateService || new PromptTemplateService();
-        this.aiResponseValidatorService = options.aiResponseValidatorService || options.aiResponseSchemaGuard || new AIResponseSchemaGuard();
-        this.mockAIResponseService = options.mockAIResponseService || new MockAIResponseService();
-        this.providerRegistry = options.providerRegistry || ProviderFactory.createRegistry(options);
-        this.aiCostReporter = options.aiCostReporter || new AICostReporter();
-        this.aiLatencyReporter = options.aiLatencyReporter || new AILatencyReporter();
-        this.fallbackReporter = options.fallbackReporter || new FallbackReporter();
-        this.aiTraceService = options.aiTraceService || new AITraceService();
+        if (!options.promptTemplateService) {
+            throw new Error("AIProviderService requires promptTemplateService");
+        }
+        if (!options.aiResponseValidatorService && !options.aiResponseSchemaGuard) {
+            throw new Error("AIProviderService requires aiResponseValidatorService");
+        }
+        if (!options.mockAIResponseService) {
+            throw new Error("AIProviderService requires mockAIResponseService");
+        }
+        if (!options.providerRegistry) {
+            throw new Error("AIProviderService requires providerRegistry");
+        }
+        if (!options.aiCostReporter) {
+            throw new Error("AIProviderService requires aiCostReporter");
+        }
+        if (!options.aiLatencyReporter) {
+            throw new Error("AIProviderService requires aiLatencyReporter");
+        }
+        if (!options.fallbackReporter) {
+            throw new Error("AIProviderService requires fallbackReporter");
+        }
+        if (!options.aiTraceService) {
+            throw new Error("AIProviderService requires aiTraceService");
+        }
+        this.promptTemplateService = options.promptTemplateService;
+        this.aiResponseValidatorService = options.aiResponseValidatorService || options.aiResponseSchemaGuard;
+        this.mockAIResponseService = options.mockAIResponseService;
+        this.providerRegistry = options.providerRegistry;
+        this.aiCostReporter = options.aiCostReporter;
+        this.aiLatencyReporter = options.aiLatencyReporter;
+        this.fallbackReporter = options.fallbackReporter;
+        this.aiTraceService = options.aiTraceService;
     }
 
     getStatus() {
@@ -91,7 +106,6 @@ class AIProviderService {
         if (this.aiUsageService && context.userId) {
             await this.aiUsageService.assertWithinDailyLimit(context.userId);
         }
-
         let enhancement = null;
         let fallbackReason = null;
         const latency = this.aiLatencyReporter.createMeasurement();
@@ -105,14 +119,11 @@ class AIProviderService {
             enhancement = this.mockAIResponseService.safeDailyPlanCopy(plan);
         }
         const latencyMs = latency.finish();
-
         const enhancedPlan = {
             ...plan,
             headline: enhancement.headline || plan.headline,
             motivation: enhancement.motivation || plan.motivation,
-            tasks: Array.isArray(enhancement.tasks) && enhancement.tasks.length
-                ? this.mergeTaskCopy(plan.tasks, enhancement.tasks)
-                : plan.tasks,
+            tasks: Array.isArray(enhancement.tasks) && enhancement.tasks.length ? this.mergeTaskCopy(plan.tasks, enhancement.tasks) : plan.tasks,
             mode: `${plan.mode}+${fallbackReason ? 'fallback-mock-ai' : (this.isMock() ? 'mock-ai' : this.provider)}`,
             aiProvider: {
                 ...this.getStatus(),
@@ -121,14 +132,12 @@ class AIProviderService {
             }
         };
         this.traceTaskResult('enhance_daily_plan', latencyMs, fallbackReason);
-
         if (this.aiUsageService && context.userId) {
             await this.aiUsageService.recordUsage(
                 context.userId,
                 this.buildUsageRecord('enhance_daily_plan', plan, enhancedPlan, enhancement.__aiUsage, fallbackReason, latencyMs, enhancement.__aiModel)
             );
         }
-
         return enhancedPlan;
     }
 
@@ -193,7 +202,6 @@ class AIProviderService {
         const outputTokens = providerUsage?.outputTokens ?? this.estimateTokens(this.stripProviderMetadata(output));
         const totalTokens = providerUsage?.totalTokens ?? inputTokens + outputTokens;
         const taskModel = model || this.getModelForTask(task);
-
         return {
             task,
             provider: this.provider,
@@ -247,7 +255,6 @@ class AIProviderService {
             }),
             this.getTimeoutForTask(task)
         ), task);
-
         const content = response.choices?.[0]?.message?.content || "{}";
         const parsed = this.parseJsonContent(content);
         const validated = this.validateTaskOutput(task, parsed, input);
@@ -362,12 +369,7 @@ class AIProviderService {
     }
 
     parseJsonContent(content) {
-        const cleaned = content
-            .trim()
-            .replace(/^```json\s*/i, "")
-            .replace(/^```\s*/i, "")
-            .replace(/```$/i, "")
-            .trim();
+        const cleaned = content.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/i, "").trim();
         try {
             return JSON.parse(cleaned);
         } catch (error) {
@@ -401,7 +403,6 @@ class AIProviderService {
             };
         });
     }
-
 }
 
 module.exports = AIProviderService;

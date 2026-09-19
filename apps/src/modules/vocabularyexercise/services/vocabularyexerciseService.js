@@ -49,8 +49,7 @@ class VocabularyExerciseService {
 
     getUserProgressService() {
         if (!this.userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this.userProgressService = new UserProgressService();
+            throw new Error("VocabularyExerciseService requires userProgressService");
         }
         return this.userProgressService;
     }
@@ -92,7 +91,7 @@ class VocabularyExerciseService {
         if (!userProgress) {
             const firstVocabularyExercisePage = await this.getVocabularyexerciseList(1, 1);
             const firstVocabularyExercise = firstVocabularyExercisePage?.vocabularyexercises?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, null, firstVocabularyExercise ? firstVocabularyExercise._id : null, null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { vocabularyExercise: firstVocabularyExercise ? firstVocabularyExercise._id : null }});
         }
         return userProgress;
     }

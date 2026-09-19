@@ -1,132 +1,198 @@
-const UserRepository = require('../modules/user/repositories/userRepository');
-const UserProgressRepository = require('../modules/userprogress/repositories/userprogressRepository');
-
-const NotificationService = require('../modules/notification/services/notificationService');
-const UserSettingService = require('../modules/usersetting/services/usersettingService');
-const UserProgressService = require('../modules/userprogress/services/userprogressService');
-const StreakService = require('../modules/userprogress/services/streakService');
-const LeaderboardService = require('../modules/userprogress/services/leaderboardService');
-const BadgeService = require('../modules/userprogress/services/badgeService');
-const UserPrizeService = require('../modules/userprogress/services/userprizeService');
-const FollowService = require('../modules/userprogress/services/followService');
-const PrizeService = require('../modules/prize/services/prizeService');
-const FlashcardService = require('../modules/flashcard/services/flashcardService');
-const GrammarService = require('../modules/grammar/services/grammarService');
-const EnglishTranslationService = require('../modules/englishtranslation/services/englishtranslationService');
-const PronunciationService = require('../modules/pronunciation/services/pronunciationService');
-const StoryService = require('../modules/story/services/storyService');
-const GrammarExerciseService = require('../modules/grammarexercise/services/grammarexerciseService');
-const PronunciationExerciseService = require('../modules/pronunciationexercise/services/pronunciationexerciseService');
-const VocabularyExerciseService = require('../modules/vocabularyexercise/services/vocabularyexerciseService');
-const DictationExerciseService = require('../modules/dictationexercise/services/dictationexerciseService');
-const JourneyService = require('../modules/journey/services/journeyService');
-const GateService = require('../modules/gate/services/gateService');
-const StageService = require('../modules/stage/services/stageService');
-const LearningAgentService = require('../modules/learningAgent/services/learningAgentService');
-const LearnerMemoryService = require('../modules/learningAgent/services/learnerMemoryService');
-const AIProviderService = require('../modules/learningAgent/services/aiProviderService');
-const AIUsageService = require('../modules/learningAgent/services/aiUsageService');
-const AITextToSpeechService = require('../modules/learningAgent/services/aiTextToSpeechService');
-const AIProviderDebugService = require('../modules/learningAgent/services/aiProviderDebugService');
-const DailyPlanCacheService = require('../modules/learningAgent/services/dailyPlanCacheService');
-const AgentSessionService = require('../modules/learningAgent/services/agentSessionService');
-const AgentLearningEventService = require('../modules/learningAgent/services/agentLearningEventService');
-const AgentModeService = require('../modules/learningAgent/services/agentModeService');
-const DailyPlanAgent = require('../modules/learningAgent/agents/dailyPlanAgent');
-const ChatCoachAgent = require('../modules/learningAgent/agents/chatCoachAgent');
-const WritingCoachAgent = require('../modules/learningAgent/agents/writingCoachAgent');
-const StudyGuideAgent = require('../modules/learningAgent/agents/studyGuideAgent');
-const AgentRegistry = require('../modules/learningAgent/agents/agentRegistry');
-const ProgressTool = require('../modules/learningAgent/tools/progressTool');
-const MemoryTool = require('../modules/learningAgent/tools/memoryTool');
-const DailyPlanTool = require('../modules/learningAgent/tools/dailyPlanTool');
-const LearningEventTool = require('../modules/learningAgent/tools/learningEventTool');
-const WritingAIService = require('../modules/writingAI/services/writingAIService');
+const { createUserController, UserService, AuthenticationService, EmailService, SocialAuthService, SecurityAuditService, UserRepository, UserSessionRepository } = require('../modules/user');
+const { createUserProgressController, UserProgressService, StreakService, LeaderboardService, BadgeService, UserPrizeService, FollowService, UserProgressRepository } = require('../modules/userprogress');
+const { createGrammarController, GrammarService, GrammarImageService, GrammarRepository } = require('../modules/grammar');
+const { createPronunciationController, PronunciationService, PronunciationImageService, PronunciationRepository } = require('../modules/pronunciation');
+const { createStoryController, StoryService, StoryImageService, StoryRepository } = require('../modules/story');
+const { createGrammarExerciseController, GrammarExerciseService, GrammarExerciseRepository, GrammarExerciseAttemptRepository } = require('../modules/grammarexercise');
+const { createPronunciationExerciseController, PronunciationExerciseService, SpeechAnalysisService, PronunciationExerciseRepository, PronunciationExerciseAttemptRepository } = require('../modules/pronunciationexercise');
+const { createVocabularyExerciseController, VocabularyExerciseService, VocabularyExerciseRepository, VocabularyExerciseAttemptRepository } = require('../modules/vocabularyexercise');
+const { createDictationExerciseController, DictationExerciseService, DictationExerciseRepository } = require('../modules/dictationexercise');
+const { createJourneyController, JourneyService } = require('../modules/journey');
+const { createGateController, GateService } = require('../modules/gate');
+const { createStageController, StageService } = require('../modules/stage');
+const { createFlashcardController, FlashcardService, FlashcardImageService } = require('../modules/flashcard');
+const { createReminderController, ReminderService, ReminderSchedulerService, ReminderEmailService } = require('../modules/reminder');
+const { createDashboardController, DashboardService, ActivityAnalyticsService, ContentAnalyticsService, LeaderboardAnalyticsService, SecurityDashboardService, AgentDebugDashboardService } = require('../modules/dashboard');
+const { createLearningAgentController, LearningAgentService, LearnerMemoryService, AIProviderService, AIUsageService, AITextToSpeechService, AIProviderDebugService, DailyPlanCacheService, PromptTemplateService, MockAIResponseService, AgentSessionService, AgentLearningEventService, AgentModeService, AIResponseSchemaGuard, ProviderFactory, AICostReporter, AILatencyReporter, FallbackReporter, AITraceService, DailyPlanAgent, ChatCoachAgent, WritingCoachAgent, StudyGuideAgent, AgentRegistry, ProgressTool, MemoryTool, DailyPlanTool, LearningEventTool } = require('../modules/learningAgent');
+const { createWritingAIController, WritingAIService, TopicGeneratorService, WritingAnalyzerService } = require('../modules/writingAI');
+const { createChatAIController, ChatAIService, OpenAIService, ConversationFlowService } = require('../modules/chatAI');
+const { createPrizeController, PrizeService } = require('../modules/prize');
+const { createNotificationController, NotificationService } = require('../modules/notification');
+const { createUserSettingController, UserSettingService } = require('../modules/usersetting');
+const { createEnglishTranslationController, EnglishTranslationService } = require('../modules/englishtranslation');
+const { ContentProgressService } = require('../modules/learningContent');
+const { createCacheController } = require('../modules/cache');
 const cacheService = require('../shared/utils/cacheService');
-
-const userController = require('../modules/user/controllers/userController');
-const userProgressController = require('../modules/userprogress/controllers/userprogressController');
-const prizeController = require('../modules/prize/controllers/prizeController');
-const notificationController = require('../modules/notification/controllers/notificationController');
-const grammarController = require('../modules/grammar/controllers/grammarController');
-const pronunciationController = require('../modules/pronunciation/controllers/pronunciationController');
-const storyController = require('../modules/story/controllers/storyController');
-const grammarExerciseController = require('../modules/grammarexercise/controllers/grammarexerciseController');
-const pronunciationExerciseController = require('../modules/pronunciationexercise/controllers/pronunciationexerciseController');
-const vocabularyExerciseController = require('../modules/vocabularyexercise/controllers/vocabularyexerciseController');
-const dictationController = require('../modules/dictationexercise/controllers/dictationexerciseController');
-const journeyController = require('../modules/journey/controllers/journeyController');
-const gateController = require('../modules/gate/controllers/gateController');
-const stageController = require('../modules/stage/controllers/stageController');
-const flashcardController = require('../modules/flashcard/controllers/flashcardController');
-const reminderController = require('../modules/reminder/controllers/reminderController');
-const userSettingController = require('../modules/usersetting/controllers/usersettingController');
-const dashboardController = require('../modules/dashboard/controllers/dashboardController');
-const chatAIController = require('../modules/chatAI/controllers/chatAIController');
-const writingAIController = require('../modules/writingAI/controllers/writingAIController');
-const learningAgentController = require('../modules/learningAgent/controllers/learningAgentController');
-const cacheController = require('../modules/cache/controllers/cacheController');
-const englishTranslationController = require('../modules/englishtranslation/controllers/englishtranslationController');
 
 function buildDependencies(options = {}) {
     const repositories = {
         userRepository: new UserRepository(),
-        userProgressRepository: new UserProgressRepository()
+        userProgressRepository: new UserProgressRepository(),
+        grammarRepository: new GrammarRepository(),
+        pronunciationRepository: new PronunciationRepository(),
+        storyRepository: new StoryRepository(),
+        grammarExerciseRepository: new GrammarExerciseRepository(),
+        grammarExerciseAttemptRepository: new GrammarExerciseAttemptRepository(),
+        pronunciationExerciseRepository: new PronunciationExerciseRepository(),
+        pronunciationExerciseAttemptRepository: new PronunciationExerciseAttemptRepository(),
+        vocabularyExerciseRepository: new VocabularyExerciseRepository(),
+        vocabularyExerciseAttemptRepository: new VocabularyExerciseAttemptRepository(),
+        dictationExerciseRepository: new DictationExerciseRepository(),
+        userSessionRepository: new UserSessionRepository()
     };
-
     const services = {
+        securityAuditService: new SecurityAuditService(),
+        emailService: new EmailService(),
+        socialAuthService: new SocialAuthService(),
         notificationService: new NotificationService({ io: options.io }),
         userSettingService: new UserSettingService(),
         userProgressService: new UserProgressService(),
-        streakService: new StreakService(),
         leaderboardService: new LeaderboardService(),
         badgeService: new BadgeService(),
         prizeService: new PrizeService(),
         followService: new FollowService(),
-        flashcardService: new FlashcardService(),
         englishTranslationService: new EnglishTranslationService(),
+        flashcardImageService: new FlashcardImageService(),
+        grammarImageService: new GrammarImageService("easytalk/grammar"),
+        pronunciationImageService: new PronunciationImageService("easytalk/pronunciation"),
+        storyImageService: new StoryImageService("easytalk/story"),
+        speechAnalysisService: new SpeechAnalysisService(),
+        reminderSchedulerService: new ReminderSchedulerService(),
+        reminderEmailService: new ReminderEmailService(),
+        chatOpenAIService: new OpenAIService(),
+        topicGeneratorService: new TopicGeneratorService(),
+        writingAnalyzerService: new WritingAnalyzerService(),
+        promptTemplateService: new PromptTemplateService(),
+        aiResponseValidatorService: new AIResponseSchemaGuard(),
+        mockAIResponseService: new MockAIResponseService(),
+        aiCostReporter: new AICostReporter(),
+        aiLatencyReporter: new AILatencyReporter(),
+        fallbackReporter: new FallbackReporter(),
+        aiTraceService: new AITraceService(),
         cacheService
     };
-
+    services.authService = new AuthenticationService({
+        sessionRepository: repositories.userSessionRepository,
+        securityAuditService: services.securityAuditService
+    });
+    services.flashcardService = new FlashcardService({
+        imageService: services.flashcardImageService,
+        userProgressService: services.userProgressService
+    });
+    services.reminderService = new ReminderService({
+        schedulerService: services.reminderSchedulerService,
+        emailService: services.reminderEmailService,
+        notificationService: services.notificationService
+    });
+    services.conversationFlowService = new ConversationFlowService(services.chatOpenAIService);
+    services.chatAIService = new ChatAIService({
+        openAIService: services.chatOpenAIService,
+        conversationFlowService: services.conversationFlowService
+    });
+    services.streakService = new StreakService({
+        notificationService: services.notificationService
+    });
     services.userPrizeService = new UserPrizeService({
         notificationService: services.notificationService,
         prizeService: services.prizeService
     });
-
+    services.activityAnalyticsService = new ActivityAnalyticsService(repositories.userRepository);
+    services.contentAnalyticsService = new ContentAnalyticsService(repositories.userRepository.db);
+    services.leaderboardAnalyticsService = new LeaderboardAnalyticsService(repositories.userProgressRepository);
+    services.securityDashboardService = new SecurityDashboardService(repositories.userRepository.db);
+    services.agentDebugDashboardService = new AgentDebugDashboardService(repositories.userRepository.db);
+    services.dashboardService = new DashboardService(
+        repositories.userRepository,
+        repositories.userProgressRepository,
+        {
+            activityService: services.activityAnalyticsService,
+            contentService: services.contentAnalyticsService,
+            leaderboardService: services.leaderboardAnalyticsService,
+            securityService: services.securityDashboardService,
+            agentDebugService: services.agentDebugDashboardService
+        }
+    );
+    services.userService = new UserService({
+        repository: repositories.userRepository,
+        authService: services.authService,
+        emailService: services.emailService,
+        socialAuthService: services.socialAuthService,
+        securityAuditService: services.securityAuditService,
+        notificationService: services.notificationService,
+        userSettingService: services.userSettingService,
+        userProgressService: services.userProgressService,
+        flashcardService: services.flashcardService
+    });
     const learningServiceDeps = {
         cacheService,
         userProgressService: services.userProgressService
     };
-
     services.grammarService = new GrammarService({
         ...learningServiceDeps,
+        repository: repositories.grammarRepository,
+        imageService: services.grammarImageService,
         englishTranslationService: services.englishTranslationService
     });
     services.pronunciationService = new PronunciationService({
         ...learningServiceDeps,
+        repository: repositories.pronunciationRepository,
+        imageService: services.pronunciationImageService,
         englishTranslationService: services.englishTranslationService
     });
     services.storyService = new StoryService({
         ...learningServiceDeps,
+        repository: repositories.storyRepository,
+        imageService: services.storyImageService,
         englishTranslationService: services.englishTranslationService
     });
     services.grammarExerciseService = new GrammarExerciseService({
         ...learningServiceDeps,
+        repository: repositories.grammarExerciseRepository,
+        attemptRepository: repositories.grammarExerciseAttemptRepository,
         englishTranslationService: services.englishTranslationService
     });
-    services.pronunciationExerciseService = new PronunciationExerciseService(learningServiceDeps);
-    services.vocabularyExerciseService = new VocabularyExerciseService(learningServiceDeps);
-    services.dictationExerciseService = new DictationExerciseService(learningServiceDeps);
+    services.pronunciationExerciseService = new PronunciationExerciseService({
+        ...learningServiceDeps,
+        repository: repositories.pronunciationExerciseRepository,
+        attemptRepository: repositories.pronunciationExerciseAttemptRepository,
+        speechAnalysisService: services.speechAnalysisService
+    });
+    services.vocabularyExerciseService = new VocabularyExerciseService({
+        ...learningServiceDeps,
+        repository: repositories.vocabularyExerciseRepository,
+        attemptRepository: repositories.vocabularyExerciseAttemptRepository
+    });
+    services.dictationExerciseService = new DictationExerciseService({
+        ...learningServiceDeps,
+        repository: repositories.dictationExerciseRepository
+    });
     services.journeyService = new JourneyService({ cacheService });
-    services.gateService = new GateService({ cacheService });
-    services.stageService = new StageService({ cacheService });
+    services.gateService = new GateService({
+        cacheService,
+        journeyService: services.journeyService
+    });
+    services.stageService = new StageService({
+        cacheService,
+        gateService: services.gateService,
+        journeyService: services.journeyService,
+        userProgressService: services.userProgressService
+    });
+    services.gateService.setStageService(services.stageService);
     services.learnerMemoryService = new LearnerMemoryService();
     services.aiUsageService = new AIUsageService();
     services.dailyPlanCacheService = new DailyPlanCacheService({
         cacheService
     });
     services.aiProviderService = new AIProviderService({
-        aiUsageService: services.aiUsageService
+        aiUsageService: services.aiUsageService,
+        promptTemplateService: services.promptTemplateService,
+        aiResponseValidatorService: services.aiResponseValidatorService,
+        mockAIResponseService: services.mockAIResponseService,
+        providerRegistry: ProviderFactory.createRegistry(),
+        aiCostReporter: services.aiCostReporter,
+        aiLatencyReporter: services.aiLatencyReporter,
+        fallbackReporter: services.fallbackReporter,
+        aiTraceService: services.aiTraceService
     });
     services.aiTextToSpeechService = new AITextToSpeechService({
         aiUsageService: services.aiUsageService
@@ -178,6 +244,7 @@ function buildDependencies(options = {}) {
     services.pronunciationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
     services.dictationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
     services.writingCoachAgent = new WritingCoachAgent({
+        writingAnalyzer: services.writingAnalyzerService,
         learningEventTool: services.learningEventTool,
         agentModeService: services.agentModeService,
         aiProviderService: services.aiProviderService
@@ -189,43 +256,10 @@ function buildDependencies(options = {}) {
         studyGuide: services.studyGuideAgent
     });
     services.writingAIService = new WritingAIService({
+        topicGenerator: services.topicGeneratorService,
+        writingAnalyzer: services.writingAnalyzerService,
         writingCoachAgent: services.agentRegistry.require('writingCoach')
     });
-
-    userController.setNotificationService(services.notificationService);
-    userController.setUserSettingService(services.userSettingService);
-    userController.setUserProgressService(services.userProgressService);
-    userController.setFlashcardService(services.flashcardService);
-
-    notificationController.setNotificationService(services.notificationService);
-    userSettingController.setUserSettingService(services.userSettingService);
-    flashcardController.setFlashcardService(services.flashcardService);
-    flashcardController.setUserProgressService(services.userProgressService);
-    prizeController.setPrizeService(services.prizeService);
-    prizeController.setUserPrizeService(services.userPrizeService);
-
-    journeyController.setGateService(services.gateService);
-    journeyController.setUserProgressService(services.userProgressService);
-    gateController.setJourneyService(services.journeyService);
-    gateController.setStageService(services.stageService);
-    stageController.setJourneyService(services.journeyService);
-    stageController.setGateService(services.gateService);
-    stageController.setUserProgressService(services.userProgressService);
-    reminderController.setNotificationService(services.notificationService);
-    dashboardController.setRepositories(repositories.userRepository, repositories.userProgressRepository);
-    learningAgentController.setLearningAgentService(services.learningAgentService);
-    learningAgentController.setLearnerMemoryService(services.learnerMemoryService);
-    learningAgentController.setAIProviderService(services.aiProviderService);
-    learningAgentController.setAIUsageService(services.aiUsageService);
-    learningAgentController.setAITextToSpeechService(services.aiTextToSpeechService);
-    learningAgentController.setAIProviderDebugService(services.aiProviderDebugService);
-    learningAgentController.setStudyGuideAgent(services.agentRegistry.require('studyGuide'));
-    learningAgentController.setAgentSessionService(services.agentSessionService);
-    learningAgentController.setAgentLearningEventService(services.agentLearningEventService);
-    learningAgentController.setAgentModeService(services.agentModeService);
-    writingAIController.setWritingAIService(services.writingAIService);
-    englishTranslationController.setEnglishTranslationService(services.englishTranslationService);
-
     services.userProgressService.setStreakService(services.streakService);
     services.userProgressService.setLeaderboardService(services.leaderboardService);
     services.userProgressService.setBadgeService(services.badgeService);
@@ -233,34 +267,107 @@ function buildDependencies(options = {}) {
     services.userProgressService.setFollowService(services.followService);
     services.badgeService.setUserPrizeService(services.userPrizeService);
     services.userPrizeService.setUserProgressService(services.userProgressService);
-    services.userProgressService.setContentServices({
+    services.contentProgressService = new ContentProgressService({
         grammarService: services.grammarService,
         pronunciationService: services.pronunciationService,
         storyService: services.storyService,
-        grammarexerciseService: services.grammarExerciseService,
-        pronunciationexerciseService: services.pronunciationExerciseService,
-        vocabularyexerciseService: services.vocabularyExerciseService,
-        dictationexerciseService: services.dictationExerciseService
+        grammarExerciseService: services.grammarExerciseService,
+        pronunciationExerciseService: services.pronunciationExerciseService,
+        vocabularyExerciseService: services.vocabularyExerciseService,
+        dictationExerciseService: services.dictationExerciseService
     });
-
-    grammarController.setGrammarService(services.grammarService);
-    pronunciationController.setPronunciationService(services.pronunciationService);
-    storyController.setStoryService(services.storyService);
-    grammarExerciseController.setGrammarExerciseService(services.grammarExerciseService);
-    pronunciationExerciseController.setPronunciationExerciseService(services.pronunciationExerciseService);
-    vocabularyExerciseController.setVocabularyExerciseService(services.vocabularyExerciseService);
-    dictationController.setDictationExerciseService(services.dictationExerciseService);
-    journeyController.setJourneyServiceInstance(services.journeyService);
-    gateController.setGateServiceInstance(services.gateService);
-    stageController.setStageServiceInstance(services.stageService);
-    userProgressController.setUserProgressService(services.userProgressService);
-    userProgressController.setBadgeService(services.badgeService);
-    userProgressController.setStreakService(services.streakService);
-    userProgressController.setUserPrizeService(services.userPrizeService);
-    userProgressController.setLeaderboardService(services.leaderboardService);
-    userProgressController.setFollowService(services.followService);
-    cacheController.setCacheServices(services);
-
+    services.userProgressService.setContentProgressService(services.contentProgressService);
+    const userController = createUserController({
+        userService: services.userService,
+        notificationService: services.notificationService,
+        userSettingService: services.userSettingService,
+        userProgressService: services.userProgressService,
+        flashcardService: services.flashcardService
+    });
+    const userProgressController = createUserProgressController({
+        userProgressService: services.userProgressService,
+        badgeService: services.badgeService,
+        userPrizeService: services.userPrizeService,
+        leaderboardService: services.leaderboardService,
+        followService: services.followService
+    });
+    const learningAgentController = createLearningAgentController({
+        learningAgentService: services.learningAgentService,
+        learnerMemoryService: services.learnerMemoryService,
+        aiProviderService: services.aiProviderService,
+        aiUsageService: services.aiUsageService,
+        aiTextToSpeechService: services.aiTextToSpeechService,
+        aiProviderDebugService: services.aiProviderDebugService,
+        studyGuideAgent: services.agentRegistry.require('studyGuide'),
+        agentSessionService: services.agentSessionService,
+        agentLearningEventService: services.agentLearningEventService,
+        agentModeService: services.agentModeService
+    });
+    const prizeController = createPrizeController({
+        prizeService: services.prizeService,
+        userPrizeService: services.userPrizeService
+    });
+    const notificationController = createNotificationController({
+        notificationService: services.notificationService
+    });
+    const userSettingController = createUserSettingController({
+        userSettingService: services.userSettingService
+    });
+    const dashboardController = createDashboardController({
+        dashboardService: services.dashboardService
+    });
+    const chatAIController = createChatAIController({
+        chatAIService: services.chatAIService
+    });
+    const writingAIController = createWritingAIController({
+        writingAIService: services.writingAIService
+    });
+    const cacheController = createCacheController({
+        services
+    });
+    const englishTranslationController = createEnglishTranslationController({
+        englishTranslationService: services.englishTranslationService
+    });
+    const grammarExerciseController = createGrammarExerciseController({
+        grammarExerciseService: services.grammarExerciseService
+    });
+    const pronunciationExerciseController = createPronunciationExerciseController({
+        pronunciationExerciseService: services.pronunciationExerciseService
+    });
+    const vocabularyExerciseController = createVocabularyExerciseController({
+        vocabularyExerciseService: services.vocabularyExerciseService
+    });
+    const dictationController = createDictationExerciseController({
+        dictationExerciseService: services.dictationExerciseService
+    });
+    const journeyController = createJourneyController({
+        journeyService: services.journeyService,
+        gateService: services.gateService,
+        userProgressService: services.userProgressService
+    });
+    const gateController = createGateController({
+        gateService: services.gateService
+    });
+    const stageController = createStageController({
+        stageService: services.stageService
+    });
+    const flashcardController = createFlashcardController({
+        flashcardService: services.flashcardService,
+        userProgressService: services.userProgressService
+    });
+    const reminderController = createReminderController({
+        reminderService: services.reminderService,
+        notificationService: services.notificationService
+    });
+    const grammarController = createGrammarController({
+        grammarService: services.grammarService
+    });
+    const pronunciationController = createPronunciationController({
+        pronunciationService: services.pronunciationService
+    });
+    const storyController = createStoryController({
+        storyService: services.storyService
+    });
     const controllers = {
         userController,
         userProgressController,
@@ -286,7 +393,6 @@ function buildDependencies(options = {}) {
         cacheController,
         englishTranslationController
     };
-
     return {
         controllers,
         services,

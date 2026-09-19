@@ -1,6 +1,4 @@
 const UserProgressRepository = require('../repositories/userprogressRepository');
-const NotificationService = require('../../notification/services/notificationService');
-const PrizeService = require('../../prize/services/prizeService');
 const { calculatePerfectStreak } = require('../utils/streakCalculator');
 const { invalidateUserProgressCache } = require('../utils/cacheHelper');
 const { getVietnamDate } = require('../../../shared/utils/dateFormat');
@@ -8,8 +6,14 @@ const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 class UserPrizeService {
     constructor(deps = {}) {
         this.userProgressRepository = deps.repository || new UserProgressRepository();
-        this.notificationService = deps.notificationService || new NotificationService();
-        this.prizeService = deps.prizeService || new PrizeService();
+        if (!deps.notificationService) {
+            throw new Error("UserPrizeService requires notificationService");
+        }
+        if (!deps.prizeService) {
+            throw new Error("UserPrizeService requires prizeService");
+        }
+        this.notificationService = deps.notificationService;
+        this.prizeService = deps.prizeService;
         this.userProgressService = deps.userProgressService || null;
     }
 

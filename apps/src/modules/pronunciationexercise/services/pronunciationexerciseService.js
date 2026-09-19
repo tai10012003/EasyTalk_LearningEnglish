@@ -3,7 +3,6 @@ const cacheNs = require('../../../shared/utils/cacheNamespaces');
 const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const PronunciationExerciseRepository = require('../repositories/pronunciationexerciseRepository');
 const PronunciationExerciseAttemptRepository = require('../repositories/pronunciationexerciseAttemptRepository');
-const SpeechAnalysisService = require('./speechAnalysisService');
 const { invalidatePronunciationExerciseCache } = require('../utils/cacheHelper');
 const { calculateAccuracy } = require('../utils/accuracyCalculator');
 const { PronunciationExercise } = require('../models/pronunciationexercise');
@@ -50,7 +49,10 @@ class PronunciationExerciseService {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
         this.repository = options.repository || new PronunciationExerciseRepository();
         this.attemptRepository = options.attemptRepository || new PronunciationExerciseAttemptRepository();
-        this.speechAnalysisService = options.speechAnalysisService || new SpeechAnalysisService();
+        if (!options.speechAnalysisService) {
+            throw new Error("PronunciationExerciseService requires speechAnalysisService");
+        }
+        this.speechAnalysisService = options.speechAnalysisService;
         this.cache = options.cacheService || cache;
         this._userProgressService = options.userProgressService || null;
         this.agentLearningEventService = options.agentLearningEventService || null;
@@ -62,8 +64,7 @@ class PronunciationExerciseService {
 
     getUserProgressService() {
         if (!this._userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this._userProgressService = new UserProgressService();
+            throw new Error("PronunciationExerciseService requires userProgressService");
         }
         return this._userProgressService;
     }
@@ -114,7 +115,7 @@ class PronunciationExerciseService {
         if (!userProgress) {
             const firstPronunciationExercisePage = await this.getPronunciationexerciseList(1, 1);
             const firstPronunciationExercise = firstPronunciationExercisePage?.pronunciationexercises?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, null, firstPronunciationExercise?._id || null, null, null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { pronunciationExercise: firstPronunciationExercise?._id || null }});
         }
         return userProgress;
     }

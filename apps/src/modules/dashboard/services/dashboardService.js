@@ -1,16 +1,25 @@
-const ActivityAnalyticsService = require('./activityAnalyticsService');
-const ContentAnalyticsService = require('./contentAnalyticsService');
-const LeaderboardAnalyticsService = require('./leaderboardAnalyticsService');
-const SecurityDashboardService = require('./securityDashboardService');
-const AgentDebugDashboardService = require('./agentDebugDashboardService');
-
 class DashboardService {
     constructor(userRepository, userProgressRepository, deps = {}) {
-        this.activityService = deps.activityService || new ActivityAnalyticsService(userRepository);
-        this.contentService = deps.contentService || new ContentAnalyticsService(userRepository.db);
-        this.leaderboardService = deps.leaderboardService || new LeaderboardAnalyticsService(userProgressRepository);
-        this.securityService = deps.securityService || new SecurityDashboardService(userRepository.db);
-        this.agentDebugService = deps.agentDebugService || new AgentDebugDashboardService(userRepository.db);
+        if (!deps.activityService) {
+            throw new Error("DashboardService requires activityService");
+        }
+        if (!deps.contentService) {
+            throw new Error("DashboardService requires contentService");
+        }
+        if (!deps.leaderboardService) {
+            throw new Error("DashboardService requires leaderboardService");
+        }
+        if (!deps.securityService) {
+            throw new Error("DashboardService requires securityService");
+        }
+        if (!deps.agentDebugService) {
+            throw new Error("DashboardService requires agentDebugService");
+        }
+        this.activityService = deps.activityService;
+        this.contentService = deps.contentService;
+        this.leaderboardService = deps.leaderboardService;
+        this.securityService = deps.securityService;
+        this.agentDebugService = deps.agentDebugService;
     }
 
     async getUserActivityLast7Days() {

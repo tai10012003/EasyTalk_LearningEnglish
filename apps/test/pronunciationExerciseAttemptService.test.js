@@ -174,6 +174,7 @@ test('pronunciation exercise roadmap and history are compact and user scoped', a
         repository,
         attemptRepository: createMemoryAttemptRepository(),
         userProgressService,
+        speechAnalysisService: {},
         cacheService: passthroughCache
     });
 

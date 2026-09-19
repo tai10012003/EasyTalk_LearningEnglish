@@ -1,20 +1,20 @@
-const TopicGeneratorService = require('./topicGeneratorService');
-const WritingAnalyzerService = require('./writingAnalyzerService');
-const WritingCoachAgent = require('../../learningAgent/agents/writingCoachAgent');
-
 class WritingAIService {
     constructor(deps = {}) {
-        this.topicGenerator = deps.topicGenerator || new TopicGeneratorService();
-        this.writingAnalyzer = deps.writingAnalyzer || new WritingAnalyzerService();
+        if (!deps.topicGenerator) {
+            throw new Error("WritingAIService requires topicGenerator");
+        }
+        if (!deps.writingAnalyzer) {
+            throw new Error("WritingAIService requires writingAnalyzer");
+        }
+        if (!deps.writingCoachAgent) {
+            throw new Error("WritingAIService requires writingCoachAgent");
+        }
+        this.topicGenerator = deps.topicGenerator;
+        this.writingAnalyzer = deps.writingAnalyzer;
         this.agentLearningEventService = deps.agentLearningEventService || null;
         this.agentModeService = deps.agentModeService || null;
         this.aiProviderService = deps.aiProviderService || null;
-        this.writingCoachAgent = deps.writingCoachAgent || new WritingCoachAgent({
-            writingAnalyzer: this.writingAnalyzer,
-            agentLearningEventService: this.agentLearningEventService,
-            agentModeService: this.agentModeService,
-            aiProviderService: this.aiProviderService
-        });
+        this.writingCoachAgent = deps.writingCoachAgent;
     }
 
     async generateRandomTopic() {

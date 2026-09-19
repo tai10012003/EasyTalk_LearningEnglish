@@ -6,13 +6,6 @@ const { getVietnamDate } = require('../../../shared/utils/dateFormat');
 const UserProgressRepository = require('../repositories/userprogressRepository');
 const { calculateStreak } = require('../utils/streakCalculator');
 const { invalidateUserProgressCache } = require('../utils/cacheHelper');
-const GrammarService = require('../../grammar/services/grammarService');
-const StoryService = require('../../story/services/storyService');
-const PronunciationService = require('../../pronunciation/services/pronunciationService');
-const GrammarexerciseService = require('../../grammarexercise/services/grammarexerciseService');
-const PronunciationexerciseService = require('../../pronunciationexercise/services/pronunciationexerciseService');
-const VocabularyexerciseService = require('../../vocabularyexercise/services/vocabularyexerciseService');
-const DictationexerciseService = require('../../dictationexercise/services/dictationexerciseService');
 
 const FLASHCARD_BADGES = [
     { name: "Tân binh chăm chỉ", threshold: 1000, xp: 300 },
@@ -31,7 +24,7 @@ class UserProgressService {
         this.userPrizeService = deps.userPrizeService || null;
         this.followService = deps.followService || null;
         this.leaderboardService = deps.leaderboardService || null;
-        this.contentServices = deps.contentServices || {};
+        this.contentProgressService = deps.contentProgressService || null;
     }
 
     setStreakService(streakService) {
@@ -54,11 +47,15 @@ class UserProgressService {
         this.leaderboardService = leaderboardService;
     }
 
-    setContentServices(contentServices) {
-        this.contentServices = {
-            ...this.contentServices,
-            ...contentServices
-        };
+    setContentProgressService(contentProgressService) {
+        this.contentProgressService = contentProgressService;
+    }
+
+    getRequiredContentProgressService() {
+        if (!this.contentProgressService) {
+            throw new Error("UserProgressService requires contentProgressService");
+        }
+        return this.contentProgressService;
     }
 
     async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
@@ -88,35 +85,21 @@ class UserProgressService {
         return await this.userProgressRepository.findByUserId(userId);
     }
 
-    async createUserProgress(userId, journey = null, initialStory = null, initialGrammar = null, initialPronunciation = null, initialGrammarExercise = null, initialPronunciationExercise = null, initialVocabularyExercise = null, initialDictation = null) {
-        const grammarService = this.contentServices.grammarService || new GrammarService({ cacheService: this.cache });
-        const storyService = this.contentServices.storyService || new StoryService({ cacheService: this.cache });
-        const pronunciationService = this.contentServices.pronunciationService || new PronunciationService({ cacheService: this.cache });
-        const grammarexerciseService = this.contentServices.grammarexerciseService || new GrammarexerciseService({ cacheService: this.cache });
-        const pronunciationexerciseService = this.contentServices.pronunciationexerciseService || new PronunciationexerciseService({ cacheService: this.cache });
-        const vocabularyexerciseService = this.contentServices.vocabularyexerciseService || new VocabularyexerciseService({ cacheService: this.cache });
-        const dictationexerciseService = this.contentServices.dictationexerciseService || new DictationexerciseService({ cacheService: this.cache });
+    async createUserProgress(userId, options = {}) {
+        const journey = options.journey || null;
+        const providedInitialUnlocks = options.initialUnlocks || {};
+        const contentProgressService = this.getRequiredContentProgressService();
         const firstGate = journey?.gates?.[0]?._id || null;
         const firstStage = journey?.gates?.[0]?.stages?.[0]?._id || null;
-        if (!initialStory || !initialGrammar || !initialPronunciation || !initialGrammarExercise || !initialPronunciationExercise || !initialVocabularyExercise || !initialDictation) {
-            const [storyPage, grammarPage, pronPage, grammarExPage, pronunciationExPage, vocabularyExPage, dictationPage] = await Promise.all([
-                !initialStory ? storyService.getStoryList(1, 1) : null,
-                !initialGrammar ? grammarService.getGrammarList(1, 1) : null,
-                !initialPronunciation ? pronunciationService.getPronunciationList(1, 1) : null,
-                !initialGrammarExercise ? grammarexerciseService.getGrammarexerciseList(1, 1) : null,
-                !initialPronunciationExercise ? pronunciationexerciseService.getPronunciationexerciseList(1, 1) : null,
-                !initialVocabularyExercise ? vocabularyexerciseService.getVocabularyexerciseList(1, 1) : null,
-                !initialDictation ? dictationexerciseService.getDictationList(1, 1) : null
-            ]);
-
-            initialStory = initialStory || storyPage?.stories?.[0]?._id || null;
-            initialGrammar = initialGrammar || grammarPage?.grammars?.[0]?._id || null;
-            initialPronunciation = initialPronunciation || pronPage?.pronunciations?.[0]?._id || null;
-            initialGrammarExercise = initialGrammarExercise || grammarExPage?.grammarexercises?.[0]?._id || null;
-            initialPronunciationExercise = initialPronunciationExercise || pronunciationExPage?.pronunciationexercises?.[0]?._id || null;
-            initialVocabularyExercise = initialVocabularyExercise || vocabularyExPage?.vocabularyexercises?.[0]?._id || null;
-            initialDictation = initialDictation || dictationPage?.dictationExercises?.[0]?._id || null;
-        }
+        const initialUnlocks = await contentProgressService.getInitialUnlocks({
+            story: providedInitialUnlocks.story,
+            grammar: providedInitialUnlocks.grammar,
+            pronunciation: providedInitialUnlocks.pronunciation,
+            grammarExercise: providedInitialUnlocks.grammarExercise,
+            pronunciationExercise: providedInitialUnlocks.pronunciationExercise,
+            vocabularyExercise: providedInitialUnlocks.vocabularyExercise,
+            dictation: providedInitialUnlocks.dictation
+        });
         const userProgress = {
             user: new ObjectId(userId),
             dailyFlashcardReviews: {},
@@ -124,13 +107,13 @@ class UserProgressService {
             unlockedFlashcardBadges: {},
             unlockedGates: firstGate ? [new ObjectId(firstGate)] : [],
             unlockedStages: firstStage ? [new ObjectId(firstStage)] : [],
-            unlockedStories: initialStory ? [new ObjectId(initialStory)] : [],
-            unlockedGrammars: initialGrammar ? [new ObjectId(initialGrammar)] : [],
-            unlockedPronunciations: initialPronunciation ? [new ObjectId(initialPronunciation)] : [],
-            unlockedGrammarExercises: initialGrammarExercise ? [new ObjectId(initialGrammarExercise)] : [],
-            unlockedPronunciationExercises: initialPronunciationExercise ? [new ObjectId(initialPronunciationExercise)] : [],
-            unlockedVocabularyExercises: initialVocabularyExercise ? [new ObjectId(initialVocabularyExercise)] : [],
-            unlockedDictations: initialDictation ? [new ObjectId(initialDictation)] : [],
+            unlockedStories: initialUnlocks.story ? [new ObjectId(initialUnlocks.story)] : [],
+            unlockedGrammars: initialUnlocks.grammar ? [new ObjectId(initialUnlocks.grammar)] : [],
+            unlockedPronunciations: initialUnlocks.pronunciation ? [new ObjectId(initialUnlocks.pronunciation)] : [],
+            unlockedGrammarExercises: initialUnlocks.grammarExercise ? [new ObjectId(initialUnlocks.grammarExercise)] : [],
+            unlockedPronunciationExercises: initialUnlocks.pronunciationExercise ? [new ObjectId(initialUnlocks.pronunciationExercise)] : [],
+            unlockedVocabularyExercises: initialUnlocks.vocabularyExercise ? [new ObjectId(initialUnlocks.vocabularyExercise)] : [],
+            unlockedDictations: initialUnlocks.dictation ? [new ObjectId(initialUnlocks.dictation)] : [],
             grammarStudyStats: {},
             pronunciationStudyStats: {},
             storyStudyStats: {},

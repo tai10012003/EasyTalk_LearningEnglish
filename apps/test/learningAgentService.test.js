@@ -6,14 +6,51 @@ const AIProviderService = require('../src/modules/learningAgent/services/aiProvi
 const AIUsageService = require('../src/modules/learningAgent/services/aiUsageService');
 const AIProviderDebugService = require('../src/modules/learningAgent/services/aiProviderDebugService');
 const DailyPlanCacheService = require('../src/modules/learningAgent/services/dailyPlanCacheService');
+const PromptTemplateService = require('../src/modules/learningAgent/services/promptTemplateService');
+const MockAIResponseService = require('../src/modules/learningAgent/services/mockAIResponseService');
 const AgentSessionService = require('../src/modules/learningAgent/services/agentSessionService');
 const AgentLearningEventService = require('../src/modules/learningAgent/services/agentLearningEventService');
 const AgentModeService = require('../src/modules/learningAgent/services/agentModeService');
+const DailyPlanAgent = require('../src/modules/learningAgent/agents/dailyPlanAgent');
 const StudyGuideAgent = require('../src/modules/learningAgent/agents/studyGuideAgent');
+const ProgressTool = require('../src/modules/learningAgent/tools/progressTool');
+const MemoryTool = require('../src/modules/learningAgent/tools/memoryTool');
+const AIResponseSchemaGuard = require('../src/modules/learningAgent/schemas/aiResponseSchemaGuard');
+const ProviderFactory = require('../src/modules/learningAgent/adapters/providerFactory');
+const AICostReporter = require('../src/modules/learningAgent/telemetry/aiCostReporter');
+const AILatencyReporter = require('../src/modules/learningAgent/telemetry/aiLatencyReporter');
+const FallbackReporter = require('../src/modules/learningAgent/telemetry/fallbackReporter');
+const AITraceService = require('../src/modules/learningAgent/telemetry/aiTraceService');
 const { getVietnamDate } = require('../src/shared/utils/dateFormat');
 
-function createService(progress, memory = null) {
+function createTestAIProvider(options = {}) {
+    return new AIProviderService({
+        promptTemplateService: new PromptTemplateService(),
+        aiResponseValidatorService: new AIResponseSchemaGuard(),
+        mockAIResponseService: new MockAIResponseService(),
+        providerRegistry: ProviderFactory.createRegistry(options),
+        aiCostReporter: new AICostReporter(),
+        aiLatencyReporter: new AILatencyReporter(),
+        fallbackReporter: new FallbackReporter(),
+        aiTraceService: new AITraceService(),
+        ...options
+    });
+}
+
+function createLearningAgentService(deps = {}) {
+    const userProgressService = deps.userProgressService || null;
+    const learnerMemoryService = deps.learnerMemoryService || null;
     return new LearningAgentService({
+        dailyPlanAgent: new DailyPlanAgent(),
+        progressTool: new ProgressTool({ userProgressService }),
+        memoryTool: new MemoryTool({ learnerMemoryService }),
+        dailyPlanCacheService: new DailyPlanCacheService(),
+        ...deps
+    });
+}
+
+function createService(progress, memory = null) {
+    return createLearningAgentService({
         userProgressService: {
             async getUserProgressByUserId() {
                 return progress;
@@ -24,7 +61,7 @@ function createService(progress, memory = null) {
                 return memory;
             }
         },
-        aiProviderService: new AIProviderService()
+        aiProviderService: createTestAIProvider()
     });
 }
 
@@ -123,7 +160,7 @@ test('daily plan cache avoids repeated provider calls and invalidates when memor
         updatedAt: new Date('2026-07-27T00:00:00.000Z')
     };
     let providerCalls = 0;
-    const service = new LearningAgentService({
+    const service = createLearningAgentService({
         userProgressService: {
             async getUserProgressByUserId() {
                 return {
@@ -212,7 +249,7 @@ test('daily plan cache can reuse shared cache across service instances', async (
         }
     };
 
-    const firstService = new LearningAgentService({
+    const firstService = createLearningAgentService({
         userProgressService: progressService,
         learnerMemoryService: memoryService,
         aiProviderService,
@@ -222,7 +259,7 @@ test('daily plan cache can reuse shared cache across service instances', async (
             now: () => new Date('2026-07-27T08:00:00.000Z')
         })
     });
-    const secondService = new LearningAgentService({
+    const secondService = createLearningAgentService({
         userProgressService: progressService,
         learnerMemoryService: memoryService,
         aiProviderService,
@@ -243,7 +280,7 @@ test('daily plan cache can reuse shared cache across service instances', async (
 });
 
 test('mock AI provider enhances daily plan copy without external calls', async () => {
-    const provider = new AIProviderService();
+    const provider = createTestAIProvider();
     const enhanced = await provider.enhanceDailyPlan({
         headline: 'Original headline',
         motivation: 'Original motivation',
@@ -295,7 +332,7 @@ test('mock AI provider records usage when user context is provided', async () =>
             }
         }
     });
-    const provider = new AIProviderService({ aiUsageService: usageService });
+    const provider = createTestAIProvider({ aiUsageService: usageService });
 
     await provider.enhanceDailyPlan({
         headline: 'Original headline',
@@ -377,7 +414,7 @@ test('OpenAI provider enhances plan through injected client and records provider
             }
         }
     };
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'openai',
         mode: 'live',
         defaultModel: 'gpt-test',
@@ -417,7 +454,7 @@ test('OpenAI provider enhances plan through injected client and records provider
 
 test('AI provider selects task-specific models for daily plan chat writing and summary', async () => {
     const seenModels = [];
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'custom',
         mode: 'live',
         defaultModel: 'default-model',
@@ -482,7 +519,7 @@ test('AI provider selects task-specific models for daily plan chat writing and s
 });
 
 test('AI provider can use a registered live adapter without provider-specific branching', async () => {
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'custom',
         mode: 'live',
         defaultModel: 'custom-json-model',
@@ -519,12 +556,12 @@ test('AI provider can use a registered live adapter without provider-specific br
 });
 
 test('Gemini and Claude provider skeletons are registered for health checks', async () => {
-    const geminiProvider = new AIProviderService({
+    const geminiProvider = createTestAIProvider({
         provider: 'gemini',
         mode: 'live',
         defaultModel: 'gemini-skeleton'
     });
-    const claudeProvider = new AIProviderService({
+    const claudeProvider = createTestAIProvider({
         provider: 'claude',
         mode: 'live',
         defaultModel: 'claude-skeleton'
@@ -540,7 +577,7 @@ test('Gemini and Claude provider skeletons are registered for health checks', as
 });
 
 test('Gemini skeleton falls back to mock for daily plan content tasks', async () => {
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'gemini',
         mode: 'live',
         defaultModel: 'gemini-skeleton',
@@ -578,7 +615,7 @@ test('Gemini skeleton falls back to mock for daily plan content tasks', async ()
 test('OpenAI provider requires API key when no client is injected', async () => {
     const originalKey = process.env.OPENAI_API_KEY;
     delete process.env.OPENAI_API_KEY;
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'openai',
         mode: 'live',
         defaultModel: 'gpt-test'
@@ -595,7 +632,7 @@ test('OpenAI provider requires API key when no client is injected', async () => 
 });
 
 test('daily plan falls back to mock copy when live provider fails', async () => {
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'openai',
         mode: 'live',
         defaultModel: 'gpt-test',
@@ -643,7 +680,7 @@ test('daily plan falls back to mock copy when live provider fails', async () => 
 
 test('OpenAI provider retries retryable failures once', async () => {
     let calls = 0;
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'openai',
         mode: 'live',
         defaultModel: 'gpt-test',
@@ -675,7 +712,7 @@ test('OpenAI provider retries retryable failures once', async () => {
 });
 
 test('OpenAI prompts define strict coach behavior and JSON-only output', () => {
-    const provider = new AIProviderService({
+    const provider = createTestAIProvider({
         provider: 'openai',
         mode: 'live',
         defaultModel: 'gpt-test',
@@ -704,7 +741,7 @@ test('OpenAI prompts define strict coach behavior and JSON-only output', () => {
 });
 
 test('AI provider schema guard sanitizes unsafe daily plan task copy', () => {
-    const provider = new AIProviderService();
+    const provider = createTestAIProvider();
 
     const validated = provider.validateTaskOutput('enhance_daily_plan', {
         headline: '  Better plan  ',
@@ -728,7 +765,7 @@ test('AI provider schema guard sanitizes unsafe daily plan task copy', () => {
 });
 
 test('AI provider schema guard rejects chat reply without reply text', () => {
-    const provider = new AIProviderService();
+    const provider = createTestAIProvider();
 
     assert.throws(
         () => provider.validateTaskOutput('agent_chat_reply', {
@@ -740,7 +777,7 @@ test('AI provider schema guard rejects chat reply without reply text', () => {
 });
 
 test('AI provider schema guard filters invalid summary skills and paths', () => {
-    const provider = new AIProviderService();
+    const provider = createTestAIProvider();
 
     const validated = provider.validateTaskOutput('agent_chat_summary', {
         summary: 'The learner practiced speaking.',
@@ -778,7 +815,7 @@ test('AI provider returns structured writing feedback and records usage', async 
             }
         }
     });
-    const provider = new AIProviderService({ aiUsageService: usageService });
+    const provider = createTestAIProvider({ aiUsageService: usageService });
 
     const feedback = await provider.generateWritingFeedback({
         userId: '64b64c0f4f1a2562d08f9a10',
@@ -795,7 +832,7 @@ test('AI provider returns structured writing feedback and records usage', async 
 });
 
 test('AI provider schema guard normalizes writing feedback', () => {
-    const provider = new AIProviderService();
+    const provider = createTestAIProvider();
 
     const validated = provider.validateTaskOutput('writing_feedback', {
         score: '8.7',
@@ -827,7 +864,7 @@ test('provider health check records usage when user id is provided', async () =>
             }
         }
     });
-    const provider = new AIProviderService({ aiUsageService: usageService });
+    const provider = createTestAIProvider({ aiUsageService: usageService });
 
     const result = await provider.testProvider('64b64c0f4f1a2562d08f9a10');
 
@@ -1041,7 +1078,7 @@ test('agent chat session starts, receives message, finishes, and applies memory 
                 return { headline: 'Mock plan', tasks: [] };
             }
         },
-        aiProviderService: new AIProviderService()
+        aiProviderService: createTestAIProvider()
     });
 
     const started = await service.startChatSession('64b64c0f4f1a2562d08f9a10', { topic: 'travel' });
@@ -1126,7 +1163,7 @@ test('agent chat session stores selected mode config snapshot', async () => {
                 };
             }
         },
-        aiProviderService: new AIProviderService()
+        aiProviderService: createTestAIProvider()
     });
 
     const started = await service.startChatSession('64b64c0f4f1a2562d08f9a10', {

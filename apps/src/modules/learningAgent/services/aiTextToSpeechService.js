@@ -1,4 +1,3 @@
-const AIUsageService = require("./aiUsageService");
 const { getVietnamDate } = require("../../../shared/utils/dateFormat");
 
 class AITextToSpeechService {
@@ -14,7 +13,10 @@ class AITextToSpeechService {
         this.dailyLimitPerUser = Number.parseInt(options.dailyLimitPerUser || process.env.AI_TTS_DAILY_LIMIT_PER_USER || "30", 10);
         this.pricePerMillionCharacters = Number.parseFloat(options.pricePerMillionCharacters || process.env.AI_TTS_PRICE_PER_MILLION_CHARS || "0");
         this.openAIClient = options.openAIClient || null;
-        this.aiUsageService = options.aiUsageService || new AIUsageService();
+        if (!options.aiUsageService) {
+            throw new Error("AITextToSpeechService requires aiUsageService");
+        }
+        this.aiUsageService = options.aiUsageService;
     }
 
     isMock() {
@@ -42,27 +44,22 @@ class AITextToSpeechService {
             error.code = "AI_TTS_EMPTY_TEXT";
             throw error;
         }
-
         await this.assertWithinDailyLimit(userId);
-
         if (this.isMock()) {
             const error = new Error("AI TTS provider is in mock mode.");
             error.statusCode = 503;
             error.code = "AI_TTS_MOCK_MODE";
             throw error;
         }
-
         if (this.provider !== "openai") {
             const error = new Error(`AI TTS provider "${this.provider}" is not implemented.`);
             error.statusCode = 501;
             error.code = "AI_TTS_PROVIDER_NOT_IMPLEMENTED";
             throw error;
         }
-
         const startedAt = Date.now();
         const audioBuffer = await this.generateOpenAISpeech(input);
         await this.recordUsage(userId, input, Date.now() - startedAt);
-
         return {
             audioBuffer,
             contentType: this.getContentType(),

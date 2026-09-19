@@ -1,14 +1,18 @@
 const { ObjectId } = require('mongodb');
 const ReminderRepository = require('../repositories/reminderRepository');
-const ReminderSchedulerService = require('./reminderSchedulerService');
-const ReminderEmailService = require('./reminderEmailService');
 const { validateFutureTime, convertToVietnamTime } = require('../utils/timezoneHelper');
 
 class ReminderService {
     constructor(deps = {}) {
         this.repository = deps.repository || new ReminderRepository();
-        this.schedulerService = deps.schedulerService || new ReminderSchedulerService();
-        this.emailService = deps.emailService || new ReminderEmailService();
+        if (!deps.schedulerService) {
+            throw new Error("ReminderService requires schedulerService");
+        }
+        if (!deps.emailService) {
+            throw new Error("ReminderService requires emailService");
+        }
+        this.schedulerService = deps.schedulerService;
+        this.emailService = deps.emailService;
         this.notificationService = deps.notificationService || null;
     }
 

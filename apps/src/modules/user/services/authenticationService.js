@@ -2,7 +2,6 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const config = require('../../../shared/config/setting');
 const UserSessionRepository = require('../repositories/userSessionRepository');
-const SecurityAuditService = require('./securityAuditService');
 
 const REFRESH_TOKEN_EXPIRES_IN = "7d";
 const REFRESH_TOKEN_EXPIRES_IN_MS = 7 * 24 * 60 * 60 * 1000;
@@ -26,9 +25,7 @@ function getRequestMetadata(req) {
         return { userAgent: "", ipAddress: "" };
     }
     const forwardedFor = req.headers?.["x-forwarded-for"];
-    const ipAddress = Array.isArray(forwardedFor)
-        ? forwardedFor[0]
-        : (forwardedFor || req.ip || req.socket?.remoteAddress || "");
+    const ipAddress = Array.isArray(forwardedFor) ? forwardedFor[0] : (forwardedFor || req.ip || req.socket?.remoteAddress || "");
     return {
         userAgent: req.headers?.["user-agent"] || "",
         ipAddress: String(ipAddress).split(",")[0].trim()
@@ -38,7 +35,10 @@ function getRequestMetadata(req) {
 class AuthenticationService {
     constructor(deps = {}) {
         this.sessionRepository = deps.sessionRepository || new UserSessionRepository();
-        this.securityAuditService = deps.securityAuditService || new SecurityAuditService();
+        if (!deps.securityAuditService) {
+            throw new Error("AuthenticationService requires securityAuditService");
+        }
+        this.securityAuditService = deps.securityAuditService;
     }
 
     generateAccessToken(user) {

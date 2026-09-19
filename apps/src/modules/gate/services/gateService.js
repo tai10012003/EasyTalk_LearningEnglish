@@ -1,3 +1,4 @@
+const { ObjectId } = require('mongodb');
 const cache = require('../../../shared/utils/cacheService');
 const cacheNs = require('../../../shared/utils/cacheNamespaces');
 const { policies, withTags } = require('../../../shared/utils/cachePolicies');
@@ -9,6 +10,30 @@ class GateService {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
         this.repository = options.repository || new GateRepository();
         this.cache = options.cacheService || cache;
+        this.journeyService = options.journeyService || null;
+        this.stageService = options.stageService || null;
+    }
+
+    setJourneyService(service) {
+        this.journeyService = service;
+    }
+
+    setStageService(service) {
+        this.stageService = service;
+    }
+
+    getRequiredJourneyService() {
+        if (!this.journeyService) {
+            throw new Error("GateService requires journeyService");
+        }
+        return this.journeyService;
+    }
+
+    getRequiredStageService() {
+        if (!this.stageService) {
+            throw new Error("GateService requires stageService");
+        }
+        return this.stageService;
     }
 
     async getGateList(page = 1, limit = 12) {
@@ -37,6 +62,18 @@ class GateService {
         return result;
     }
 
+    async createGate({ title, journeyId }) {
+        const journeyService = this.getRequiredJourneyService();
+        const result = await this.insertGate({
+            title,
+            journey: new ObjectId(journeyId),
+            stages: [],
+            createdAt: new Date()
+        });
+        await journeyService.addGateToJourney(journeyId, result.insertedId);
+        return result;
+    }
+
     async updateGate(gate) {
         const { _id, ...updateData } = gate;
         const result = await this.repository.update(_id, updateData);
@@ -44,9 +81,41 @@ class GateService {
         return result;
     }
 
+    async updateGateAndJourneyLink(gateId, { title, journeyId }) {
+        const journeyService = this.getRequiredJourneyService();
+        const currentGate = await this.getGateById(gateId);
+        if (!currentGate) {
+            return null;
+        }
+        const oldJourneyId = currentGate.journey ? currentGate.journey.toString() : null;
+        const result = await this.updateGate({
+            _id: gateId,
+            title,
+            journey: new ObjectId(journeyId)
+        });
+        if (oldJourneyId && oldJourneyId !== journeyId) {
+            await journeyService.removeGateFromJourney(oldJourneyId, gateId);
+            await journeyService.addGateToJourney(journeyId, gateId);
+        }
+        return result;
+    }
+
     async deleteGate(id) {
         const result = await this.repository.delete(id);
         await invalidateGateCache();
+        return result;
+    }
+
+    async deleteGateWithStages(gateId) {
+        const journeyService = this.getRequiredJourneyService();
+        const stageService = this.getRequiredStageService();
+        const currentGate = await this.getGateById(gateId);
+        if (!currentGate) {
+            return null;
+        }
+        await stageService.deleteStageByGate(gateId);
+        const result = await this.deleteGate(gateId);
+        await journeyService.removeGateFromJourney(currentGate.journey, gateId);
         return result;
     }
 

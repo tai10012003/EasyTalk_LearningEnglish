@@ -59,6 +59,7 @@ test('grammar roadmap returns compact items with study counts', async () => {
     const service = new GrammarService({
         repository,
         userProgressService,
+        imageService: {},
         cacheService: passthroughCache
     });
 
@@ -129,6 +130,7 @@ test('complete grammar increments study count', async () => {
     const service = new GrammarService({
         repository,
         userProgressService,
+        imageService: {},
         cacheService: passthroughCache
     });
 

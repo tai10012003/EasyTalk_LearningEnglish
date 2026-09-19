@@ -10,6 +10,36 @@ class StageService {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
         this.repository = options.repository || new StageRepository();
         this.cache = options.cacheService || cache;
+        this.gateService = options.gateService || null;
+        this.journeyService = options.journeyService || null;
+        this.userProgressService = options.userProgressService || null;
+    }
+
+    setGateService(service) {
+        this.gateService = service;
+    }
+
+    setJourneyService(service) {
+        this.journeyService = service;
+    }
+
+    setUserProgressService(service) {
+        this.userProgressService = service;
+    }
+
+    getRequiredServices() {
+        const missing = [];
+        if (!this.gateService) missing.push("gateService");
+        if (!this.journeyService) missing.push("journeyService");
+        if (!this.userProgressService) missing.push("userProgressService");
+        if (missing.length) {
+            throw new Error(`StageService requires ${missing.join(", ")}`);
+        }
+        return {
+            gateService: this.gateService,
+            journeyService: this.journeyService,
+            userProgressService: this.userProgressService
+        };
     }
 
     async getStageList(page = 1, limit = 12) {
@@ -27,19 +57,45 @@ class StageService {
         });
     }
 
+    async getStageDetailForUser(stageId, userId) {
+        const { userProgressService } = this.getRequiredServices();
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            userProgress = await userProgressService.createUserProgress(userId, {});
+        }
+        const stage = await this.getStageById(stageId);
+        return { stage, userProgress };
+    }
+
     async getStagesInGate(gateId) {
         return await this.repository.findByGate(gateId);
+    }
+
+    async getGateOptions() {
+        const { gateService } = this.getRequiredServices();
+        return await gateService.getGateList();
     }
 
     async insertStage(stageData) {
         const formattedQuestions = this._formatQuestions(stageData.questions || []);
         const dataToInsert = {
             title: stageData.title,
-            gate: stageData.gate,
+            gate: new ObjectId(stageData.gate),
             questions: formattedQuestions
         };
         const result = await this.repository.insert(dataToInsert);
         await invalidateStageCache();
+        return result;
+    }
+
+    async createStage(stageData) {
+        const { gateService } = this.getRequiredServices();
+        const result = await this.insertStage({
+            title: stageData.title,
+            questions: stageData.questions,
+            gate: stageData.gateId
+        });
+        await gateService.addStageToGate(stageData.gateId, result.insertedId);
         return result;
     }
 
@@ -55,9 +111,39 @@ class StageService {
         return result;
     }
 
+    async updateStageAndGateLink(stageId, updateData) {
+        const { gateService } = this.getRequiredServices();
+        const currentStage = await this.getStageById(stageId);
+        if (!currentStage) {
+            return null;
+        }
+        const oldGateId = currentStage.gate ? currentStage.gate.toString() : null;
+        const result = await this.updateStage(stageId, {
+            title: updateData.title,
+            questions: updateData.questions,
+            gate: updateData.gateId
+        });
+        if (oldGateId && oldGateId !== updateData.gateId) {
+            await gateService.removeStageFromGate(oldGateId, stageId);
+            await gateService.addStageToGate(updateData.gateId, stageId);
+        }
+        return result;
+    }
+
     async deleteStage(id) {
         const result = await this.repository.delete(id);
         await invalidateStageCache();
+        return result;
+    }
+
+    async deleteStageAndGateLink(stageId) {
+        const { gateService } = this.getRequiredServices();
+        const currentStage = await this.getStageById(stageId);
+        if (!currentStage) {
+            return null;
+        }
+        const result = await this.deleteStage(stageId);
+        await gateService.removeStageFromGate(currentStage.gate, stageId);
         return result;
     }
 
@@ -65,6 +151,60 @@ class StageService {
         const result = await this.repository.deleteByGate(gateId);
         await invalidateStageCache();
         return result;
+    }
+
+    async completeStageForUser(stageId, userId) {
+        const { gateService, journeyService, userProgressService } = this.getRequiredServices();
+        const currentStage = await this.getStageById(stageId);
+        if (!currentStage) {
+            return { status: "stage_not_found" };
+        }
+        const gate = await gateService.getGateById(currentStage.gate);
+        if (!gate) {
+            return { status: "gate_not_found" };
+        }
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const journey = await journeyService.getJourney(gate.journey);
+            userProgress = await userProgressService.createUserProgress(userId, { journey });
+        }
+        const updatedProgress = await this.applyStageCompletion(stageId, currentStage, userProgress, gateService);
+        await userProgressService.updateUserProgress(updatedProgress);
+        return { status: "completed" };
+    }
+
+    async applyStageCompletion(stageId, currentStage, userProgress, gateService) {
+        if (!userProgress.unlockedStages.some(stage => stage.toString() == stageId)) {
+            userProgress.unlockedStages.push(new ObjectId(stageId));
+        }
+        const allStagesInGate = await this.getStagesInGate(currentStage.gate);
+        const currentStageIndex = allStagesInGate.findIndex(stage => stage._id.toString() == stageId);
+        if (currentStageIndex !== -1 && currentStageIndex < allStagesInGate.length - 1) {
+            const nextStage = allStagesInGate[currentStageIndex + 1];
+            if (!userProgress.unlockedStages.some(stage => stage.toString() == nextStage._id.toString())) {
+                userProgress.unlockedStages.push(nextStage._id);
+            }
+        } else {
+            const gate = await gateService.getGateById(currentStage.gate);
+            if (!gate) {
+                throw new Error("Không thể tìm thấy cổng cho chặng hiện tại.");
+            }
+            const allGatesInJourney = await gateService.getGatesInJourney(gate.journey);
+            const currentGateIndex = allGatesInJourney.findIndex(g => g._id.toString() == currentStage.gate.toString());
+            if (currentGateIndex !== -1 && currentGateIndex < allGatesInJourney.length - 1) {
+                const nextGate = allGatesInJourney[currentGateIndex + 1];
+                if (!userProgress.unlockedGates.some(gateId => gateId.toString() == nextGate._id.toString())) {
+                    userProgress.unlockedGates.push(nextGate._id);
+                    const firstStageOfNextGate = await this.getStagesInGate(nextGate._id);
+                    if (firstStageOfNextGate.length > 0 &&
+                        !userProgress.unlockedStages.some(stage => stage.toString() == firstStageOfNextGate[0]._id.toString())) {
+                        userProgress.unlockedStages.push(firstStageOfNextGate[0]._id);
+                    }
+                }
+            }
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + 10;
+        return userProgress;
     }
 
     _formatQuestions(questions) {

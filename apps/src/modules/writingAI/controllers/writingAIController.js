@@ -1,36 +1,29 @@
 const express = require("express");
-const router = express.Router();
-const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
-const WritingAIService = require("../services/writingAIService");
+const { verifyToken } = require("../../../shared/middleware/verifyToken");
 const { validateWritingText } = require("../validators/writingValidator");
-let writingAIService = null;
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-function getWritingAIService() {
+function createWritingAIController({ writingAIService }) {
     if (!writingAIService) {
-        writingAIService = new WritingAIService();
+        throw new Error("createWritingAIController requires writingAIService");
     }
-    return writingAIService;
+    const router = express.Router();
+    router.get("/api/writing/random-topic", verifyToken, asyncHandler(async (req, res) => {
+        const topic = await writingAIService.generateRandomTopic();
+        res.json({ topic });
+    }));
+    router.post("/api/analyze", verifyToken, asyncHandler(async (req, res) => {
+        const validation = validateWritingText(req.body);
+        if (!validation.valid) {
+            return res.status(400).json({ error: validation.errors.join(', ') });
+        }
+        const userText = req.body.text;
+        const result = await writingAIService.analyzeWriting(userText, req.user.id, {
+            mode: req.body.mode
+        });
+        res.json(result);
+    }));
+    return router;
 }
 
-router.get("/api/writing/random-topic", verifyToken, asyncHandler(async (req, res) => {
-    const topic = await getWritingAIService().generateRandomTopic();
-    res.json({ topic });
-}));
-
-router.post("/api/analyze", verifyToken, asyncHandler(async (req, res) => {
-    const validation = validateWritingText(req.body);
-    if (!validation.valid) {
-        return res.status(400).json({ error: validation.errors.join(', ') });
-    }
-    const userText = req.body.text;
-    const result = await getWritingAIService().analyzeWriting(userText, req.user.id, {
-        mode: req.body.mode
-    });
-    res.json(result);
-}));
-
-module.exports = router;
-module.exports.setWritingAIService = (service) => {
-    writingAIService = service;
-};
+module.exports = { createWritingAIController };

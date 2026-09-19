@@ -54,8 +54,7 @@ class GrammarExerciseService {
 
     getUserProgressService() {
         if (!this.userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this.userProgressService = new UserProgressService();
+            throw new Error("GrammarExerciseService requires userProgressService");
         }
         return this.userProgressService;
     }
@@ -132,7 +131,7 @@ class GrammarExerciseService {
         if (!userProgress) {
             const firstGrammarExercisePage = await this.getGrammarexerciseList(1, 1);
             const firstGrammarExercise = firstGrammarExercisePage?.grammarexercises?.[0] || null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, null, null, firstGrammarExercise ? firstGrammarExercise._id : null, null, null, null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { grammarExercise: firstGrammarExercise ? firstGrammarExercise._id : null }});
         }
         return userProgress;
     }

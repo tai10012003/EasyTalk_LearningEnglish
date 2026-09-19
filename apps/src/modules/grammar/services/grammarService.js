@@ -2,7 +2,6 @@ const cache = require('../../../shared/utils/cacheService');
 const cacheNs = require('../../../shared/utils/cacheNamespaces');
 const { policies, withTags } = require('../../../shared/utils/cachePolicies');
 const GrammarRepository = require('../repositories/grammarRepository');
-const grammarImageService = require('../services/grammarImageService');
 const { invalidateGrammarCache } = require('../utils/cacheHelper');
 const { Grammar } = require('../models/grammar');
 const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
@@ -11,7 +10,10 @@ class GrammarService {
     constructor(deps = {}) {
         const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
         this.repository = options.repository || new GrammarRepository();
-        this.imageService = options.imageService || new grammarImageService("easytalk/grammar");
+        if (!options.imageService) {
+            throw new Error("GrammarService requires imageService");
+        }
+        this.imageService = options.imageService;
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
         this.englishTranslationService = options.englishTranslationService || null;
@@ -19,8 +21,7 @@ class GrammarService {
 
     getUserProgressService() {
         if (!this.userProgressService) {
-            const UserProgressService = require('../../userprogress/services/userprogressService');
-            this.userProgressService = new UserProgressService();
+            throw new Error("GrammarService requires userProgressService");
         }
         return this.userProgressService;
     }
@@ -72,7 +73,7 @@ class GrammarService {
         if (!userProgress) {
             const firstGrammarPage = await this.getGrammarList(1, 1);
             const firstGrammar = (firstGrammarPage && firstGrammarPage.grammars && firstGrammarPage.grammars[0]) ? firstGrammarPage.grammars[0] : null;
-            userProgress = await userProgressService.createUserProgress(userId, null, null, firstGrammar ? firstGrammar._id : null, null);
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { grammar: firstGrammar ? firstGrammar._id : null }});
         } else if (!Array.isArray(userProgress.unlockedGrammars) || userProgress.unlockedGrammars.length === 0) {
             const firstGrammarPage = await this.getGrammarList(1, 1);
             const firstGrammar = firstGrammarPage?.grammars?.[0] || null;
