@@ -8,7 +8,7 @@ on:
 env:
   AWS_REGION: ${{ secrets.AWS_REGION }}
   ECR_REPOSITORY: easytalk-ecr
-  ECS_SERVICE: easytalk-backend-service
+  ECS_SERVICE: easytalk-task-service
   ECS_CLUSTER: easytalk-cluster
   TASK_DEFINITION_FAMILY: easytalk-task
   ECS_TASK_DEFINITION: task-definition.json
