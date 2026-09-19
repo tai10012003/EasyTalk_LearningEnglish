@@ -135,11 +135,20 @@ class StoryService {
         };
     }
 
+    async _getRoadmapBaseData() {
+        const cacheKey = cacheNs.key('story', 'roadmap', { query: { role: 'user' } });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('story', 'user'), cacheNs.listTags('story')), async () => {
+            const filter = { display: true };
+            if (typeof this.repository.findRoadmapItems === "function") {
+                const { stories, total } = await this.repository.findRoadmapItems(filter);
+                return { stories, totalStory: total };
+            }
+            return await this.getStoryList(1, 10000, "", "", "", "user");
+        });
+    }
+
     async getStoryRoadmap(userId, lang = "vi") {
-        const filter = { display: true };
-        const result = typeof this.repository.findRoadmapItems === "function"
-            ? await this.repository.findRoadmapItems(filter)
-            : await this.getStoryList(1, 10000, "", "", "", "user", lang);
+        const result = await this._getRoadmapBaseData();
         let stories = result.stories || [];
         const totalStory = result.total ?? result.totalStory ?? stories.length;
         if (lang === "en" && this.englishTranslationService) {

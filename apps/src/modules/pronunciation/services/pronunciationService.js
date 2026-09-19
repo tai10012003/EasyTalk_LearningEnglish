@@ -132,11 +132,20 @@ class PronunciationService {
         };
     }
 
+    async _getRoadmapBaseData() {
+        const cacheKey = cacheNs.key('pronunciation', 'roadmap', { query: { role: 'user' } });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('pronunciation', 'user'), cacheNs.listTags('pronunciation')), async () => {
+            const filter = { display: true };
+            if (typeof this.repository.findRoadmapItems === "function") {
+                const { pronunciations, total } = await this.repository.findRoadmapItems(filter);
+                return { pronunciations, totalPronunciations: total };
+            }
+            return await this.getPronunciationList(1, 10000, "", "user");
+        });
+    }
+
     async getPronunciationRoadmap(userId, lang = "vi") {
-        const filter = { display: true };
-        const result = typeof this.repository.findRoadmapItems === "function"
-            ? await this.repository.findRoadmapItems(filter)
-            : await this.getPronunciationList(1, 10000, "", "user", lang);
+        const result = await this._getRoadmapBaseData();
         let pronunciations = result.pronunciations || [];
         const totalPronunciations = result.total ?? result.totalPronunciations ?? pronunciations.length;
         if (lang === "en" && this.englishTranslationService) {

@@ -132,11 +132,20 @@ class GrammarService {
         };
     }
 
+    async _getRoadmapBaseData() {
+        const cacheKey = cacheNs.key('grammar', 'roadmap', { query: { role: 'user' } });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammar', 'user'), cacheNs.listTags('grammar')), async () => {
+            const filter = { display: true };
+            if (typeof this.repository.findRoadmapItems === "function") {
+                const { grammars, total } = await this.repository.findRoadmapItems(filter);
+                return { grammars, totalGrammars: total };
+            }
+            return await this.getGrammarList(1, 10000, "", "user");
+        });
+    }
+
     async getGrammarRoadmap(userId, lang = "vi") {
-        const filter = { display: true };
-        const result = typeof this.repository.findRoadmapItems === "function"
-            ? await this.repository.findRoadmapItems(filter)
-            : await this.getGrammarList(1, 10000, "", "user", lang);
+        const result = await this._getRoadmapBaseData();
         let grammars = result.grammars || [];
         const totalGrammars = result.total ?? result.totalGrammars ?? grammars.length;
         if (lang === "en" && this.englishTranslationService) {
