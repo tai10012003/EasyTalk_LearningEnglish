@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Swal from "sweetalert2";
 
-function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
+function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl, translateUrl = "" }) {
     const [dictations, setDictations] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    const loadData = async (page = 1) => {
+    const loadData = useCallback(async (page = 1) => {
         setLoading(true);
         try {
             const data = await fetchData(page);
@@ -21,11 +21,11 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
         } finally {
             setLoading(false);
         }
-    };
+    }, [fetchData, dataKey]);
 
     useEffect(() => {
         loadData(currentPage);
-    }, [currentPage]);
+    }, [currentPage, loadData]);
 
     const handleDelete = async (id, title) => {
         Swal.fire({
@@ -41,7 +41,7 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa luyện tập "${title}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa luyện tập "${title}" thất bại!`, 'error');
                 }
             }
@@ -150,6 +150,14 @@ function DictationList({ fetchData, deleteItem, title, dataKey, addUrl, updateUr
                                                 >
                                                     Sửa
                                                 </a>
+                                                {translateUrl && (
+                                                    <a
+                                                        href={`${translateUrl}/${dictation._id}`}
+                                                        className="admin-exercise-btn-translate"
+                                                    >
+                                                        Dịch EN
+                                                    </a>
+                                                )}
                                                 <button
                                                     className="admin-exercise-btn-delete"
                                                     onClick={() => handleDelete(dictation._id, dictation.title)}

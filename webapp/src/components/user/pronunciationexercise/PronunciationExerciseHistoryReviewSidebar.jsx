@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 const PronunciationExerciseHistoryReviewSidebar = ({
     questionResults,
@@ -6,6 +7,8 @@ const PronunciationExerciseHistoryReviewSidebar = ({
     onQuestionNavigation,
     summary
 }) => {
+    const { t } = useTranslation();
+
     const getQuestionButtonColor = (index) => {
         const result = questionResults[index];
         if (!result || !result.userAnswer) {
@@ -22,13 +25,13 @@ const PronunciationExerciseHistoryReviewSidebar = ({
             <div className="text-center mb-4">
                 <h4>{Math.round(summary.score || 0)}%</h4>
                 <p className="mb-1">
-                    {summary.correctCount}/{summary.totalQuestions} câu đúng
+                    {t("pronunciationExercisePage.attemptHistory.correctCount", { correct: summary.correctCount, total: summary.totalQuestions })}
                 </p>
                 <p className={`exercise-history-review-status ${summary.status === "completed" ? "completed" : "in-progress"}`}>
-                    {summary.status === "completed" ? "Đã hoàn thành" : "Chưa hoàn thành"}
+                    {summary.status === "completed" ? t("pronunciationExercisePage.attemptHistory.completed") : t("pronunciationExercisePage.attemptHistory.inProgress")}
                 </p>
             </div>
-            <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>
+            <h5 id="exercise-questionListTitle">{t("pronunciationExercisePage.sidebar.questionList")}</h5>
             <div className="exercise-question-list mt-3" id="exercise-question-list">
                 {questionResults.map((_, index) => (
                     <button

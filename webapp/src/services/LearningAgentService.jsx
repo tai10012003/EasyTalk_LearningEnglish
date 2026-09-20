@@ -6,6 +6,10 @@ let hasShownAlert = false;
 const requestCache = new Map();
 const REQUEST_CACHE_TTL = 10000;
 
+const getCurrentLanguage = () => {
+    return localStorage.getItem("language") === "en" ? "en" : "vi";
+};
+
 function getCachedRequest(key, fetcher) {
     const now = Date.now();
     const cached = requestCache.get(key);
@@ -280,7 +284,10 @@ export const LearningAgentService = {
 
     async getModes(activityType) {
         try {
-            const query = activityType ? `?${new URLSearchParams({ activityType }).toString()}` : "";
+            const params = new URLSearchParams();
+            if (activityType) params.set("activityType", activityType);
+            if (getCurrentLanguage() === "en") params.set("lang", "en");
+            const query = params.toString() ? `?${params.toString()}` : "";
             const res = await AuthService.fetchWithAuth(`${API_URL}/agent/modes${query}`, {
                 method: "GET",
             });

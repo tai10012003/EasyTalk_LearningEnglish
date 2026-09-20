@@ -104,7 +104,8 @@ function createLearningAgentController({
         const memory = learnerMemoryService ? await learnerMemoryService.getOrCreateMemory(req.user.id) : null;
         const modes = await agentModeService.listModes({
             activityType: validation.activityType,
-            memory
+            memory,
+            lang: req.query.lang === "en" ? "en" : "vi"
         });
         res.json({ modes });
     }));

@@ -4,7 +4,7 @@ import { VocabularyExerciseService } from "@/services/VocabularyExerciseService.
 
 function VocabularyExercise() {
     const fetchVocabularyExercise = async (page = 1) => {
-        const data = await VocabularyExerciseService.fetchVocabularyExercise(page, 6);
+        const data = await VocabularyExerciseService.fetchVocabularyExercise(page, 6, { admin: true });
         return {
             lessons: data.data || [],
             currentPage: data.currentPage,
@@ -25,6 +25,7 @@ function VocabularyExercise() {
                 dataKey="lessons"
                 addUrl="/admin/vocabulary-exercise/add"
                 updateUrl="/admin/vocabulary-exercise/update"
+                translateUrl="/admin/vocabulary-exercise/translate"
             />
         </div>
     );

@@ -4,7 +4,7 @@ import { DictationExerciseService } from "@/services/DictationExerciseService.js
 
 function DictationExercise() {
     const fetchDictationExercise = async (page = 1) => {
-        const data = await DictationExerciseService.fetchDictationExercise(page, 12);
+        const data = await DictationExerciseService.fetchDictationExercise(page, 12, { admin: true });
         return {
             lessons: data.dictationExercises || [],
             currentPage: data.currentPage,
@@ -25,6 +25,7 @@ function DictationExercise() {
                 dataKey="lessons"
                 addUrl="/admin/dictation-exercise/add"
                 updateUrl="/admin/dictation-exercise/update"
+                translateUrl="/admin/dictation-exercise/translate"
             />
         </div>
     );

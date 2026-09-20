@@ -4,8 +4,10 @@ import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import PronunciationExerciseHistoryReviewCarousel from "@/components/user/pronunciationexercise/PronunciationExerciseHistoryReviewCarousel.jsx";
 import PronunciationExerciseHistoryReviewSidebar from "@/components/user/pronunciationexercise/PronunciationExerciseHistoryReviewSidebar.jsx";
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
+import { useTranslation } from "react-i18next";
 
 function PronunciationExerciseAttemptHistoryDetail() {
+    const { t, i18n } = useTranslation();
     const { attemptId } = useParams();
     const navigate = useNavigate();
     const [attempt, setAttempt] = useState(null);
@@ -18,7 +20,7 @@ function PronunciationExerciseAttemptHistoryDetail() {
                 setIsLoading(true);
                 const data = await PronunciationExerciseService.getPronunciationExerciseAttemptDetail(attemptId);
                 setAttempt(data);
-                document.title = data?.pronunciationExerciseContent?.title || "Lịch sử luyện tập phát âm";
+                document.title = data?.pronunciationExerciseContent?.title || t("pronunciationExercisePage.attemptHistory.detailDocumentTitle");
             } catch (error) {
                 console.error("Error fetching pronunciation exercise attempt detail:", error);
                 setAttempt(null);
@@ -29,7 +31,7 @@ function PronunciationExerciseAttemptHistoryDetail() {
         if (attemptId) {
             fetchAttempt();
         }
-    }, [attemptId]);
+    }, [attemptId, t, i18n.language]);
 
     if (isLoading) return <LoadingScreen />;
 
@@ -38,9 +40,9 @@ function PronunciationExerciseAttemptHistoryDetail() {
             <div className="exercise-history-detail-page">
                 <div className="container exercise-history-detail-content">
                     <div className="exercise-history-empty">
-                        <p>Chưa có lịch sử làm bài nào.</p>
+                        <p>{t("pronunciationExercisePage.attemptHistory.empty")}</p>
                         <button className="exercise-history-back-btn mt-3" type="button" onClick={() => navigate("/pronunciation-exercise/history")}>
-                            <i className="fas fa-arrow-left"></i> Quay lại
+                            <i className="fas fa-arrow-left"></i> {t("pronunciationExercisePage.carousel.back")}
                         </button>
                     </div>
                 </div>
@@ -54,16 +56,16 @@ function PronunciationExerciseAttemptHistoryDetail() {
                 <div className="container exercise-history-detail-hero-inner">
                     <div>
                         <span className="exercise-history-detail-eyebrow">
-                            <i className="fas fa-history"></i> Lịch sử làm bài luyện tập phát âm
+                            <i className="fas fa-history"></i> {t("pronunciationExercisePage.attemptHistory.detailEyebrow")}
                         </span>
                         <h1 className="exercise-history-detail-title">{attempt.pronunciationExerciseContent?.title}</h1>
                         <div className="exercise-history-detail-stats">
-                            <span><i className="fas fa-check-circle"></i> {attempt.correctCount}/{attempt.totalQuestions} câu đúng</span>
+                            <span><i className="fas fa-check-circle"></i> {t("pronunciationExercisePage.attemptHistory.correctCount", { correct: attempt.correctCount, total: attempt.totalQuestions })}</span>
                             <span><i className="fas fa-chart-line"></i> {Math.round(attempt.score || 0)}%</span>
                         </div>
                     </div>
                     <button className="exercise-history-detail-back" type="button" onClick={() => navigate("/pronunciation-exercise/history")}>
-                        <i className="fas fa-arrow-left"></i> Quay lại
+                        <i className="fas fa-arrow-left"></i> {t("pronunciationExercisePage.carousel.back")}
                     </button>
                 </div>
             </div>

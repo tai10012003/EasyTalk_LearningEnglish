@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const VocabularyExerciseSidebar = ({
         timeRemaining,
@@ -15,20 +16,21 @@ const VocabularyExerciseSidebar = ({
         answeredCount,
         isSubmitting = false
     }) => {
+        const { t } = useTranslation();
         const handleSubmitClick = useCallback(() => {
             Swal.fire({
-                title: 'Xác nhận',
-                text: 'Bạn có chắc chắn muốn nộp bài?',
+                title: t("vocabularyExercisePage.sidebar.confirmTitle"),
+                text: t("vocabularyExercisePage.sidebar.confirmText"),
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy'
+                confirmButtonText: t("vocabularyExercisePage.sidebar.confirm"),
+                cancelButtonText: t("vocabularyExercisePage.sidebar.cancel")
             }).then((result) => {
                 if (result.isConfirmed) {
                     onSubmitQuiz();
                 }
             });
-        }, [onSubmitQuiz]);
+        }, [onSubmitQuiz, t]);
 
         const getCompletedTime = () => {
             const timeTaken = selectedDuration - timeRemaining;
@@ -39,7 +41,7 @@ const VocabularyExerciseSidebar = ({
 
         const getQuestionButtonColor = (index) => {
         const result = questionResults[index];
-        if (!result || result.userAnswer == "Chưa trả lời") {
+        if (!result || result.userAnswer == t("vocabularyExercisePage.detail.unanswered")) {
             return {};
         }
 
@@ -57,7 +59,7 @@ const VocabularyExerciseSidebar = ({
             {!isCompleted ? (
                 <>
                     <div className="exercise-time-remaining text-center">
-                        <span id="exercise-timeLabel">Thời gian còn lại: </span>
+                        <span id="exercise-timeLabel">{t("vocabularyExercisePage.sidebar.timeRemaining")} </span>
                         <span id="exercise-time">{formatTime(timeRemaining)}</span>
                     </div>
                     {allQuestionsAnswered && (
@@ -68,15 +70,15 @@ const VocabularyExerciseSidebar = ({
                             onClick={handleSubmitClick}
                             disabled={isSubmitting}
                         >
-                            <i className="fas fa-paper-plane"></i> {isSubmitting ? "Đang nộp..." : "Nộp bài"}
+                            <i className="fas fa-paper-plane"></i> {isSubmitting ? t("vocabularyExercisePage.sidebar.submitting") : t("vocabularyExercisePage.sidebar.submit")}
                         </button>
                     )}
                     {!allQuestionsAnswered && (
                         <div className="text-center mb-4">
-                            Đã trả lời: {answeredCount}/{questions.length} câu
+                            {t("vocabularyExercisePage.sidebar.answered", { answered: answeredCount, total: questions.length })}
                         </div>
                     )}
-                    <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>
+                    <h5 id="exercise-questionListTitle">{t("vocabularyExercisePage.sidebar.questionList")}</h5>
                     <div className="exercise-question-list mt-3" id="exercise-question-list">
                         {questions.map((_, index) => (
                             <button
@@ -95,13 +97,13 @@ const VocabularyExerciseSidebar = ({
                 </>
             ) : (
                 <div id="exercise-completed-info" className="text-center">
-                    <h4>Thời gian đã làm: <span id="exercise-completedTime">{getCompletedTime()}</span></h4>
+                    <h4>{t("vocabularyExercisePage.sidebar.completedTime")} <span id="exercise-completedTime">{getCompletedTime()}</span></h4>
                     <button
                         className="btn btn-secondary mt-3"
                         id="exercise-viewHistoryBtn"
                         onClick={onShowHistory}
                     >
-                        Xem lịch sử
+                        {t("vocabularyExercisePage.sidebar.viewHistory")}
                     </button>
                 </div>
             )}

@@ -2,8 +2,10 @@ import React, { useEffect, useState, useRef } from "react";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import DictationExerciseCard from "@/components/user/dictationexercise/DictationExerciseCard.jsx";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
+import { Trans, useTranslation } from "react-i18next";
 
 function DictationExercise() {
+    const { t, i18n } = useTranslation();
     const [allDictationExercises, setAllDictationExercises] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -11,7 +13,7 @@ function DictationExercise() {
     const currentLessonRef = useRef(null);
 
     useEffect(() => {
-        document.title = "Bài luyện tập nghe chép chính tả - EasyTalk";
+        document.title = t("dictationExercisePage.list.documentTitle");
         DictationExerciseService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
@@ -28,7 +30,7 @@ function DictationExercise() {
             }
         };
         fetchData();
-    }, []);
+    }, [t, i18n.language]);
 
     const findCurrentDictationExerciseIndex = () => {
         return allDictationExercises.findIndex(item => item.isCurrent);
@@ -49,7 +51,7 @@ function DictationExercise() {
                 <div className="user-road-header">
                     <div className="container">
                         <h1 className="user-road-title">
-                            <i className="fas fa-headphones me-2"></i> LỘ TRÌNH LUYỆN TẬP NGHE CHÉP CHÍNH TẢ TỪ A-Z
+                            <i className="fas fa-headphones me-2"></i> {t("dictationExercisePage.list.title")}
                             <i
                                 className="fas fa-question-circle help-icon"
                                 style={{ cursor: "pointer", marginLeft: "10px" }}
@@ -57,14 +59,14 @@ function DictationExercise() {
                             ></i>
                         </h1>
                         <p className="user-road-subtitle">
-                            Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {roadmapProgress.unlockedCount} / {roadmapProgress.totalCount || allDictationExercises.length}
+                            {t("dictationExercisePage.list.subtitle", { unlocked: roadmapProgress.unlockedCount, total: roadmapProgress.totalCount || allDictationExercises.length })}
                         </p>
                         <div className="user-road-progress">
                             <div className="user-progress-bar">
                                 <div className="user-progress-fill" style={{ width: `${roadmapProgress.percent || 0}%` }}/>
                             </div>
                             <span className="user-progress-text">
-                                {roadmapProgress.percent || 0}% hoàn thành
+                                {t("dictationExercisePage.list.completePercent", { percent: roadmapProgress.percent || 0 })}
                             </span>
                         </div>
                     </div>
@@ -84,12 +86,12 @@ function DictationExercise() {
                     </div>
                 </div>
                 <div className="user-floating-buttons">
-                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title="Cuộn đến bài luyện tập hiện tại" >
+                    <button className="user-scroll-current-btn" onClick={scrollToCurrentLesson} title={t("dictationExercisePage.list.scrollCurrentTitle")} >
                         <i className="fas fa-play-circle"></i>
-                        <span className="user-scroll-current-text">Tiếp tục luyện tập</span>
-                        <span className="user-scroll-hot-badge">HOT</span>
+                        <span className="user-scroll-current-text">{t("dictationExercisePage.list.continuePractice")}</span>
+                        <span className="user-scroll-hot-badge">{t("dictationExercisePage.list.hot")}</span>
                     </button>
-                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title="Lên đầu trang" >
+                    <button className="user-scroll-top" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })} title={t("dictationExercisePage.list.scrollTopTitle")} >
                         <i className="fas fa-arrow-up"></i>
                     </button>
                 </div>
@@ -104,7 +106,7 @@ function DictationExercise() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="custom-modal-header">
-                            <h5>Hướng Dẫn Bài Luyện Tập Nghe Chép Chính Tả</h5>
+                            <h5>{t("dictationExercisePage.list.guide.title")}</h5>
                             <button
                                 className="close-btn"
                                 onClick={() => setIsModalOpen(false)}
@@ -113,41 +115,21 @@ function DictationExercise() {
                             </button>
                         </div>
                         <div className="custom-modal-body">
-                            <p>
-                                Chọn bài luyện tập nghe chép chính tả mà bạn muốn
-                                luyện tập từ danh sách.
-                            </p>
-                            <p>
-                                Nghe mỗi câu và gõ lại đúng chính xác từng câu vào ô
-                                nhập liệu.
-                            </p>
+                            <p>{t("dictationExercisePage.list.guide.intro")}</p>
+                            <p>{t("dictationExercisePage.list.guide.description")}</p>
                             <ul>
-                                <li>
-                                    <strong>Nghe:</strong> Hệ thống sẽ phát âm thanh
-                                    mỗi câu 3 lần. Bạn có thể bấm nút "Loa" hoặc phím{" "}
-                                    <strong>Ctrl</strong> để nghe lại.
-                                </li>
-                                <li>
-                                    <strong>Chép chính tả:</strong> Gõ lại câu vừa nghe
-                                    vào ô nhập, sau đó nhấn "Kiểm tra" để xác nhận kết
-                                    quả.
-                                </li>
-                                <li>
-                                    <strong>Bỏ qua:</strong> Nếu quá khó, bạn có thể bỏ
-                                    qua và xem đáp án.
-                                </li>
+                                <li><Trans i18nKey="dictationExercisePage.list.guide.listen" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="dictationExercisePage.list.guide.dictation" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="dictationExercisePage.list.guide.skip" components={{ strong: <strong /> }} /></li>
                             </ul>
-                            <p>
-                                <strong>Lưu ý:</strong> Hãy cố gắng hoàn thành từng
-                                câu trước khi chuyển sang câu tiếp theo.
-                            </p>
+                            <p><Trans i18nKey="dictationExercisePage.list.guide.note" components={{ strong: <strong /> }} /></p>
                         </div>
                         <div className="custom-modal-footer">
                             <button
                                 className="footer-btn"
                                 onClick={() => setIsModalOpen(false)}
                             >
-                                Đóng
+                                {t("dictationExercisePage.common.close")}
                             </button>
                         </div>
                     </div>

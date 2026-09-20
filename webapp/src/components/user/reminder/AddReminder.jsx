@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { ReminderService } from "@/services/ReminderService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
 
 const AddReminder = ({ isOpen, onClose, onCreated }) => {
+    const { t } = useTranslation();
     const [userEmail, setUserEmail] = useState("");
     const [reminderTime, setReminderTime] = useState("");
     const [frequency, setFrequency] = useState("one-time");
@@ -26,25 +28,25 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!reminderTime) {
-            Swal.fire({ icon: "warning", title: "Chú ý!", text: "Vui lòng chọn thời gian nhắc!" });
+            Swal.fire({ icon: "warning", title: t("reminderPage.alert.noticeTitle"), text: t("reminderPage.alert.timeRequired") });
             return;
         }
         const selected = new Date(reminderTime).getTime();
         if (isNaN(selected) || selected < Date.now()) {
-            Swal.fire({ icon: "warning", title: "Chú ý!", text: "Thời gian nhắc không được ở quá khứ!" });
+            Swal.fire({ icon: "warning", title: t("reminderPage.alert.noticeTitle"), text: t("reminderPage.alert.timeInPast") });
             return;
         }
         setLoading(true);
         try {
             const payload = { email: userEmail, reminderTime, frequency, additionalInfo };
-            const data = await ReminderService.addReminder(payload);
-            await Swal.fire({ icon: "success", title: "Thành công!", text: "Nhắc nhở đã được thêm thành công!" });
+            await ReminderService.addReminder(payload);
+            await Swal.fire({ icon: "success", title: t("reminderPage.alert.successTitle"), text: t("reminderPage.alert.addSuccess") });
             resetForm();
             onCreated && onCreated();
             onClose && onClose();
         } catch (err) {
             console.error("Add reminder error:", err);
-            Swal.fire({ icon: "error", title: "Lỗi", text: err.message || "Không thể tạo nhắc nhở." });
+            Swal.fire({ icon: "error", title: t("reminderPage.alert.errorTitle"), text: err.message || t("reminderPage.alert.createFailed") });
         } finally {
             setLoading(false);
         }
@@ -56,19 +58,19 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
         <div className="custom-modal-overlay" onClick={onClose}>
             <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
                 <div className="custom-modal-header">
-                    <h5>THÊM NHẮC NHỞ HỌC TẬP</h5>
+                    <h5>{t("reminderPage.form.addTitle")}</h5>
                     <button className="close-btn" onClick={onClose}>×</button>
                 </div>
                 <form onSubmit={handleSubmit}>
                     <div className="custom-modal-body">
                         <div className="mb-3">
-                            <label className="form-label">Email nhận thông báo:</label>
+                            <label className="form-label">{t("reminderPage.form.emailLabel")}</label>
                             <div className="form-control">
                                 {userEmail}
                             </div>
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Thời gian nhắc (local):</label>
+                            <label className="form-label">{t("reminderPage.form.timeLabel")}</label>
                             <input
                                 type="datetime-local"
                                 className="form-control"
@@ -78,27 +80,27 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
                             />
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Tần suất:</label>
+                            <label className="form-label">{t("reminderPage.form.frequencyLabel")}</label>
                             <select
                                 className="form-select select-colored"
                                 value={frequency}
                                 onChange={(e) => setFrequency(e.target.value)}
                                 required
                             >
-                                <option value="one-time">Một lần</option>
-                                <option value="daily">Hàng ngày</option>
-                                <option value="weekly">Hàng tuần</option>
-                                <option value="monthly">Hàng tháng</option>
+                                <option value="one-time">{t("reminderPage.frequency.oneTime")}</option>
+                                <option value="daily">{t("reminderPage.frequency.daily")}</option>
+                                <option value="weekly">{t("reminderPage.frequency.weekly")}</option>
+                                <option value="monthly">{t("reminderPage.frequency.monthly")}</option>
                             </select>
                         </div>
                         <div className="mb-3">
-                            <label className="form-label">Ghi chú / nội dung nhắc:</label>
+                            <label className="form-label">{t("reminderPage.form.noteLabel")}</label>
                             <textarea
                                 className="form-control"
                                 rows="4"
                                 value={additionalInfo}
                                 onChange={(e) => setAdditionalInfo(e.target.value)}
-                                placeholder="Ví dụ: Học 30 phút grammar, nghe, đọc..."
+                                placeholder={t("reminderPage.form.notePlaceholder")}
                             />
                         </div>
                     </div>
@@ -111,10 +113,10 @@ const AddReminder = ({ isOpen, onClose, onCreated }) => {
                         }}
                     >
                         <button type="button" className="footer-btn" onClick={onClose} disabled={loading}>
-                            <i className="fas fa-times"></i> Đóng
+                            <i className="fas fa-times"></i> {t("reminderPage.common.close")}
                         </button>
                         <button type="submit" className="footer-btn" disabled={loading}>
-                            <i className="fas fa-save"></i> {loading ? "Đang lưu..." : "Lưu"}
+                            <i className="fas fa-save"></i> {loading ? t("reminderPage.common.saving") : t("reminderPage.common.save")}
                         </button>
                     </div>
                 </form>

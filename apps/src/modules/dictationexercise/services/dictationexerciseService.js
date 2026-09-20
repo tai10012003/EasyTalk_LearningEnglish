@@ -18,6 +18,7 @@ class DictationExerciseService {
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
         this.agentLearningEventService = options.agentLearningEventService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     setAgentLearningEventService(service) {
@@ -31,9 +32,9 @@ class DictationExerciseService {
         return this.userProgressService;
     }
 
-    async getDictationList(page = 1, limit = 12, role = "user") {
+    async getDictationList(page = 1, limit = 12, role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('dictation', { page, limit, role });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('dictation', role), cacheNs.listTags('dictation')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('dictation', role), cacheNs.listTags('dictation')), async () => {
             const filter = {};
             if (role !== "admin") {
                 filter.display = true;
@@ -41,6 +42,13 @@ class DictationExerciseService {
             const { dictations, total } = await this.repository.findAll(filter, page, limit);
             return { dictationExercises: dictations, totalDictationExercises: total };
         });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                dictationExercises: await this.englishTranslationService.applyTranslations("dictationExercise", result.dictationExercises, lang)
+            };
+        }
+        return result;
     }
 
     async getDictation(id) {
@@ -53,6 +61,22 @@ class DictationExerciseService {
         return await this.cache.getOrSet(cacheNs.slugKey('dictation', slug), withTags(policies.contentDetail('dictation'), cacheNs.itemTags('dictation', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
+    }
+
+    async getLocalizedDictation(id, lang = "vi") {
+        const dictationExercise = await this.getDictation(id);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("dictationExercise", dictationExercise, lang);
+        }
+        return dictationExercise;
+    }
+
+    async getLocalizedDictationBySlug(slug, lang = "vi") {
+        const dictationExercise = await this.getDictationBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("dictationExercise", dictationExercise, lang);
+        }
+        return dictationExercise;
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -74,8 +98,8 @@ class DictationExerciseService {
         return userProgress;
     }
 
-    async getDictationExerciseDetails(userId, dictationId) {
-        const dictationExercise = await this.getDictation(dictationId);
+    async getDictationExerciseDetails(userId, dictationId, lang = "vi") {
+        const dictationExercise = await this.getLocalizedDictation(dictationId, lang);
         if (!dictationExercise) {
             return { status: 404, data: { message: "Dictation exercise not found." } };
         }
@@ -87,16 +111,16 @@ class DictationExerciseService {
         return { status: 200, data: { success: true, data: { dictationExercise } } };
     }
 
-    async getDictationExerciseDetailsBySlug(userId, slug) {
+    async getDictationExerciseDetailsBySlug(userId, slug, lang = "vi") {
         const dictationExercise = await this.getDictationBySlug(slug);
         if (!dictationExercise) {
             return { status: 404, data: { success: false, message: "Dictation exercise not found" } };
         }
-        return await this.getDictationExerciseDetails(userId, dictationExercise._id);
+        return await this.getDictationExerciseDetails(userId, dictationExercise._id, lang);
     }
 
-    async getDictationExerciseRoadmap(userId) {
-        const { dictationExercises, totalDictationExercises } = await this.getDictationList(1, 10000, "user");
+    async getDictationExerciseRoadmap(userId, lang = "vi") {
+        const { dictationExercises, totalDictationExercises } = await this.getDictationList(1, 10000, "user", lang);
         const userProgress = await this._getOrCreateUserProgress(userId);
         const unlockedIds = new Set((userProgress.unlockedDictations || []).map(id => id.toString()));
         const studyStats = userProgress.dictationStudyStats || {};
@@ -214,6 +238,9 @@ class DictationExerciseService {
             return { status: 404, data: { success: false, message: "Bài nghe chép chính tả không tìm thấy." } };
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("dictationExercise", id);
+        }
         await invalidateDictationExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài nghe chép chính tả đã xóa thành công!" } };
     }

@@ -3,10 +3,15 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguage = () => {
+    return localStorage.getItem("language") === "en" ? "en" : "vi";
+};
+
 export const JourneyService = {
     async fetchJourney() {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api`, {
+            const query = getCurrentLanguage() === "en" ? "?lang=en" : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api${query}`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -39,12 +44,13 @@ export const JourneyService = {
 
     async fetchJourneyAdmin(page = 1, limit = 12) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api/journey-list?page=${page}&limit=${limit}`, {
+            const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api/journey-list?${params.toString()}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = responseData.data || responseData;
             return await data;
         } catch (err) {
             console.error("Error fetching journey:", err);

@@ -1,7 +1,9 @@
 import React, { useState, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import Swal from "sweetalert2";
 
 function ChatAIInput({ onSend, disabled }) {
+    const { t } = useTranslation();
     const [input, setInput] = useState("");
     const [mode, setMode] = useState("text")
     const [listening, setListening] = useState(false);
@@ -11,8 +13,8 @@ function ChatAIInput({ onSend, disabled }) {
         const trimmed = input.trim();
         if (!trimmed) return Swal.fire({
             icon: "warning",
-            title: "Cảnh báo",
-            text: "Vui lòng nhập nội dung tin nhắn."
+            title: t("chatAIPage.alert.warningTitle"),
+            text: t("chatAIPage.input.emptyMessage")
         });
         onSend(trimmed);
         setInput("");
@@ -31,8 +33,8 @@ function ChatAIInput({ onSend, disabled }) {
         if (!("webkitSpeechRecognition" in window)) {
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói. Vui lòng sử dụng Google Chrome."
+                title: t("chatAIPage.alert.errorTitle"),
+                text: t("chatAIPage.input.speechUnsupported")
             });
             return;
         }
@@ -71,7 +73,7 @@ function ChatAIInput({ onSend, disabled }) {
                 onClick={toggleMode}
                 disabled={disabled}
             >
-                {mode == "text" ? "Giao tiếp" : "Nhắn tin"}
+                {mode == "text" ? t("chatAIPage.input.voiceMode") : t("chatAIPage.input.textMode")}
             </button>
 
             {mode == "text" ? (
@@ -79,7 +81,7 @@ function ChatAIInput({ onSend, disabled }) {
                     <input
                         type="text"
                         className="chat-ai-input"
-                        placeholder="Nhập tin nhắn của bạn ..."
+                        placeholder={t("chatAIPage.input.placeholder")}
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyPress={handleKeyPress}

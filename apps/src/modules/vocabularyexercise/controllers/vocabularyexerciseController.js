@@ -12,7 +12,8 @@ function createVocabularyExerciseController({ vocabularyExerciseService }) {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
         const role = req.user.role || "user";
-        const { vocabularyexercises, totalExercises } = await vocabularyExerciseService.getVocabularyexerciseList(page, limit, role);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { vocabularyexercises, totalExercises } = await vocabularyExerciseService.getVocabularyexerciseList(page, limit, role, lang);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({
             success: true,
@@ -22,16 +23,19 @@ function createVocabularyExerciseController({ vocabularyExerciseService }) {
         });
     }));
     router.get("/api/vocabulary-exercises/roadmap", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await vocabularyExerciseService.getVocabularyExerciseRoadmap(req.user.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await vocabularyExerciseService.getVocabularyExerciseRoadmap(req.user.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/vocabulary-exercises/:id", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await vocabularyExerciseService.getVocabularyExerciseDetails(req.user.id, req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await vocabularyExerciseService.getVocabularyExerciseDetails(req.user.id, req.params.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/vocabulary-exercises/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
         const slug = req.params.slug;
-        const { status, data } = await vocabularyExerciseService.getVocabularyExerciseDetailsBySlug(req.user.id, slug);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await vocabularyExerciseService.getVocabularyExerciseDetailsBySlug(req.user.id, slug, lang);
         return res.status(status).json(data);
     }));
     router.post("/api/vocabulary-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {
@@ -39,7 +43,8 @@ function createVocabularyExerciseController({ vocabularyExerciseService }) {
         return res.status(status).json(data);
     }));
     router.post("/api/vocabulary-exercises/:id/attempts", verifyToken, asyncHandler(async (req, res) => {
-        const { status, data } = await vocabularyExerciseService.startAttempt(req.user.id, req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await vocabularyExerciseService.startAttempt(req.user.id, req.params.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/attempts/history", verifyToken, asyncHandler(async (req, res) => {

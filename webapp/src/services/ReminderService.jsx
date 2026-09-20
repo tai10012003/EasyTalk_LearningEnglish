@@ -1,4 +1,5 @@
 import { AuthService } from "./AuthService.jsx";
+import i18n from "@/i18n";
 import Swal from "sweetalert2";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -22,8 +23,8 @@ export const ReminderService = {
                 hasShownAlert = true;
                 Swal.fire({
                     icon: "error",
-                    title: "Lỗi",
-                    text: "Không thể tải danh sách nhắc nhở. Vui lòng kiểm tra kết nối server.",
+                    title: i18n.t("reminderPage.alert.errorTitle"),
+                    text: i18n.t("reminderPage.alert.loadListFailed"),
                 });
             }
             return {
@@ -48,8 +49,8 @@ export const ReminderService = {
             const data = responseData.data;
             Swal.fire({
                 icon: "success",
-                title: "Thành công",
-                text: "Đã tạo nhắc nhở mới!",
+                title: i18n.t("reminderPage.alert.successTitle"),
+                text: i18n.t("reminderPage.alert.addSuccessShort"),
                 timer: 2000,
                 showConfirmButton: false,
             });
@@ -58,8 +59,8 @@ export const ReminderService = {
             console.error("Error adding reminder:", error);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Không thể thêm nhắc nhở. Vui lòng thử lại.",
+                title: i18n.t("reminderPage.alert.errorTitle"),
+                text: i18n.t("reminderPage.alert.addFailed"),
             });
             throw error;
         }
@@ -79,8 +80,8 @@ export const ReminderService = {
             const data = responseData.data;
             Swal.fire({
                 icon: "success",
-                title: "Đã cập nhật",
-                text: "Nhắc nhở đã được cập nhật thành công.",
+                title: i18n.t("reminderPage.alert.updatedTitle"),
+                text: i18n.t("reminderPage.alert.updateSuccess"),
                 timer: 2000,
                 showConfirmButton: false,
             });
@@ -89,8 +90,8 @@ export const ReminderService = {
             console.error("Error updating reminder:", error);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Không thể cập nhật nhắc nhở.",
+                title: i18n.t("reminderPage.alert.errorTitle"),
+                text: i18n.t("reminderPage.alert.updateReminderFailed"),
             });
             throw error;
         }
@@ -106,8 +107,8 @@ export const ReminderService = {
             const data = responseData.data;
             Swal.fire({
                 icon: "success",
-                title: "Đã xóa",
-                text: "Nhắc nhở đã được xóa.",
+                title: i18n.t("reminderPage.alert.deletedTitle"),
+                text: i18n.t("reminderPage.alert.deleteSuccess"),
                 timer: 1500,
                 showConfirmButton: false,
             });
@@ -116,8 +117,8 @@ export const ReminderService = {
             console.error("Error deleting reminder:", error);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Không thể xóa nhắc nhở.",
+                title: i18n.t("reminderPage.alert.errorTitle"),
+                text: i18n.t("reminderPage.alert.deleteFailed"),
             });
             throw error;
         }

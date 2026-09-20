@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
 function paginatedResponse(responseData, page) {
     const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
     const meta = responseData?.meta || responseData?.data || responseData || {};
@@ -18,6 +23,7 @@ export const PronunciationExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises${query}`, {
                 method: 'GET',
             });
@@ -45,7 +51,8 @@ export const PronunciationExerciseService = {
 
     async getPronunciationExerciseBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
             const data = responseData.data?.pronunciationExercise || responseData.data || responseData;
@@ -57,7 +64,8 @@ export const PronunciationExerciseService = {
     },
 
     async fetchPronunciationExerciseRoadmap() {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/roadmap`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/roadmap${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {
@@ -70,7 +78,8 @@ export const PronunciationExerciseService = {
     },
 
     async startPronunciationExerciseAttempt(pronunciationExerciseId) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${pronunciationExerciseId}/attempts`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${pronunciationExerciseId}/attempts${langQuery}`, {
             method: "POST",
         });
         if (!res.ok) {
@@ -190,7 +199,8 @@ export const PronunciationExerciseService = {
     },
 
     async getPronunciationExerciseDetail(id) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${id}`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${id}${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {
@@ -201,6 +211,15 @@ export const PronunciationExerciseService = {
         const responseData = await res.json();
         const data = responseData.data || responseData;
         return data;
+    },
+
+    async getPronunciationExerciseAdmin(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     async completePronunciationExercise(pronunciationexerciseId) {

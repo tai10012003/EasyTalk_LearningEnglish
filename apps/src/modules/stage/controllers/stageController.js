@@ -12,7 +12,8 @@ function createStageController({ stageService }) {
     router.get("/api/stage/detail/:id", verifyToken, asyncHandler(async (req, res) => {
         const userId = req.user.id;
         const stageId = req.params.id;
-        const { stage, userProgress } = await stageService.getStageDetailForUser(stageId, userId);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { stage, userProgress } = await stageService.getStageDetailForUser(stageId, userId, { lang });
         if(!stage) {
             return res.status(404).json({ error: "Chặng không tồn tại." });
         }
@@ -33,7 +34,8 @@ function createStageController({ stageService }) {
     router.get("/api/stages", asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { stages, totalStages } = await stageService.getStageList(page, limit);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { stages, totalStages } = await stageService.getStageList(page, limit, { lang });
         const totalPages = Math.ceil(totalStages / limit);
         res.json({
             success: true,
@@ -63,7 +65,8 @@ function createStageController({ stageService }) {
         });
     }));
     router.get("/api/:id", verifyAdmin, asyncHandler(async function (req, res) {
-        const stage = await stageService.getStageById(req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const stage = await stageService.getStageById(req.params.id, { lang });
         const gateData = await stageService.getGateOptions();
         const gates = gateData.gates;
         res.json({ stage, gates });

@@ -1,5 +1,6 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
+import i18n from "@/i18n";
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 const requestCache = new Map();
@@ -43,8 +44,8 @@ export const UserProgressService = {
                     hasShownAlert = true;
                     Swal.fire({
                         icon: "error",
-                        title: "Lỗi",
-                        text: "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+                        title: i18n.t("streakPage.error.title"),
+                        text: i18n.t("streakPage.error.connectionFailed")
                     });
                 }
                 throw err;

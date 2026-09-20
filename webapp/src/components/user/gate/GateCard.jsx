@@ -1,7 +1,9 @@
 import React from "react";
 import StageCard from "@/components/user/stage/StageCard.jsx";
+import { useTranslation } from "react-i18next";
 
 const GateCard = ({ gate, index, total, isCurrent }) => {
+  const { t } = useTranslation();
   let currentStageIndexInGate = -1;
   let isCompleted = false;
 
@@ -24,25 +26,25 @@ const GateCard = ({ gate, index, total, isCurrent }) => {
         <div className="user-gate-card-header">
           <h4>{gate.title}</h4>
           {isCurrent && (
-            <span className="user-gate-current-badge">Cổng hiện tại</span>
+            <span className="user-gate-current-badge">{t("journeyPage.gateCard.current")}</span>
           )}
           {!isCurrent && isCompleted && (
             <span className="user-gate-completed-badge">
-              Đã hoàn thành
+              {t("journeyPage.gateCard.completed")}
             </span>
           )}
           {!gate.unlocked && (
             <span className="user-gate-locked-badge">
-              Chưa mở khóa
+              {t("journeyPage.gateCard.locked")}
             </span>
           )}
           <span className="user-gate-stage-count">
-            {gate.stages.length} chặng
+            {t("journeyPage.gateCard.stageCount", { count: gate.stages.length })}
           </span>
         </div>
         {gate.stages.length === 0 ? (
           <div className="user-gate-empty">
-            <p>Chưa có chặng nào ở cổng này!</p>
+            <p>{t("journeyPage.gateCard.empty")}</p>
           </div>
         ) : (
           <div className="user-stage-grid">

@@ -12,7 +12,8 @@ function createDictationExerciseController({ dictationExerciseService }) {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
         const role = req.user.role || "user";
-        const { dictationExercises, totalDictationExercises } = await dictationExerciseService.getDictationList(page, limit, role);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { dictationExercises, totalDictationExercises } = await dictationExerciseService.getDictationList(page, limit, role, lang);
         const totalPages = Math.ceil(totalDictationExercises / limit);
         res.json({
             success: true,
@@ -22,15 +23,18 @@ function createDictationExerciseController({ dictationExerciseService }) {
         });
     }));
     router.get("/api/dictation-exercises/roadmap", verifyToken, asyncHandler(async (req, res) => {
-        const { status, data } = await dictationExerciseService.getDictationExerciseRoadmap(req.user.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await dictationExerciseService.getDictationExerciseRoadmap(req.user.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/dictationexercise/:id", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await dictationExerciseService.getDictationExerciseDetails(req.user.id, req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await dictationExerciseService.getDictationExerciseDetails(req.user.id, req.params.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/dictationexercise/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await dictationExerciseService.getDictationExerciseDetailsBySlug(req.user.id, req.params.slug);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await dictationExerciseService.getDictationExerciseDetailsBySlug(req.user.id, req.params.slug, lang);
         return res.status(status).json(data);
     }));
     router.post("/api/dictation-exercises/complete/:id", verifyToken, asyncHandler(async (req, res) => {

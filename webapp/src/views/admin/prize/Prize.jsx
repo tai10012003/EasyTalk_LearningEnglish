@@ -25,6 +25,7 @@ function Prize() {
                 dataKey="prizes"
                 addUrl="/admin/prize/add"
                 updateUrl="/admin/prize/update"
+                translateUrl="/admin/prize/translate"
             />
         </div>
     );

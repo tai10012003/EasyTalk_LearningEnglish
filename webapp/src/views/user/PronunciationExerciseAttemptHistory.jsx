@@ -3,13 +3,15 @@ import { useNavigate } from "react-router-dom";
 import LoadingScreen from '@/components/user/LoadingScreen.jsx';
 import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
-const formatDateTime = (value) => {
+const formatDateTime = (value, locale) => {
     if (!value) return "";
-    return new Date(value).toLocaleString("vi-VN");
+    return new Date(value).toLocaleString(locale);
 };
 
 function PronunciationExerciseAttemptHistory() {
+    const { t, i18n } = useTranslation();
     const navigate = useNavigate();
     const [items, setItems] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -17,8 +19,8 @@ function PronunciationExerciseAttemptHistory() {
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        document.title = "Lịch sử làm bài luyện tập phát âm - EasyTalk";
-    }, []);
+        document.title = t("pronunciationExercisePage.attemptHistory.documentTitle");
+    }, [t, i18n.language]);
 
     useEffect(() => {
         const fetchHistory = async () => {
@@ -41,11 +43,11 @@ function PronunciationExerciseAttemptHistory() {
     const handleDeleteHistory = async (attemptId) => {
         const result = await Swal.fire({
             icon: "warning",
-            title: "Xóa lịch sử làm bài?",
-            text: "Lịch sử này sẽ bị xóa khỏi tài khoản của bạn.",
+            title: t("pronunciationExercisePage.attemptHistory.deleteConfirmTitle"),
+            text: t("pronunciationExercisePage.attemptHistory.deleteConfirmText"),
             showCancelButton: true,
-            confirmButtonText: "Xóa",
-            cancelButtonText: "Hủy",
+            confirmButtonText: t("pronunciationExercisePage.attemptHistory.deleteConfirm"),
+            cancelButtonText: t("pronunciationExercisePage.attemptHistory.deleteCancel"),
             confirmButtonColor: "#dc3545",
             cancelButtonColor: "#6b7280",
         });
@@ -55,7 +57,7 @@ function PronunciationExerciseAttemptHistory() {
             setItems(prev => prev.filter(item => item.attemptId !== attemptId));
             Swal.fire({
                 icon: "success",
-                title: "Đã xóa lịch sử",
+                title: t("pronunciationExercisePage.attemptHistory.deleteSuccess"),
                 timer: 1200,
                 showConfirmButton: false
             });
@@ -63,8 +65,8 @@ function PronunciationExerciseAttemptHistory() {
             console.error("Error deleting pronunciation exercise history:", error);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: error.message || "Có lỗi xảy ra khi xóa lịch sử."
+                title: t("pronunciationExercisePage.detail.errorTitle"),
+                text: error.message || t("pronunciationExercisePage.attemptHistory.deleteError")
             });
         }
     };
@@ -75,20 +77,20 @@ function PronunciationExerciseAttemptHistory() {
         <div className="exercise-history-page">
             <div className="exercise-history-hero">
                 <h1 className="exercise-history-title">
-                    <i className="fas fa-history me-2"></i> LỊCH SỬ LÀM BÀI LUYỆN TẬP PHÁT ÂM
+                    <i className="fas fa-history me-2"></i> {t("pronunciationExercisePage.attemptHistory.title")}
                 </h1>
             </div>
 
             <div className="container exercise-history-content">
                 <div className="exercise-history-toolbar">
                     <button className="exercise-history-back-btn" type="button" onClick={() => navigate("/pronunciation-exercise")}>
-                        <i className="fas fa-arrow-left"></i> Quay lại
+                        <i className="fas fa-arrow-left"></i> {t("pronunciationExercisePage.carousel.back")}
                     </button>
                 </div>
 
                 {items.length === 0 ? (
                     <div className="exercise-history-empty">
-                        <p>Chưa có lịch sử làm bài nào.</p>
+                        <p>{t("pronunciationExercisePage.attemptHistory.empty")}</p>
                     </div>
                 ) : (
                     <div className="exercise-history-list">
@@ -101,13 +103,13 @@ function PronunciationExerciseAttemptHistory() {
                                     <div className="exercise-history-card-info">
                                         <div className="exercise-history-card-top">
                                             <span className={`exercise-history-status ${item.status === "completed" ? "completed" : "in-progress"}`}>
-                                                {item.status === "completed" ? "Đã hoàn thành" : "Chưa hoàn thành"}
+                                                {item.status === "completed" ? t("pronunciationExercisePage.attemptHistory.completed") : t("pronunciationExercisePage.attemptHistory.inProgress")}
                                             </span>
-                                            <span className="exercise-history-date">{formatDateTime(item.completedAt || item.startedAt)}</span>
+                                            <span className="exercise-history-date">{formatDateTime(item.completedAt || item.startedAt, i18n.language === "en" ? "en-US" : "vi-VN")}</span>
                                         </div>
                                         <h3 className="exercise-history-card-title">{item.title}</h3>
                                         <div className="exercise-history-meta">
-                                            <span><i className="fas fa-check-circle"></i> {item.correctCount}/{item.totalQuestions} câu đúng</span>
+                                            <span><i className="fas fa-check-circle"></i> {t("pronunciationExercisePage.attemptHistory.correctCount", { correct: item.correctCount, total: item.totalQuestions })}</span>
                                             <span><i className="fas fa-list-ol"></i> {item.answeredCount}/{item.totalQuestions}</span>
                                         </div>
                                     </div>
@@ -118,7 +120,7 @@ function PronunciationExerciseAttemptHistory() {
                                         className="exercise-history-delete-btn"
                                         type="button"
                                         onClick={() => handleDeleteHistory(item.attemptId)}
-                                        title="Xóa"
+                                        title={t("pronunciationExercisePage.attemptHistory.deleteConfirm")}
                                     >
                                         <i className="fas fa-trash"></i>
                                     </button>
@@ -127,7 +129,7 @@ function PronunciationExerciseAttemptHistory() {
                                         type="button"
                                         onClick={() => navigate(`/pronunciation-exercise/history/${item.attemptId}`)}
                                     >
-                                        <i className="fas fa-eye"></i> Xem chi tiết
+                                        <i className="fas fa-eye"></i> {t("pronunciationExercisePage.attemptHistory.viewDetail")}
                                     </button>
                                 </div>
                             </div>

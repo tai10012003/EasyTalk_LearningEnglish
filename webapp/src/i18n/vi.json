@@ -312,6 +312,159 @@
         "explanation": "Giải thích"
       }
     },
+    "pronunciationExercisePage": {
+      "common": {
+        "close": "Đóng"
+      },
+      "list": {
+        "documentTitle": "Bài luyện tập phát âm - EasyTalk",
+        "title": "LỘ TRÌNH LUYỆN TẬP PHÁT ÂM TỪ A-Z",
+        "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+        "history": "LỊCH SỬ LÀM BÀI LUYỆN TẬP PHÁT ÂM",
+        "completePercent": "{{percent}}% hoàn thành",
+        "scrollCurrentTitle": "Cuộn đến bài luyện tập hiện tại",
+        "continuePractice": "Tiếp tục luyện tập",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang",
+        "guide": {
+          "title": "Hướng Dẫn Bài Luyện Tập Phát Âm",
+          "intro": "Chọn bài luyện tập phát âm mà bạn muốn luyện tập từ danh sách.",
+          "description": "Mỗi bài luyện tập sẽ có các câu hỏi phát âm với hai dạng câu hỏi chính: chọn đáp án đúng và phát âm.",
+          "questionTypes": "Dạng câu hỏi:",
+          "multipleChoice": "<strong>Trắc nghiệm:</strong> Nghe một câu và chọn đáp án đúng nhất từ các lựa chọn đưa ra.",
+          "pronunciation": "<strong>Phát âm:</strong> Nghe một câu hoặc cụm từ, sau đó phát âm lại để hệ thống phân tích độ chính xác.",
+          "noteTitle": "Lưu ý:",
+          "noteCheck": "Nhấn <strong>Kiểm tra</strong> sau khi hoàn thành mỗi câu hỏi để xem kết quả và giải thích.",
+          "notePronunciation": "Khi làm câu hỏi <strong>phát âm</strong>, hệ thống sẽ ghi lại giọng nói, phân tích và chỉ ra các từ phát âm đúng hoặc sai.",
+          "noteTime": "Thời gian làm bài là 20 phút. Hãy cố gắng hoàn thành đúng giờ nhé.",
+          "noteSubmit": "Sau khi nhấn <strong>Nộp bài</strong>, hệ thống sẽ hiển thị kết quả luyện tập, bao gồm tổng số câu hỏi, số câu đúng, tỷ lệ chính xác và phân tích chi tiết. Nhấn <strong>Xem lịch sử</strong> để xem lại bài đã làm.",
+          "closing": "Chúc bạn luyện tập tốt và cải thiện kỹ năng phát âm của mình!"
+        }
+      },
+      "card": {
+        "step": "Bước {{number}}",
+        "current": "Luyện tập ngay",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "questionCount": "Số câu hỏi: {{count}}",
+        "start": "Bắt đầu luyện tập",
+        "retry": "Làm lại"
+      },
+      "detail": {
+        "documentTitle": "Chi tiết luyện tập phát âm - EasyTalk",
+        "defaultTitle": "Bài luyện tập phát âm",
+        "unanswered": "Chưa trả lời",
+        "noAnswer": "Không trả lời",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang làm bài luyện phát âm. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "warningTitle": "Cảnh báo",
+        "speechUnsupported": "Trình duyệt của bạn không hỗ trợ Speech Synthesis.",
+        "completeTitle": "Hoàn thành!",
+        "completeText": "Chúc mừng! Bạn đã hoàn thành bài luyện tập phát âm. Bài luyện tập phát âm tiếp theo đã được mở khóa.",
+        "completeConfirm": "Quay lại danh sách bài luyện tập phát âm",
+        "errorTitle": "Lỗi",
+        "errorText": "Có lỗi xảy ra khi cập nhật tiến độ.",
+        "submitError": "Có lỗi xảy ra khi nộp bài.",
+        "startError": "Có lỗi xảy ra khi bắt đầu bài luyện tập.",
+        "noQuestions": "Không có câu hỏi nào trong bài tập này.",
+        "chooseTime": "Chọn thời gian làm bài:",
+        "minutes": "{{count}} phút",
+        "start": "Bắt đầu",
+        "loading": "Đang tải..."
+      },
+      "carousel": {
+        "questionTypes": {
+          "multipleChoice": "Nghe và chọn đáp án đúng:",
+          "pronunciation": "Phát âm lại sao cho đúng:",
+          "default": "Câu hỏi:"
+        },
+        "warningTitle": "Cảnh báo",
+        "recordUnsupported": "Trình duyệt không hỗ trợ ghi âm.",
+        "analyzeFailed": "Không thể phân tích phát âm. Vui lòng thử lại.",
+        "micBlocked": "Bạn đã chặn quyền micro. Vui lòng bật lại trong trình duyệt.",
+        "micNotFound": "Không tìm thấy thiết bị micro. Hãy kiểm tra lại máy của bạn.",
+        "micAccessFailed": "Không thể truy cập micro: {{message}}",
+        "answerRequired": "Vui lòng chọn một đáp án.",
+        "checkFailed": "Có lỗi xảy ra khi kiểm tra câu trả lời.",
+        "checking": "Đang kiểm tra...",
+        "check": "Kiểm tra",
+        "maxAttempts": "Bạn đã hết số lần phát âm cho câu này (3 lần).",
+        "stopRecording": "Dừng ghi âm",
+        "analyzing": "Đang phân tích...",
+        "record": "Ghi âm",
+        "analyzingPronunciation": "Đang phân tích phát âm...",
+        "analysisUnavailable": "Chưa phân tích được phát âm.",
+        "recordAgain": "Vui lòng ghi âm lại và thử thêm lần nữa.",
+        "accuracy": "Độ chính xác",
+        "analyzed": "Đã phân tích phát âm của bạn.",
+        "analysisResult": "Kết quả phân tích",
+        "pronunciationDetail": "Chi tiết phát âm",
+        "correct": "Bạn đã trả lời đúng!",
+        "incorrect": "Bạn đã trả lời sai.",
+        "correctAnswer": "Đáp án đúng",
+        "correctAnswerIs": "Đáp án đúng là",
+        "explanation": "Giải thích",
+        "standardSentence": "Câu chuẩn",
+        "back": "Quay lại",
+        "next": "Tiếp theo"
+      },
+      "sidebar": {
+        "confirmTitle": "Xác nhận",
+        "confirmText": "Bạn có chắc chắn muốn nộp bài?",
+        "confirm": "Đồng ý",
+        "cancel": "Hủy",
+        "timeRemaining": "Thời gian còn lại:",
+        "submit": "Nộp bài",
+        "submitting": "Đang nộp...",
+        "questionList": "Danh sách câu hỏi:",
+        "completedTime": "Thời gian đã làm:",
+        "viewHistory": "Xem lịch sử"
+      },
+      "result": {
+        "title": "KẾT QUẢ BÀI LUYỆN TẬP PHÁT ÂM",
+        "totalQuestions": "Tổng số câu",
+        "correctAnswers": "Số câu đúng",
+        "incorrectAnswers": "Số câu sai",
+        "accuracy": "Tỷ lệ đúng",
+        "iconAlt": "Icon kết quả",
+        "unlockNext": "Mở khóa bài luyện tập phát âm tiếp theo"
+      },
+      "history": {
+        "title": "LỊCH SỬ LÀM BÀI LUYỆN TẬP PHÁT ÂM",
+        "empty": "Không có dữ liệu lịch sử.",
+        "question": "Câu {{number}}",
+        "yourPronunciation": "Phát âm của bạn",
+        "pronunciationAnswer": "Đáp án phát âm",
+        "yourAnswer": "Đáp án của bạn",
+        "correctAnswer": "Đáp án đúng",
+        "result": "Kết quả",
+        "correct": "✓ Đúng",
+        "incorrect": "✗ Sai",
+        "explanation": "Giải thích",
+        "pronunciationGood": "Phát âm tốt",
+        "pronunciationAverage": "Phát âm trung bình",
+        "pronunciationPoor": "Phát âm tệ"
+      },
+      "attemptHistory": {
+        "documentTitle": "Lịch sử làm bài luyện tập phát âm - EasyTalk",
+        "detailDocumentTitle": "Lịch sử luyện tập phát âm",
+        "title": "LỊCH SỬ LÀM BÀI LUYỆN TẬP PHÁT ÂM",
+        "detailEyebrow": "Lịch sử làm bài luyện tập phát âm",
+        "empty": "Chưa có lịch sử làm bài nào.",
+        "completed": "Đã hoàn thành",
+        "inProgress": "Chưa hoàn thành",
+        "correctCount": "{{correct}}/{{total}} câu đúng",
+        "viewDetail": "Xem chi tiết",
+        "deleteConfirmTitle": "Xóa lịch sử làm bài?",
+        "deleteConfirmText": "Lịch sử này sẽ bị xóa khỏi tài khoản của bạn.",
+        "deleteConfirm": "Xóa",
+        "deleteCancel": "Hủy",
+        "deleteSuccess": "Đã xóa lịch sử",
+        "deleteError": "Có lỗi xảy ra khi xóa lịch sử."
+      }
+    },
     "storyPage": {
       "list": {
         "documentTitle": "Bài học câu chuyện - EasyTalk",
@@ -715,6 +868,549 @@
         "close": "Đóng",
         "saving": "Đang lưu...",
         "save": "Lưu"
+      }
+    },
+    "vocabularyExercisePage": {
+      "common": {
+        "close": "Đóng"
+      },
+      "list": {
+        "documentTitle": "Bài luyện tập từ vựng - EasyTalk",
+        "title": "LỘ TRÌNH LUYỆN TẬP TỪ VỰNG TỪ A-Z",
+        "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+        "history": "LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG",
+        "completePercent": "{{percent}}% hoàn thành",
+        "scrollCurrentTitle": "Cuộn đến bài luyện tập hiện tại",
+        "continuePractice": "Tiếp tục luyện tập",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang",
+        "guide": {
+          "title": "Hướng Dẫn Bài Luyện Tập Từ Vựng",
+          "intro": "Chọn bài tập từ vựng mà bạn muốn luyện tập từ danh sách.",
+          "description": "Mỗi bài tập sẽ có các câu hỏi từ vựng bao gồm các dạng câu hỏi như: trắc nghiệm, điền từ vào chỗ trống, dịch nghĩa và sắp xếp từ.",
+          "questionTypes": "Dạng câu hỏi:",
+          "multipleChoice": "<strong>Trắc Nghiệm:</strong> Chọn đáp án đúng nhất trong các lựa chọn được đưa ra.",
+          "fillBlank": "<strong>Điền Từ Vào Chỗ Trống:</strong> Điền từ thích hợp vào ô trống để hoàn thành câu.",
+          "translation": "<strong>Dịch Nghĩa:</strong> Dịch câu từ Tiếng Việt sang Tiếng Anh hoặc ngược lại.",
+          "noteTitle": "Lưu ý:",
+          "noteCheck": "Nhấn <strong>Kiểm tra</strong> sau khi trả lời mỗi câu hỏi để xem đáp án và giải thích.",
+          "noteComplete": "Mỗi bộ đề có số lượng câu hỏi khác nhau, hãy cố gắng hoàn thành hết các câu hỏi.",
+          "noteTime": "Thời gian làm bài là 20 phút. Hãy cố gắng hoàn thành đúng giờ nhé.",
+          "noteSubmit": "Nhấn <strong>Nộp bài</strong> thì hệ thống sẽ hiển thị kết quả bài luyện tập gồm có: số câu hỏi, số câu đúng, số câu sai, tỷ lệ chính xác (%). Nhấn <strong>Xem lịch sử</strong> để thấy những câu mình đã làm, để biết mình đúng hoặc sai chỗ nào.",
+          "closing": "Chúc bạn luyện tập tốt và cải thiện từ vựng của mình!"
+        }
+      },
+      "card": {
+        "step": "Bước {{number}}",
+        "current": "Luyện tập ngay",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "questionCount": "Số câu hỏi: {{count}}",
+        "start": "Bắt đầu luyện tập",
+        "retry": "Làm lại"
+      },
+      "detail": {
+        "documentTitle": "Chi tiết luyện tập từ vựng - EasyTalk",
+        "defaultTitle": "Bài luyện tập từ vựng",
+        "unanswered": "Chưa trả lời",
+        "noAnswer": "Không trả lời",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang làm bài luyện từ vựng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "warningTitle": "Cảnh báo",
+        "speechUnsupported": "Trình duyệt của bạn không hỗ trợ Speech Synthesis.",
+        "completeTitle": "Hoàn thành!",
+        "completeText": "Chúc mừng! Bạn đã hoàn thành bài luyện tập từ vựng. Bài luyện tập từ vựng tiếp theo đã được mở khóa.",
+        "completeConfirm": "Quay lại danh sách bài luyện tập từ vựng",
+        "errorTitle": "Lỗi",
+        "errorText": "Có lỗi xảy ra khi cập nhật tiến độ.",
+        "submitError": "Có lỗi xảy ra khi nộp bài.",
+        "startError": "Có lỗi xảy ra khi bắt đầu bài luyện tập.",
+        "noQuestions": "Không có câu hỏi nào trong bài tập này.",
+        "chooseTime": "Chọn thời gian làm bài:",
+        "minutes": "{{count}} phút",
+        "start": "Bắt đầu",
+        "loading": "Đang tải..."
+      },
+      "carousel": {
+        "translationNotFound": "Không tìm thấy nghĩa",
+        "translationError": "Lỗi dịch",
+        "warningTitle": "Cảnh báo",
+        "answerRequired": "Vui lòng nhập hoặc chọn câu trả lời!",
+        "checkFailed": "Có lỗi xảy ra khi kiểm tra đáp án.",
+        "arrangePlaceholder": "Bấm vào các từ bên dưới để sắp xếp thành câu",
+        "answerPlaceholder": "Nhập câu trả lời Tiếng Anh của bạn ...",
+        "questionTypes": {
+          "multipleChoice": "Chọn đáp án đúng:",
+          "fillBlank": "Điền vào chỗ trống:",
+          "translation": "Dịch câu (Tiếng Việt) dưới đây sang câu (Tiếng Anh):",
+          "arrange": "Sắp xếp các từ thành câu hoàn chỉnh:",
+          "default": "Câu hỏi:"
+        },
+        "speakTitle": "Phát âm câu hỏi",
+        "correct": "Bạn đã trả lời đúng!",
+        "incorrect": "Bạn đã trả lời sai.",
+        "correctAnswer": "Đáp án đúng là",
+        "explanation": "Giải thích",
+        "checking": "Đang kiểm tra...",
+        "check": "Kiểm tra",
+        "back": "Quay lại",
+        "next": "Tiếp theo"
+      },
+      "sidebar": {
+        "confirmTitle": "Xác nhận",
+        "confirmText": "Bạn có chắc chắn muốn nộp bài?",
+        "confirm": "Đồng ý",
+        "cancel": "Hủy",
+        "timeRemaining": "Thời gian còn lại:",
+        "submit": "Nộp bài",
+        "submitting": "Đang nộp...",
+        "answered": "Đã trả lời: {{answered}}/{{total}} câu",
+        "questionList": "Danh sách câu hỏi:",
+        "completedTime": "Thời gian đã làm:",
+        "viewHistory": "Xem lịch sử"
+      },
+      "result": {
+        "title": "KẾT QUẢ BÀI LUYỆN TẬP TỪ VỰNG",
+        "totalQuestions": "Tổng số câu",
+        "correctAnswers": "Số câu đúng",
+        "incorrectAnswers": "Số câu sai",
+        "accuracy": "Tỷ lệ đúng",
+        "iconAlt": "Icon kết quả",
+        "unlockNext": "Mở khóa bài luyện tập từ vựng tiếp theo"
+      },
+      "history": {
+        "title": "LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG",
+        "empty": "Không có dữ liệu lịch sử.",
+        "question": "Câu {{number}}",
+        "yourAnswer": "Đáp án của bạn",
+        "correctAnswer": "Đáp án đúng",
+        "result": "Kết quả",
+        "correct": "✓ Đúng",
+        "incorrect": "✗ Sai",
+        "explanation": "Giải thích"
+      },
+      "attemptHistory": {
+        "documentTitle": "Lịch sử làm bài luyện tập từ vựng - EasyTalk",
+        "detailDocumentTitle": "Lịch sử luyện tập từ vựng",
+        "title": "LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG",
+        "detailEyebrow": "Lịch sử làm bài luyện tập từ vựng",
+        "empty": "Chưa có lịch sử làm bài nào.",
+        "completed": "Đã hoàn thành",
+        "inProgress": "Chưa hoàn thành",
+        "correctCount": "{{correct}}/{{total}} câu đúng",
+        "viewDetail": "Xem chi tiết",
+        "deleteConfirmTitle": "Xóa lịch sử làm bài?",
+        "deleteConfirmText": "Lịch sử này sẽ bị xóa khỏi tài khoản của bạn.",
+        "deleteConfirm": "Xóa",
+        "deleteCancel": "Hủy",
+        "deleteSuccess": "Đã xóa lịch sử",
+        "deleteError": "Có lỗi xảy ra khi xóa lịch sử."
+      }
+    },
+    "dictationExercisePage": {
+      "common": {
+        "close": "Đóng"
+      },
+      "list": {
+        "documentTitle": "Bài luyện tập nghe chép chính tả - EasyTalk",
+        "title": "LỘ TRÌNH LUYỆN TẬP NGHE CHÉP CHÍNH TẢ TỪ A-Z",
+        "subtitle": "Hoàn thành từng bài để mở khóa bài tiếp theo • Đã mở khóa: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% hoàn thành",
+        "scrollCurrentTitle": "Cuộn đến bài luyện tập hiện tại",
+        "continuePractice": "Tiếp tục luyện tập",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang",
+        "guide": {
+          "title": "Hướng Dẫn Bài Luyện Tập Nghe Chép Chính Tả",
+          "intro": "Chọn bài luyện tập nghe chép chính tả mà bạn muốn luyện tập từ danh sách.",
+          "description": "Nghe mỗi câu và gõ lại chính xác từng câu vào ô nhập liệu.",
+          "listen": "<strong>Nghe:</strong> Hệ thống sẽ phát âm thanh mỗi câu 3 lần. Bạn có thể bấm nút loa hoặc phím <strong>Ctrl</strong> để nghe lại.",
+          "dictation": "<strong>Chép chính tả:</strong> Gõ lại câu vừa nghe vào ô nhập, sau đó nhấn Kiểm tra để xác nhận kết quả.",
+          "skip": "<strong>Bỏ qua:</strong> Nếu quá khó, bạn có thể bỏ qua và xem đáp án.",
+          "note": "<strong>Lưu ý:</strong> Hãy cố gắng hoàn thành từng câu trước khi chuyển sang câu tiếp theo."
+        }
+      },
+      "card": {
+        "step": "Bước {{number}}",
+        "current": "Luyện tập ngay",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "sentenceCount": "Số câu: {{count}}",
+        "studyCount": "Đã học: {{count}} lần",
+        "start": "Bắt đầu luyện tập",
+        "retry": "Làm lại"
+      },
+      "detail": {
+        "documentTitle": "Chi tiết bài nghe chép chính tả - EasyTalk",
+        "topic": "Chủ đề: {{title}}",
+        "errorTitle": "Lỗi",
+        "notFound": "Không tìm thấy nội dung bài nghe chép chính tả.",
+        "correctSentence": "Câu chính xác",
+        "currentAnswer": "Đáp án hiện tại",
+        "leaveWarningTitle": "Cảnh báo",
+        "leaveWarningText": "Bạn đang làm bài luyện nghe. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "leaveCancel": "Ở lại",
+        "finishedInline": "Bạn đã hoàn thành bài luyện nghe chép chính tả!",
+        "completeTitle": "Hoàn thành!",
+        "completeText": "Chúc mừng! Bạn đã hoàn thành bài luyện tập nghe chính tả. Bài luyện tập nghe chính tả tiếp theo đã được mở khóa.",
+        "completeConfirm": "Quay lại danh sách bài luyện tập nghe chính tả",
+        "errorText": "Có lỗi xảy ra khi cập nhật tiến độ."
+      },
+      "controls": {
+        "noTranslationContent": "Không có nội dung để dịch",
+        "translationUnavailable": "Không thể dịch câu này",
+        "translationError": "Lỗi dịch (kiểm tra kết nối mạng)",
+        "saveSuccessTitle": "Lưu thành công!",
+        "saveSuccessText": "Cài đặt của bạn đã được áp dụng.",
+        "replayTitle": "Bấm {{hotkey}} để phát lại câu",
+        "audioSpeed": "Tốc độ âm thanh:",
+        "settings": "Cài đặt",
+        "inputPlaceholder": "Nhập lại nội dung bạn nghe được...",
+        "sentenceMeaning": "Nghĩa của câu",
+        "translating": "Đang dịch...",
+        "check": "Kiểm tra",
+        "skip": "Bỏ qua",
+        "skipCountdown": "Bỏ qua ({{seconds}}s)",
+        "next": "Tiếp theo",
+        "repeatAfterNext": "Số lần phát sau khi qua câu mới:",
+        "repeatCount": "{{count}} lần",
+        "replayHotkey": "Phím tắt phát lại:",
+        "saveSettings": "Lưu cài đặt"
+      },
+      "complete": {
+        "title": "Bạn đã hoàn thành bài luyện nghe chép chính tả!",
+        "description": "Chúc mừng bạn, hãy tiếp tục luyện tập nhé!",
+        "unlockNext": "Mở khóa bài luyện tập nghe chính tả tiếp theo"
+      },
+      "fullScript": {
+        "title": "ĐẦY ĐỦ AUDIO VÀ SCRIPT",
+        "showScript": "Hiện script",
+        "hideScript": "Ẩn script"
+      }
+    },
+    "chatAIPage": {
+      "documentTitle": "Giao tiếp với AI - EasyTalk",
+      "common": {
+        "close": "Đóng"
+      },
+      "modeSelect": {
+        "title": "Chọn chế độ Agent Chat",
+        "subtitle": "Mỗi buổi học có mục tiêu riêng để Coach kèm bạn đúng việc hơn.",
+        "minutes": "{{count}} phút",
+        "recommended": "Gợi ý"
+      },
+      "modes": {
+        "fallbackTitle": "Speaking Practice",
+        "fallbackDescription": "Luyện nói ngắn theo chủ đề."
+      },
+      "alert": {
+        "warningTitle": "Cảnh báo",
+        "errorTitle": "Lỗi",
+        "leaveConversationText": "Bạn đang trong cuộc hội thoại với AI. Nếu rời đi, nội dung sẽ không được lưu. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "stayCancel": "Ở lại",
+        "notReadyTitle": "Chưa sẵn sàng",
+        "notReadyText": "Agent session chưa được khởi tạo. Vui lòng tải lại trang.",
+        "sendingText": "Đang gửi tin nhắn, vui lòng đợi...",
+        "sendFailedText": "Không thể gửi tin nhắn. Vui lòng thử lại.",
+        "startFailedTitle": "Không thể bắt đầu buổi học",
+        "tryAgainLater": "Vui lòng thử lại sau ít phút.",
+        "tryAgain": "Vui lòng thử lại sau."
+      },
+      "finish": {
+        "button": "Kết thúc buổi học",
+        "confirmTitle": "Kết thúc buổi học?",
+        "confirmText": "AI Coach sẽ tóm tắt buổi chat và cập nhật hồ sơ học tập của bạn.",
+        "confirmButton": "Kết thúc",
+        "cancelButton": "Tiếp tục học",
+        "savedTitle": "Đã lưu buổi học",
+        "savedText": "AI Coach đã cập nhật hồ sơ học tập.",
+        "failedTitle": "Không thể kết thúc buổi học"
+      },
+      "summary": {
+        "title": "Tóm tắt buổi học",
+        "mistakes": "Lỗi cần chú ý",
+        "nextActions": "Gợi ý tiếp theo"
+      },
+      "guide": {
+        "title": "Hướng Dẫn Luyện Giao Tiếp Với AI",
+        "intro": "Chào mừng bạn đến với chức năng <strong>Giao tiếp với AI</strong>. Tại đây, bạn có thể luyện tập nói tiếng Anh trực tiếp với AI.",
+        "stepsTitle": "Các bước thực hiện:",
+        "stepChat": "<strong>Trò chuyện:</strong> Nhập câu hỏi hoặc phản hồi của bạn vào ô chat và nhấn gửi.",
+        "stepReply": "<strong>Phản hồi từ AI:</strong> AI sẽ trả lời bạn bằng tiếng Anh, giúp bạn luyện tập phản xạ và ngữ pháp.",
+        "stepListen": "<strong>Nghe phát âm:</strong> AI sẽ đọc to câu trả lời, bạn có thể theo dõi từ nào đang được phát âm.",
+        "stepHighlight": "<strong>Đánh dấu từ:</strong> Các từ AI đang phát âm sẽ được đánh dấu, giúp bạn dễ theo dõi và luyện phát âm.",
+        "stepContinue": "<strong>Tiếp tục hội thoại:</strong> Nhập thêm câu hỏi hoặc phản hồi để AI tiếp tục trò chuyện cùng bạn.",
+        "noteTitle": "Lưu ý:",
+        "noteListen": "Nghe kỹ câu trả lời và cố gắng nhại theo để cải thiện phát âm.",
+        "notePractice": "Đừng ngần ngại thử các câu hỏi khác nhau để nâng cao kỹ năng giao tiếp.",
+        "closing": "Chúc bạn luyện tập giao tiếp hiệu quả và tự tin hơn mỗi ngày!"
+      },
+      "input": {
+        "voiceMode": "Giao tiếp",
+        "textMode": "Nhắn tin",
+        "placeholder": "Nhập tin nhắn của bạn ...",
+        "emptyMessage": "Vui lòng nhập nội dung tin nhắn.",
+        "speechUnsupported": "Trình duyệt của bạn không hỗ trợ nhận dạng giọng nói. Vui lòng sử dụng Google Chrome."
+      }
+    },
+    "writingAIPage": {
+      "documentTitle": "Luyện viết với AI - EasyTalk",
+      "common": {
+        "close": "Đóng"
+      },
+      "header": {
+        "modeTitle": "Luyện viết: {{title}}",
+        "defaultTitle": "Luyện Viết Với AI - Thực Hành Tiếng Anh"
+      },
+      "modeCard": {
+        "minutes": "{{count}} phút",
+        "recommended": "Gợi ý"
+      },
+      "alert": {
+        "noticeTitle": "Chú ý",
+        "warningTitle": "Cảnh báo",
+        "errorTitle": "Lỗi",
+        "topicFailed": "Không thể lấy đề bài. Vui lòng thử lại.",
+        "emptyText": "Vui lòng nhập bài viết trước khi nộp!",
+        "minCharacters": "Bài viết của bạn phải ít nhất {{count}} ký tự mới được phép nộp bài!",
+        "analyzeFailed": "Không thể phân tích bài viết. Vui lòng thử lại.",
+        "leaveText": "Bạn đang viết bài. Nếu rời trang, nội dung sẽ bị mất. Bạn có chắc muốn rời đi?",
+        "leaveConfirm": "Rời đi",
+        "stayCancel": "Ở lại"
+      },
+      "input": {
+        "topicLabel": "Đề bài dành cho bạn:",
+        "changeTopic": "Đổi đề bài khác",
+        "placeholder": "Viết bài của bạn tại đây...",
+        "submitting": "Đang gửi...",
+        "submit": "Nộp bài",
+        "continue": "Tiếp tục làm bài"
+      },
+      "result": {
+        "title": "Feedback luyện viết từ AI Coach",
+        "strengths": "Điểm mạnh",
+        "corrections": "Lỗi nên sửa",
+        "original": "Lỗi",
+        "corrected": "Sửa",
+        "rewrite": "Phiên bản cải thiện",
+        "nextActions": "Bước tiếp theo",
+        "legacyTitle": "Chấm điểm bài viết từ AI:"
+      },
+      "guide": {
+        "title": "Hướng Dẫn Luyện Viết Với AI",
+        "intro": "Trong luyện viết AI, bạn sẽ nhận được một đề bài ngắn gọn do AI tạo ra để thực hành viết tiếng Anh.",
+        "stepsTitle": "Các bước thực hiện:",
+        "stepWrite": "<strong>Viết bài:</strong> Nhập bài viết của bạn vào ô text bên dưới đề bài.",
+        "stepSubmit": "<strong>Nộp bài:</strong> Nhấn nút <strong>Nộp bài</strong> để AI phân tích bài viết của bạn.",
+        "stepAnalyze": "<strong>Phân tích:</strong> AI sẽ đánh giá ngữ pháp, từ vựng, cấu trúc câu, và cung cấp phiên bản đã cải thiện cùng các gợi ý sửa.",
+        "stepScore": "<strong>Điểm tổng quan:</strong> AI sẽ đưa ra điểm đánh giá tổng thể cho bài viết của bạn.",
+        "stepContinue": "<strong>Tiếp tục:</strong> Sau khi nhận phản hồi, nhấn nút <strong>Tiếp tục làm bài</strong> để nhận đề bài mới và luyện tiếp.",
+        "noteTitle": "Lưu ý:",
+        "noteWrite": "Hãy viết hết khả năng của bạn trước khi nộp bài.",
+        "noteApply": "Đọc kỹ các gợi ý của AI và thử áp dụng chúng cho bài viết tiếp theo để cải thiện kỹ năng.",
+        "closing": "Chúc bạn luyện viết hiệu quả và tiến bộ mỗi ngày!"
+      }
+    },
+    "reminderPage": {
+      "documentTitle": "Nhắc nhở học tập - EasyTalk",
+      "title": "NHẮC NHỞ HỌC TẬP CỦA BẠN",
+      "empty": "Chưa có nhắc nhở nào. Hãy thêm nhắc nhở để hệ thống gửi email nhắc bạn",
+      "common": {
+        "close": "Đóng",
+        "save": "Lưu",
+        "saving": "Đang lưu..."
+      },
+      "actions": {
+        "add": "Thêm nhắc nhở"
+      },
+      "pagination": {
+        "previous": "Trước",
+        "next": "Tiếp"
+      },
+      "frequency": {
+        "oneTime": "Một lần",
+        "daily": "Hàng ngày",
+        "weekly": "Hàng tuần",
+        "monthly": "Hàng tháng"
+      },
+      "card": {
+        "email": "Email",
+        "time": "Thời gian",
+        "frequency": "Tần suất",
+        "content": "Nội dung nhắc nhở",
+        "defaultContent": "Nhắc nhở"
+      },
+      "form": {
+        "addTitle": "THÊM NHẮC NHỞ HỌC TẬP",
+        "updateTitle": "CẬP NHẬT NHẮC NHỞ",
+        "emailLabel": "Email nhận thông báo:",
+        "timeLabel": "Thời gian nhắc (local):",
+        "frequencyLabel": "Tần suất:",
+        "noteLabel": "Ghi chú / nội dung nhắc:",
+        "notePlaceholder": "Ví dụ: Học 30 phút grammar, nghe, đọc..."
+      },
+      "alert": {
+        "noticeTitle": "Chú ý!",
+        "warningTitle": "Cảnh báo",
+        "errorTitle": "Lỗi",
+        "successTitle": "Thành công!",
+        "updatedTitle": "Đã cập nhật",
+        "deletedTitle": "Đã xóa",
+        "loadFailed": "Không thể tải nhắc nhở.",
+        "loadListFailed": "Không thể tải danh sách nhắc nhở. Vui lòng kiểm tra kết nối server.",
+        "timeRequired": "Vui lòng chọn thời gian nhắc!",
+        "timeInPast": "Thời gian nhắc không được ở quá khứ!",
+        "addSuccess": "Nhắc nhở đã được thêm thành công!",
+        "addSuccessShort": "Đã tạo nhắc nhở mới!",
+        "addFailed": "Không thể thêm nhắc nhở. Vui lòng thử lại.",
+        "createFailed": "Không thể tạo nhắc nhở.",
+        "updateSuccess": "Nhắc nhở đã được cập nhật thành công!",
+        "updateFailed": "Không thể cập nhật.",
+        "updateReminderFailed": "Không thể cập nhật nhắc nhở.",
+        "deleteSuccess": "Nhắc nhở đã được xóa.",
+        "deleteFailed": "Không thể xóa nhắc nhở."
+      },
+      "delete": {
+        "confirmTitle": "Bạn có chắc?",
+        "confirmText": "Bạn có muốn xóa nhắc nhở này không?",
+        "confirmButton": "Xóa",
+        "cancelButton": "Hủy",
+        "successTitle": "Nhắc nhở đã bị xóa thành công!"
+      },
+      "guide": {
+        "title": "Hướng Dẫn Sử Dụng Nhắc Nhở Học Tập",
+        "intro": "Phần Nhắc nhở giúp bạn quản lý lịch học và nhận email thông báo đúng thời gian.",
+        "featuresTitle": "Các chức năng chính:",
+        "add": "<strong>Thêm nhắc nhở:</strong> Nhấn nút <strong>Thêm nhắc nhở</strong> để tạo mới, nhập email, thời gian và tần suất (Hàng ngày, Hàng tuần, Hàng tháng).",
+        "edit": "<strong>Chỉnh sửa nhắc nhở:</strong> Nhấn biểu tượng <icon></icon> trên card nhắc nhở để cập nhật thông tin.",
+        "delete": "<strong>Xóa nhắc nhở:</strong> Nhấn biểu tượng <icon></icon> trên card nhắc nhở để xóa nhắc nhở không cần thiết.",
+        "list": "<strong>Danh sách nhắc nhở:</strong> Xem tất cả nhắc nhở đã tạo và kiểm tra email, thời gian, tần suất.",
+        "noteTitle": "Lưu ý:",
+        "noteEmailTime": "Nhắc nhở sẽ gửi email đúng thời gian và tần suất bạn đã chọn.",
+        "noteEditDelete": "Có thể xóa hoặc chỉnh sửa bất kỳ nhắc nhở nào nếu thông tin không còn phù hợp.",
+        "noteCorrectEmail": "Hãy đảm bảo email nhập đúng để nhận thông báo.",
+        "closing": "Sử dụng nhắc nhở để duy trì thói quen học tập hiệu quả!"
+      }
+    },
+    "streakPage": {
+      "documentTitle": "Streak Học Tập - EasyTalk",
+      "title": "Streak Học Tập Của Bạn",
+      "stats": {
+        "current": "Streak Hiện Tại",
+        "best": "Streak Kỷ Lục"
+      },
+      "calendar": {
+        "weekdays": {
+          "sun": "CN",
+          "mon": "T2",
+          "tue": "T3",
+          "wed": "T4",
+          "thu": "T5",
+          "fri": "T6",
+          "sat": "T7"
+        }
+      },
+      "error": {
+        "title": "Lỗi",
+        "loadFailed": "Không thể tải streak ....",
+        "connectionFailed": "Không thể kết nối đến server. Vui lòng kiểm tra lỗi kết nối server. Hệ thống sẽ hiển thị dữ liệu mặc định."
+      }
+    },
+    "journeyPage": {
+      "list": {
+        "documentTitle": "Hành Trình Học Tập - EasyTalk",
+        "title": "HÀNH TRÌNH HỌC TẬP CỦA BẠN",
+        "subtitle": "Chọn một lộ trình để bắt đầu chinh phục tiếng Anh",
+        "empty": "Chưa có hành trình nào."
+      },
+      "card": {
+        "completePercent": "{{percent}}% hoàn thành",
+        "continue": "Tiếp tục học"
+      },
+      "gate": {
+        "documentTitle": "Cổng học tập - EasyTalk",
+        "defaultJourneyTitle": "HÀNH TRÌNH",
+        "title": "HÀNH TRÌNH: {{title}}",
+        "subtitle": "Hoàn thành từng cổng để mở khóa chặng tiếp theo",
+        "scrollCurrentTitle": "Cuộn đến cổng hiện tại",
+        "continue": "Tiếp tục học",
+        "hot": "HOT",
+        "scrollTopTitle": "Lên đầu trang"
+      },
+      "gateCard": {
+        "current": "Cổng hiện tại",
+        "completed": "Đã hoàn thành",
+        "locked": "Chưa mở khóa",
+        "stageCount": "{{count}} chặng",
+        "empty": "Chưa có chặng nào ở cổng này!"
+      },
+      "stageCard": {
+        "start": "Vào học",
+        "review": "Ôn lại",
+        "locked": "Khóa"
+      },
+      "stage": {
+        "documentTitle": "Chặng hành trình - EasyTalk",
+        "defaultTitle": "Bài học",
+        "unanswered": "Chưa trả lời",
+        "noAnswer": "Không trả lời",
+        "noQuestions": "Không có câu hỏi nào trong stage này.",
+        "alert": {
+          "warningTitle": "Cảnh báo",
+          "speechUnsupported": "Trình duyệt của bạn không hỗ trợ Speech Synthesis.",
+          "leaveText": "Bạn đang làm bài luyện tập. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+          "leaveConfirm": "Rời đi",
+          "leaveCancel": "Ở lại"
+        }
+      },
+      "stageResult": {
+        "title": "KẾT QUẢ CHẶNG",
+        "totalQuestions": "Tổng số câu:",
+        "correctAnswers": "Số câu đúng:",
+        "incorrectAnswers": "Số câu sai:",
+        "accuracy": "Tỷ lệ đúng:",
+        "iconAlt": "Icon kết quả",
+        "viewHistory": "Xem lịch sử",
+        "exit": "Thoát"
+      },
+      "stageHistory": {
+        "title": "LỊCH SỬ LÀM CHẶNG",
+        "empty": "Không có dữ liệu lịch sử.",
+        "question": "Câu {{number}}:",
+        "yourAnswer": "Đáp án của bạn:",
+        "correctAnswer": "Đáp án đúng:",
+        "result": "Kết quả:",
+        "correct": "Đúng",
+        "incorrect": "Sai",
+        "explanation": "Giải thích:",
+        "close": "Đóng"
+      },
+      "stageCarousel": {
+        "translationNotFound": "Không tìm thấy nghĩa",
+        "translationError": "Lỗi dịch",
+        "warningTitle": "Cảnh báo",
+        "answerRequired": "Vui lòng nhập hoặc chọn câu trả lời!",
+        "arrangePlaceholder": "Bấm vào các từ bên dưới để sắp xếp thành câu",
+        "answerPlaceholder": "Nhập câu trả lời Tiếng Anh của bạn ...",
+        "questionTypes": {
+          "multipleChoice": "Chọn đáp án đúng:",
+          "fillBlank": "Điền vào chỗ trống:",
+          "translation": "Dịch câu (Tiếng Việt) dưới đây sang câu (Tiếng Anh):",
+          "arrange": "Sắp xếp các từ thành câu hoàn chỉnh:",
+          "default": "Câu hỏi:"
+        },
+        "speakTitle": "Phát âm câu hỏi",
+        "correct": "Bạn đã trả lời đúng.",
+        "incorrect": "Bạn đã trả lời sai.",
+        "correctAnswerIs": "Đáp án đúng là:",
+        "explanation": "Giải thích:",
+        "check": "Kiểm tra",
+        "complete": "HOÀN THÀNH",
+        "next": "Tiếp tục"
       }
     },
     "leaderboardPage": {

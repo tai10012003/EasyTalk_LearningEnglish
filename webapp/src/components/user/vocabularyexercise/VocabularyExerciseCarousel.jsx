@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const VocabularyExerciseCarousel = ({
     questions,
@@ -12,6 +13,7 @@ const VocabularyExerciseCarousel = ({
     isCompleted,
     onAnsweredQuestionsChange
 }) => {
+    const { t } = useTranslation();
     const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
     const [userAnswers, setUserAnswers] = useState({});
     const [arrangeState, setArrangeState] = useState({});
@@ -59,11 +61,11 @@ const VocabularyExerciseCarousel = ({
             if (data && data[0] && data[0][0] && data[0][0][0]) {
                 setTranslation(data[0][0][0]);
             } else {
-                setTranslation('Không tìm thấy nghĩa');
+                setTranslation(t("vocabularyExercisePage.carousel.translationNotFound"));
             }
         } catch (error) {
             console.error('Translation error:', error);
-            setTranslation('Lỗi dịch');
+            setTranslation(t("vocabularyExercisePage.carousel.translationError"));
         } finally {
             setTranslationLoading(false);
         }
@@ -103,8 +105,8 @@ const VocabularyExerciseCarousel = ({
         if (!userAnswer || userAnswer.toString().trim() == '') {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Vui lòng nhập hoặc chọn câu trả lời!"
+                title: t("vocabularyExercisePage.carousel.warningTitle"),
+                text: t("vocabularyExercisePage.carousel.answerRequired")
             });
             return;
         }
@@ -118,13 +120,13 @@ const VocabularyExerciseCarousel = ({
             console.error("Error checking vocabulary exercise answer:", error);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: error.message || "Có lỗi xảy ra khi kiểm tra đáp án."
+                title: t("vocabularyExercisePage.detail.errorTitle"),
+                text: error.message || t("vocabularyExercisePage.carousel.checkFailed")
             });
         } finally {
             setIsCheckingAnswer(false);
         }
-    }, [currentQuestionIndex, userAnswers, onCheckAnswer, onAnswerSubmit]);
+    }, [currentQuestionIndex, userAnswers, onCheckAnswer, onAnswerSubmit, t]);
 
     const handleNextQuestion = useCallback(() => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -185,7 +187,7 @@ const VocabularyExerciseCarousel = ({
                 <div className="selected-words-area">
                     {state.selected.length == 0 ? (
                         <div className="placeholder-text">
-                            Bấm vào các từ bên dưới để sắp xếp thành câu
+                            {t("vocabularyExercisePage.carousel.arrangePlaceholder")}
                         </div>
                     ) : (
                         state.selected.map((word, idx) => {
@@ -258,7 +260,7 @@ const VocabularyExerciseCarousel = ({
                             : ''
                     }`}
                     rows="4"
-                    placeholder="Nhập câu trả lời Tiếng Anh của bạn ..."
+                    placeholder={t("vocabularyExercisePage.carousel.answerPlaceholder")}
                     value={userAnswers[currentQuestionIndex] || ''}
                     onChange={(e) => handleAnswerChange(e.target.value)}
                     disabled={isQuestionAnswered}
@@ -276,11 +278,11 @@ const VocabularyExerciseCarousel = ({
 
     const getQuestionTitle = () => {
         switch (currentQuestion?.type) {
-            case 'multiple-choice': return 'Chọn đáp án đúng:';
-            case 'fill-in-the-blank': return 'Điền vào chỗ trống:';
-            case 'translation': return 'Dịch câu (Tiếng Việt) dưới đây sang câu (Tiếng Anh):';
-            case 'arrange-words': return 'Sắp xếp các từ thành câu hoàn chỉnh:';
-            default: return 'Câu hỏi:';
+            case 'multiple-choice': return t("vocabularyExercisePage.carousel.questionTypes.multipleChoice");
+            case 'fill-in-the-blank': return t("vocabularyExercisePage.carousel.questionTypes.fillBlank");
+            case 'translation': return t("vocabularyExercisePage.carousel.questionTypes.translation");
+            case 'arrange-words': return t("vocabularyExercisePage.carousel.questionTypes.arrange");
+            default: return t("vocabularyExercisePage.carousel.questionTypes.default");
         }
     };
 
@@ -297,7 +299,7 @@ const VocabularyExerciseCarousel = ({
                             className="exercise-speak-button btn-sm btn-outline mr-2"
                             onClick={() => onSpeakText(currentQuestion.question)}
                             type="button"
-                            title="Phát âm câu hỏi"
+                            title={t("vocabularyExercisePage.carousel.speakTitle")}
                         >
                             🔊
                         </button>
@@ -326,13 +328,13 @@ const VocabularyExerciseCarousel = ({
                         <div className="exercise-explanation mt-4">
                             {questionResult.isCorrect ? (
                                 <p>
-                                    <strong>Bạn đã trả lời đúng!</strong><br />
-                                    Giải thích: {questionResult.explanation}
+                                    <strong>{t("vocabularyExercisePage.carousel.correct")}</strong><br />
+                                    {t("vocabularyExercisePage.carousel.explanation")}: {questionResult.explanation}
                                 </p>
                             ) : (
                                 <p>
-                                    <strong>Bạn đã trả lời sai.</strong> Đáp án đúng là: <strong>{questionResult.correctAnswer}</strong><br />
-                                    Giải thích: {questionResult.explanation}
+                                    <strong>{t("vocabularyExercisePage.carousel.incorrect")}</strong> {t("vocabularyExercisePage.carousel.correctAnswer")}: <strong>{questionResult.correctAnswer}</strong><br />
+                                    {t("vocabularyExercisePage.carousel.explanation")}: {questionResult.explanation}
                                 </p>
                             )}
                         </div>
@@ -344,7 +346,7 @@ const VocabularyExerciseCarousel = ({
                             onClick={handleSubmitAnswer}
                             disabled={isCheckingAnswer}
                         >
-                            <i className="fas fa-check me-2"></i> {isCheckingAnswer ? "Đang kiểm tra..." : "Kiểm tra"}
+                            <i className="fas fa-check me-2"></i> {isCheckingAnswer ? t("vocabularyExercisePage.carousel.checking") : t("vocabularyExercisePage.carousel.check")}
                         </button>
                     )}
                 </div>
@@ -357,7 +359,7 @@ const VocabularyExerciseCarousel = ({
                             type="button"
                             onClick={handlePrevQuestion}
                         >
-                            <i className="fas fa-arrow-left"></i> Quay lại
+                            <i className="fas fa-arrow-left"></i> {t("vocabularyExercisePage.carousel.back")}
                         </button>
                     )}
                     {currentQuestionIndex < questions.length - 1 && (
@@ -367,7 +369,7 @@ const VocabularyExerciseCarousel = ({
                             onClick={handleNextQuestion}
                             style={{ marginLeft: currentQuestionIndex === 0 ? 'auto' : '0' }}
                         >
-                            <i className="fas fa-arrow-right"></i> Tiếp theo
+                            <i className="fas fa-arrow-right"></i> {t("vocabularyExercisePage.carousel.next")}
                         </button>
                     )}
                 </div>

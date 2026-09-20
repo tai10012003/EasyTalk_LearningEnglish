@@ -45,6 +45,7 @@ class VocabularyExerciseService {
         this.attemptRepository = options.attemptRepository || new VocabularyExerciseAttemptRepository();
         this.cache = options.cacheService || cache;
         this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     getUserProgressService() {
@@ -54,7 +55,7 @@ class VocabularyExerciseService {
         return this.userProgressService;
     }
 
-    async getVocabularyexerciseList(page = 1, limit = 12, role = "user") {
+    async getVocabularyexerciseList(page = 1, limit = 12, role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('vocabularyexercise', { page, limit, role });
         const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('vocabularyexercise', role), cacheNs.listTags('vocabularyexercise')), async () => {
             const filter = {};
@@ -64,10 +65,11 @@ class VocabularyExerciseService {
             const { exercises, total } = await this.repository.findAll(filter, page, limit);
             return { vocabularyexercises: exercises, totalExercises: total };
         });
+        const localizedExercises = lang === "en" && this.englishTranslationService && role !== "admin" ? await this.englishTranslationService.applyTranslations("vocabularyExercise", result.vocabularyexercises, lang) : result.vocabularyexercises;
         if (role !== "admin") {
             return {
                 ...result,
-                vocabularyexercises: this.sanitizeExercisesForLearner(result.vocabularyexercises)
+                vocabularyexercises: this.sanitizeExercisesForLearner(localizedExercises)
             };
         }
         return result;
@@ -83,6 +85,22 @@ class VocabularyExerciseService {
         return await this.cache.getOrSet(cacheNs.slugKey('vocabularyexercise', slug), withTags(policies.contentDetail('vocabularyexercise'), cacheNs.itemTags('vocabularyexercise', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
+    }
+
+    async getLocalizedVocabularyexerciseById(id, lang = "vi") {
+        const vocabularyExercise = await this.getVocabularyexerciseById(id);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("vocabularyExercise", vocabularyExercise, lang);
+        }
+        return vocabularyExercise;
+    }
+
+    async getLocalizedVocabularyexerciseBySlug(slug, lang = "vi") {
+        const vocabularyExercise = await this.getVocabularyexerciseBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("vocabularyExercise", vocabularyExercise, lang);
+        }
+        return vocabularyExercise;
     }
 
     async _getOrCreateUserProgress(userId) {
@@ -117,8 +135,8 @@ class VocabularyExerciseService {
         return exercises.map(exercise => this.sanitizeExerciseForLearner(exercise));
     }
 
-    async getVocabularyExerciseDetails(userId, vocabularyExerciseId) {
-        const vocabularyExercise = await this.getVocabularyexerciseById(vocabularyExerciseId);
+    async getVocabularyExerciseDetails(userId, vocabularyExerciseId, lang = "vi") {
+        const vocabularyExercise = await this.getLocalizedVocabularyexerciseById(vocabularyExerciseId, lang);
         if (!vocabularyExercise) {
             return { status: 404, data: { message: "Vocabulary exercise not found." } };
         }
@@ -130,16 +148,16 @@ class VocabularyExerciseService {
         return { status: 200, data: { success: true, data: { vocabularyExercise: this.sanitizeExerciseForLearner(vocabularyExercise) } } };
     }
 
-    async getVocabularyExerciseDetailsBySlug(userId, slug) {
+    async getVocabularyExerciseDetailsBySlug(userId, slug, lang = "vi") {
         const vocabularyExercise = await this.getVocabularyexerciseBySlug(slug);
         if (!vocabularyExercise) {
             return { status: 404, data: { message: "Vocabulary exercise not found." } };
         }
-        return await this.getVocabularyExerciseDetails(userId, vocabularyExercise._id);
+        return await this.getVocabularyExerciseDetails(userId, vocabularyExercise._id, lang);
     }
 
-    async getVocabularyExerciseRoadmap(userId) {
-        const { vocabularyexercises, totalExercises } = await this.getVocabularyexerciseList(1, 10000, "user");
+    async getVocabularyExerciseRoadmap(userId, lang = "vi") {
+        const { vocabularyexercises, totalExercises } = await this.getVocabularyexerciseList(1, 10000, "user", lang);
         const userProgress = await this._getOrCreateUserProgress(userId);
         const unlockedIds = new Set((userProgress.unlockedVocabularyExercises || []).map(id => id.toString()));
         const items = vocabularyexercises.map(exercise => {
@@ -175,8 +193,8 @@ class VocabularyExerciseService {
         };
     }
 
-    async startAttempt(userId, vocabularyExerciseId) {
-        const vocabularyExercise = await this.getVocabularyexerciseById(vocabularyExerciseId);
+    async startAttempt(userId, vocabularyExerciseId, lang = "vi") {
+        const vocabularyExercise = await this.getLocalizedVocabularyexerciseById(vocabularyExerciseId, lang);
         if (!vocabularyExercise) {
             return { status: 404, data: { success: false, message: "Vocabulary exercise not found" } };
         }
@@ -468,6 +486,9 @@ class VocabularyExerciseService {
             return { status: 404, data: { success: false, message: "Bài luyện tập từ vựng không tìm thấy." } };
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("vocabularyExercise", id);
+        }
         await invalidateVocabularyExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài luyện tập từ vựng đã xóa thành công !" } };
     }

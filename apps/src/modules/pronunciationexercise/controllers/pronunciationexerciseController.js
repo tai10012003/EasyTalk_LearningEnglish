@@ -16,20 +16,24 @@ function createPronunciationExerciseController({ pronunciationExerciseService })
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
         const role = req.user.role || "user";
-        const { pronunciationexercises, totalExercises } = await pronunciationExerciseService.getPronunciationexerciseList(page, limit, role);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { pronunciationexercises, totalExercises } = await pronunciationExerciseService.getPronunciationexerciseList(page, limit, role, lang);
         const totalPages = Math.ceil(totalExercises / limit);
         res.json({ success: true, data: pronunciationexercises, currentPage: page, totalPages });
     }));
     router.get("/api/pronunciation-exercises/roadmap", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await pronunciationExerciseService.getPronunciationExerciseRoadmap(req.user.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await pronunciationExerciseService.getPronunciationExerciseRoadmap(req.user.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/pronunciation-exercises/:id", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await pronunciationExerciseService.getPronunciationexerciseDetails(req.user.id, req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await pronunciationExerciseService.getPronunciationexerciseDetails(req.user.id, req.params.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/pronunciation-exercises/slug/:slug", verifyToken, asyncHandler(async function (req, res) {
-        const { status, data } = await pronunciationExerciseService.getPronunciationexerciseDetailsBySlug(req.user.id, req.params.slug);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await pronunciationExerciseService.getPronunciationexerciseDetailsBySlug(req.user.id, req.params.slug, lang);
         return res.status(status).json(data);
     }));
     router.post('/analyze/:id/:index', verifyToken, upload.single('audio'), asyncHandler(async (req, res) => {
@@ -43,7 +47,8 @@ function createPronunciationExerciseController({ pronunciationExerciseService })
         return res.status(status).json(data);
     }));
     router.post("/api/pronunciation-exercises/:id/attempts", verifyToken, asyncHandler(async (req, res) => {
-        const { status, data } = await pronunciationExerciseService.startAttempt(req.user.id, req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { status, data } = await pronunciationExerciseService.startAttempt(req.user.id, req.params.id, lang);
         return res.status(status).json(data);
     }));
     router.get("/api/attempts/history", verifyToken, asyncHandler(async (req, res) => {

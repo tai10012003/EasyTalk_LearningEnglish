@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 const buildDetailedAnalysis = (correctSentence = "", transcription = "") => {
     const correctWords = correctSentence.replace(/[^a-zA-Z\s]/g, '').toLowerCase().split(/\s+/).filter(Boolean);
@@ -23,13 +24,14 @@ const PronunciationExerciseHistoryReviewCarousel = ({
     currentQuestionIndex,
     onQuestionNavigation
 }) => {
+    const { t } = useTranslation();
     const currentQuestion = questionResults[currentQuestionIndex];
 
     const getQuestionTitle = () => {
         switch (currentQuestion?.type) {
-            case 'multiple-choice': return 'Nghe và chọn đáp án đúng:';
-            case 'pronunciation': return 'Phát âm lại sao cho đúng:';
-            default: return 'Câu hỏi:';
+            case 'multiple-choice': return t("pronunciationExercisePage.carousel.questionTypes.multipleChoice");
+            case 'pronunciation': return t("pronunciationExercisePage.carousel.questionTypes.pronunciation");
+            default: return t("pronunciationExercisePage.carousel.questionTypes.default");
         }
     };
 
@@ -82,19 +84,19 @@ const PronunciationExerciseHistoryReviewCarousel = ({
         return (
             <div className="exercise-explanation mt-4">
                 <h5>
-                    Độ chính xác:{" "}
+                    {t("pronunciationExercisePage.carousel.accuracy")}:{" "}
                     <span style={{ color: accuracy >= 75 ? "green" : accuracy >= 50 ? "orange" : "red" }}>
                         {accuracy.toFixed(2)}%
                     </span>
                 </h5>
                 <p style={{ marginTop: "15px" }}>
-                    <strong>Kết quả phân tích:</strong> "{currentQuestion?.transcription || currentQuestion?.userAnswer || "Chưa trả lời"}"
+                    <strong>{t("pronunciationExercisePage.carousel.analysisResult")}:</strong> "{currentQuestion?.transcription || currentQuestion?.userAnswer || t("pronunciationExercisePage.detail.unanswered")}"
                 </p>
                 <p>
-                    <strong>Câu chuẩn:</strong> {currentQuestion?.correctAnswer}
+                    <strong>{t("pronunciationExercisePage.carousel.standardSentence")}:</strong> {currentQuestion?.correctAnswer}
                 </p>
                 <p>
-                    <strong>Chi tiết phát âm: </strong>
+                    <strong>{t("pronunciationExercisePage.carousel.pronunciationDetail")}: </strong>
                     {words.map((word, idx) => (
                         <span key={idx} style={{ marginRight: "12px" }}>
                             {word.isCorrect ? (
@@ -113,7 +115,7 @@ const PronunciationExerciseHistoryReviewCarousel = ({
                     ))}
                 </p>
                 {currentQuestion?.explanation && (
-                    <p>Giải thích: {currentQuestion.explanation}</p>
+                    <p>{t("pronunciationExercisePage.carousel.explanation")}: {currentQuestion.explanation}</p>
                 )}
             </div>
         );
@@ -147,13 +149,13 @@ const PronunciationExerciseHistoryReviewCarousel = ({
                             <div className="exercise-explanation mt-4">
                                 {currentQuestion.isCorrect ? (
                                     <p>
-                                        <strong>Bạn đã trả lời đúng!</strong><br />
-                                        Giải thích: {currentQuestion.explanation}
+                                        <strong>{t("pronunciationExercisePage.carousel.correct")}</strong><br />
+                                        {t("pronunciationExercisePage.carousel.explanation")}: {currentQuestion.explanation}
                                     </p>
                                 ) : (
                                     <p>
-                                        <strong>Bạn đã trả lời sai.</strong> Đáp án đúng là: <strong>{currentQuestion.correctAnswer}</strong><br />
-                                        Giải thích: {currentQuestion.explanation}
+                                        <strong>{t("pronunciationExercisePage.carousel.incorrect")}</strong> {t("pronunciationExercisePage.carousel.correctAnswerIs")}: <strong>{currentQuestion.correctAnswer}</strong><br />
+                                        {t("pronunciationExercisePage.carousel.explanation")}: {currentQuestion.explanation}
                                     </p>
                                 )}
                             </div>
@@ -164,12 +166,12 @@ const PronunciationExerciseHistoryReviewCarousel = ({
                 <div className="d-flex justify-content-between mt-3">
                     {currentQuestionIndex > 0 && (
                         <button className="btn_2" style={{ marginRight: '20px', marginTop: '20px' }} type="button" onClick={handlePrevQuestion}>
-                            <i className="fas fa-arrow-left"></i> Quay lại
+                            <i className="fas fa-arrow-left"></i> {t("pronunciationExercisePage.carousel.back")}
                         </button>
                     )}
                     {currentQuestionIndex < questionResults.length - 1 && (
                         <button className="btn_2" type="button" onClick={handleNextQuestion} style={{ marginLeft: currentQuestionIndex === 0 ? 'auto' : '0' }}>
-                            <i className="fas fa-arrow-right"></i> Tiếp theo
+                            <i className="fas fa-arrow-right"></i> {t("pronunciationExercisePage.carousel.next")}
                         </button>
                     )}
                 </div>

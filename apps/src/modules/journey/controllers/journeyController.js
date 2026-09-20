@@ -11,7 +11,8 @@ function createJourneyController({ journeyService, gateService, userProgressServ
     const router = express.Router();
     router.get("/api", verifyToken, asyncHandler(async (req, res) => {
         const userId = req.user.id;
-        const journeys = await journeyService.getAllJourneysWithDetails();
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const journeys = await journeyService.getAllJourneysWithDetails({ lang });
         const userProgress = await userProgressService.getUserProgressByUserId(userId) || { unlockedGates: [], unlockedStages: [] };
         const journeysWithProgress = calculateJourneyProgress(journeys, userProgress);
         const overallProgress = calculateOverallProgress(journeys, userProgress);
@@ -30,7 +31,8 @@ function createJourneyController({ journeyService, gateService, userProgressServ
     router.get("/api/gate/:id", verifyToken, asyncHandler(async (req, res) => {
         const journeyId = req.params.id;
         const userId = req.user.id;
-        const journey = await journeyService.getJourneyWithDetails(journeyId);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const journey = await journeyService.getJourneyWithDetails(journeyId, { lang });
         if(!journey) {
             return res.status(404).json({ error: "Journey not found." });
         }
@@ -56,7 +58,8 @@ function createJourneyController({ journeyService, gateService, userProgressServ
     router.get("/api/journey-list", asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { journeys, totalJourneys } = await journeyService.getJourneyList(page, limit);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { journeys, totalJourneys } = await journeyService.getJourneyList(page, limit, { lang });
         const totalPages = Math.ceil(totalJourneys / limit);
         res.json({
             journeys,

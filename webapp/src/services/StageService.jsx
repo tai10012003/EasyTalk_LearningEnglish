@@ -3,10 +3,16 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguage = () => {
+    return localStorage.getItem("language") === "en" ? "en" : "vi";
+};
+
 export const StageService = {
-    async getStage(stageId) {
+    async getStage(stageId, options = {}) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stage/detail/${stageId}`, {
+            const includeLanguage = options.includeLanguage !== false;
+            const query = includeLanguage && getCurrentLanguage() === "en" ? "?lang=en" : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stage/detail/${stageId}${query}`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -65,8 +71,9 @@ export const StageService = {
 
     async fetchStage(page = 1, limit = 12, filters = {}) {
         try {
-            let query = `?page=${page}&limit=${limit}`;
-            if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+            if (filters.search) params.set("search", filters.search);
+            const query = `?${params.toString()}`;
             const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stages${query}`, {
                 method: 'GET',
             });
@@ -75,7 +82,7 @@ export const StageService = {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
             const responseData = await res.json();
-            const data = responseData.data;
+            const data = responseData.data ? responseData : { data: responseData.data || [], currentPage: responseData.currentPage, totalPages: responseData.totalPages };
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;

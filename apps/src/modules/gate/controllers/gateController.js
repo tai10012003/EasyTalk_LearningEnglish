@@ -11,7 +11,8 @@ function createGateController({ gateService }) {
     router.get("/api/gate-list", asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { gates, totalGates } = await gateService.getGateList(page, limit);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { gates, totalGates } = await gateService.getGateList(page, limit, { lang });
         const totalPages = Math.ceil(totalGates / limit);
         res.json({
             gates,

@@ -2,22 +2,24 @@ import React, { useEffect, useState, useRef } from "react";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import GateCard from "@/components/user/gate/GateCard.jsx";
 import { GateService } from "@/services/GateService.jsx";
+import { useTranslation } from "react-i18next";
 
 const Gate = () => {
-    const [journeyTitle, setJourneyTitle] = useState("HÀNH TRÌNH");
+    const { t, i18n } = useTranslation();
+    const [journeyTitle, setJourneyTitle] = useState("");
     const [gates, setGates] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const currentGateRef = useRef(null);
 
     useEffect(() => {
-        document.title = "Cổng học tập - EasyTalk";
+        document.title = t("journeyPage.gate.documentTitle");
         const fetchJourneyData = async () => {
             setIsLoading(true);
             try {
                 const journeyId = window.location.pathname.split("/").pop();
                 const data = await GateService.getGate(journeyId);
                 if (!data || !data.journey) return;
-                setJourneyTitle(data.journey.title || "HÀNH TRÌNH");
+                setJourneyTitle(data.journey.title || t("journeyPage.gate.defaultJourneyTitle"));
                 const formattedGates = data.journey.gates.map((gate) => ({
                     ...gate,
                     unlocked: data.userProgress.unlockedGates.includes(gate._id),
@@ -35,7 +37,7 @@ const Gate = () => {
             }
         };
         fetchJourneyData();
-    }, []);
+    }, [t, i18n.language]);
 
     const getCurrentGateIndex = () => {
         if (gates.length === 0) return -1;
@@ -63,8 +65,10 @@ const Gate = () => {
     return (
         <div className="user-gate-roadmap">
             <div className="user-gate-header">
-                <h3 className="user-gate-title">HÀNH TRÌNH: {journeyTitle.toUpperCase()}</h3>
-                <p className="user-gate-subtitle">Hoàn thành từng cổng để mở khóa chặng tiếp theo</p>
+                <h3 className="user-gate-title">
+                    {t("journeyPage.gate.title", { title: journeyTitle.toUpperCase() })}
+                </h3>
+                <p className="user-gate-subtitle">{t("journeyPage.gate.subtitle")}</p>
             </div>
             <div className="user-gate-timeline">
                 {gates.map((gate, index) => (
@@ -86,16 +90,16 @@ const Gate = () => {
                     <button
                         className="user-scroll-current-btn"
                         onClick={scrollToCurrentGate}
-                        title="Cuộn đến cổng hiện tại"
+                        title={t("journeyPage.gate.scrollCurrentTitle")}
                     >
                         <i className="fas fa-play-circle"></i>
-                        <span className="user-scroll-current-text">Tiếp tục học</span>
-                        <span className="user-scroll-hot-badge">HOT</span>
+                        <span className="user-scroll-current-text">{t("journeyPage.gate.continue")}</span>
+                        <span className="user-scroll-hot-badge">{t("journeyPage.gate.hot")}</span>
                     </button>
                     <button
                         className="user-scroll-top"
                         onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                        title="Lên đầu trang"
+                        title={t("journeyPage.gate.scrollTopTitle")}
                     >
                         <i className="fas fa-arrow-up"></i>
                     </button>

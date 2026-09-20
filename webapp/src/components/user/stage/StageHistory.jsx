@@ -1,6 +1,9 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 const StageHistory = ({ show, onClose, questionResults }) => {
+    const { t } = useTranslation();
+
     if (!show) return null;
 
     return (
@@ -10,7 +13,7 @@ const StageHistory = ({ show, onClose, questionResults }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="custom-modal-header">
-                    <h5>LỊCH SỬ LÀM CHẶNG</h5>
+                    <h5>{t("journeyPage.stageHistory.title")}</h5>
                     <button className="close-btn" onClick={onClose}>
                         &times;
                     </button>
@@ -19,27 +22,27 @@ const StageHistory = ({ show, onClose, questionResults }) => {
                 <div className="custom-modal-body">
                     <div id="exercise-historyContent">
                         {questionResults.length == 0 ? (
-                            <p>Không có dữ liệu lịch sử.</p>
+                            <p>{t("journeyPage.stageHistory.empty")}</p>
                         ) : (
                             questionResults.map((result, index) => (
                                 <div key={index} className="exercise-history-item">
-                                    <h6><strong>Câu {index + 1}: {result.question}</strong></h6>
+                                    <h6><strong>{t("journeyPage.stageHistory.question", { number: index + 1 })} {result.question}</strong></h6>
                                     <p>
-                                        <strong>Đáp án của bạn:</strong> {result.userAnswer}
+                                        <strong>{t("journeyPage.stageHistory.yourAnswer")}</strong> {result.userAnswer}
                                     </p>
                                     <p>
-                                        <strong>Đáp án đúng:</strong> {result.correctAnswer}
+                                        <strong>{t("journeyPage.stageHistory.correctAnswer")}</strong> {result.correctAnswer}
                                     </p>
                                     <p>
-                                        <strong>Kết quả:</strong>{' '}
+                                        <strong>{t("journeyPage.stageHistory.result")}</strong>{' '}
                                         {result.isCorrect ? (
-                                            <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Đúng</span>
+                                            <span style={{ color: 'green', fontWeight: 'bold' }}>✓ {t("journeyPage.stageHistory.correct")}</span>
                                         ) : (
-                                            <span style={{ color: 'red', fontWeight: 'bold' }}>✗ Sai</span>
+                                            <span style={{ color: 'red', fontWeight: 'bold' }}>✗ {t("journeyPage.stageHistory.incorrect")}</span>
                                         )}
                                     </p>
                                     <p>
-                                        <strong>Giải thích:</strong> {result.explanation}
+                                        <strong>{t("journeyPage.stageHistory.explanation")}</strong> {result.explanation}
                                     </p>
                                     {index < questionResults.length - 1 && <hr />}
                                 </div>
@@ -50,7 +53,7 @@ const StageHistory = ({ show, onClose, questionResults }) => {
                 
                 <div className="custom-modal-footer">
                     <button className="footer-btn" onClick={onClose}>
-                        Đóng
+                        {t("journeyPage.stageHistory.close")}
                     </button>
                 </div>
             </div>

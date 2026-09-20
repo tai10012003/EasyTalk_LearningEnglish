@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
 
 function paginatedResponse(responseData, page) {
     const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
@@ -19,6 +24,7 @@ export const VocabularyExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises${query}`, {
                 method: 'GET',
             });
@@ -46,7 +52,8 @@ export const VocabularyExerciseService = {
 
     async getVocabularyExerciseBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/slug/${slug}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/slug/${slug}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
             const data = responseData.data?.vocabularyExercise || responseData.data || responseData;
@@ -58,7 +65,8 @@ export const VocabularyExerciseService = {
     },
 
     async getVocabularyExerciseDetail(id) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${id}`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${id}${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {
@@ -73,7 +81,8 @@ export const VocabularyExerciseService = {
 
     async fetchVocabularyExerciseRoadmap() {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/roadmap`, {
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/roadmap${langQuery}`, {
                 method: "GET",
             });
             if (!res.ok) {
@@ -97,7 +106,8 @@ export const VocabularyExerciseService = {
     },
 
     async startVocabularyExerciseAttempt(vocabularyExerciseId) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${vocabularyExerciseId}/attempts`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/vocabulary-exercises/${vocabularyExerciseId}/attempts${langQuery}`, {
             method: "POST",
         });
         if (!res.ok) {
@@ -194,6 +204,15 @@ export const VocabularyExerciseService = {
         const responseData = await res.json();
         const data = responseData.data;
         return data;
+    },
+
+    async getVocabularyExerciseAdmin(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/vocabulary-exercise/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     resetAlertFlag() {

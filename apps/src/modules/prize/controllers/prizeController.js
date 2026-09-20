@@ -2,19 +2,24 @@ const express = require("express");
 const { verifyToken, verifyAdmin } = require("../../../shared/middleware/verifyToken");
 const { asyncHandler } = require("../../../shared/middleware/errorHandler");
 
-function createPrizeController({ prizeService, userPrizeService }) {
+function createPrizeController({ prizeService, userPrizeService, englishTranslationService }) {
     if (!prizeService || !userPrizeService) {
         throw new Error("createPrizeController requires prizeService and userPrizeService");
     }
+    if (englishTranslationService && typeof prizeService.setEnglishTranslationService === "function") {
+        prizeService.setEnglishTranslationService(englishTranslationService);
+    }
     const router = express.Router();
     router.get("/api/prizes", verifyToken, asyncHandler(async (req, res) => {
-        const prizes = await prizeService.getAllPrizes();
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const prizes = await prizeService.getAllPrizes(lang);
         res.json({ success: true, prizes });
     }));
     router.get("/api/prize-list", verifyToken, asyncHandler(async (req, res) => {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 12;
-        const { prizes, totalPrizes } = await prizeService.getPrizeList(page, limit);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const { prizes, totalPrizes } = await prizeService.getPrizeList(page, limit, lang);
         const totalPages = Math.ceil(totalPrizes / limit);
         res.json({
             success: true,
@@ -25,7 +30,8 @@ function createPrizeController({ prizeService, userPrizeService }) {
     }));
     router.get("/api/type/:type", verifyToken, asyncHandler(async (req, res) => {
         const { type } = req.params;
-        const prizes = await prizeService.getPrizesByType(type);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const prizes = await prizeService.getPrizesByType(type, lang);
         res.json({ success: true, prizes });
     }));
     router.post("/check-prize", verifyToken, asyncHandler(async (req, res) => {
@@ -49,7 +55,8 @@ function createPrizeController({ prizeService, userPrizeService }) {
         res.json({ success: true, prizeId: result.insertedId });
     }));
     router.get("/api/:id", verifyAdmin, asyncHandler(async function (req, res) {
-        const prize = await prizeService.getPrizeById(req.params.id);
+        const lang = req.query.lang === "en" ? "en" : "vi";
+        const prize = await prizeService.getPrizeById(req.params.id, lang);
         if (!prize) {
             return res.status(404).json({ message: "Prize not found" });
         }

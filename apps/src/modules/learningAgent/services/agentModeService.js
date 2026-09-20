@@ -6,6 +6,7 @@ class AgentModeService {
     constructor(deps = {}) {
         this.repository = deps.repository || new AgentModeRepository();
         this.defaultModes = deps.defaultModes || DEFAULT_AGENT_MODES;
+        this.englishTranslationService = deps.englishTranslationService || null;
     }
 
     async listModes(options = {}) {
@@ -23,7 +24,8 @@ class AgentModeService {
                 return !options.activityType || mode.activityType === options.activityType;
             });
         }
-        return this.rankForMemory(modes.map(AgentMode.toPublic), options.memory);
+        const localizedModes = options.lang === "en" && this.englishTranslationService ? await this.englishTranslationService.applyTranslations("agentMode", modes, options.lang) : modes;
+        return this.rankForMemory(localizedModes.map(AgentMode.toPublic), options.memory);
     }
 
     async getMode(key, activityType = null) {

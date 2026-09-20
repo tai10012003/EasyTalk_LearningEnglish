@@ -155,27 +155,35 @@ function buildDependencies(options = {}) {
         ...learningServiceDeps,
         repository: repositories.pronunciationExerciseRepository,
         attemptRepository: repositories.pronunciationExerciseAttemptRepository,
-        speechAnalysisService: services.speechAnalysisService
+        speechAnalysisService: services.speechAnalysisService,
+        englishTranslationService: services.englishTranslationService
     });
     services.vocabularyExerciseService = new VocabularyExerciseService({
         ...learningServiceDeps,
         repository: repositories.vocabularyExerciseRepository,
-        attemptRepository: repositories.vocabularyExerciseAttemptRepository
+        attemptRepository: repositories.vocabularyExerciseAttemptRepository,
+        englishTranslationService: services.englishTranslationService
     });
     services.dictationExerciseService = new DictationExerciseService({
         ...learningServiceDeps,
-        repository: repositories.dictationExerciseRepository
+        repository: repositories.dictationExerciseRepository,
+        englishTranslationService: services.englishTranslationService
     });
-    services.journeyService = new JourneyService({ cacheService });
+    services.journeyService = new JourneyService({
+        cacheService,
+        englishTranslationService: services.englishTranslationService
+    });
     services.gateService = new GateService({
         cacheService,
-        journeyService: services.journeyService
+        journeyService: services.journeyService,
+        englishTranslationService: services.englishTranslationService
     });
     services.stageService = new StageService({
         cacheService,
         gateService: services.gateService,
         journeyService: services.journeyService,
-        userProgressService: services.userProgressService
+        userProgressService: services.userProgressService,
+        englishTranslationService: services.englishTranslationService
     });
     services.gateService.setStageService(services.stageService);
     services.learnerMemoryService = new LearnerMemoryService();
@@ -238,7 +246,7 @@ function buildDependencies(options = {}) {
         learnerMemoryService: services.learnerMemoryService
     });
     services.learningEventTool.setAgentLearningEventService(services.agentLearningEventService);
-    services.agentModeService = new AgentModeService();
+    services.agentModeService = new AgentModeService({ englishTranslationService: services.englishTranslationService });
     services.agentSessionService.setAgentModeService(services.agentModeService);
     services.flashcardService.setAgentLearningEventService(services.agentLearningEventService);
     services.pronunciationExerciseService.setAgentLearningEventService(services.agentLearningEventService);
@@ -305,7 +313,8 @@ function buildDependencies(options = {}) {
     });
     const prizeController = createPrizeController({
         prizeService: services.prizeService,
-        userPrizeService: services.userPrizeService
+        userPrizeService: services.userPrizeService,
+        englishTranslationService: services.englishTranslationService
     });
     const notificationController = createNotificationController({
         notificationService: services.notificationService

@@ -1,34 +1,36 @@
 import React from 'react';
 import iconhappy from "@/assets/images/iconhappy.png";
 import iconsad from "@/assets/images/iconsad.png";
+import { useTranslation } from "react-i18next";
 
 const StageResultScreen = ({ correctAnswers, totalQuestions, onShowHistory, onExit }) => {
+    const { t } = useTranslation();
     const incorrectAnswers = totalQuestions - correctAnswers;
     const percentageCorrect = totalQuestions > 0 ? (correctAnswers / totalQuestions) * 100 : 0;
     const iconSrc = percentageCorrect >= 50 ? iconhappy : iconsad;
 
     return (
         <div className="exercise-result-screen text-center">
-            <h4 className="text-center">KẾT QUẢ CHẶNG</h4>
+            <h4 className="text-center">{t("journeyPage.stageResult.title")}</h4>
             
             <div className="row mt-4">
                 <div className="col-md-7 exercise-result-content">
                     <p>
-                        Tổng số câu: <span className="exercise-result-number">{totalQuestions}</span>
+                        {t("journeyPage.stageResult.totalQuestions")} <span className="exercise-result-number">{totalQuestions}</span>
                     </p>
                     <p>
-                        Số câu đúng: <span className="exercise-result-number correct">{correctAnswers}</span>
+                        {t("journeyPage.stageResult.correctAnswers")} <span className="exercise-result-number correct">{correctAnswers}</span>
                     </p>
                     <p>
-                        Số câu sai: <span className="exercise-result-number incorrect">{incorrectAnswers}</span>
+                        {t("journeyPage.stageResult.incorrectAnswers")} <span className="exercise-result-number incorrect">{incorrectAnswers}</span>
                     </p>
                     <p>
-                        Tỷ lệ đúng: <span className="exercise-result-percentage">{percentageCorrect.toFixed(2)}%</span>
+                        {t("journeyPage.stageResult.accuracy")} <span className="exercise-result-percentage">{percentageCorrect.toFixed(2)}%</span>
                     </p>
                 </div>
                 
                 <div className="col-md-5 text-center exercise-result-icon">
-                    <img src={iconSrc} alt="Icon kết quả" />
+                    <img src={iconSrc} alt={t("journeyPage.stageResult.iconAlt")} />
                 </div>
             </div>
             
@@ -38,13 +40,13 @@ const StageResultScreen = ({ correctAnswers, totalQuestions, onShowHistory, onEx
                     id="exercise-viewHistoryBtnStage"
                     onClick={onShowHistory}
                 >
-                    Xem lịch sử
+                    {t("journeyPage.stageResult.viewHistory")}
                 </button>
                 <button
                     className="btn btn-secondary exercise-exit-btn"
                     onClick={onExit}
                 >
-                    Thoát
+                    {t("journeyPage.stageResult.exit")}
                 </button>
             </div>
         </div>

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 function highlightText(text) {
     if (!text) return "";
@@ -10,6 +11,8 @@ function highlightText(text) {
 }
 
 function WritingAIResult({ analysisResult }) {
+    const { t } = useTranslation();
+
     if (!analysisResult) return null;
 
     const hasStructuredFeedback = analysisResult.summary || analysisResult.rubric || analysisResult.corrections || analysisResult.rewriteSuggestion;
@@ -26,7 +29,7 @@ function WritingAIResult({ analysisResult }) {
             <div className="writingai-result mt-4">
                 <div className="writingai-structured-header">
                     <div>
-                        <h5>Feedback luyện viết từ AI Coach</h5>
+                        <h5>{t("writingAIPage.result.title")}</h5>
                         {analysisResult.summary && <p>{analysisResult.summary}</p>}
                     </div>
                     <div className="writingai-score-pill">
@@ -48,7 +51,7 @@ function WritingAIResult({ analysisResult }) {
 
                 {analysisResult.strengths?.length > 0 && (
                     <div className="writingai-feedback-section">
-                        <h6>Điểm mạnh</h6>
+                        <h6>{t("writingAIPage.result.strengths")}</h6>
                         <ul>
                             {analysisResult.strengths.map((item, index) => (
                                 <li key={index}>{item}</li>
@@ -59,11 +62,11 @@ function WritingAIResult({ analysisResult }) {
 
                 {analysisResult.corrections?.length > 0 && (
                     <div className="writingai-feedback-section">
-                        <h6>Lỗi nên sửa</h6>
+                        <h6>{t("writingAIPage.result.corrections")}</h6>
                         {analysisResult.corrections.map((item, index) => (
                             <div key={index} className="writingai-correction-card">
-                                <p><strong>Lỗi:</strong> {item.original}</p>
-                                <p><strong>Sửa:</strong> {item.corrected}</p>
+                                <p><strong>{t("writingAIPage.result.original")}:</strong> {item.original}</p>
+                                <p><strong>{t("writingAIPage.result.corrected")}:</strong> {item.corrected}</p>
                                 {item.explanation && <small>{item.explanation}</small>}
                             </div>
                         ))}
@@ -72,14 +75,14 @@ function WritingAIResult({ analysisResult }) {
 
                 {analysisResult.rewriteSuggestion && (
                     <div className="writingai-feedback-section">
-                        <h6>Phiên bản cải thiện</h6>
+                        <h6>{t("writingAIPage.result.rewrite")}</h6>
                         <div className="writingai-rewrite-box">{analysisResult.rewriteSuggestion}</div>
                     </div>
                 )}
 
                 {analysisResult.nextActions?.length > 0 && (
                     <div className="writingai-feedback-section">
-                        <h6>Bước tiếp theo</h6>
+                        <h6>{t("writingAIPage.result.nextActions")}</h6>
                         <ul>
                             {analysisResult.nextActions.map((action, index) => (
                                 <li key={index}>{action.title}</li>
@@ -93,7 +96,7 @@ function WritingAIResult({ analysisResult }) {
 
     return (
         <div className="writingai-result mt-4">
-            <h5>Chấm điểm bài viết từ AI:</h5>
+            <h5>{t("writingAIPage.result.legacyTitle")}</h5>
             <div
                 className="writingai-feedback"
                 dangerouslySetInnerHTML={{ __html: highlightText(analysisResult.suggestions) }}

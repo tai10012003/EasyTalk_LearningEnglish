@@ -1,6 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { isAnswerCorrect } from '@/utils/englishTextNormalizer'
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const shuffleArray = (array) => {
     const arr = [...array];
@@ -21,6 +22,7 @@ const StageCarousel = ({
     isCompleted,
     onSubmitStage
 }) => {
+    const { t } = useTranslation();
     const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
     const [userAnswers, setUserAnswers] = useState({});
     const [arrangeState, setArrangeState] = useState({});
@@ -30,19 +32,20 @@ const StageCarousel = ({
     const [shuffledOptionsMap, setShuffledOptionsMap] = useState({});
 
     useEffect(() => {
-        const newShuffledMap = {};
-        questions.forEach((question, index) => {
-            if (!shuffledOptionsMap[index]) {
+        setShuffledOptionsMap(prev => {
+            const newShuffledMap = { ...prev };
+            let hasChanges = false;
+            questions.forEach((question, index) => {
+                if (newShuffledMap[index]) return;
                 if (question.type === "multiple-choice" || question.type === "arrange-words") {
                     newShuffledMap[index] = shuffleArray(question.options.filter(o => o.trim() !== ""));
                 } else {
                     newShuffledMap[index] = question.options;
                 }
-            }
+                hasChanges = true;
+            });
+            return hasChanges ? newShuffledMap : prev;
         });
-        if (Object.keys(newShuffledMap).length > 0) {
-            setShuffledOptionsMap(prev => ({ ...prev, ...newShuffledMap }));
-        }
     }, [questions]);
 
     const currentQuestion = questions[currentQuestionIndex];
@@ -50,7 +53,7 @@ const StageCarousel = ({
 
     const isEnglishQuestion = (text) => {
         if (!text) return false;
-        const cleanText = text.replace(/[0-9\s.,?!()_\-]/g, '');
+        const cleanText = text.replace(/[0-9\s.,?!()_-]/g, '');
         const vietnameseRegex = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
         if (vietnameseRegex.test(cleanText)) return false;
         const englishRegex = /[a-z]/i;
@@ -66,11 +69,11 @@ const StageCarousel = ({
             if (data && data[0] && data[0][0] && data[0][0][0]) {
                 setTranslation(data[0][0][0]);
             } else {
-                setTranslation('Không tìm thấy nghĩa');
+                setTranslation(t("journeyPage.stageCarousel.translationNotFound"));
             }
         } catch (error) {
             console.error('Translation error:', error);
-            setTranslation('Lỗi dịch');
+            setTranslation(t("journeyPage.stageCarousel.translationError"));
         } finally {
             setTranslationLoading(false);
         }
@@ -104,8 +107,8 @@ const StageCarousel = ({
         if (!userAnswer || userAnswer.toString().trim() == '') {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Vui lòng nhập hoặc chọn câu trả lời!"
+                title: t("journeyPage.stageCarousel.warningTitle"),
+                text: t("journeyPage.stageCarousel.answerRequired")
             });
             return;
         }
@@ -114,7 +117,7 @@ const StageCarousel = ({
         const isCorrect = isAnswerCorrect(rawUserAnswer, correctAnswer);
         onAnswerSubmit(currentQuestionIndex, rawUserAnswer, isCorrect);
         setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
-    }, [currentQuestionIndex, userAnswers, currentQuestion, onAnswerSubmit]);
+    }, [currentQuestionIndex, userAnswers, currentQuestion, onAnswerSubmit, t]);
 
     const handleNextQuestion = useCallback(() => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -169,7 +172,7 @@ const StageCarousel = ({
                 <div className="selected-words-area">
                     {state.selected.length == 0 ? (
                         <div className="placeholder-text">
-                            Bấm vào các từ bên dưới để sắp xếp thành câu
+                            {t("journeyPage.stageCarousel.arrangePlaceholder")}
                         </div>
                     ) : (
                         state.selected.map((word, idx) => {
@@ -239,7 +242,7 @@ const StageCarousel = ({
                 }`}
                 name="exercise-answer"
                 rows="4"
-                placeholder="Nhập câu trả lời Tiếng Anh của bạn ..."
+                placeholder={t("journeyPage.stageCarousel.answerPlaceholder")}
                 value={userAnswers[currentQuestionIndex] || ''}
                 onChange={(e) => handleAnswerChange(e.target.value)}
                 disabled={isQuestionAnswered}
@@ -256,11 +259,11 @@ const StageCarousel = ({
 
     const getQuestionTitle = () => {
         switch (currentQuestion?.type) {
-            case 'multiple-choice': return 'Chọn đáp án đúng:';
-            case 'fill-in-the-blank': return 'Điền vào chỗ trống:';
-            case 'translation': return 'Dịch câu (Tiếng Việt) dưới đây sang câu (Tiếng Anh):';
-            case 'arrange-words': return 'Sắp xếp các từ thành câu hoàn chỉnh:';
-            default: return 'Câu hỏi:';
+            case 'multiple-choice': return t("journeyPage.stageCarousel.questionTypes.multipleChoice");
+            case 'fill-in-the-blank': return t("journeyPage.stageCarousel.questionTypes.fillBlank");
+            case 'translation': return t("journeyPage.stageCarousel.questionTypes.translation");
+            case 'arrange-words': return t("journeyPage.stageCarousel.questionTypes.arrange");
+            default: return t("journeyPage.stageCarousel.questionTypes.default");
         }
     };
 
@@ -277,7 +280,7 @@ const StageCarousel = ({
                             className="exercise-speak-button btn-sm btn-outline mr-2"
                             onClick={() => onSpeakText(currentQuestion.question)}
                             type="button"
-                            title="Phát âm câu hỏi"
+                            title={t("journeyPage.stageCarousel.speakTitle")}
                         >
                             🔊
                         </button>
@@ -306,13 +309,13 @@ const StageCarousel = ({
                         <div className="exercise-explanation mt-4">
                             {questionResult.isCorrect ? (
                                 <p>
-                                    <strong>Bạn đã trả lời đúng.</strong><br />
-                                    Giải thích: {questionResult.explanation}
+                                    <strong>{t("journeyPage.stageCarousel.correct")}</strong><br />
+                                    {t("journeyPage.stageCarousel.explanation")} {questionResult.explanation}
                                 </p>
                             ) : (
                                 <p>
-                                    <strong>Bạn đã trả lời sai.</strong> Đáp án đúng là: <strong>{questionResult.correctAnswer}</strong><br />
-                                    Giải thích: {questionResult.explanation}
+                                    <strong>{t("journeyPage.stageCarousel.incorrect")}</strong> {t("journeyPage.stageCarousel.correctAnswerIs")} <strong>{questionResult.correctAnswer}</strong><br />
+                                    {t("journeyPage.stageCarousel.explanation")} {questionResult.explanation}
                                 </p>
                             )}
                         </div>
@@ -323,7 +326,7 @@ const StageCarousel = ({
                             className="exercise-submit-answer mt-4 mb-4"
                             onClick={handleSubmitAnswer}
                         >
-                            <i className="fas fa-check me-2"></i> Kiểm tra
+                            <i className="fas fa-check me-2"></i> {t("journeyPage.stageCarousel.check")}
                         </button>
                     )}
                 </div>
@@ -336,7 +339,7 @@ const StageCarousel = ({
                                 type="button"
                                 onClick={onSubmitStage}
                             >
-                                HOÀN THÀNH
+                                {t("journeyPage.stageCarousel.complete")}
                             </button>
                         ) : (
                             <button
@@ -345,7 +348,7 @@ const StageCarousel = ({
                                 type="button"
                                 onClick={handleNextQuestion}
                             >
-                                Tiếp tục
+                                {t("journeyPage.stageCarousel.next")}
                             </button>
                         )}
                     </div>

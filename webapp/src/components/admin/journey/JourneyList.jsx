@@ -45,7 +45,7 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa hành trình "${title}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa hành trình "${title}" thất bại!`, 'error');
                 }
             }
@@ -143,6 +143,12 @@ function JourneyList({ fetchData, deleteItem, title, dataKey }) {
                                                     className="admin-journey-btn-edit"
                                                 >
                                                     Sửa
+                                                </a>
+                                                <a
+                                                    href={`/admin/journey/translate/${journey._id}`}
+                                                    className="admin-journey-btn-edit"
+                                                >
+                                                    Dịch EN
                                                 </a>
                                                 <button
                                                     className="admin-journey-btn-delete"

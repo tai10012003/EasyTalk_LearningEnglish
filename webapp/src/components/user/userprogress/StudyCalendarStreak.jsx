@@ -1,6 +1,8 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function StudyCalendarStreak({ studyDates = [] }) {
+    const { t, i18n } = useTranslation();
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
@@ -24,7 +26,17 @@ function StudyCalendarStreak({ studyDates = [] }) {
         setCurrentYear(newYear);
     };
 
-    const monthName = new Date(currentYear, currentMonth).toLocaleString("en-US", {
+    const locale = i18n.language === "en" ? "en-US" : "vi-VN";
+    const weekdays = [
+        t("streakPage.calendar.weekdays.sun"),
+        t("streakPage.calendar.weekdays.mon"),
+        t("streakPage.calendar.weekdays.tue"),
+        t("streakPage.calendar.weekdays.wed"),
+        t("streakPage.calendar.weekdays.thu"),
+        t("streakPage.calendar.weekdays.fri"),
+        t("streakPage.calendar.weekdays.sat")
+    ];
+    const monthName = new Date(currentYear, currentMonth).toLocaleString(locale, {
         month: "long",
         year: "numeric",
     });
@@ -37,7 +49,7 @@ function StudyCalendarStreak({ studyDates = [] }) {
                 <button onClick={() => changeMonth(1)} className="streak-nav-btn">›</button>
             </div>
             <div className="streak-weekdays">
-                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                {weekdays.map((d) => (
                     <div key={d} className="streak-weekday">{d}</div>
                 ))}
             </div>

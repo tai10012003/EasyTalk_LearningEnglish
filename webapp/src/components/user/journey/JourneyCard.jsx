@@ -1,6 +1,9 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 function JourneyCard({ id, title, progress }) {
+    const { t } = useTranslation();
+
     return (
         <div className="user-journey-card">
             <div className="user-journey-card-inner">
@@ -15,10 +18,12 @@ function JourneyCard({ id, title, progress }) {
                             style={{ width: `${progress}%` }}
                         />
                     </div>
-                    <span className="user-journey-progress-text">{progress.toFixed(0)}% hoàn thành</span>
+                    <span className="user-journey-progress-text">
+                        {t("journeyPage.card.completePercent", { percent: progress.toFixed(0) })}
+                    </span>
                 </div>
                 <a href={`/journey/detail/${id}`} className="user-journey-btn">
-                    <i className="fas fa-play"></i> Tiếp tục học
+                    <i className="fas fa-play"></i> {t("journeyPage.card.continue")}
                 </a>
             </div>
         </div>

@@ -13,6 +13,7 @@ class StageService {
         this.gateService = options.gateService || null;
         this.journeyService = options.journeyService || null;
         this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     setGateService(service) {
@@ -42,28 +43,33 @@ class StageService {
         };
     }
 
-    async getStageList(page = 1, limit = 12) {
+    async getStageList(page = 1, limit = 12, options = {}) {
         const cacheKey = cacheNs.listKey('stage', { page, limit });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.relationList('stage'), cacheNs.listTags('stage')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.relationList('stage'), cacheNs.listTags('stage')), async () => {
             const { stages, total } = await this.repository.findAll(page, limit);
             return { stages, totalStages: total };
         });
+        return {
+            ...result,
+            stages: await this.applyStageListTranslations(result.stages, options.lang)
+        };
     }
 
-    async getStageById(id) {
+    async getStageById(id, options = {}) {
         const cacheKey = cacheNs.key('stage', 'detail', { id });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.relationDetail('stage'), [cacheNs.tag('stage', 'detail'), cacheNs.tag('stage', 'detail', id), cacheNs.tag('stage', 'all')]), async () => {
+        const stage = await this.cache.getOrSet(cacheKey, withTags(policies.relationDetail('stage'), [cacheNs.tag('stage', 'detail'), cacheNs.tag('stage', 'detail', id), cacheNs.tag('stage', 'all')]), async () => {
             return await this.repository.findById(id);
         });
+        return await this.applyStageTranslation(stage, options.lang);
     }
 
-    async getStageDetailForUser(stageId, userId) {
+    async getStageDetailForUser(stageId, userId, options = {}) {
         const { userProgressService } = this.getRequiredServices();
         let userProgress = await userProgressService.getUserProgressByUserId(userId);
         if (!userProgress) {
             userProgress = await userProgressService.createUserProgress(userId, {});
         }
-        const stage = await this.getStageById(stageId);
+        const stage = await this.getStageById(stageId, { lang: options.lang });
         return { stage, userProgress };
     }
 
@@ -151,6 +157,31 @@ class StageService {
         const result = await this.repository.deleteByGate(gateId);
         await invalidateStageCache();
         return result;
+    }
+
+    async applyStageTranslation(stage, lang = "vi") {
+        if (lang !== "en" || !this.englishTranslationService || !stage?._id) return stage;
+        return await this.englishTranslationService.applyTranslationToItem("stage", stage, lang);
+    }
+
+    async applyStageListTranslations(stages = [], lang = "vi") {
+        if (lang !== "en" || !this.englishTranslationService || !Array.isArray(stages) || stages.length === 0) {
+            return stages;
+        }
+        const localizedStages = await this.englishTranslationService.applyTranslations("stage", stages, lang);
+        const gateInfoItems = localizedStages.map((stage) => stage.gateInfo).filter((gate) => gate?._id);
+        const localizedGateInfo = await this.englishTranslationService.applyTranslations("gate", gateInfoItems, lang);
+        const gateMap = new Map(localizedGateInfo.map((gate) => [gate._id.toString(), gate]));
+        const journeyInfoItems = localizedGateInfo.map((gate) => gate.journeyInfo).filter((journey) => journey?._id);
+        const localizedJourneyInfo = await this.englishTranslationService.applyTranslations("journey", journeyInfoItems, lang);
+        const journeyMap = new Map(localizedJourneyInfo.map((journey) => [journey._id.toString(), journey]));
+        return localizedStages.map((stage) => {
+            const localizedGate = stage.gateInfo?._id ? gateMap.get(stage.gateInfo._id.toString()) || stage.gateInfo : stage.gateInfo;
+            return {
+                ...stage,
+                gateInfo: localizedGate?._id ? { ...localizedGate, journeyInfo: localizedGate.journeyInfo?._id ? journeyMap.get(localizedGate.journeyInfo._id.toString()) || localizedGate.journeyInfo : localizedGate.journeyInfo } : localizedGate
+            };
+        });
     }
 
     async completeStageForUser(stageId, userId) {

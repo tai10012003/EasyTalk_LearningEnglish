@@ -12,6 +12,7 @@ class GateService {
         this.cache = options.cacheService || cache;
         this.journeyService = options.journeyService || null;
         this.stageService = options.stageService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     setJourneyService(service) {
@@ -36,12 +37,16 @@ class GateService {
         return this.stageService;
     }
 
-    async getGateList(page = 1, limit = 12) {
+    async getGateList(page = 1, limit = 12, options = {}) {
         const cacheKey = cacheNs.listKey('gate', { page, limit });
-        return await this.cache.getOrSet(cacheKey, withTags(policies.relationList('gate'), cacheNs.listTags('gate')), async () => {
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.relationList('gate'), cacheNs.listTags('gate')), async () => {
             const { gates, total } = await this.repository.findAll(page, limit);
             return { gates, totalGates: total };
         });
+        return {
+            ...result,
+            gates: await this.applyGateListTranslations(result.gates, options.lang)
+        };
     }
 
     async getGateById(gateId) {
@@ -135,6 +140,20 @@ class GateService {
         const result = await this.repository.removeStage(gateId, stageId);
         await invalidateGateCache();
         return result;
+    }
+
+    async applyGateListTranslations(gates = [], lang = "vi") {
+        if (lang !== "en" || !this.englishTranslationService || !Array.isArray(gates) || gates.length === 0) {
+            return gates;
+        }
+        const localizedGates = await this.englishTranslationService.applyTranslations("gate", gates, lang);
+        const journeyInfoItems = localizedGates.map((gate) => gate.journeyInfo).filter((journey) => journey?._id);
+        const localizedJourneyInfo = await this.englishTranslationService.applyTranslations("journey", journeyInfoItems, lang);
+        const journeyMap = new Map(localizedJourneyInfo.map((journey) => [journey._id.toString(), journey]));
+        return localizedGates.map((gate) => ({
+            ...gate,
+            journeyInfo: gate.journeyInfo?._id ? journeyMap.get(gate.journeyInfo._id.toString()) || gate.journeyInfo : gate.journeyInfo
+        }));
     }
 }
 

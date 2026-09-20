@@ -56,6 +56,7 @@ class PronunciationExerciseService {
         this.cache = options.cacheService || cache;
         this._userProgressService = options.userProgressService || null;
         this.agentLearningEventService = options.agentLearningEventService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
     }
 
     setAgentLearningEventService(service) {
@@ -69,7 +70,7 @@ class PronunciationExerciseService {
         return this._userProgressService;
     }
 
-    async getPronunciationexerciseList(page = 1, limit = 12, role = "user") {
+    async getPronunciationexerciseList(page = 1, limit = 12, role = "user", lang = "vi") {
         const cacheKey = cacheNs.listKey('pronunciationexercise', { page, limit, role });
         const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('pronunciationexercise', role), cacheNs.listTags('pronunciationexercise')), async () => {
             const filter = {};
@@ -79,10 +80,11 @@ class PronunciationExerciseService {
             const { exercises, total } = await this.repository.findAll(filter, page, limit);
             return { pronunciationexercises: exercises, totalExercises: total };
         });
+        const localizedExercises = lang === "en" && this.englishTranslationService && role !== "admin" ? await this.englishTranslationService.applyTranslations("pronunciationExercise", result.pronunciationexercises, lang) : result.pronunciationexercises;
         if (role !== "admin") {
             return {
                 ...result,
-                pronunciationexercises: this.sanitizeExercisesForLearner(result.pronunciationexercises)
+                pronunciationexercises: this.sanitizeExercisesForLearner(localizedExercises)
             };
         }
         return result;
@@ -98,6 +100,22 @@ class PronunciationExerciseService {
         return await this.cache.getOrSet(cacheNs.slugKey('pronunciationexercise', slug), withTags(policies.contentDetail('pronunciationexercise'), cacheNs.itemTags('pronunciationexercise', null, slug)), async () => {
             return await this.repository.findBySlug(slug);
         });
+    }
+
+    async getLocalizedPronunciationexerciseById(id, lang = "vi") {
+        const pronunciationExercise = await this.getPronunciationexerciseById(id);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("pronunciationExercise", pronunciationExercise, lang);
+        }
+        return pronunciationExercise;
+    }
+
+    async getLocalizedPronunciationexerciseBySlug(slug, lang = "vi") {
+        const pronunciationExercise = await this.getPronunciationexerciseBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("pronunciationExercise", pronunciationExercise, lang);
+        }
+        return pronunciationExercise;
     }
 
     async getPronunciationexerciseByIdOrSlug(identifier) {
@@ -141,8 +159,8 @@ class PronunciationExerciseService {
         return exercises.map(exercise => this.sanitizeExerciseForLearner(exercise));
     }
 
-    async getPronunciationexerciseDetails(userId, prouunciationeExerciseId) {
-        const pronunciationExercise = await this.getPronunciationexerciseById(prouunciationeExerciseId);
+    async getPronunciationexerciseDetails(userId, prouunciationeExerciseId, lang = "vi") {
+        const pronunciationExercise = await this.getLocalizedPronunciationexerciseById(prouunciationeExerciseId, lang);
         if (!pronunciationExercise) {
             return { status: 404, data: { message: "Pronunciation exercise not found" } };
         }
@@ -154,16 +172,16 @@ class PronunciationExerciseService {
         return { status: 200, data: { success: true, data: { pronunciationExercise: this.sanitizeExerciseForLearner(pronunciationExercise) } } };
     }
 
-    async getPronunciationexerciseDetailsBySlug(userId, slug) {
+    async getPronunciationexerciseDetailsBySlug(userId, slug, lang = "vi") {
         const pronunciationExercise = await this.getPronunciationexerciseBySlug(slug);
         if (!pronunciationExercise) {
             return { status: 404, data: { message: "Pronunciation exercise not found" } };
         }
-        return await this.getPronunciationexerciseDetails(userId, pronunciationExercise._id);
+        return await this.getPronunciationexerciseDetails(userId, pronunciationExercise._id, lang);
     }
 
-    async getPronunciationExerciseRoadmap(userId) {
-        const { pronunciationexercises, totalExercises } = await this.getPronunciationexerciseList(1, 10000, "user");
+    async getPronunciationExerciseRoadmap(userId, lang = "vi") {
+        const { pronunciationexercises, totalExercises } = await this.getPronunciationexerciseList(1, 10000, "user", lang);
         const userProgress = await this._getOrCreateUserProgress(userId);
         const unlockedIds = new Set((userProgress.unlockedPronunciationExercises || []).map(id => id.toString()));
         const items = pronunciationexercises.map(exercise => {
@@ -199,8 +217,8 @@ class PronunciationExerciseService {
         };
     }
 
-    async startAttempt(userId, pronunciationExerciseId) {
-        const pronunciationExercise = await this.getPronunciationexerciseById(pronunciationExerciseId);
+    async startAttempt(userId, pronunciationExerciseId, lang = "vi") {
+        const pronunciationExercise = await this.getLocalizedPronunciationexerciseById(pronunciationExerciseId, lang);
         if (!pronunciationExercise) {
             return { status: 404, data: { success: false, message: "Pronunciation exercise not found" } };
         }
@@ -616,6 +634,9 @@ class PronunciationExerciseService {
             return { status: 404, data: { success: false, message: "Bài luyện tập phát âm không tìm thấy." } };
         }
         await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("pronunciationExercise", id);
+        }
         await invalidatePronunciationExerciseCache({ id, slug: existing.slug });
         return { status: 200, data: { success: true, message: "Bài luyện tập phát âm đã xóa thành công !" } };
     }

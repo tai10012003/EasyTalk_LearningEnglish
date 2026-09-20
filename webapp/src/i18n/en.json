@@ -312,6 +312,159 @@
         "explanation": "Explanation"
       }
     },
+    "pronunciationExercisePage": {
+      "common": {
+        "close": "Close"
+      },
+      "list": {
+        "documentTitle": "Pronunciation Exercises - EasyTalk",
+        "title": "PRONUNCIATION PRACTICE ROADMAP FROM A TO Z",
+        "subtitle": "Complete each exercise to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+        "history": "PRONUNCIATION EXERCISE HISTORY",
+        "completePercent": "{{percent}}% complete",
+        "scrollCurrentTitle": "Scroll to current pronunciation exercise",
+        "continuePractice": "Continue practicing",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top",
+        "guide": {
+          "title": "Pronunciation Exercise Guide",
+          "intro": "Choose the pronunciation exercise you want to practice from the list.",
+          "description": "Each exercise includes pronunciation questions in two main formats: choosing the correct answer and speaking aloud.",
+          "questionTypes": "Question types:",
+          "multipleChoice": "<strong>Multiple Choice:</strong> Listen to a sentence and choose the best answer from the given options.",
+          "pronunciation": "<strong>Pronunciation:</strong> Listen to a sentence or phrase, then repeat it so the system can analyze your accuracy.",
+          "noteTitle": "Notes:",
+          "noteCheck": "Press <strong>Check</strong> after completing each question to view the result and explanation.",
+          "notePronunciation": "For <strong>pronunciation</strong> questions, the system records your voice, analyzes it, and shows which words were pronounced correctly or incorrectly.",
+          "noteTime": "The default time is 20 minutes. Try to finish on time.",
+          "noteSubmit": "After pressing <strong>Submit</strong>, the system will show your result, including total questions, correct answers, accuracy, and detailed pronunciation analysis. Press <strong>View history</strong> to review your attempt.",
+          "closing": "Practice well and keep improving your pronunciation!"
+        }
+      },
+      "card": {
+        "step": "Step {{number}}",
+        "current": "Practice now",
+        "completed": "Completed",
+        "locked": "Locked",
+        "questionCount": "Questions: {{count}}",
+        "start": "Start practice",
+        "retry": "Try again"
+      },
+      "detail": {
+        "documentTitle": "Pronunciation Exercise Detail - EasyTalk",
+        "defaultTitle": "Pronunciation exercise",
+        "unanswered": "Not answered",
+        "noAnswer": "No answer",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of a pronunciation exercise. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "warningTitle": "Warning",
+        "speechUnsupported": "Your browser does not support Speech Synthesis.",
+        "completeTitle": "Completed!",
+        "completeText": "Congratulations! You have completed this pronunciation exercise. The next pronunciation exercise has been unlocked.",
+        "completeConfirm": "Back to pronunciation exercises",
+        "errorTitle": "Error",
+        "errorText": "An error occurred while updating your progress.",
+        "submitError": "An error occurred while submitting your exercise.",
+        "startError": "An error occurred while starting the exercise.",
+        "noQuestions": "There are no questions in this exercise.",
+        "chooseTime": "Choose exercise time:",
+        "minutes": "{{count}} minutes",
+        "start": "Start",
+        "loading": "Loading..."
+      },
+      "carousel": {
+        "questionTypes": {
+          "multipleChoice": "Listen and choose the correct answer:",
+          "pronunciation": "Repeat with correct pronunciation:",
+          "default": "Question:"
+        },
+        "warningTitle": "Warning",
+        "recordUnsupported": "Recording is not supported by this browser.",
+        "analyzeFailed": "Could not analyze pronunciation. Please try again.",
+        "micBlocked": "Microphone access is blocked. Please enable it in your browser.",
+        "micNotFound": "No microphone device was found. Please check your computer.",
+        "micAccessFailed": "Unable to access microphone: {{message}}",
+        "answerRequired": "Please choose an answer.",
+        "checkFailed": "An error occurred while checking your answer.",
+        "checking": "Checking...",
+        "check": "Check",
+        "maxAttempts": "You have used all pronunciation attempts for this question (3 times).",
+        "stopRecording": "Stop recording",
+        "analyzing": "Analyzing...",
+        "record": "Record",
+        "analyzingPronunciation": "Analyzing pronunciation...",
+        "analysisUnavailable": "Pronunciation has not been analyzed yet.",
+        "recordAgain": "Please record again and try one more time.",
+        "accuracy": "Accuracy",
+        "analyzed": "Your pronunciation has been analyzed.",
+        "analysisResult": "Analysis result",
+        "pronunciationDetail": "Pronunciation detail",
+        "correct": "Your answer is correct!",
+        "incorrect": "Your answer is incorrect.",
+        "correctAnswer": "Correct answer",
+        "correctAnswerIs": "The correct answer is",
+        "explanation": "Explanation",
+        "standardSentence": "Standard sentence",
+        "back": "Back",
+        "next": "Next"
+      },
+      "sidebar": {
+        "confirmTitle": "Confirm",
+        "confirmText": "Are you sure you want to submit?",
+        "confirm": "Submit",
+        "cancel": "Cancel",
+        "timeRemaining": "Time remaining:",
+        "submit": "Submit",
+        "submitting": "Submitting...",
+        "questionList": "Question list:",
+        "completedTime": "Time spent:",
+        "viewHistory": "View history"
+      },
+      "result": {
+        "title": "PRONUNCIATION EXERCISE RESULT",
+        "totalQuestions": "Total questions",
+        "correctAnswers": "Correct answers",
+        "incorrectAnswers": "Incorrect answers",
+        "accuracy": "Accuracy",
+        "iconAlt": "Result icon",
+        "unlockNext": "Unlock the next pronunciation exercise"
+      },
+      "history": {
+        "title": "PRONUNCIATION EXERCISE HISTORY",
+        "empty": "No history data.",
+        "question": "Question {{number}}",
+        "yourPronunciation": "Your pronunciation",
+        "pronunciationAnswer": "Pronunciation answer",
+        "yourAnswer": "Your answer",
+        "correctAnswer": "Correct answer",
+        "result": "Result",
+        "correct": "✓ Correct",
+        "incorrect": "✗ Incorrect",
+        "explanation": "Explanation",
+        "pronunciationGood": "Good pronunciation",
+        "pronunciationAverage": "Average pronunciation",
+        "pronunciationPoor": "Needs more practice"
+      },
+      "attemptHistory": {
+        "documentTitle": "Pronunciation Exercise History - EasyTalk",
+        "detailDocumentTitle": "Pronunciation practice history",
+        "title": "PRONUNCIATION EXERCISE HISTORY",
+        "detailEyebrow": "Pronunciation exercise history",
+        "empty": "No exercise history yet.",
+        "completed": "Completed",
+        "inProgress": "Incomplete",
+        "correctCount": "{{correct}}/{{total}} correct",
+        "viewDetail": "View detail",
+        "deleteConfirmTitle": "Delete exercise history?",
+        "deleteConfirmText": "This history item will be removed from your account.",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleteSuccess": "History deleted",
+        "deleteError": "An error occurred while deleting history."
+      }
+    },
     "storyPage": {
       "list": {
         "documentTitle": "Story Lessons - EasyTalk",
@@ -715,6 +868,549 @@
         "close": "Close",
         "saving": "Saving...",
         "save": "Save"
+      }
+    },
+    "vocabularyExercisePage": {
+      "common": {
+        "close": "Close"
+      },
+      "list": {
+        "documentTitle": "Vocabulary Exercises - EasyTalk",
+        "title": "VOCABULARY PRACTICE ROADMAP FROM A TO Z",
+        "subtitle": "Complete each exercise to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+        "history": "VOCABULARY EXERCISE HISTORY",
+        "completePercent": "{{percent}}% complete",
+        "scrollCurrentTitle": "Scroll to current vocabulary exercise",
+        "continuePractice": "Continue practicing",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top",
+        "guide": {
+          "title": "Vocabulary Exercise Guide",
+          "intro": "Choose the vocabulary exercise you want to practice from the list.",
+          "description": "Each exercise includes vocabulary questions such as multiple choice, fill in the blank, translation, and word arrangement.",
+          "questionTypes": "Question types:",
+          "multipleChoice": "<strong>Multiple Choice:</strong> Choose the best answer from the given options.",
+          "fillBlank": "<strong>Fill in the Blank:</strong> Enter the correct word to complete the sentence.",
+          "translation": "<strong>Translation:</strong> Translate the sentence from Vietnamese to English or the other way around.",
+          "noteTitle": "Notes:",
+          "noteCheck": "Press <strong>Check</strong> after answering each question to view the answer and explanation.",
+          "noteComplete": "Each set has a different number of questions, so try to complete them all.",
+          "noteTime": "The default time is 20 minutes. Try to finish on time.",
+          "noteSubmit": "Press <strong>Submit</strong> and the system will show your result, including total questions, correct answers, incorrect answers, and accuracy. Press <strong>View history</strong> to review what you answered and see where you were right or wrong.",
+          "closing": "Practice well and keep improving your vocabulary!"
+        }
+      },
+      "card": {
+        "step": "Step {{number}}",
+        "current": "Practice now",
+        "completed": "Completed",
+        "locked": "Locked",
+        "questionCount": "Questions: {{count}}",
+        "start": "Start practice",
+        "retry": "Try again"
+      },
+      "detail": {
+        "documentTitle": "Vocabulary Exercise Detail - EasyTalk",
+        "defaultTitle": "Vocabulary exercise",
+        "unanswered": "Not answered",
+        "noAnswer": "No answer",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of a vocabulary exercise. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "warningTitle": "Warning",
+        "speechUnsupported": "Your browser does not support Speech Synthesis.",
+        "completeTitle": "Completed!",
+        "completeText": "Congratulations! You have completed this vocabulary exercise. The next vocabulary exercise has been unlocked.",
+        "completeConfirm": "Back to vocabulary exercises",
+        "errorTitle": "Error",
+        "errorText": "An error occurred while updating your progress.",
+        "submitError": "An error occurred while submitting your exercise.",
+        "startError": "An error occurred while starting the exercise.",
+        "noQuestions": "There are no questions in this exercise.",
+        "chooseTime": "Choose exercise time:",
+        "minutes": "{{count}} minutes",
+        "start": "Start",
+        "loading": "Loading..."
+      },
+      "carousel": {
+        "translationNotFound": "Meaning not found",
+        "translationError": "Translation error",
+        "warningTitle": "Warning",
+        "answerRequired": "Please enter or select an answer!",
+        "checkFailed": "An error occurred while checking your answer.",
+        "arrangePlaceholder": "Click the words below to arrange them into a sentence",
+        "answerPlaceholder": "Enter your English answer ...",
+        "questionTypes": {
+          "multipleChoice": "Choose the correct answer:",
+          "fillBlank": "Fill in the blank:",
+          "translation": "Translate the Vietnamese sentence below into English:",
+          "arrange": "Arrange the words into a complete sentence:",
+          "default": "Question:"
+        },
+        "speakTitle": "Pronounce question",
+        "correct": "Your answer is correct!",
+        "incorrect": "Your answer is incorrect.",
+        "correctAnswer": "The correct answer is",
+        "explanation": "Explanation",
+        "checking": "Checking...",
+        "check": "Check",
+        "back": "Back",
+        "next": "Next"
+      },
+      "sidebar": {
+        "confirmTitle": "Confirm",
+        "confirmText": "Are you sure you want to submit?",
+        "confirm": "Submit",
+        "cancel": "Cancel",
+        "timeRemaining": "Time remaining:",
+        "submit": "Submit",
+        "submitting": "Submitting...",
+        "answered": "Answered: {{answered}}/{{total}} questions",
+        "questionList": "Question list:",
+        "completedTime": "Time spent:",
+        "viewHistory": "View history"
+      },
+      "result": {
+        "title": "VOCABULARY EXERCISE RESULT",
+        "totalQuestions": "Total questions",
+        "correctAnswers": "Correct answers",
+        "incorrectAnswers": "Incorrect answers",
+        "accuracy": "Accuracy",
+        "iconAlt": "Result icon",
+        "unlockNext": "Unlock the next vocabulary exercise"
+      },
+      "history": {
+        "title": "VOCABULARY EXERCISE HISTORY",
+        "empty": "No history data.",
+        "question": "Question {{number}}",
+        "yourAnswer": "Your answer",
+        "correctAnswer": "Correct answer",
+        "result": "Result",
+        "correct": "✓ Correct",
+        "incorrect": "✗ Incorrect",
+        "explanation": "Explanation"
+      },
+      "attemptHistory": {
+        "documentTitle": "Vocabulary Exercise History - EasyTalk",
+        "detailDocumentTitle": "Vocabulary practice history",
+        "title": "VOCABULARY EXERCISE HISTORY",
+        "detailEyebrow": "Vocabulary exercise history",
+        "empty": "No exercise history yet.",
+        "completed": "Completed",
+        "inProgress": "Incomplete",
+        "correctCount": "{{correct}}/{{total}} correct",
+        "viewDetail": "View detail",
+        "deleteConfirmTitle": "Delete exercise history?",
+        "deleteConfirmText": "This history item will be removed from your account.",
+        "deleteConfirm": "Delete",
+        "deleteCancel": "Cancel",
+        "deleteSuccess": "History deleted",
+        "deleteError": "An error occurred while deleting history."
+      }
+    },
+    "dictationExercisePage": {
+      "common": {
+        "close": "Close"
+      },
+      "list": {
+        "documentTitle": "Dictation Exercises - EasyTalk",
+        "title": "DICTATION PRACTICE ROADMAP FROM A TO Z",
+        "subtitle": "Complete each exercise to unlock the next one • Unlocked: {{unlocked}} / {{total}}",
+        "completePercent": "{{percent}}% complete",
+        "scrollCurrentTitle": "Scroll to current dictation exercise",
+        "continuePractice": "Continue practicing",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top",
+        "guide": {
+          "title": "Dictation Exercise Guide",
+          "intro": "Choose the dictation exercise you want to practice from the list.",
+          "description": "Listen to each sentence and type it accurately into the input box.",
+          "listen": "<strong>Listen:</strong> The system plays each sentence 3 times. You can press the speaker button or the <strong>Ctrl</strong> key to listen again.",
+          "dictation": "<strong>Dictation:</strong> Type the sentence you heard, then press Check to confirm your result.",
+          "skip": "<strong>Skip:</strong> If it is too difficult, you can skip and view the answer.",
+          "note": "<strong>Note:</strong> Try to complete each sentence before moving to the next one."
+        }
+      },
+      "card": {
+        "step": "Step {{number}}",
+        "current": "Practice now",
+        "completed": "Completed",
+        "locked": "Locked",
+        "sentenceCount": "Sentences: {{count}}",
+        "studyCount": "Studied: {{count}} time(s)",
+        "start": "Start practice",
+        "retry": "Try again"
+      },
+      "detail": {
+        "documentTitle": "Dictation Exercise Detail - EasyTalk",
+        "topic": "Topic: {{title}}",
+        "errorTitle": "Error",
+        "notFound": "Dictation content was not found.",
+        "correctSentence": "Correct sentence",
+        "currentAnswer": "Current answer",
+        "leaveWarningTitle": "Warning",
+        "leaveWarningText": "You are in the middle of a listening exercise. If you leave, your progress will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "leaveCancel": "Stay",
+        "finishedInline": "You have completed this dictation exercise!",
+        "completeTitle": "Completed!",
+        "completeText": "Congratulations! You have completed this dictation exercise. The next dictation exercise has been unlocked.",
+        "completeConfirm": "Back to dictation exercises",
+        "errorText": "An error occurred while updating your progress."
+      },
+      "controls": {
+        "noTranslationContent": "No content to translate",
+        "translationUnavailable": "This sentence cannot be translated",
+        "translationError": "Translation error (check your network connection)",
+        "saveSuccessTitle": "Saved successfully!",
+        "saveSuccessText": "Your settings have been applied.",
+        "replayTitle": "Press {{hotkey}} to replay the sentence",
+        "audioSpeed": "Audio speed:",
+        "settings": "Settings",
+        "inputPlaceholder": "Type what you heard...",
+        "sentenceMeaning": "Sentence meaning",
+        "translating": "Translating...",
+        "check": "Check",
+        "skip": "Skip",
+        "skipCountdown": "Skip ({{seconds}}s)",
+        "next": "Next",
+        "repeatAfterNext": "Repeats after moving to a new sentence:",
+        "repeatCount": "{{count}} time(s)",
+        "replayHotkey": "Replay hotkey:",
+        "saveSettings": "Save settings"
+      },
+      "complete": {
+        "title": "You have completed this dictation exercise!",
+        "description": "Congratulations, keep practicing!",
+        "unlockNext": "Unlock the next dictation exercise"
+      },
+      "fullScript": {
+        "title": "FULL AUDIO AND SCRIPT",
+        "showScript": "Show script",
+        "hideScript": "Hide script"
+      }
+    },
+    "chatAIPage": {
+      "documentTitle": "Chat with AI - EasyTalk",
+      "common": {
+        "close": "Close"
+      },
+      "modeSelect": {
+        "title": "Choose Agent Chat Mode",
+        "subtitle": "Each session has its own goal so your coach can guide the right practice.",
+        "minutes": "{{count}} min",
+        "recommended": "Recommended"
+      },
+      "modes": {
+        "fallbackTitle": "Speaking Practice",
+        "fallbackDescription": "Practice short speaking prompts by topic."
+      },
+      "alert": {
+        "warningTitle": "Warning",
+        "errorTitle": "Error",
+        "leaveConversationText": "You are in an AI conversation. If you leave, the content will not be saved. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "stayCancel": "Stay",
+        "notReadyTitle": "Not ready yet",
+        "notReadyText": "The agent session has not been initialized. Please reload the page.",
+        "sendingText": "Sending your message, please wait...",
+        "sendFailedText": "Unable to send the message. Please try again.",
+        "startFailedTitle": "Unable to start the session",
+        "tryAgainLater": "Please try again in a few minutes.",
+        "tryAgain": "Please try again later."
+      },
+      "finish": {
+        "button": "Finish session",
+        "confirmTitle": "Finish this session?",
+        "confirmText": "AI Coach will summarize this chat and update your learning profile.",
+        "confirmButton": "Finish",
+        "cancelButton": "Keep learning",
+        "savedTitle": "Session saved",
+        "savedText": "AI Coach has updated your learning profile.",
+        "failedTitle": "Unable to finish the session"
+      },
+      "summary": {
+        "title": "Session summary",
+        "mistakes": "Mistakes to review",
+        "nextActions": "Next recommendations"
+      },
+      "guide": {
+        "title": "AI Conversation Practice Guide",
+        "intro": "Welcome to <strong>Chat with AI</strong>. Here, you can practice speaking English directly with AI.",
+        "stepsTitle": "How to practice:",
+        "stepChat": "<strong>Chat:</strong> Type your question or response in the chat box and send it.",
+        "stepReply": "<strong>AI feedback:</strong> AI replies in English to help you build fluency and grammar.",
+        "stepListen": "<strong>Listen:</strong> AI reads the reply aloud so you can follow the pronunciation.",
+        "stepHighlight": "<strong>Word highlight:</strong> The words being spoken are highlighted to help you follow and practice pronunciation.",
+        "stepContinue": "<strong>Continue the conversation:</strong> Add more questions or responses to keep chatting with AI.",
+        "noteTitle": "Note:",
+        "noteListen": "Listen carefully and try shadowing the reply to improve pronunciation.",
+        "notePractice": "Try different questions freely to strengthen your communication skills.",
+        "closing": "Practice consistently and build more confidence every day!"
+      },
+      "input": {
+        "voiceMode": "Voice chat",
+        "textMode": "Text chat",
+        "placeholder": "Enter your message ...",
+        "emptyMessage": "Please enter a message.",
+        "speechUnsupported": "Your browser does not support speech recognition. Please use Google Chrome."
+      }
+    },
+    "writingAIPage": {
+      "documentTitle": "Writing with AI - EasyTalk",
+      "common": {
+        "close": "Close"
+      },
+      "header": {
+        "modeTitle": "Writing: {{title}}",
+        "defaultTitle": "Writing with AI - English Practice"
+      },
+      "modeCard": {
+        "minutes": "{{count}} min",
+        "recommended": "Recommended"
+      },
+      "alert": {
+        "noticeTitle": "Notice",
+        "warningTitle": "Warning",
+        "errorTitle": "Error",
+        "topicFailed": "Unable to get a prompt. Please try again.",
+        "emptyText": "Please enter your writing before submitting!",
+        "minCharacters": "Your writing must be at least {{count}} characters before you can submit it!",
+        "analyzeFailed": "Unable to analyze your writing. Please try again.",
+        "leaveText": "You are writing now. If you leave this page, your content will be lost. Are you sure you want to leave?",
+        "leaveConfirm": "Leave",
+        "stayCancel": "Stay"
+      },
+      "input": {
+        "topicLabel": "Your prompt:",
+        "changeTopic": "Change prompt",
+        "placeholder": "Write your answer here...",
+        "submitting": "Submitting...",
+        "submit": "Submit",
+        "continue": "Continue writing"
+      },
+      "result": {
+        "title": "Writing feedback from AI Coach",
+        "strengths": "Strengths",
+        "corrections": "Corrections to review",
+        "original": "Issue",
+        "corrected": "Correction",
+        "rewrite": "Improved version",
+        "nextActions": "Next steps",
+        "legacyTitle": "AI writing score:"
+      },
+      "guide": {
+        "title": "AI Writing Practice Guide",
+        "intro": "In AI writing practice, you will receive a short prompt generated by AI to practice writing in English.",
+        "stepsTitle": "How to practice:",
+        "stepWrite": "<strong>Write:</strong> Enter your writing in the text box below the prompt.",
+        "stepSubmit": "<strong>Submit:</strong> Press <strong>Submit</strong> so AI can analyze your writing.",
+        "stepAnalyze": "<strong>Analysis:</strong> AI evaluates grammar, vocabulary, sentence structure, and provides an improved version with correction suggestions.",
+        "stepScore": "<strong>Overall score:</strong> AI gives an overall score for your writing.",
+        "stepContinue": "<strong>Continue:</strong> After receiving feedback, press <strong>Continue writing</strong> to get a new prompt and keep practicing.",
+        "noteTitle": "Note:",
+        "noteWrite": "Write as well as you can before submitting.",
+        "noteApply": "Read AI suggestions carefully and try applying them to your next piece of writing.",
+        "closing": "Practice consistently and improve your writing every day!"
+      }
+    },
+    "reminderPage": {
+      "documentTitle": "Study Reminders - EasyTalk",
+      "title": "YOUR STUDY REMINDERS",
+      "empty": "No reminders yet. Add a reminder so the system can email you when it is time to study.",
+      "common": {
+        "close": "Close",
+        "save": "Save",
+        "saving": "Saving..."
+      },
+      "actions": {
+        "add": "Add reminder"
+      },
+      "pagination": {
+        "previous": "Previous",
+        "next": "Next"
+      },
+      "frequency": {
+        "oneTime": "One time",
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      },
+      "card": {
+        "email": "Email",
+        "time": "Time",
+        "frequency": "Frequency",
+        "content": "Reminder content",
+        "defaultContent": "Reminder"
+      },
+      "form": {
+        "addTitle": "ADD STUDY REMINDER",
+        "updateTitle": "UPDATE REMINDER",
+        "emailLabel": "Notification email:",
+        "timeLabel": "Reminder time (local):",
+        "frequencyLabel": "Frequency:",
+        "noteLabel": "Note / reminder content:",
+        "notePlaceholder": "Example: Study grammar, listening, or reading for 30 minutes..."
+      },
+      "alert": {
+        "noticeTitle": "Notice!",
+        "warningTitle": "Warning",
+        "errorTitle": "Error",
+        "successTitle": "Success!",
+        "updatedTitle": "Updated",
+        "deletedTitle": "Deleted",
+        "loadFailed": "Unable to load reminders.",
+        "loadListFailed": "Unable to load the reminder list. Please check the server connection.",
+        "timeRequired": "Please choose a reminder time!",
+        "timeInPast": "Reminder time cannot be in the past!",
+        "addSuccess": "Reminder has been added successfully!",
+        "addSuccessShort": "A new reminder has been created!",
+        "addFailed": "Unable to add reminder. Please try again.",
+        "createFailed": "Unable to create reminder.",
+        "updateSuccess": "Reminder has been updated successfully!",
+        "updateFailed": "Unable to update.",
+        "updateReminderFailed": "Unable to update reminder.",
+        "deleteSuccess": "Reminder has been deleted.",
+        "deleteFailed": "Unable to delete reminder."
+      },
+      "delete": {
+        "confirmTitle": "Are you sure?",
+        "confirmText": "Do you want to delete this reminder?",
+        "confirmButton": "Delete",
+        "cancelButton": "Cancel",
+        "successTitle": "Reminder deleted successfully!"
+      },
+      "guide": {
+        "title": "Study Reminder Guide",
+        "intro": "Study reminders help you manage your study schedule and receive email notifications on time.",
+        "featuresTitle": "Main features:",
+        "add": "<strong>Add reminder:</strong> Press <strong>Add reminder</strong> to create a new reminder, then enter the email, time, and frequency (Daily, Weekly, Monthly).",
+        "edit": "<strong>Edit reminder:</strong> Press the <icon></icon> icon on a reminder card to update its information.",
+        "delete": "<strong>Delete reminder:</strong> Press the <icon></icon> icon on a reminder card to remove an unnecessary reminder.",
+        "list": "<strong>Reminder list:</strong> View all reminders you created and check their email, time, and frequency.",
+        "noteTitle": "Note:",
+        "noteEmailTime": "Reminders will send emails at the time and frequency you selected.",
+        "noteEditDelete": "You can delete or edit any reminder when its information is no longer suitable.",
+        "noteCorrectEmail": "Make sure the email address is correct so you can receive notifications.",
+        "closing": "Use reminders to maintain an effective study habit!"
+      }
+    },
+    "streakPage": {
+      "documentTitle": "Study Streak - EasyTalk",
+      "title": "Your Study Streak",
+      "stats": {
+        "current": "Current Streak",
+        "best": "Best Streak"
+      },
+      "calendar": {
+        "weekdays": {
+          "sun": "Sun",
+          "mon": "Mon",
+          "tue": "Tue",
+          "wed": "Wed",
+          "thu": "Thu",
+          "fri": "Fri",
+          "sat": "Sat"
+        }
+      },
+      "error": {
+        "title": "Error",
+        "loadFailed": "Unable to load streak data.",
+        "connectionFailed": "Unable to connect to the server. Please check the server connection. The system will show default data."
+      }
+    },
+    "journeyPage": {
+      "list": {
+        "documentTitle": "Learning Journey - EasyTalk",
+        "title": "YOUR LEARNING JOURNEY",
+        "subtitle": "Choose a path and start conquering English",
+        "empty": "No journeys available yet."
+      },
+      "card": {
+        "completePercent": "{{percent}}% complete",
+        "continue": "Continue learning"
+      },
+      "gate": {
+        "documentTitle": "Learning Gates - EasyTalk",
+        "defaultJourneyTitle": "JOURNEY",
+        "title": "JOURNEY: {{title}}",
+        "subtitle": "Complete each gate to unlock the next stage",
+        "scrollCurrentTitle": "Scroll to current gate",
+        "continue": "Continue learning",
+        "hot": "HOT",
+        "scrollTopTitle": "Back to top"
+      },
+      "gateCard": {
+        "current": "Current gate",
+        "completed": "Completed",
+        "locked": "Locked",
+        "stageCount": "{{count}} stages",
+        "empty": "No stages in this gate yet!"
+      },
+      "stageCard": {
+        "start": "Start",
+        "review": "Review",
+        "locked": "Locked"
+      },
+      "stage": {
+        "documentTitle": "Journey Stage - EasyTalk",
+        "defaultTitle": "Lesson",
+        "unanswered": "Not answered yet",
+        "noAnswer": "No answer",
+        "noQuestions": "There are no questions in this stage.",
+        "alert": {
+          "warningTitle": "Warning",
+          "speechUnsupported": "Your browser does not support Speech Synthesis.",
+          "leaveText": "You are doing a practice activity. If you leave, your progress will not be saved. Are you sure you want to leave?",
+          "leaveConfirm": "Leave",
+          "leaveCancel": "Stay"
+        }
+      },
+      "stageResult": {
+        "title": "STAGE RESULT",
+        "totalQuestions": "Total questions:",
+        "correctAnswers": "Correct answers:",
+        "incorrectAnswers": "Incorrect answers:",
+        "accuracy": "Accuracy:",
+        "iconAlt": "Result icon",
+        "viewHistory": "View history",
+        "exit": "Exit"
+      },
+      "stageHistory": {
+        "title": "STAGE HISTORY",
+        "empty": "No history data.",
+        "question": "Question {{number}}:",
+        "yourAnswer": "Your answer:",
+        "correctAnswer": "Correct answer:",
+        "result": "Result:",
+        "correct": "Correct",
+        "incorrect": "Incorrect",
+        "explanation": "Explanation:",
+        "close": "Close"
+      },
+      "stageCarousel": {
+        "translationNotFound": "Translation not found",
+        "translationError": "Translation error",
+        "warningTitle": "Warning",
+        "answerRequired": "Please enter or choose an answer!",
+        "arrangePlaceholder": "Click the words below to arrange a sentence",
+        "answerPlaceholder": "Enter your English answer ...",
+        "questionTypes": {
+          "multipleChoice": "Choose the correct answer:",
+          "fillBlank": "Fill in the blank:",
+          "translation": "Translate the Vietnamese sentence below into English:",
+          "arrange": "Arrange the words into a complete sentence:",
+          "default": "Question:"
+        },
+        "speakTitle": "Play question audio",
+        "correct": "You answered correctly.",
+        "incorrect": "You answered incorrectly.",
+        "correctAnswerIs": "The correct answer is:",
+        "explanation": "Explanation:",
+        "check": "Check",
+        "complete": "COMPLETE",
+        "next": "Continue"
       }
     },
     "leaderboardPage": {

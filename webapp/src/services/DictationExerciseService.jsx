@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
 function unwrapResponseData(responseData) {
     if (!responseData || typeof responseData !== "object") return responseData;
     if (Array.isArray(responseData.dictationExercises)) {
@@ -23,6 +28,7 @@ export const DictationExerciseService = {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises${query}`, {
                 method: 'GET',
             });
@@ -50,7 +56,8 @@ export const DictationExerciseService = {
 
     async getDictationExerciseById(id) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
             const data = unwrapResponseData(responseData);
@@ -63,7 +70,8 @@ export const DictationExerciseService = {
 
     async getDictationExerciseBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
             const responseData = await res.json();
             const data = responseData.data?.dictationExercise || unwrapResponseData(responseData);
@@ -75,7 +83,8 @@ export const DictationExerciseService = {
     },
 
     async fetchDictationExerciseRoadmap() {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/roadmap`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/roadmap${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {
@@ -88,7 +97,8 @@ export const DictationExerciseService = {
     },
 
     async getDictationExerciseDetail(id) {
-        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`, {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}${langQuery}`, {
             method: "GET",
         });
         if (!res.ok) {
@@ -113,6 +123,15 @@ export const DictationExerciseService = {
         const responseData = await res.json();
         const data = unwrapResponseData(responseData);
         return data;
+    },
+
+    async getDictationExerciseAdmin(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     resetAlertFlag() {
