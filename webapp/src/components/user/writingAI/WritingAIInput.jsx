@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
+import { useTranslation } from "react-i18next";
 
 function WritingAIInput({ topic, userText, setUserText, onSubmit, onReset, disabled, analysisResult }) {
+    const { t } = useTranslation();
+
     return (
         <div className="writingai-input-area mb-3">
             <div className="writingai-topic mb-2">
-                <strong>Đề bài dành cho bạn: </strong>
+                <strong>{t("writingAIPage.input.topicLabel")} </strong>
                 <p>{topic}</p>
                 {!analysisResult && (
                      <button className="btn btn-sm btn-secondary" onClick={onReset} disabled={disabled}>
-                        Đổi đề bài khác
+                        {t("writingAIPage.input.changeTopic")}
                     </button>
                 )}
             </div>
@@ -16,7 +19,7 @@ function WritingAIInput({ topic, userText, setUserText, onSubmit, onReset, disab
             <textarea
                 className="writingai-textarea form-control mb-2"
                 rows={10}
-                placeholder="Viết bài của bạn tại đây..."
+                placeholder={t("writingAIPage.input.placeholder")}
                 value={userText}
                 onChange={(e) => setUserText(e.target.value)}
                 disabled={disabled}
@@ -28,7 +31,7 @@ function WritingAIInput({ topic, userText, setUserText, onSubmit, onReset, disab
                     onClick={onSubmit}
                     disabled={disabled}
                 >
-                    {disabled ? "Đang gửi..." : "Nộp bài"}
+                    {disabled ? t("writingAIPage.input.submitting") : t("writingAIPage.input.submit")}
                 </button>
             )}
 
@@ -38,7 +41,7 @@ function WritingAIInput({ topic, userText, setUserText, onSubmit, onReset, disab
                     onClick={onReset}
                     disabled={disabled}
                 >
-                    Tiếp tục làm bài
+                    {t("writingAIPage.input.continue")}
                 </button>
             )}
         </div>

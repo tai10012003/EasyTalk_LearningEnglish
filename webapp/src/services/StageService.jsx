@@ -3,16 +3,23 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguage = () => {
+    return localStorage.getItem("language") === "en" ? "en" : "vi";
+};
+
 export const StageService = {
-    async getStage(stageId) {
+    async getStage(stageId, options = {}) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stage/detail/${stageId}`, {
+            const includeLanguage = options.includeLanguage !== false;
+            const query = includeLanguage && getCurrentLanguage() === "en" ? "?lang=en" : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stage/detail/${stageId}${query}`, {
                 method: "GET",
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("Fetch stage detail success:", data);
             return data;
@@ -48,7 +55,8 @@ export const StageService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             console.log("Complete stage success:", data);
             return data;
         } catch (error) {
@@ -63,19 +71,18 @@ export const StageService = {
 
     async fetchStage(page = 1, limit = 12, filters = {}) {
         try {
-            let query = `?page=${page}&limit=${limit}`;
-            if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
-            const res = await fetch(`${API_URL}/stage/api/stages${query}`, {
+            const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+            if (filters.search) params.set("search", filters.search);
+            const query = `?${params.toString()}`;
+            const res = await AuthService.fetchWithAuth(`${API_URL}/stage/api/stages${query}`, {
                 method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
 
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data ? responseData : { data: responseData.data || [], currentPage: responseData.currentPage, totalPages: responseData.totalPages };
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -100,7 +107,9 @@ export const StageService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding stage:", err);
             throw err;
@@ -114,7 +123,9 @@ export const StageService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+           const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating stage:", err);
             throw err;
@@ -127,7 +138,9 @@ export const StageService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting stage:", err);
             throw err;

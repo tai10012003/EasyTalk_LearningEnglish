@@ -6,8 +6,10 @@ import { FlashCardService } from "@/services/FlashCardService.jsx";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import FlashCardReviewCard from "@/components/user/flashcard/FlashCardReviewCard.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const FlashCardReview = () => {
+    const { t } = useTranslation();
     const { id } = useParams();
     const navigate = useNavigate();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
@@ -27,13 +29,6 @@ const FlashCardReview = () => {
     const pendingUpdatesRef = useRef([]);
     const lastCombinationsRef = useRef([]);
 
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
-
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
         intervalRef.current = setInterval(() => {
@@ -47,6 +42,13 @@ const FlashCardReview = () => {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -69,7 +71,7 @@ const FlashCardReview = () => {
     }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
-        document.title = "Ôn tập flashcard - EasyTalk";
+        document.title = t("flashcardPage.review.documentTitle");
         const load = async () => {
             setIsLoading(true);
             try {
@@ -82,16 +84,16 @@ const FlashCardReview = () => {
             } catch (err) {
                 Swal.fire({
                     icon: "error",
-                    title: "Lỗi tải flashcard",
+                    title: t("flashcardPage.review.loadErrorTitle"),
                     text: err.message,
-                    confirmButtonText: "Quay lại",
+                    confirmButtonText: t("flashcardPage.review.back"),
                 }).then(() => navigate("/flashcards"));
             } finally {
                 setIsLoading(false);
             }
         };
         load();
-    }, [id]);
+    }, [id, navigate, t]);
 
     useEffect(() => {
         if (!navigator || flashcards.length == 0) return;
@@ -101,11 +103,11 @@ const FlashCardReview = () => {
             if (!allowNavigationRef.current && flashcards.length > 0) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang luyện tập flashcard giữa chừng. Nếu rời trang, tiến độ sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("flashcardPage.review.leaveWarningTitle"),
+                    text: t("flashcardPage.review.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("flashcardPage.review.leaveConfirm"),
+                    cancelButtonText: t("flashcardPage.review.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -123,7 +125,7 @@ const FlashCardReview = () => {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, flashcards.length]);
+    }, [navigator, flashcards.length, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -243,12 +245,12 @@ const FlashCardReview = () => {
 
     const handleRemove = async () => {
         const result = await Swal.fire({
-            title: "Xác nhận xóa từ vựng",
-            text: "Bạn đã nhớ từ này rồi chứ? Hệ thống sẽ tự động xóa từ vựng đã ghi nhớ khỏi danh sách luyện tập!",
+            title: t("flashcardPage.review.removeConfirmTitle"),
+            text: t("flashcardPage.review.removeConfirmText"),
             icon: "question",
             showCancelButton: true,
-            confirmButtonText: "Đúng vậy",
-            cancelButtonText: "Hủy",
+            confirmButtonText: t("flashcardPage.review.removeConfirm"),
+            cancelButtonText: t("flashcardPage.review.removeCancel"),
             confirmButtonColor: "#3085d6",
             cancelButtonColor: "#d33",
         });
@@ -262,8 +264,8 @@ const FlashCardReview = () => {
                 setFlashcards(updated);
                 Swal.fire({
                     icon: "success",
-                    title: "Đã xóa từ vựng",
-                    text: `Còn ${updated.length} từ để ôn tiếp!`,
+                    title: t("flashcardPage.review.removeSuccessTitle"),
+                    text: t("flashcardPage.review.removeSuccessText", { count: updated.length }),
                     timer: 1500,
                     showConfirmButton: false,
                 });
@@ -323,7 +325,7 @@ const FlashCardReview = () => {
             try {
                 await FlashCardService.updateDifficulties(pendingUpdatesRef.current);
             } catch (err) {
-                console.error("Lỗi gửi batch update:", err);
+                console.error(t("flashcardPage.review.batchErrorLog"), err);
             }
         }
         const now = Date.now();
@@ -336,20 +338,20 @@ const FlashCardReview = () => {
         allowNavigationRef.current = true;
         Swal.fire({
             icon: "success",
-            title: "🎉 Hoàn thành!",
-            text: "Bạn đã hoàn thành luyện tập flashcard!",
+            title: t("flashcardPage.review.completeTitle"),
+            text: t("flashcardPage.review.completeText"),
             confirmButtonText: "OK",
         }).then(() => navigate(`/flashcards/flashcardlist/${id}`));
     };
 
     const handleStop = async () => {
         const result = await Swal.fire({
-            title: "Dừng học?",
-            text: "Bạn có chắc chắn muốn dừng học không?",
+            title: t("flashcardPage.review.stopTitle"),
+            text: t("flashcardPage.review.stopText"),
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Có, dừng lại",
-            cancelButtonText: "Tiếp tục học",
+            confirmButtonText: t("flashcardPage.review.stopConfirm"),
+            cancelButtonText: t("flashcardPage.review.stopCancel"),
             confirmButtonColor: "#d33",
             cancelButtonColor: "#3085d6",
         });
@@ -359,15 +361,15 @@ const FlashCardReview = () => {
     };
 
     if (isLoading) return <LoadingScreen />;
-    if (flashcards.length == 0) return <p>Không có flashcards nào.</p>;
+    if (flashcards.length == 0) return <p>{t("flashcardPage.review.empty")}</p>;
 
     return (
         <div className="flashcard-review-container">
             <div className="section_tittle" style={{ marginBottom: "30px" }}>
-                <h3 className="title">Luyện tập: {listName}</h3> 
+                <h3 className="title">{t("flashcardPage.review.title", { name: listName })}</h3> 
             </div>
             <button className="btn_1" onClick={handleStop}>
-                <i className="fas fa-stop-circle mr-2"></i>Dừng học
+                <i className="fas fa-stop-circle mr-2"></i>{t("flashcardPage.review.stop")}
             </button>
             {
                 flashcards.length > 0 && flashcards[currentIndex] ? (
@@ -381,9 +383,9 @@ const FlashCardReview = () => {
                     />
                 ) : flashcards.length === 0 ? (
                     <div style={{ textAlign: "center", padding: "50px", fontSize: "1.2rem" }}>
-                        <p>Chúc mừng! Bạn đã hoàn thành toàn bộ flashcard!</p>
+                        <p>{t("flashcardPage.review.allDone")}</p>
                         <button className="btn_1" onClick={finalizeAndExit}>
-                            Hoàn thành
+                            {t("flashcardPage.review.completeButton")}
                         </button>
                     </div>
                 ) : null
@@ -394,22 +396,22 @@ const FlashCardReview = () => {
                         {isOwner ? (
                             <>
                                 <button className="btn_1 easy" onClick={() => handleRate(1)}>
-                                    <i className="fas fa-thumbs-up"></i> Dễ
+                                    <i className="fas fa-thumbs-up"></i> {t("flashcardPage.review.easy")}
                                 </button>
                                 <button className="btn_1 normal" onClick={() => handleRate(2)}>
-                                    <i className="fas fa-minus"></i> Thường
+                                    <i className="fas fa-minus"></i> {t("flashcardPage.review.normal")}
                                 </button>
                                 <button className="btn_1 hard" onClick={() => handleRate(3)}>
-                                    <i className="fas fa-thumbs-down"></i> Khó
+                                    <i className="fas fa-thumbs-down"></i> {t("flashcardPage.review.hard")}
                                 </button>
                             </>
                         ) : (
                             <>
                                 <button className="btn_1 danger" onClick={handleRemove}>
-                                    <i className="fas fa-check-circle"></i> Đã nhớ từ vựng
+                                    <i className="fas fa-check-circle"></i> {t("flashcardPage.review.remembered")}
                                 </button>
                                 <button className="btn_1 primary" onClick={handleNext}>
-                                    <i className="fas fa-arrow-right"></i> Tiếp theo
+                                    <i className="fas fa-arrow-right"></i> {t("flashcardPage.review.next")}
                                 </button>
                             </>
                         )}
@@ -423,7 +425,7 @@ const FlashCardReview = () => {
                         color: "#999",
                         fontStyle: "italic"
                     }}>
-                        {mode == "flip" ? "Đang tải câu hỏi tiếp theo... (3s)" : "Vui lòng trả lời câu hỏi để tiếp tục"}
+                        {mode == "flip" ? t("flashcardPage.review.loadingNext") : t("flashcardPage.review.answerToContinue")}
                     </div>
                 )}
             </div>

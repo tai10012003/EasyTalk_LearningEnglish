@@ -3,18 +3,40 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    if (Array.isArray(responseData.dictationExercises)) {
+        return {
+            data: responseData.dictationExercises,
+            currentPage: responseData.currentPage || 1,
+            totalPages: responseData.totalPages || 1,
+        };
+    }
+    if (responseData.meta && typeof responseData.data === "object" && responseData.data !== null && !Array.isArray(responseData.data)) {
+        return { ...responseData.data, ...responseData.meta };
+    }
+    return responseData.data || responseData;
+}
+
 export const DictationExerciseService = {
     async fetchDictationExercise(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises${query}`, {
                 method: 'GET',
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -34,9 +56,11 @@ export const DictationExerciseService = {
 
     async getDictationExerciseById(id) {
         try {
-            const res = await fetch(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (err) {
             console.error(err);
@@ -46,9 +70,11 @@ export const DictationExerciseService = {
 
     async getDictationExerciseBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/slug/${encodeURIComponent(slug)}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data?.dictationExercise || unwrapResponseData(responseData);
             return data;
         } catch (err) {
             console.error(err);
@@ -56,38 +82,56 @@ export const DictationExerciseService = {
         }
     },
 
-    async getDictationExerciseDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+    async fetchDictationExerciseRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async getDictationExerciseDetail(id) {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictationexercise/${id}${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        const data = responseData.data?.dictationExercise || unwrapResponseData(responseData);
+        return data;
     },
 
     async completeDictationExercise(dictationexerciseId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/complete/${dictationexerciseId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/dictation-exercises/complete/${dictationexerciseId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
+    },
+
+    async getDictationExerciseAdmin(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/dictation-exercise/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     resetAlertFlag() {

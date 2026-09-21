@@ -1,0 +1,460 @@
+const { ObjectId } = require('mongodb');
+const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
+const { getVietnamDate } = require('../../../shared/utils/dateFormat');
+const UserProgressRepository = require('../repositories/userprogressRepository');
+const { calculateStreak } = require('../utils/streakCalculator');
+const { invalidateUserProgressCache } = require('../utils/cacheHelper');
+
+const FLASHCARD_BADGES = [
+    { name: "Tân binh chăm chỉ", threshold: 1000, xp: 300 },
+    { name: "Chiến binh ngôn từ", threshold: 3000, xp: 900 },
+    { name: "Bậc thầy từ vựng", threshold: 6000, xp: 2500 },
+    { name: "Huyền thoại ôn tập", threshold: 10000, xp: 5000 },
+    { name: "Vua từ vựng", threshold: 15000, xp: 9000 },
+];
+
+class UserProgressService {
+    constructor(deps = {}) {
+        this.userProgressRepository = deps.repository || new UserProgressRepository();
+        this.cache = deps.cacheService || cache;
+        this.streakService = deps.streakService || null;
+        this.badgeService = deps.badgeService || null;
+        this.userPrizeService = deps.userPrizeService || null;
+        this.followService = deps.followService || null;
+        this.leaderboardService = deps.leaderboardService || null;
+        this.contentProgressService = deps.contentProgressService || null;
+    }
+
+    setStreakService(streakService) {
+        this.streakService = streakService;
+    }
+
+    setBadgeService(badgeService) {
+        this.badgeService = badgeService;
+    }
+
+    setUserPrizeService(userPrizeService) {
+        this.userPrizeService = userPrizeService;
+    }
+
+    setFollowService(followService) {
+        this.followService = followService;
+    }
+
+    setLeaderboardService(leaderboardService) {
+        this.leaderboardService = leaderboardService;
+    }
+
+    setContentProgressService(contentProgressService) {
+        this.contentProgressService = contentProgressService;
+    }
+
+    getRequiredContentProgressService() {
+        if (!this.contentProgressService) {
+            throw new Error("UserProgressService requires contentProgressService");
+        }
+        return this.contentProgressService;
+    }
+
+    async getUserProgressList(page = 1, limit = 12, search = "", role = "user") {
+        const cacheKey = cacheNs.listKey('userprogress', { page, limit, search, role });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.userList(), cacheNs.listTags('userprogress')), async () => {
+            const skip = (page - 1) * limit;
+            const filter = {};
+            if (search) {
+                const db = this.userProgressRepository.db;
+                const users = await db.collection("users").find({ username: { $regex: search, $options: "i" } }).project({ _id: 1 }).toArray();
+                filter.user = { $in: users.map(u => u._id) };
+            }
+            const { userprogresses, total } = await this.userProgressRepository.findAll(filter, skip, limit);
+            return { userprogresses, totalUserProgresses: total };
+        });
+    }
+
+    async getUserProgress(id) {
+        return await this.userProgressRepository.findUserProgressById(id);
+    }
+
+    async getDetailUserProgressByUserId(userId) {
+        return await this.userProgressRepository.findDetailUserProgressByUserId(userId);
+    }
+
+    async getUserProgressByUserId(userId) {
+        return await this.userProgressRepository.findByUserId(userId);
+    }
+
+    async createUserProgress(userId, options = {}) {
+        const journey = options.journey || null;
+        const providedInitialUnlocks = options.initialUnlocks || {};
+        const contentProgressService = this.getRequiredContentProgressService();
+        const firstGate = journey?.gates?.[0]?._id || null;
+        const firstStage = journey?.gates?.[0]?.stages?.[0]?._id || null;
+        const initialUnlocks = await contentProgressService.getInitialUnlocks({
+            story: providedInitialUnlocks.story,
+            grammar: providedInitialUnlocks.grammar,
+            pronunciation: providedInitialUnlocks.pronunciation,
+            grammarExercise: providedInitialUnlocks.grammarExercise,
+            pronunciationExercise: providedInitialUnlocks.pronunciationExercise,
+            vocabularyExercise: providedInitialUnlocks.vocabularyExercise,
+            dictation: providedInitialUnlocks.dictation
+        });
+        const userProgress = {
+            user: new ObjectId(userId),
+            dailyFlashcardReviews: {},
+            dailyFlashcardGoal: 20,
+            unlockedFlashcardBadges: {},
+            unlockedGates: firstGate ? [new ObjectId(firstGate)] : [],
+            unlockedStages: firstStage ? [new ObjectId(firstStage)] : [],
+            unlockedStories: initialUnlocks.story ? [new ObjectId(initialUnlocks.story)] : [],
+            unlockedGrammars: initialUnlocks.grammar ? [new ObjectId(initialUnlocks.grammar)] : [],
+            unlockedPronunciations: initialUnlocks.pronunciation ? [new ObjectId(initialUnlocks.pronunciation)] : [],
+            unlockedGrammarExercises: initialUnlocks.grammarExercise ? [new ObjectId(initialUnlocks.grammarExercise)] : [],
+            unlockedPronunciationExercises: initialUnlocks.pronunciationExercise ? [new ObjectId(initialUnlocks.pronunciationExercise)] : [],
+            unlockedVocabularyExercises: initialUnlocks.vocabularyExercise ? [new ObjectId(initialUnlocks.vocabularyExercise)] : [],
+            unlockedDictations: initialUnlocks.dictation ? [new ObjectId(initialUnlocks.dictation)] : [],
+            grammarStudyStats: {},
+            pronunciationStudyStats: {},
+            storyStudyStats: {},
+            dictationStudyStats: {},
+            studyTimes: 0,
+            dailyStudyTimes: {},
+            experiencePoints: 0,
+            dailyExperiencePoints: {},
+            unlockedPrizes: [],
+            diamonds: 0,
+            streak: 0,
+            maxStreak: 0,
+            studyDates: [],
+        };
+        await this.userProgressRepository.insert(userProgress);
+        await invalidateUserProgressCache(userId);
+        return userProgress;
+    }
+
+    async updateUserProgress(userProgress) {
+        const normalize = (arr) => Array.isArray(arr) ? [...new Set(arr)].map(id => new ObjectId(id)) : [];
+        const fields = [
+            "unlockedGates",
+            "unlockedStages",
+            "unlockedStories",
+            "unlockedGrammars",
+            "unlockedPronunciations",
+            "unlockedGrammarExercises",
+            "unlockedPronunciationExercises",
+            "unlockedVocabularyExercises",
+            "unlockedDictations",
+        ];
+        const normalizedData = Object.fromEntries(
+            fields.map(field => [field, normalize(userProgress[field])])
+        );
+        const todayStr = getVietnamDate();
+        let studyDates = (userProgress.studyDates || []).map(d => d instanceof Date ? getVietnamDate(d) : d).filter(Boolean);
+        if (!studyDates.includes(todayStr)) studyDates.push(todayStr);
+        const updateOp = { $set: {}, $inc: {} };
+        const currentXP = await this.userProgressRepository.findByUserId(userProgress.user);
+        const { currentStreak, tempMaxStreak } = calculateStreak(studyDates, todayStr);
+        const maxStreak = Math.max(currentXP?.maxStreak || 0, tempMaxStreak);
+        const xpDiff = (userProgress.experiencePoints || 0) - (currentXP?.experiencePoints || 0);
+        if (xpDiff > 0) updateOp.$inc.experiencePoints = xpDiff;
+        updateOp.$set = { ...normalizedData, streak: currentStreak, maxStreak, studyDates };
+        const result = await this.userProgressRepository.update(userProgress.user, updateOp);
+        if (this.userPrizeService) {
+            await this.userPrizeService.checkAndUnlockNonChampionPrizes(userProgress.user);
+        }
+        await invalidateUserProgressCache(userProgress.user);
+        return result;
+    }
+
+    async recordStudyTime(userId, seconds) {
+        if (!seconds || seconds <= 0) return false;
+        const result = await this.userProgressRepository.addDailyStudyTime(userId, seconds);
+        await invalidateUserProgressCache(userId);
+        return result.modifiedCount > 0 || result.upsertedCount > 0;
+    }
+
+    async incrementDailyFlashcardReview(userId, count = 1) {
+        if (!this.badgeService) throw new Error("BadgeService chưa được inject!");
+        return await this.badgeService.incrementDailyFlashcardReview(userId, count);
+    }
+
+    async getFlashcardProgressOverview(userId) {
+        const userProgress = await this.userProgressRepository.findByUserId(userId);
+        const todayStr = getVietnamDate();
+        const now = new Date();
+        const monthYear = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const dailyFlashcardReviews = userProgress?.dailyFlashcardReviews || {};
+        const dailyFlashcardGoal = userProgress?.dailyFlashcardGoal || 20;
+        const todayCount = dailyFlashcardReviews[todayStr] || 0;
+        const monthlyTotal = Object.entries(dailyFlashcardReviews)
+            .filter(([dateStr]) => dateStr.startsWith(monthYear))
+            .reduce((sum, [, count]) => sum + count, 0);
+        const unlocked = userProgress?.unlockedFlashcardBadges?.[monthYear] || [];
+        return {
+            dailyFlashcardReviews,
+            dailyGoal: {
+                goal: dailyFlashcardGoal,
+                todayCount,
+                isAchieved: todayCount >= dailyFlashcardGoal
+            },
+            badges: {
+                monthYear,
+                monthlyTotal,
+                status: FLASHCARD_BADGES.map(badge => ({
+                    ...badge,
+                    unlocked: unlocked.includes(badge.name) || monthlyTotal >= badge.threshold
+                }))
+            }
+        };
+    }
+
+    async addDiamonds(userId, amount) {
+        if (amount <= 0) return false;
+        const result = await this.userProgressRepository.update(userId, {
+            $inc: { diamonds: amount }
+        });
+        await invalidateUserProgressCache(userId);
+        return result.modifiedCount > 0 || result.upsertedCount > 0;
+    }
+
+    async getDiamonds(userId) {
+        const progress = await this.userProgressRepository.findByUserId(userId);
+        return progress?.diamonds || 0;
+    }
+
+    async deleteUserProgressByUser(userId) {
+        const result = await this.userProgressRepository.deleteByUser(userId);
+        await invalidateUserProgressCache(userId);
+        return result;
+    }
+
+    async deleteUserProgress(id) {
+        const result = await this.userProgressRepository.deleteProgress(id);
+        await invalidateUserProgressCache();
+        return result;
+    }
+
+    async checkAndResetStreakOnLogin(userId) {
+        if (!this.streakService) throw new Error("StreakService chưa được inject!");
+        return await this.streakService.checkAndResetStreakOnLogin(userId);
+    }
+
+    async checkAndUnlockChampionPrizes(userId) {
+        if (!this.userPrizeService) return;
+        return await this.userPrizeService.checkAndUnlockChampionPrizes(userId);
+    }
+
+    async getLeaderboard(limit = 10) {
+        if (!this.leaderboardService) {
+            return [];
+        }
+        return await this.leaderboardService.getLeaderboard(limit);
+    }
+
+    async unlockJourneyInitial(userProgress, journey) {
+        const firstGate = journey.gates && journey.gates.length > 0 ? journey.gates[0]._id : null;
+        const firstStage = journey.gates[0]?.stages && journey.gates[0].stages.length > 0 ? journey.gates[0].stages[0]._id : null;
+        let isUpdated = false;
+        if (firstGate && !userProgress.unlockedGates.some(g => g.toString() == firstGate.toString())) {
+            userProgress.unlockedGates.push(firstGate);
+            isUpdated = true;
+        }
+        if (firstStage && !userProgress.unlockedStages.some(s => s.toString() == firstStage.toString())) {
+            userProgress.unlockedStages.push(firstStage);
+            isUpdated = true;
+        }
+        if (isUpdated) {
+            await this.updateUserProgress(userProgress);
+        }
+        return userProgress;
+    }
+
+    async unlockNextStory(userProgress, nextStoryId, addExp = 10) {
+        if (!nextStoryId) return userProgress;
+        if (!userProgress.unlockedStories) userProgress.unlockedStories = [];
+        const nextIdStr = nextStoryId.toString();
+        if (!userProgress.unlockedStories.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedStories.push(new ObjectId(nextStoryId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async isStoryUnlocked(userProgress, storyId) {
+        if (!userProgress || !userProgress.unlockedStories) return false;
+        return userProgress.unlockedStories.some(s => s.toString() == storyId.toString());
+    }
+
+    async recordStoryStudy(userId, storyId) {
+        const storyIdStr = storyId.toString();
+        const now = new Date();
+        const userProgress = await this.userProgressRepository.findByUserId(userId);
+        const existingStats = userProgress?.storyStudyStats?.[storyIdStr] || {};
+        const result = await this.userProgressRepository.update(userId, {
+            $inc: {
+                [`storyStudyStats.${storyIdStr}.studyCount`]: 1
+            },
+            $set: {
+                [`storyStudyStats.${storyIdStr}.firstStudiedAt`]: existingStats.firstStudiedAt || now,
+                [`storyStudyStats.${storyIdStr}.lastStudiedAt`]: now
+            }
+        });
+        await invalidateUserProgressCache(userId);
+        return result;
+    }
+
+    async unlockNextGrammar(userProgress, nextGrammarId, addExp = 10) {
+        if (!nextGrammarId) return userProgress;
+        if (!userProgress.unlockedGrammars) userProgress.unlockedGrammars = [];
+        const nextIdStr = nextGrammarId.toString();
+        if (!userProgress.unlockedGrammars.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedGrammars.push(new ObjectId(nextGrammarId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async isGrammarUnlocked(userProgress, grammarId) {
+        if (!userProgress || !userProgress.unlockedGrammars) return false;
+        return userProgress.unlockedGrammars.some(s => s.toString() == grammarId.toString());
+    }
+
+    async recordGrammarStudy(userId, grammarId) {
+        const grammarIdStr = grammarId.toString();
+        const now = new Date();
+        const userProgress = await this.userProgressRepository.findByUserId(userId);
+        const existingStats = userProgress?.grammarStudyStats?.[grammarIdStr] || {};
+        const result = await this.userProgressRepository.update(userId, {
+            $inc: {
+                [`grammarStudyStats.${grammarIdStr}.studyCount`]: 1
+            },
+            $set: {
+                [`grammarStudyStats.${grammarIdStr}.firstStudiedAt`]: existingStats.firstStudiedAt || now,
+                [`grammarStudyStats.${grammarIdStr}.lastStudiedAt`]: now
+            }
+        });
+        await invalidateUserProgressCache(userId);
+        return result;
+    }
+
+    async unlockNextPronunciation(userProgress, nextPronunciationId, addExp = 10) {
+        if (!nextPronunciationId) return userProgress;
+        if (!userProgress.unlockedPronunciations) userProgress.unlockedPronunciations = [];
+        const nextIdStr = nextPronunciationId.toString();
+        if (!userProgress.unlockedPronunciations.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedPronunciations.push(new ObjectId(nextPronunciationId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async recordPronunciationStudy(userId, pronunciationId) {
+        const pronunciationIdStr = pronunciationId.toString();
+        const now = new Date();
+        const userProgress = await this.userProgressRepository.findByUserId(userId);
+        const existingStats = userProgress?.pronunciationStudyStats?.[pronunciationIdStr] || {};
+        const result = await this.userProgressRepository.update(userId, {
+            $inc: {
+                [`pronunciationStudyStats.${pronunciationIdStr}.studyCount`]: 1
+            },
+            $set: {
+                [`pronunciationStudyStats.${pronunciationIdStr}.firstStudiedAt`]: existingStats.firstStudiedAt || now,
+                [`pronunciationStudyStats.${pronunciationIdStr}.lastStudiedAt`]: now
+            }
+        });
+        await invalidateUserProgressCache(userId);
+        return result;
+    }
+
+    async unlockNextGrammarExercise(userProgress, nextGrammarExerciseId, addExp = 10) {
+        if (!nextGrammarExerciseId) return userProgress;
+        if (!userProgress.unlockedGrammarExercises) userProgress.unlockedGrammarExercises = [];
+        const nextIdStr = nextGrammarExerciseId.toString();
+        if (!userProgress.unlockedGrammarExercises.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedGrammarExercises.push(new ObjectId(nextGrammarExerciseId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async isGrammarExerciseUnlocked(userProgress, grammarExerciseId) {
+        if (!userProgress || !userProgress.unlockedGrammarExercises) return false;
+        return userProgress.unlockedGrammarExercises.some(s => s.toString() == grammarExerciseId.toString());
+    }
+
+    async unlockNextPronunciationExercise(userProgress, nextPronunciationExerciseId, addExp = 10) {
+        if (!nextPronunciationExerciseId) return userProgress;
+        if (!userProgress.unlockedPronunciationExercises) userProgress.unlockedPronunciationExercises = [];
+        const nextIdStr = nextPronunciationExerciseId.toString();
+        if (!userProgress.unlockedPronunciationExercises.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedPronunciationExercises.push(new ObjectId(nextPronunciationExerciseId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async isPronunciationExerciseUnlocked(userProgress, pronunciationExerciseId) {
+        if (!userProgress || !userProgress.unlockedPronunciationExercises) return false;
+        return userProgress.unlockedPronunciationExercises.some(s => s.toString() == pronunciationExerciseId.toString());
+    }
+
+    async unlockNextVocabularyExercise(userProgress, nextVocabularyExerciseId, addExp = 10) {
+        if (!nextVocabularyExerciseId) return userProgress;
+        if (!userProgress.unlockedVocabularyExercises) userProgress.unlockedVocabularyExercises = [];
+        const nextIdStr = nextVocabularyExerciseId.toString();
+        if (!userProgress.unlockedVocabularyExercises.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedVocabularyExercises.push(new ObjectId(nextVocabularyExerciseId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async isVocabularyExerciseUnlocked(userProgress, vocabularyExerciseId) {
+        if (!userProgress || !userProgress.unlockedVocabularyExercises) return false;
+        return userProgress.unlockedVocabularyExercises.some(s => s.toString() == vocabularyExerciseId.toString());
+    }
+
+    async unlockNextDictation(userProgress, nextDictationId, addExp = 10) {
+        if (!nextDictationId) return userProgress;
+        if (!userProgress.unlockedDictations) userProgress.unlockedDictations = [];
+        const nextIdStr = nextDictationId.toString();
+        if (!userProgress.unlockedDictations.some(s => s.toString() == nextIdStr)) {
+            userProgress.unlockedDictations.push(new ObjectId(nextDictationId));
+        }
+        userProgress.experiencePoints = (userProgress.experiencePoints || 0) + addExp;
+        await this.updateUserProgress(userProgress);
+        return userProgress;
+    }
+
+    async isDictationUnlocked(userProgress, dictationId) {
+        if (!userProgress || !userProgress.unlockedDictations) return false;
+        return userProgress.unlockedDictations.some(s => s.toString() == dictationId.toString());
+    }
+
+    async recordDictationStudy(userId, dictationId) {
+        const dictationIdStr = dictationId.toString();
+        const now = new Date();
+        const userProgress = await this.userProgressRepository.findByUserId(userId);
+        const existingStats = userProgress?.dictationStudyStats?.[dictationIdStr] || {};
+        const result = await this.userProgressRepository.update(userId, {
+            $inc: {
+                [`dictationStudyStats.${dictationIdStr}.studyCount`]: 1
+            },
+            $set: {
+                [`dictationStudyStats.${dictationIdStr}.firstStudiedAt`]: existingStats.firstStudiedAt || now,
+                [`dictationStudyStats.${dictationIdStr}.lastStudiedAt`]: now
+            }
+        });
+        await invalidateUserProgressCache(userId);
+        return result;
+    }
+}
+
+module.exports = UserProgressService;

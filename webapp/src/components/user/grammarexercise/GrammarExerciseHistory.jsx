@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 const GrammarExerciseHistory = ({ show, onClose, questionResults }) => {
+    const { t } = useTranslation();
     if (!show) return null;
 
     return (
@@ -10,7 +12,7 @@ const GrammarExerciseHistory = ({ show, onClose, questionResults }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="custom-modal-header">
-                    <h5>LỊCH SỬ LÀM BÀI LUYỆN TẬP NGỮ PHÁP</h5>
+                    <h5>{t("grammarExercisePage.history.title")}</h5>
                     <button className="close-btn" onClick={onClose}>
                         &times;
                     </button>
@@ -19,27 +21,27 @@ const GrammarExerciseHistory = ({ show, onClose, questionResults }) => {
                 <div className="custom-modal-body">
                     <div id="exercise-historyContent">
                         {questionResults.length == 0 ? (
-                            <p>Không có dữ liệu lịch sử.</p>
+                            <p>{t("grammarExercisePage.history.empty")}</p>
                         ) : (
                             questionResults.map((result, index) => (
                                 <div key={index} className="exercise-history-item">
-                                    <h6><strong>Câu {index + 1}: {result.question}</strong></h6>
+                                    <h6><strong>{t("grammarExercisePage.history.question", { number: index + 1 })}: {result.question}</strong></h6>
                                     <p>
-                                        <strong>Đáp án của bạn:</strong> {result.userAnswer}
+                                        <strong>{t("grammarExercisePage.history.yourAnswer")}:</strong> {result.userAnswer}
                                     </p>
                                     <p>
-                                        <strong>Đáp án đúng:</strong> {result.correctAnswer}
+                                        <strong>{t("grammarExercisePage.history.correctAnswer")}:</strong> {result.correctAnswer}
                                     </p>
                                     <p>
-                                        <strong>Kết quả:</strong>{' '}
+                                        <strong>{t("grammarExercisePage.history.result")}:</strong>{' '}
                                         {result.isCorrect ? (
-                                            <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Đúng</span>
+                                            <span style={{ color: 'green', fontWeight: 'bold' }}>{t("grammarExercisePage.history.correct")}</span>
                                         ) : (
-                                            <span style={{ color: 'red', fontWeight: 'bold' }}>✗ Sai</span>
+                                            <span style={{ color: 'red', fontWeight: 'bold' }}>{t("grammarExercisePage.history.incorrect")}</span>
                                         )}
                                     </p>
                                     <p>
-                                        <strong>Giải thích:</strong> {result.explanation}
+                                        <strong>{t("grammarExercisePage.history.explanation")}:</strong> {result.explanation}
                                     </p>
                                     {index < questionResults.length - 1 && <hr />}
                                 </div>
@@ -50,7 +52,7 @@ const GrammarExerciseHistory = ({ show, onClose, questionResults }) => {
                 
                 <div className="custom-modal-footer">
                     <button className="footer-btn" onClick={onClose}>
-                        Đóng
+                        {t("grammarExercisePage.common.close")}
                     </button>
                 </div>
             </div>

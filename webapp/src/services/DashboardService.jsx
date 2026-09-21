@@ -3,6 +3,14 @@ import { AuthService } from '@/services/AuthService.jsx';
 const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
 
+function unwrapDashboardData(responseData) {
+    const payload = responseData?.data;
+    if (payload?.success && Object.prototype.hasOwnProperty.call(payload, "data")) {
+        return payload.data;
+    }
+    return payload;
+}
+
 export const DashboardService = {
     async fetchUserActivityLast7Days() {
         try {
@@ -12,7 +20,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -44,7 +53,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -63,6 +73,63 @@ export const DashboardService = {
         }
     },
 
+    async fetchSecurityOverview() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dashboard/security-overview`, {
+                method: 'GET'
+            });
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            return unwrapDashboardData(responseData);
+        } catch (error) {
+            console.error("Error fetching security overview:", error.message);
+            return {
+                activeSessions: 0,
+                revokedSessionsToday: 0,
+                rotatedSessionsToday: 0,
+                failedLoginsToday: 0,
+                suspiciousRefreshReuse: 0,
+                recentSecurityLogs: [],
+                recentActiveSessions: []
+            };
+        }
+    },
+
+    async fetchAgentDebugOverview() {
+        try {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/dashboard/agent-debug`, {
+                method: 'GET'
+            });
+            if (!res.ok) {
+                throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            const responseData = await res.json();
+            return unwrapDashboardData(responseData);
+        } catch (error) {
+            console.error("Error fetching Agent debug overview:", error.message);
+            return {
+                today: "",
+                usageToday: {
+                    requests: 0,
+                    inputTokens: 0,
+                    outputTokens: 0,
+                    totalTokens: 0,
+                    estimatedCostUsd: 0,
+                    fallbackCount: 0,
+                    uniqueUsers: 0
+                },
+                taskBreakdown: [],
+                fallbackBreakdown: [],
+                recentUsage: [],
+                recentLearningEvents: [],
+                recentSessions: [],
+                memorySignals: []
+            };
+        }
+    },
+
     async fetchLessonBreakdown() {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/dashboard/lesson-breakdown`, {
@@ -71,7 +138,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -94,7 +162,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -118,7 +187,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -141,7 +211,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -160,7 +231,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -179,7 +251,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -198,7 +271,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -217,7 +291,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -236,7 +311,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -255,7 +331,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -274,7 +351,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }
@@ -293,7 +371,8 @@ export const DashboardService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const result = await res.json();
+            const responseData = await res.json();
+            const result = responseData.data;
             if (!result.success) {
                 throw new Error(result.message || "Lỗi dữ liệu từ server");
             }

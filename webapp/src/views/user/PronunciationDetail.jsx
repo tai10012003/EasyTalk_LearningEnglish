@@ -7,8 +7,10 @@ import PronunciationComplete from "@/components/user/pronunciation/Pronunciation
 import { PronunciationService } from "@/services/PronunciationService.jsx";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 function PronunciationDetail() {
+    const { t } = useTranslation();
     const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [pronunciation, setPronunciation] = useState(null);
@@ -26,13 +28,6 @@ function PronunciationDetail() {
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
 
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
-
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
         intervalRef.current = setInterval(() => {
@@ -46,6 +41,13 @@ function PronunciationDetail() {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -75,11 +77,11 @@ function PronunciationDetail() {
             if (!allowNavigationRef.current && displayContent && !pronunciationCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang học giữa chừng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("pronunciationPage.detail.leaveWarningTitle"),
+                    text: t("pronunciationPage.detail.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("pronunciationPage.detail.leaveConfirm"),
+                    cancelButtonText: t("pronunciationPage.detail.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -97,7 +99,7 @@ function PronunciationDetail() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, displayContent, pronunciationCompleted]);
+    }, [navigator, displayContent, pronunciationCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -114,7 +116,7 @@ function PronunciationDetail() {
     }, [pronunciationCompleted, displayContent]);
 
     useEffect(() => {
-        document.title = "Chi tiết bài học phát âm - EasyTalk";
+        document.title = t("pronunciationPage.detail.documentTitle");
         const fetchPronunciationDetail = async () => {
             setIsLoading(true);
             try {
@@ -137,7 +139,7 @@ function PronunciationDetail() {
             }
         };
         fetchPronunciationDetail();
-    }, [slug]);
+    }, [slug, t]);
 
     const handleStepChange = (step, total) => {
         setCurrentStep(step);
@@ -162,9 +164,9 @@ function PronunciationDetail() {
             setPronunciationCompleted(true);
             Swal.fire({
                 icon: "success",
-                title: "Hoàn thành!",
-                text: "Chúc mừng! Bạn đã hoàn thành bài học phát âm. Bài học phát âm tiếp theo đã được mở khóa.",
-                confirmButtonText: "Quay lại danh sách bài học phát âm",
+                title: t("pronunciationPage.detail.completeTitle"),
+                text: t("pronunciationPage.detail.completeText"),
+                confirmButtonText: t("pronunciationPage.detail.completeConfirm"),
             }).then(() => {
                 window.location.href = "/pronunciation";
             });
@@ -172,14 +174,14 @@ function PronunciationDetail() {
             console.error("Error completing pronunciation:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                title: t("pronunciationPage.detail.errorTitle"),
+                text: t("pronunciationPage.detail.errorText")
             });
         }
     };
 
     if (isLoading) { return <LoadingScreen />; }
-    if (!pronunciation) return <p className="no-pronunciation">Đang tải bài học phát âm ...</p>;
+    if (!pronunciation) return <p className="no-pronunciation">{t("pronunciationPage.detail.loading")}</p>;
 
     return (
         <div className="lesson-detail-container container">
@@ -197,7 +199,7 @@ function PronunciationDetail() {
                     {progressPercent}%
                 </div>
             </div>
-            <p className="lesson-step-counter">Step {currentStep} / {totalSteps}</p>
+            <p className="lesson-step-counter">{t("pronunciationPage.detail.stepCounter", { current: currentStep, total: totalSteps })}</p>
             <div ref={contentRef} className="lesson-content" style={{ display: showQuiz && !isComplete ? "none" : "block" }}>
                 <PronunciationSentence
                     content={displayContent}

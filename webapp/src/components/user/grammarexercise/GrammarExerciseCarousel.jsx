@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { isAnswerCorrect } from '@/utils/englishTextNormalizer'
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const GrammarExerciseCarousel = ({
     questions,
     currentQuestionIndex,
+    onCheckAnswer,
     onAnswerSubmit,
     onQuestionNavigation,
     onSpeakText,
@@ -12,12 +13,14 @@ const GrammarExerciseCarousel = ({
     isCompleted,
     onAnsweredQuestionsChange
 }) => {
+    const { t } = useTranslation();
     const [answeredQuestions, setAnsweredQuestions] = useState(new Set());
     const [userAnswers, setUserAnswers] = useState({});
     const [arrangeState, setArrangeState] = useState({});
     const [hoveredWord, setHoveredWord] = useState(null);
     const [translation, setTranslation] = useState('');
     const [translationLoading, setTranslationLoading] = useState(false);
+    const [isCheckingAnswer, setIsCheckingAnswer] = useState(false);
 
     const shuffleArray = useCallback((array) => {
         const arr = [...array];
@@ -42,7 +45,7 @@ const GrammarExerciseCarousel = ({
 
     const isEnglishQuestion = (text) => {
         if (!text) return false;
-        const cleanText = text.replace(/[0-9\s.,?!()_\-]/g, '');
+        const cleanText = text.replace(/[0-9\s.,?!()_-]/g, '');
         const vietnameseRegex = /[àáạảãâầấậẩẫăằắặẳẵèéẹẻẽêềếệểễìíịỉĩòóọỏõôồốộổỗơờớợởỡùúụủũưừứựửữỳýỵỷỹđ]/i;
         if (vietnameseRegex.test(cleanText)) return false;
         const englishRegex = /[a-z]/i;
@@ -58,11 +61,11 @@ const GrammarExerciseCarousel = ({
             if (data && data[0] && data[0][0] && data[0][0][0]) {
                 setTranslation(data[0][0][0]);
             } else {
-                setTranslation('Không tìm thấy nghĩa');
+                setTranslation(t("grammarExercisePage.carousel.translationNotFound"));
             }
         } catch (error) {
             console.error('Translation error:', error);
-            setTranslation('Lỗi dịch');
+            setTranslation(t("grammarExercisePage.carousel.translationError"));
         } finally {
             setTranslationLoading(false);
         }
@@ -97,22 +100,33 @@ const GrammarExerciseCarousel = ({
         }
     }, [answeredQuestions, onAnsweredQuestionsChange]);
 
-    const handleSubmitAnswer = useCallback(() => {
+    const handleSubmitAnswer = useCallback(async () => {
         const userAnswer = userAnswers[currentQuestionIndex];
         if (!userAnswer || userAnswer.toString().trim() == '') {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Vui lòng nhập hoặc chọn câu trả lời!"
+                title: t("grammarExercisePage.carousel.warningTitle"),
+                text: t("grammarExercisePage.carousel.answerRequired")
             });
             return;
         }
         const rawUserAnswer = userAnswer.toString().trim();
-        const correctAnswer = currentQuestion.correctAnswer?.trim() || "";
-        const isCorrect = isAnswerCorrect(rawUserAnswer, correctAnswer);
-        onAnswerSubmit(currentQuestionIndex, rawUserAnswer, isCorrect);
-        setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
-    }, [currentQuestionIndex, userAnswers, currentQuestion, onAnswerSubmit]);
+        try {
+            setIsCheckingAnswer(true);
+            const result = await onCheckAnswer(currentQuestionIndex, rawUserAnswer);
+            onAnswerSubmit(currentQuestionIndex, result);
+            setAnsweredQuestions(prev => new Set([...prev, currentQuestionIndex]));
+        } catch (error) {
+            console.error("Error checking grammar exercise answer:", error);
+            Swal.fire({
+                icon: "error",
+                title: t("grammarExercisePage.detail.errorTitle"),
+                text: error.message || t("grammarExercisePage.detail.errorText")
+            });
+        } finally {
+            setIsCheckingAnswer(false);
+        }
+    }, [currentQuestionIndex, userAnswers, onCheckAnswer, onAnswerSubmit, t]);
 
     const handleNextQuestion = useCallback(() => {
         if (currentQuestionIndex < questions.length - 1) {
@@ -147,7 +161,7 @@ const GrammarExerciseCarousel = ({
             selected: savedSelected,
             available: words.filter(w => !savedSelected.includes(w))
         };
-        const correctWords = currentQuestion.correctAnswer.trim().split(" ");
+        const correctWords = questionResult?.correctAnswer ? questionResult.correctAnswer.trim().split(" ") : [];
         const isWordCorrectAtPosition = (word, index) => {
             if (index >= correctWords.length) return false;
             return word.toLowerCase() === correctWords[index].toLowerCase().replace(/[.,?!]/g, '');
@@ -173,7 +187,7 @@ const GrammarExerciseCarousel = ({
                 <div className="selected-words-area">
                     {state.selected.length == 0 ? (
                         <div className="placeholder-text">
-                            Bấm vào các từ bên dưới để sắp xếp thành câu
+                            {t("grammarExercisePage.carousel.arrangePlaceholder")}
                         </div>
                     ) : (
                         state.selected.map((word, idx) => {
@@ -216,6 +230,7 @@ const GrammarExerciseCarousel = ({
                                 onChange={() => handleAnswerChange(option)}
                                 checked={userAnswers[currentQuestionIndex] == option}
                                 disabled={isQuestionAnswered}
+                                readOnly={isQuestionAnswered}
                             />
                             <label
                                 className={`exercise-form-check-label ${
@@ -246,7 +261,7 @@ const GrammarExerciseCarousel = ({
                             : ''
                     }`}
                     rows="4"
-                    placeholder="Nhập câu trả lời Tiếng Anh của bạn ..."
+                    placeholder={t("grammarExercisePage.carousel.answerPlaceholder")}
                     value={userAnswers[currentQuestionIndex] || ''}
                     onChange={(e) => handleAnswerChange(e.target.value)}
                     disabled={isQuestionAnswered}
@@ -264,11 +279,11 @@ const GrammarExerciseCarousel = ({
 
     const getQuestionTitle = () => {
         switch (currentQuestion?.type) {
-            case 'multiple-choice': return 'Chọn đáp án đúng:';
-            case 'fill-in-the-blank': return 'Điền vào chỗ trống:';
-            case 'translation': return 'Dịch câu (Tiếng Việt) dưới đây sang câu (Tiếng Anh):';
-            case 'arrange-words': return 'Sắp xếp các từ thành câu hoàn chỉnh:';
-            default: return 'Câu hỏi:';
+            case 'multiple-choice': return t("grammarExercisePage.carousel.questionTypes.multipleChoice");
+            case 'fill-in-the-blank': return t("grammarExercisePage.carousel.questionTypes.fillBlank");
+            case 'translation': return t("grammarExercisePage.carousel.questionTypes.translation");
+            case 'arrange-words': return t("grammarExercisePage.carousel.questionTypes.arrange");
+            default: return t("grammarExercisePage.carousel.questionTypes.default");
         }
     };
 
@@ -285,7 +300,7 @@ const GrammarExerciseCarousel = ({
                             className="exercise-speak-button btn-sm btn-outline mr-2"
                             onClick={() => onSpeakText(currentQuestion.question)}
                             type="button"
-                            title="Phát âm câu hỏi"
+                            title={t("grammarExercisePage.carousel.speakTitle")}
                         >
                             🔊
                         </button>
@@ -314,13 +329,13 @@ const GrammarExerciseCarousel = ({
                         <div className="exercise-explanation mt-4">
                             {questionResult.isCorrect ? (
                                 <p>
-                                    <strong>Bạn đã trả lời đúng!</strong><br />
-                                    Giải thích: {questionResult.explanation}
+                                    <strong>{t("grammarExercisePage.carousel.correct")}</strong><br />
+                                    {t("grammarExercisePage.carousel.explanation")}: {questionResult.explanation}
                                 </p>
                             ) : (
                                 <p>
-                                    <strong>Bạn đã trả lời sai.</strong> Đáp án đúng là: <strong>{questionResult.correctAnswer}</strong><br />
-                                    Giải thích: {questionResult.explanation}
+                                    <strong>{t("grammarExercisePage.carousel.incorrect")}</strong> {t("grammarExercisePage.carousel.correctAnswer")}: <strong>{questionResult.correctAnswer}</strong><br />
+                                    {t("grammarExercisePage.carousel.explanation")}: {questionResult.explanation}
                                 </p>
                             )}
                         </div>
@@ -330,8 +345,9 @@ const GrammarExerciseCarousel = ({
                             type="button"
                             className="exercise-submit-answer mt-4 mb-4"
                             onClick={handleSubmitAnswer}
+                            disabled={isCheckingAnswer}
                         >
-                            <i className="fas fa-check me-2"></i> Kiểm tra
+                            <i className="fas fa-check me-2"></i> {isCheckingAnswer ? t("common.loading", { defaultValue: "Đang kiểm tra..." }) : t("grammarExercisePage.carousel.check")}
                         </button>
                     )}
                 </div>
@@ -344,7 +360,7 @@ const GrammarExerciseCarousel = ({
                             type="button"
                             onClick={handlePrevQuestion}
                         >
-                            <i className="fas fa-arrow-left"></i> Quay lại
+                            <i className="fas fa-arrow-left"></i> {t("grammarExercisePage.carousel.back")}
                         </button>
                     )}
                     {currentQuestionIndex < questions.length - 1 && (
@@ -354,7 +370,7 @@ const GrammarExerciseCarousel = ({
                             onClick={handleNextQuestion}
                             style={{ marginLeft: currentQuestionIndex === 0 ? 'auto' : '0' }}
                         >
-                            <i className="fas fa-arrow-right"></i> Tiếp theo
+                            <i className="fas fa-arrow-right"></i> {t("grammarExercisePage.carousel.next")}
                         </button>
                     )}
                 </div>

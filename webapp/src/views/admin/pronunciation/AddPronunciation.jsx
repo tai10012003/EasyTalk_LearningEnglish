@@ -53,7 +53,7 @@ const AddPronunciation = () => {
         const fetchPronunciations = async () => {
             try {
                 const data = await PronunciationService.fetchPronunciations(1, 10000);
-                setExistingPronunciations(data.pronunciations || []);
+                setExistingPronunciations(data.data.pronunciations || []);
             } catch (err) {
                 console.error("Error fetching pronunciations:", err);
             }

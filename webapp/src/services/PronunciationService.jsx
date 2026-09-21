@@ -3,11 +3,23 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 
 let hasShownAlert = false;
+
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    return responseData.data || responseData;
+}
+
 export const PronunciationService = {
     async fetchPronunciations(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation-list${query}`, {
                 method: 'GET',
             });
@@ -15,7 +27,8 @@ export const PronunciationService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -33,14 +46,30 @@ export const PronunciationService = {
         }
     },
 
+    async fetchPronunciationRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return unwrapResponseData(responseData);
+    },
+
     async getPronunciationBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/slug/${encodeURIComponent(slug)}`, {
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/slug/${encodeURIComponent(slug)}${langQuery}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
-            return data;
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
+            return data?.pronunciation ? { pronunciation: data.pronunciation } : data;
         } catch (err) {
             console.error("Error fetching pronunciation by slug:", err);
             return null;
@@ -48,52 +77,53 @@ export const PronunciationService = {
     },
 
     async getPronunciationDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/${id}${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data?.pronunciation ? { pronunciation: data.pronunciation } : data;
+    },
+
+    async getPronunciation(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return unwrapResponseData(responseData);
     },
 
     async completePronunciation(pronunciationId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/pronunciation/complete/${pronunciationId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
     },
 
     async addPronunciation(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/add`, {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding pronunciation:", err);
             throw err;
@@ -102,16 +132,14 @@ export const PronunciationService = {
 
     async updatePronunciation(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/pronunciation/api/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation/api/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating pronunciation:", err);
             throw err;
@@ -124,7 +152,9 @@ export const PronunciationService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting pronunciation:", err);
             throw err;

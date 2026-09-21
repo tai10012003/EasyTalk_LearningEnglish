@@ -3,6 +3,11 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    return responseData.data || responseData;
+}
+
 export const FlashCardService = {
     async fetchFlashcardLists(page = 1, limit = 12, tab = "mine") {
         try {
@@ -11,7 +16,8 @@ export const FlashCardService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -34,7 +40,8 @@ export const FlashCardService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error fetching daily reviews:", error.message);
@@ -49,7 +56,8 @@ export const FlashCardService = {
                 body: JSON.stringify({ name, description }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -72,7 +80,8 @@ export const FlashCardService = {
                 body: JSON.stringify({ name, description }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -94,7 +103,8 @@ export const FlashCardService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -116,7 +126,8 @@ export const FlashCardService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -134,16 +145,13 @@ export const FlashCardService = {
 
     async createFlashcard(listId, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/flashcards/flashcardlist/${listId}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/flashcardlist/${listId}`, {
                 method: "POST",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -161,16 +169,13 @@ export const FlashCardService = {
 
     async updateFlashcard(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/flashcards/update-flashcard/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/flashcards/update-flashcard/${id}`, {
                 method: "PUT",
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -193,7 +198,9 @@ export const FlashCardService = {
                 body: JSON.stringify({ updates }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
+            return data;
         } catch (error) {
             console.error("Error updating difficulty:", error.message);
             throw error;
@@ -206,7 +213,8 @@ export const FlashCardService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error fetching daily goal:", error.message);
@@ -221,7 +229,8 @@ export const FlashCardService = {
                 body: JSON.stringify({ goal }),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error updating daily goal:", error.message);
@@ -235,7 +244,8 @@ export const FlashCardService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             return data;
         } catch (error) {
             console.error("Error fetching badges:", error.message);
@@ -249,7 +259,8 @@ export const FlashCardService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {
@@ -271,7 +282,8 @@ export const FlashCardService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             return data;
         } catch (error) {

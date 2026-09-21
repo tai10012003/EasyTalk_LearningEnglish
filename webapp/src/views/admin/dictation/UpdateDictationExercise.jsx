@@ -16,7 +16,8 @@ const UpdateDictationExercise = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/dictation-exercise/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setDictationExercise(data);
             } catch (err) {
                 console.error("Error fetching dictation exercise", err);

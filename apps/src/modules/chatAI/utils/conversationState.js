@@ -1,0 +1,25 @@
+const CONVERSATION_STEPS = {
+    START: 'start',
+    ASK_NAME: 'ask_name',
+    ASK_AGE: 'ask_age',
+    ASK_LOCATION: 'ask_location',
+    CHAT_TOPIC: 'chat_topic'
+};
+
+const STEP_TRANSITIONS = {
+    [CONVERSATION_STEPS.START]: CONVERSATION_STEPS.ASK_NAME,
+    [CONVERSATION_STEPS.ASK_NAME]: CONVERSATION_STEPS.ASK_AGE,
+    [CONVERSATION_STEPS.ASK_AGE]: CONVERSATION_STEPS.ASK_LOCATION,
+    [CONVERSATION_STEPS.ASK_LOCATION]: CONVERSATION_STEPS.CHAT_TOPIC,
+    [CONVERSATION_STEPS.CHAT_TOPIC]: CONVERSATION_STEPS.CHAT_TOPIC
+};
+
+function getNextStep(currentStep) {
+    return STEP_TRANSITIONS[currentStep] || CONVERSATION_STEPS.CHAT_TOPIC;
+}
+
+function isValidStep(step) {
+    return Object.values(CONVERSATION_STEPS).includes(step);
+}
+
+module.exports = { CONVERSATION_STEPS, STEP_TRANSITIONS, getNextStep, isValidStep };

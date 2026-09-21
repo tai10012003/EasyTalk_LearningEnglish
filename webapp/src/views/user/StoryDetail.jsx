@@ -8,8 +8,10 @@ import StoryVocabularyQuiz from "@/components/user/story/StoryVocabularyQuiz.jsx
 import { StoryService } from "@/services/StoryService.jsx";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 function StoryDetail() {
+    const { t } = useTranslation();
     const { slug } = useParams();
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
     const [story, setStory] = useState(null);
@@ -28,13 +30,6 @@ function StoryDetail() {
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
 
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
-
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
         intervalRef.current = setInterval(() => {
@@ -48,6 +43,13 @@ function StoryDetail() {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -77,11 +79,11 @@ function StoryDetail() {
             if (!allowNavigationRef.current && displayedItems.length > 0 && !storyCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang học giữa chừng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("storyPage.detail.leaveWarningTitle"),
+                    text: t("storyPage.detail.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("storyPage.detail.leaveConfirm"),
+                    cancelButtonText: t("storyPage.detail.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -99,7 +101,7 @@ function StoryDetail() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, displayedItems.length, storyCompleted]);
+    }, [navigator, displayedItems.length, storyCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -116,7 +118,7 @@ function StoryDetail() {
     }, [storyCompleted, displayedItems.length]);
 
     useEffect(() => {
-        document.title = "Chi tiết bài học câu chuyện - EasyTalk";
+        document.title = t("storyPage.detail.documentTitle");
         const fetchStoryDetail = async () => {
             setIsLoading(true);
             try {
@@ -142,7 +144,7 @@ function StoryDetail() {
             }
         };
         fetchStoryDetail();
-    }, [slug]);
+    }, [slug, t]);
 
     const getRandomWords = (arr, count) => {
         const shuffled = [...arr].sort(() => 0.5 - Math.random());
@@ -248,9 +250,9 @@ function StoryDetail() {
             setStoryCompleted(true);
             Swal.fire({
                 icon: "success",
-                title: "Thành công",
-                text: "Chúc mừng! Bạn đã hoàn thành bài học câu chuyện. Bài học câu chuyện tiếp theo đã được mở khóa.",
-                confirmButtonText: "Quay lại danh sách bài học câu chuyện",
+                title: t("storyPage.detail.completeTitle"),
+                text: t("storyPage.detail.completeText"),
+                confirmButtonText: t("storyPage.detail.completeConfirm"),
             }).then(() => {
                 window.location.href = "/story";
             });
@@ -258,14 +260,14 @@ function StoryDetail() {
             console.error("Error completing story:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                title: t("storyPage.detail.errorTitle"),
+                text: t("storyPage.detail.errorText")
             });
         }
     };
 
     if (isLoading) { return <LoadingScreen />; }
-    if (!story) return <p className="no-stories">Đang tải bài học câu chuyện ...</p>;
+    if (!story) return <p className="no-stories">{t("storyPage.detail.loading")}</p>;
 
     return (
         <div className="story-detail-container container">
@@ -283,7 +285,7 @@ function StoryDetail() {
                     {Math.round((currentStep / totalSteps) * 100)}%
                 </div>
             </div>
-            <p className="lesson-step-counter">Step {currentStep} / {totalSteps}</p>
+            <p className="lesson-step-counter">{t("storyPage.detail.stepCounter", { current: currentStep, total: totalSteps })}</p>
             {displayedItems.map((item, idx) => (
                 <div
                     key={idx}

@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
+    const { t } = useTranslation();
     // Receive props: onCheckAnswer
     const [flipped, setFlipped] = useState(false);
     const [userAnswer, setUserAnswer] = useState("");
@@ -32,7 +34,7 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
         const allChoices = [correctAnswer, ...distractors];
         const finalChoices = allChoices.sort(() => 0.5 - Math.random());
         setMcQuestion({question, choices: finalChoices, correctAnswer});
-    }, [card?._id, mode, allWords]);
+    }, [card, mode, allWords]);
 
     useEffect(() => {
         if (mode == "flip" && card?.word && "speechSynthesis" in window) {
@@ -52,8 +54,8 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
         if (!answer) {
             Swal.fire({
                 icon: "warning",
-                title: "Thiếu câu trả lời!",
-                text: "Vui lòng nhập từ trước khi kiểm tra.",
+                title: t("flashcardPage.reviewCard.missingAnswerTitle"),
+                text: t("flashcardPage.reviewCard.missingAnswerText"),
                 confirmButtonText: "OK",
             });
             return;
@@ -95,10 +97,10 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
                     </div>
                     <div className="flashcard-review-back">
                         <p>
-                            <strong>Định nghĩa:</strong> {card.meaning}
+                            <strong>{t("flashcardPage.reviewCard.definition")}</strong> {card.meaning}
                         </p>
                         <p>
-                            <strong>Ví dụ:</strong> {card.exampleSentence}
+                            <strong>{t("flashcardPage.reviewCard.example")}</strong> {card.exampleSentence}
                         </p>
                         {card.image && (
                             <img
@@ -116,10 +118,10 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
         return (
             <div className="flashcard-review-mc">
                 <p>
-                    <strong>Định nghĩa:</strong> ({card.pos}) {card.meaning}
+                    <strong>{t("flashcardPage.reviewCard.definition")}</strong> ({card.pos}) {card.meaning}
                 </p>
                 <p>
-                    <strong>Chọn đáp án đúng cho câu ví dụ sau:</strong> {question}
+                    <strong>{t("flashcardPage.reviewCard.choicePrompt")}</strong> {question}
                 </p>
                 <div className="flashcard-review-choices">
                     {choices.map((choice, i) => {
@@ -147,17 +149,17 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
         return (
             <div className="flashcard-review-fill">
                 <p>
-                    <strong>Định nghĩa:</strong> ({card.pos}) {card.meaning}
+                    <strong>{t("flashcardPage.reviewCard.definition")}</strong> ({card.pos}) {card.meaning}
                 </p>
                 <p>
-                    <strong>Điền từ cho câu ví dụ sau:</strong>{" "}
+                    <strong>{t("flashcardPage.reviewCard.fillPrompt")}</strong>{" "}
                     {card.exampleSentence.replace(card.word, "______")}
                 </p>
                 <input
                     type="text"
                     value={userAnswer}
                     onChange={(e) => setUserAnswer(e.target.value)}
-                    placeholder="Nhập từ"
+                    placeholder={t("flashcardPage.reviewCard.placeholder")}
                     disabled={status == "show"}
                     className={
                         status == "correct"
@@ -171,7 +173,7 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
                 />
                 {status == "wrong" && (
                     <p className="flashcard-correct-answer" style={{ marginTop: "20px" }}>
-                        Bạn đã trả lời sai !! ✅ Đáp án đúng là: <strong>{card.word}</strong>
+                        {t("flashcardPage.reviewCard.wrongAnswer")} <strong>{card.word}</strong>
                     </p>
                 )}
                 {status == null && (
@@ -180,9 +182,9 @@ const FlashCardReviewCard = ({ card, mode, allWords = [], onAnswerReady }) => {
                             onClick={handleShowAnswer}
                             style={{ marginRight: "30px" }}
                         >
-                            <i className="fas fa-eye"></i>Hiện đáp án
+                            <i className="fas fa-eye"></i>{t("flashcardPage.reviewCard.showAnswer")}
                         </button>
-                        <button onClick={handleCheckFill}><i className="fas fa-check"></i>Kiểm tra</button>
+                        <button onClick={handleCheckFill}><i className="fas fa-check"></i>{t("flashcardPage.reviewCard.check")}</button>
                     </div>
                 )}
             </div>

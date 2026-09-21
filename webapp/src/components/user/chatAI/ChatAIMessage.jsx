@@ -3,7 +3,7 @@ import user from "@/assets/images/user.png";
 import AI_chat from "@/assets/images/AI_chat.png";
 
 function ChatAIMessage({ message, speakingWordIndex }) {
-    const { sender, text, suggestion } = message;
+    const { sender, text, suggestion, corrections } = message;
     const [showSuggestion, setShowSuggestion] = useState(false);
 
     const avatarSrc =
@@ -49,6 +49,26 @@ function ChatAIMessage({ message, speakingWordIndex }) {
                     </div>
                     )}
                 </div>
+                )}
+                {sender == "bot" && Array.isArray(corrections) && corrections.length > 0 && (
+                    <div className="chat-ai-corrections">
+                        <button
+                            className="chat-ai-suggestion-btn"
+                            onClick={() => setShowSuggestion((prev) => !prev)}
+                        >
+                            <i className="fas fa-check"></i>
+                        </button>
+                        {showSuggestion && (
+                            <div className="chat-ai-suggestion">
+                                {corrections.map((correction, index) => (
+                                    <div key={index} className="chat-ai-correction-item">
+                                        <strong>{correction.corrected}</strong>
+                                        {correction.explanation && <span> - {correction.explanation}</span>}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
                 )}
             </div>
         </div>

@@ -1,10 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 
 const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, unlockedGates, unlockedStages, unlockedStory, unlockedGrammar, unlockedPronunciation, unlockedVocab, unlockedGrammarPractice, unlockedPronunciationPractice, unlockedDictation, username = null }) => {
+    const { t } = useTranslation();
     const navigate = useNavigate();
     const isOwnStats = !username;
-    const title = isOwnStats ? "Thành tích của bạn" : `Thành tích của ${username}`;
+    const title = isOwnStats ? t("statisticPage.achievements.ownTitle") : t("statisticPage.achievements.userTitle", { username });
     const [showGateModal, setShowGateModal] = useState(false);
     const [showStageModal, setShowStageModal] = useState(false);
     const [showStoryModal, setShowStoryModal] = useState(false);
@@ -24,9 +26,13 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
     const pronunciationExerciseDetails = currentUser?.pronunciationExerciseDetails || [];
     const dictationDetails = currentUser?.dictationExerciseDetails || [];
     
-    const formatGateName = (gate) => `${gate.name || gate.title || "Cổng không tên"}`;
-    const formatStageName = (stage) => `${stage.name || stage.title || "Chặng không tên"}`;
-    const formatLessonName = (item) => item.title || item.name || "Bài không tên";
+    const formatGateName = (gate) => `${gate.name || gate.title || t("statisticPage.achievements.fallback.gate")}`;
+    const formatStageName = (stage) => `${stage.name || stage.title || t("statisticPage.achievements.fallback.stage")}`;
+    const formatLessonName = (item) => item.title || item.name || t("statisticPage.achievements.fallback.lesson");
+    const dayText = (count) => t("statisticPage.values.days", { count });
+    const lessonText = (count) => t("statisticPage.values.lessons", { count });
+    const modalHeader = (key, count) => t(`statisticPage.achievements.modals.${key}.title`, { count });
+    const modalEmpty = (key) => t(`statisticPage.achievements.modals.${key}.empty`);
 
     return (
         <div className="user-statistic-achievements">
@@ -41,8 +47,8 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         <i className="fas fa-fire"></i>
                     </div>
                     <div className="user-statistic-info">
-                        <div className="user-statistic-label">Streak hiện tại</div>
-                        <div className="user-statistic-value">{streak} ngày</div>
+                        <div className="user-statistic-label">{t("statisticPage.achievements.cards.currentStreak")}</div>
+                        <div className="user-statistic-value">{dayText(streak)}</div>
                     </div>
                 </div>
                 <div 
@@ -54,8 +60,8 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         <i className="fas fa-trophy"></i>
                     </div>
                     <div className="user-statistic-info">
-                        <div className="user-statistic-label">Kỷ lục streak</div>
-                        <div className="user-statistic-value">{maxStreak} ngày</div>
+                        <div className="user-statistic-label">{t("statisticPage.achievements.cards.maxStreak")}</div>
+                        <div className="user-statistic-value">{dayText(maxStreak)}</div>
                     </div>
                 </div>
                 <div className="user-statistic-card">
@@ -63,8 +69,8 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         <i className="fas fa-star"></i>
                     </div>
                     <div className="user-statistic-info">
-                        <div className="user-statistic-label">Điểm KN hiện tại</div>
-                        <div className="user-statistic-value">{(currentUser?.experiencePoints || 0).toLocaleString()} KN</div>
+                        <div className="user-statistic-label">{t("statisticPage.achievements.cards.currentExp")}</div>
+                        <div className="user-statistic-value">{t("statisticPage.values.exp", { value: (currentUser?.experiencePoints || 0).toLocaleString() })}</div>
                     </div>
                 </div>
                 <div className="user-statistic-card record-exp">
@@ -72,8 +78,8 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         <i className="fas fa-bolt"></i>
                     </div>
                     <div className="user-statistic-info">
-                        <div className="user-statistic-label">Kỷ lục KN/ngày</div>
-                        <div className="user-statistic-value">{maxDailyExp} KN</div>
+                        <div className="user-statistic-label">{t("statisticPage.achievements.cards.maxDailyExp")}</div>
+                        <div className="user-statistic-value">{t("statisticPage.values.exp", { value: maxDailyExp })}</div>
                     </div>
                 </div>
             </div>
@@ -83,72 +89,72 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         onClick={() => setShowGateModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-door-open"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Số cổng</div>
-                            <div className="user-statistic-unlocked-value">{unlockedGates} cổng</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.gates")}</div>
+                            <div className="user-statistic-unlocked-value">{t("statisticPage.values.gates", { count: unlockedGates })}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowStageModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-route"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Số chặng</div>
-                            <div className="user-statistic-unlocked-value">{unlockedStages} chặng</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.stages")}</div>
+                            <div className="user-statistic-unlocked-value">{t("statisticPage.values.stages", { count: unlockedStages })}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowStoryModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-book-open"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Bài học câu chuyện</div>
-                            <div className="user-statistic-unlocked-value">{unlockedStory} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.story")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedStory)}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowGrammarModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-book"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Bài học ngữ pháp</div>
-                            <div className="user-statistic-unlocked-value">{unlockedGrammar} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.grammar")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedGrammar)}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowPronunciationModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-microphone"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Bài học phát âm</div>
-                            <div className="user-statistic-unlocked-value">{unlockedPronunciation} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.pronunciation")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedPronunciation)}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowGrammarPracticeModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-pencil-alt"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Luyện ngữ pháp</div>
-                            <div className="user-statistic-unlocked-value">{unlockedGrammarPractice} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.grammarPractice")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedGrammarPractice)}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowPronunciationPracticeModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-microphone"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Luyện phát âm</div>
-                            <div className="user-statistic-unlocked-value">{unlockedPronunciationPractice} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.pronunciationPractice")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedPronunciationPractice)}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowVocabModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-dumbbell"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Luyện từ vựng</div>
-                            <div className="user-statistic-unlocked-value">{unlockedVocab} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.vocab")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedVocab)}</div>
                         </div>
                     </div>
                     <div className="user-statistic-unlocked-item"
                         onClick={() => setShowDictationModal(true)} style={{ cursor: 'pointer' }}>
                         <i className="fas fa-headphones"></i>
                         <div className="mt-2">
-                            <div className="user-statistic-unlocked-label">Luyện Nghe chép chính tả</div>
-                            <div className="user-statistic-unlocked-value">{unlockedDictation} bài</div>
+                            <div className="user-statistic-unlocked-label">{t("statisticPage.achievements.unlocked.dictation")}</div>
+                            <div className="user-statistic-unlocked-value">{lessonText(unlockedDictation)}</div>
                         </div>
                     </div>
                 </div>
@@ -157,12 +163,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowGateModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-purple-600">
-                            <h5>Cổng Đã Mở Khóa ({unlockedGates})</h5>
+                            <h5>{modalHeader("gates", unlockedGates)}</h5>
                             <button onClick={() => setShowGateModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {gateDetails.length == 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa mở khóa cổng nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("gates")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {gateDetails.map((gate, index) => (
@@ -182,7 +188,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowGateModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -192,12 +198,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowStageModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-indigo-600">
-                            <h5>Chặng Đã Mở Khóa ({unlockedStages})</h5>
+                            <h5>{modalHeader("stages", unlockedStages)}</h5>
                             <button onClick={() => setShowStageModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {stageDetails.length == 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa mở khóa chặng nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("stages")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {stageDetails.map((stage, index) => (
@@ -217,7 +223,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowStageModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -227,12 +233,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowStoryModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-green-600">
-                            <h5>Bài Học Câu Chuyện Đã Hoàn Thành ({unlockedStory})</h5>
+                            <h5>{modalHeader("story", unlockedStory)}</h5>
                             <button onClick={() => setShowStoryModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {storyDetails.length == 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa hoàn thành bài câu chuyện nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("story")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {storyDetails.map((item, index) => (
@@ -252,7 +258,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowStoryModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -262,12 +268,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowGrammarModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-green-600">
-                            <h5>Bài Học Ngữ Pháp Đã Hoàn Thành ({unlockedGrammar})</h5>
+                            <h5>{modalHeader("grammar", unlockedGrammar)}</h5>
                             <button onClick={() => setShowGrammarModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {grammarDetails.length == 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa hoàn thành bài ngữ pháp nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("grammar")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {grammarDetails.map((item, index) => (
@@ -287,7 +293,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowGrammarModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -297,12 +303,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowPronunciationModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-blue-600">
-                            <h5>Bài Học Phát Âm Đã Hoàn Thành ({unlockedPronunciation})</h5>
+                            <h5>{modalHeader("pronunciation", unlockedPronunciation)}</h5>
                             <button onClick={() => setShowPronunciationModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {pronunciationDetails.length === 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa hoàn thành bài phát âm nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("pronunciation")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {pronunciationDetails.map((item, index) => (
@@ -322,7 +328,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowPronunciationModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -332,12 +338,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowGrammarPracticeModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-pink-600">
-                            <h5>Luyện Ngữ Pháp Đã Hoàn Thành ({unlockedGrammarPractice})</h5>
+                            <h5>{modalHeader("grammarPractice", unlockedGrammarPractice)}</h5>
                             <button onClick={() => setShowGrammarPracticeModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {grammarExerciseDetails.length === 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa luyện ngữ pháp nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("grammarPractice")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {grammarExerciseDetails.map((item, index) => (
@@ -357,7 +363,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowGrammarPracticeModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -367,12 +373,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowPronunciationPracticeModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-teal-600">
-                            <h5>Luyện Phát Âm Đã Hoàn Thành ({unlockedPronunciationPractice})</h5>
+                            <h5>{modalHeader("pronunciationPractice", unlockedPronunciationPractice)}</h5>
                             <button onClick={() => setShowPronunciationPracticeModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {pronunciationExerciseDetails.length == 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa luyện phát âm nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("pronunciationPractice")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {pronunciationExerciseDetails.map((item, index) => (
@@ -392,7 +398,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowPronunciationPracticeModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -402,12 +408,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowVocabModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-orange-600">
-                            <h5>Luyện Từ Vựng Đã Hoàn Thành ({unlockedVocab})</h5>
+                            <h5>{modalHeader("vocab", unlockedVocab)}</h5>
                             <button onClick={() => setShowVocabModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {vocabularyDetails.length === 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa luyện từ vựng nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("vocab")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {vocabularyDetails.map((item, index) => (
@@ -427,7 +433,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowVocabModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>
@@ -437,12 +443,12 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                 <div className="user-statistic-modal-overlay" onClick={() => setShowDictationModal(false)}>
                     <div className="user-statistic-modal" onClick={e => e.stopPropagation()}>
                         <div className="user-statistic-modal-header bg-red-600">
-                            <h5>Luyện Nghe Chép Chính Tả Đã Hoàn Thành ({unlockedDictation})</h5>
+                            <h5>{modalHeader("dictation", unlockedDictation)}</h5>
                             <button onClick={() => setShowDictationModal(false)} className="user-statistic-modal-close">×</button>
                         </div>
                         <div className="user-statistic-modal-body">
                             {dictationDetails.length == 0 ? (
-                                <p className="text-center text-gray-500 py-12 text-lg">Chưa luyện nghe chép chính tả nào</p>
+                                <p className="text-center text-gray-500 py-12 text-lg">{modalEmpty("dictation")}</p>
                             ) : (
                                 <div className="user-statistic-card-list">
                                     {dictationDetails.map((item, index) => (
@@ -462,7 +468,7 @@ const StatisticAchievements = ({ streak, maxStreak, currentUser, maxDailyExp, un
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={() => setShowDictationModal(false)} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>

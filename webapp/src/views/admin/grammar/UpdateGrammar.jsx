@@ -59,7 +59,8 @@ const UpdateGrammar = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/grammar/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setGrammar(data);
             } catch (err) {
                 console.error("Error fetching grammar:", err);
@@ -71,7 +72,7 @@ const UpdateGrammar = () => {
     useEffect(() => {
         const fetchGrammars = async () => {
             try {
-                const data = await GrammarService.fetchGrammars(1, 10000);
+                const data = await GrammarService.fetchGrammars(1, 10000, { admin: true });
                 setExistingGrammars(data.grammars || []);
             } catch (err) {
                 console.error("Error fetching grammars:", err);

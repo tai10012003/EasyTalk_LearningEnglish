@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 const VocabularyExerciseHistory = ({ show, onClose, questionResults }) => {
+    const { t } = useTranslation();
     if (!show) return null;
 
     return (
@@ -10,7 +12,7 @@ const VocabularyExerciseHistory = ({ show, onClose, questionResults }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="custom-modal-header">
-                    <h5>LỊCH SỬ LÀM BÀI LUYỆN TẬP TỪ VỰNG</h5>
+                    <h5>{t("vocabularyExercisePage.history.title")}</h5>
                     <button className="close-btn" onClick={onClose}>
                         &times;
                     </button>
@@ -19,27 +21,27 @@ const VocabularyExerciseHistory = ({ show, onClose, questionResults }) => {
                 <div className="custom-modal-body">
                     <div id="exercise-historyContent">
                         {questionResults.length == 0 ? (
-                            <p>Không có dữ liệu lịch sử.</p>
+                            <p>{t("vocabularyExercisePage.history.empty")}</p>
                         ) : (
                             questionResults.map((result, index) => (
                                 <div key={index} className="exercise-history-item">
-                                    <h6><strong>Câu {index + 1}: {result.question}</strong></h6>
+                                    <h6><strong>{t("vocabularyExercisePage.history.question", { number: index + 1 })}: {result.question}</strong></h6>
                                     <p>
-                                        <strong>Đáp án của bạn:</strong> {result.userAnswer}
+                                        <strong>{t("vocabularyExercisePage.history.yourAnswer")}:</strong> {result.userAnswer}
                                     </p>
                                     <p>
-                                        <strong>Đáp án đúng:</strong> {result.correctAnswer}
+                                        <strong>{t("vocabularyExercisePage.history.correctAnswer")}:</strong> {result.correctAnswer}
                                     </p>
                                     <p>
-                                        <strong>Kết quả:</strong>{' '}
+                                        <strong>{t("vocabularyExercisePage.history.result")}:</strong>{' '}
                                         {result.isCorrect ? (
-                                            <span style={{ color: 'green', fontWeight: 'bold' }}>✓ Đúng</span>
+                                            <span style={{ color: 'green', fontWeight: 'bold' }}>{t("vocabularyExercisePage.history.correct")}</span>
                                         ) : (
-                                            <span style={{ color: 'red', fontWeight: 'bold' }}>✗ Sai</span>
+                                            <span style={{ color: 'red', fontWeight: 'bold' }}>{t("vocabularyExercisePage.history.incorrect")}</span>
                                         )}
                                     </p>
                                     <p>
-                                        <strong>Giải thích:</strong> {result.explanation}
+                                        <strong>{t("vocabularyExercisePage.history.explanation")}:</strong> {result.explanation}
                                     </p>
                                     {index < questionResults.length - 1 && <hr />}
                                 </div>
@@ -50,7 +52,7 @@ const VocabularyExerciseHistory = ({ show, onClose, questionResults }) => {
                 
                 <div className="custom-modal-footer">
                     <button className="footer-btn" onClick={onClose}>
-                        Đóng
+                        {t("vocabularyExercisePage.common.close")}
                     </button>
                 </div>
             </div>

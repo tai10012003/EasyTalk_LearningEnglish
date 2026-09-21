@@ -1,27 +1,30 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 function AdvancedCourse() {
+  const { t } = useTranslation();
+
   return (
     <section className="advance_feature">
         <div className="container">
             <div className="row">
                 <div className="col-md-12 col-lg-12">
                     <div className="learning_member_text">
-                        <h5>LUYỆN TẬP & CẢI THIỆN</h5>
+                        <h5>{t("home.advancedCourse.eyebrow")}</h5>
                         <div className="section_tittle">
-                            <h3>NÂNG CAO KỸ NĂNG CỦA BẠN VỚI HỆ THỐNG HỌC TẬP TƯƠNG TÁC CỦA CHÚNG TÔI</h3>
+                            <h3>{t("home.advancedCourse.title")}</h3>
                         </div>
                         <p>
-                            Cải thiện kỹ năng ngôn ngữ của bạn thông qua các buổi thực hành chuyên biệt về ngữ pháp, phát âm và từ vựng. Hệ thống của chúng tôi được thiết kế để tăng hiệu quả học tập của bạn mọi lúc, mọi nơi.
+                            {t("home.advancedCourse.description")}
                         </p>
                         <div className="row">
                             <div className="col-sm-6 col-lg-4 col-xl-4">
                                 <a href="/grammar-exercise" className="learning_member_text_link">
                                 <div className="learning_member_text_iner">
                                     <span className="ti-book"></span>
-                                    <h4>Luyện Tập Ngữ Pháp</h4>
+                                    <h4>{t("home.advancedCourse.grammarTitle")}</h4>
                                     <p>
-                                    Nắm vững các quy tắc ngữ pháp với các bài tập tương tác được thiết kế riêng theo trình độ của bạn, giúp bạn xây dựng nền tảng vững chắc.
+                                    {t("home.advancedCourse.grammarDescription")}
                                     </p>
                                 </div>
                                 </a>
@@ -30,9 +33,9 @@ function AdvancedCourse() {
                                 <a href="/pronunciation-exercise" className="learning_member_text_link">
                                 <div className="learning_member_text_iner">
                                     <span className="ti-microphone"></span>
-                                    <h4>Luyện Tập Phát Âm</h4>
+                                    <h4>{t("home.advancedCourse.pronunciationTitle")}</h4>
                                     <p>
-                                    Hoàn thiện cách phát âm của bạn thông qua các bài học có hướng dẫn, đảm bảo bạn nói tự nhiên và rõ ràng trong cuộc trò chuyện.
+                                    {t("home.advancedCourse.pronunciationDescription")}
                                     </p>
                                 </div>
                                 </a>
@@ -41,9 +44,9 @@ function AdvancedCourse() {
                                 <a href="/vocabulary-exercise" className="learning_member_text_link">
                                 <div className="learning_member_text_iner">
                                     <span className="ti-light-bulb"></span>
-                                    <h4>Luyện Tập Từ Vựng</h4>
+                                    <h4>{t("home.advancedCourse.vocabularyTitle")}</h4>
                                     <p>
-                                    Học từ mới hiệu quả bằng cách nghiên cứu từ vựng được nhóm theo chủ đề có liên quan, giúp bạn dễ nhớ và áp dụng chúng vào ngữ cảnh hơn.
+                                    {t("home.advancedCourse.vocabularyDescription")}
                                     </p>
                                 </div>
                                 </a>

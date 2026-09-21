@@ -3,16 +3,22 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguage = () => {
+    return localStorage.getItem("language") === "en" ? "en" : "vi";
+};
+
 export const GateService = {
     async getGate(gateId) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api/gate/${gateId}`, {
+            const query = getCurrentLanguage() === "en" ? "?lang=en" : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/journey/api/gate/${gateId}${query}`, {
                 method: 'GET',
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("Fetch gate detail success:", data);
             return data;
@@ -41,11 +47,13 @@ export const GateService = {
 
     async fetchGate(page = 1, limit = 12) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/gate/api/gate-list?page=${page}&limit=${limit}`, {
+            const params = new URLSearchParams({ page: page.toString(), limit: limit.toString() });
+            const res = await AuthService.fetchWithAuth(`${API_URL}/gate/api/gate-list?${params.toString()}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            return responseData.data || responseData;
         } catch (err) {
             console.error("Error fetching gate:", err);
             return {
@@ -63,7 +71,8 @@ export const GateService = {
                 body: JSON.stringify(formData)
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            return responseData.data || responseData;
         } catch (err) {
             console.error("Error adding gate:", err);
             throw err;
@@ -77,7 +86,8 @@ export const GateService = {
                 body: JSON.stringify(formData)
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            return responseData.data || responseData;
         } catch (err) {
             console.error("Error updating gate:", err);
             throw err;
@@ -90,7 +100,8 @@ export const GateService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            return responseData.data || responseData;
         } catch (err) {
             console.error("Error deleting gate:", err);
             throw err;

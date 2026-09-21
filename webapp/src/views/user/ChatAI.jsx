@@ -1,49 +1,67 @@
 import React, { useState, useEffect, useRef, useContext } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import ChatAIMessage from "@/components/user/chatAI/ChatAIMessage.jsx";
 import ChatAIInput from "@/components/user/chatAI/ChatAIInput.jsx";
-import { ChatAIService } from "@/services/ChatAIService.jsx";
+import { LearningAgentService } from "@/services/LearningAgentService.jsx";
 import Swal from "sweetalert2";
 
 function ChatAI() {
+    const { t, i18n } = useTranslation();
     const [messages, setMessages] = useState([]);
     const [isSending, setIsSending] = useState(false);
-    const [sessionTopic, setSessionTopic] = useState(null);
-    const [step, setStep] = useState("ask_name");
+    const [sessionId, setSessionId] = useState(null);
+    const [chatModes, setChatModes] = useState([]);
+    const [selectedMode, setSelectedMode] = useState(null);
+    const [sessionSummary, setSessionSummary] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [lastBotText, setLastBotText] = useState("");
     const [speakingWordIndex, setSpeakingWordIndex] = useState(null);
     const [isFirstMessage, setIsFirstMessage] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
-    const hasStarted = messages.length > 0;
+    const [isStarting, setIsStarting] = useState(false);
+    const hasStarted = messages.length > 0 && !sessionSummary;
     const allowNavigationRef = useRef(false);
     const { navigator } = useContext(UNSAFE_NavigationContext);
 
     useEffect(() => {
-        document.title = "Giao tiếp với AI - EasyTalk";
-        const startConversation = async () => {
+        document.title = t("chatAIPage.documentTitle");
+    }, [t, i18n.language]);
+
+    useEffect(() => {
+        const loadModes = async () => {
             try {
-                const data = await ChatAIService.startConversation();
-                setMessages([{ sender: "bot", text: data.response, suggestion: data.suggestion }]);
-                setStep(data.step);
-                setLastBotText(data.response);
-                speakText(data.response);
-                setIsFirstMessage(false);
+                const modes = await LearningAgentService.getModes("chat");
+                setChatModes(modes);
+                setSelectedMode(modes[0] || {
+                    key: "speaking_practice",
+                    title: t("chatAIPage.modes.fallbackTitle"),
+                    description: t("chatAIPage.modes.fallbackDescription"),
+                    skillFocus: ["speaking"],
+                    estimatedMinutes: 10
+                });
             } catch (err) {
-                console.error("Error starting conversation:", err);
+                console.error("Error loading chat modes:", err);
+                setSelectedMode({
+                    key: "speaking_practice",
+                    title: t("chatAIPage.modes.fallbackTitle"),
+                    description: t("chatAIPage.modes.fallbackDescription"),
+                    skillFocus: ["speaking"],
+                    estimatedMinutes: 10
+                });
             } finally {
                 setIsLoading(false);
             }
         };
-        startConversation();
-    }, []);
+        loadModes();
+    }, [t, i18n.language]);
 
     useEffect(() => {
         if (lastBotText && !isFirstMessage) {
             speakText(lastBotText);
         }
-    }, [lastBotText]);
+    }, [lastBotText, isFirstMessage]);
 
     useEffect(() => {
         const chatBox = document.getElementById("chat-ai-box");
@@ -60,11 +78,11 @@ function ChatAI() {
             if (!allowNavigationRef.current && hasStarted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang trong cuộc hội thoại với AI. Nếu rời đi, nội dung sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("chatAIPage.alert.warningTitle"),
+                    text: t("chatAIPage.alert.leaveConversationText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("chatAIPage.alert.leaveConfirm"),
+                    cancelButtonText: t("chatAIPage.alert.stayCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -82,7 +100,7 @@ function ChatAI() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, hasStarted]);
+    }, [navigator, hasStarted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -133,29 +151,104 @@ function ChatAI() {
     };
 
     const handleSendMessage = async (text) => {
+        if (!sessionId) {
+            return Swal.fire({
+                icon: "warning",
+                title: t("chatAIPage.alert.notReadyTitle"),
+                text: t("chatAIPage.alert.notReadyText"),
+            });
+        }
         if (isSending)
             return Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Đang gửi tin nhắn, vui lòng đợi...",
+                title: t("chatAIPage.alert.warningTitle"),
+                text: t("chatAIPage.alert.sendingText"),
             });
         setIsSending(true);
         setMessages((prev) => [...prev, { sender: "user", text }]);
         try {
-            const data = await ChatAIService.sendMessage(text, sessionTopic, step);
-            if (!sessionTopic) setSessionTopic(data.topic);
-            if (data.step) setStep(data.step);
-
+            const data = await LearningAgentService.sendChatMessage(sessionId, text);
             setMessages((prev) => [
                 ...prev,
-                { sender: "bot", text: data.response || "...", suggestion: data.suggestion },
+                {
+                    sender: "bot",
+                    text: data.reply || "...",
+                    suggestion: formatSuggestions(data.suggestions),
+                    corrections: data.corrections || []
+                },
             ]);
-            setLastBotText(data.response || "...");
+            setLastBotText(data.reply || "...");
         } catch (error) {
+            console.error("Error sending agent chat message:", error);
             setMessages((prev) => [
                 ...prev,
-                { sender: "bot", text: "Không thể gửi tin nhắn. Vui lòng thử lại." },
+                { sender: "bot", text: t("chatAIPage.alert.sendFailedText") },
             ]);
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+    const handleStartSession = async (mode) => {
+        setIsStarting(true);
+        setSelectedMode(mode);
+        try {
+            const data = await LearningAgentService.startChatSession({
+                mode: mode.key
+            });
+            setSessionId(data.sessionId);
+            setSelectedMode(data.modeConfig || mode);
+            setMessages([{ sender: "bot", text: data.reply, suggestion: formatSuggestions(data.suggestions) }]);
+            setLastBotText(data.reply);
+            speakText(data.reply);
+            setIsFirstMessage(false);
+        } catch (err) {
+            console.error("Error starting conversation:", err);
+            Swal.fire({
+                icon: "error",
+                title: t("chatAIPage.alert.startFailedTitle"),
+                text: t("chatAIPage.alert.tryAgainLater"),
+            });
+        } finally {
+            setIsStarting(false);
+        }
+    };
+
+    const formatSuggestions = (suggestions) => {
+        if (!suggestions) return "";
+        if (Array.isArray(suggestions)) {
+            return suggestions.map((item, index) => `${index + 1}. ${item}`).join("\n");
+        }
+        return suggestions;
+    };
+
+    const handleFinishSession = async () => {
+        if (!sessionId || isSending) return;
+        const result = await Swal.fire({
+            icon: "question",
+            title: t("chatAIPage.finish.confirmTitle"),
+            text: t("chatAIPage.finish.confirmText"),
+            showCancelButton: true,
+            confirmButtonText: t("chatAIPage.finish.confirmButton"),
+            cancelButtonText: t("chatAIPage.finish.cancelButton"),
+        });
+        if (!result.isConfirmed) return;
+        setIsSending(true);
+        try {
+            const summary = await LearningAgentService.finishChatSession(sessionId);
+            setSessionSummary(summary);
+            allowNavigationRef.current = true;
+            Swal.fire({
+                icon: "success",
+                title: t("chatAIPage.finish.savedTitle"),
+                text: summary.summary || t("chatAIPage.finish.savedText"),
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: t("chatAIPage.finish.failedTitle"),
+                text: error.message || t("chatAIPage.alert.tryAgain"),
+            });
         } finally {
             setIsSending(false);
         }
@@ -163,17 +256,59 @@ function ChatAI() {
 
     if (isLoading) return <LoadingScreen />;
 
+    if (!sessionId) {
+        const modes = chatModes.length ? chatModes : [selectedMode].filter(Boolean);
+        return (
+            <div className="container chat-ai-container" data-coach-target="agent-task-chat-workspace">
+                <div className="chat-ai-header text-center">
+                    <h3>{t("chatAIPage.modeSelect.title")}</h3>
+                    <p className="agent-mode-subtitle">{t("chatAIPage.modeSelect.subtitle")}</p>
+                </div>
+                <div className="agent-mode-grid">
+                    {modes.map((mode) => (
+                        <button
+                            key={mode.key}
+                            className={`agent-mode-card ${selectedMode?.key === mode.key ? "active" : ""}`}
+                            onClick={() => handleStartSession(mode)}
+                            disabled={isStarting}
+                        >
+                            <div className="agent-mode-card-top">
+                                <span>{t("chatAIPage.modeSelect.minutes", { count: mode.estimatedMinutes || 10 })}</span>
+                                {mode.recommendedScore > 0 && <strong>{t("chatAIPage.modeSelect.recommended")}</strong>}
+                            </div>
+                            <h4>{mode.title}</h4>
+                            <p>{mode.description}</p>
+                            <div className="agent-mode-skills">
+                                {(mode.skillFocus || []).slice(0, 3).map((skill) => (
+                                    <span key={skill}>{skill}</span>
+                                ))}
+                            </div>
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
-            <div className="container chat-ai-container">
+            <div className="container chat-ai-container" data-coach-target="agent-task-chat-workspace">
                 <div className="chat-ai-header text-center">
-                    <h3>Giao Tiếp Với AI - Thực Hành Tiếng Anh
+                    <h3>{selectedMode?.title || "AI Coach Chat"}
                         <i
                             className="fas fa-question-circle help-icon"
                             style={{ cursor: "pointer" }}
                             onClick={() => setIsModalOpen(true)}
                         ></i>
                     </h3>
+                    {selectedMode?.description && <p className="agent-mode-subtitle">{selectedMode.description}</p>}
+                    <button
+                        className="chat-ai-finish-btn"
+                        onClick={handleFinishSession}
+                        disabled={isSending || !sessionId || !!sessionSummary}
+                    >
+                        <i className="fas fa-flag-checkered"></i> {t("chatAIPage.finish.button")}
+                    </button>
                 </div>
                 <div id="chat-ai-box" className="chat-ai-box">
                     {messages.map((msg, idx) => (
@@ -187,8 +322,34 @@ function ChatAI() {
                             }
                         />
                     ))}
+                    {sessionSummary && (
+                        <div className="chat-ai-summary-card">
+                            <h4>{t("chatAIPage.summary.title")}</h4>
+                            <p>{sessionSummary.summary}</p>
+                            {sessionSummary.mistakes?.length > 0 && (
+                                <>
+                                    <strong>{t("chatAIPage.summary.mistakes")}</strong>
+                                    <ul>
+                                        {sessionSummary.mistakes.map((mistake, index) => (
+                                            <li key={index}>{mistake}</li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                            {sessionSummary.recommendedNextActions?.length > 0 && (
+                                <>
+                                    <strong>{t("chatAIPage.summary.nextActions")}</strong>
+                                    <ul>
+                                        {sessionSummary.recommendedNextActions.map((action, index) => (
+                                            <li key={index}>{action.title}</li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
-                <ChatAIInput onSend={handleSendMessage} disabled={isSending} />
+                <ChatAIInput onSend={handleSendMessage} disabled={isSending || !!sessionSummary} />
             </div>
             {isModalOpen && (
                 <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
@@ -197,32 +358,37 @@ function ChatAI() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="custom-modal-header">
-                            <h5>Hướng Dẫn Luyện Giao Tiếp Với AI</h5>
+                            <h5>{t("chatAIPage.guide.title")}</h5>
                             <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                                 &times;
                             </button>
                         </div>
                         <div className="custom-modal-body">
-                            <p>Chào mừng bạn đến với chức năng <strong>Giao tiếp với AI</strong>. Tại đây, bạn có thể luyện tập nói tiếng Anh trực tiếp với AI.</p>
                             <p>
-                                <strong>Các bước thực hiện:</strong>
+                                <Trans
+                                    i18nKey="chatAIPage.guide.intro"
+                                    components={{ strong: <strong /> }}
+                                />
+                            </p>
+                            <p>
+                                <strong>{t("chatAIPage.guide.stepsTitle")}</strong>
                             </p>
                             <ul>
-                                <li><strong>Trò chuyện:</strong> Nhập câu hỏi hoặc phản hồi của bạn vào ô chat và nhấn gửi.</li>
-                                <li><strong>Phản hồi từ AI:</strong> AI sẽ trả lời bạn bằng tiếng Anh, giúp bạn luyện tập phản xạ và ngữ pháp.</li>
-                                <li><strong>Nghe phát âm:</strong> AI sẽ đọc to câu trả lời, bạn có thể theo dõi từ nào đang được phát âm.</li>
-                                <li><strong>Đánh dấu từ:</strong> Các từ AI đang phát âm sẽ được đánh dấu, giúp bạn dễ theo dõi và luyện phát âm.</li>
-                                <li><strong>Tiếp tục hội thoại:</strong> Nhập thêm câu hỏi hoặc phản hồi để AI tiếp tục trò chuyện cùng bạn.</li>
+                                <li><Trans i18nKey="chatAIPage.guide.stepChat" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="chatAIPage.guide.stepReply" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="chatAIPage.guide.stepListen" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="chatAIPage.guide.stepHighlight" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="chatAIPage.guide.stepContinue" components={{ strong: <strong /> }} /></li>
                             </ul>
-                            <p><strong>Lưu ý:</strong></p>
+                            <p><strong>{t("chatAIPage.guide.noteTitle")}</strong></p>
                             <ul>
-                                <li>Nghe kỹ câu trả lời và cố gắng nhại theo để cải thiện phát âm.</li>
-                                <li>Đừng ngần ngại thử các câu hỏi khác nhau để nâng cao kỹ năng giao tiếp.</li>
+                                <li>{t("chatAIPage.guide.noteListen")}</li>
+                                <li>{t("chatAIPage.guide.notePractice")}</li>
                             </ul>
-                            <p>🎉 Chúc bạn luyện tập giao tiếp hiệu quả và tự tin hơn mỗi ngày!</p>
+                            <p>{t("chatAIPage.guide.closing")}</p>
                         </div>
                         <div className="custom-modal-footer">
-                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>{t("chatAIPage.common.close")}</button>
                         </div>
                     </div>
                 </div>

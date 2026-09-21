@@ -1,10 +1,23 @@
 import React from "react";
 import Highcharts from "highcharts";
 import HighchartsReact from "highcharts-react-official";
+import { useTranslation } from "react-i18next";
 
 const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, formatDateString, getCurrentDatePlotLine, onChartTypeChange, onPeriodChange, onExportExcel, onExportPpt, periods, username = null }) => {
+    const { t, i18n } = useTranslation();
     const isOwnStats = !username;
-    const title = isOwnStats ? "Thống kê biểu đồ của bạn" : `Thống kê biểu đồ của ${username}`;
+    const locale = i18n.language === "en" ? "en-US" : "vi-VN";
+    const title = isOwnStats ? t("statisticPage.chart.ownTitle") : t("statisticPage.chart.userTitle", { username });
+    const formatChartDate = (date) => {
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const year = date.getFullYear();
+        if (period == "week") {
+            const weekday = date.toLocaleDateString(locale, { weekday: "long" });
+            return t("statisticPage.export.weekDateLabel", { weekday, day, month, year });
+        }
+        return `${day}/${month}/${year}`;
+    };
     const chartOptions = {
         chart: {
             type: activeChart == "time" ? "areaspline" : "column",
@@ -20,20 +33,7 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
         },
         credits: { enabled: false },
         xAxis: {
-            categories: fullDates.map((date) => {
-                if (period == "week") {
-                    const weekday = date.toLocaleDateString("vi-VN", { weekday: "long" });
-                    const day = date.getDate().toString().padStart(2, "0");
-                    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-                    const year = date.getFullYear();
-                    return `${weekday} - ngày ${day}/${month}/${year}`;
-                } else {
-                    const day = date.getDate().toString().padStart(2, "0");
-                    const month = (date.getMonth() + 1).toString().padStart(2, "0");
-                    const year = date.getFullYear();
-                    return `${day}/${month}/${year}`;
-                }
-            }),
+            categories: fullDates.map(formatChartDate),
             lineColor: "#e2e8f0",
             tickColor: "#e2e8f0",
             gridLineWidth: 0,
@@ -75,21 +75,24 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
                 const day = rawDate.getDate().toString().padStart(2, "0");
                 const month = (rawDate.getMonth() + 1).toString().padStart(2, "0");
                 const year = rawDate.getFullYear();
-                const fullDate = period == "week" ? `${rawDate.toLocaleDateString("vi-VN", { weekday: "long" })} - ngày ${day}/${month}/${year}` : `ngày ${day}/${month}/${year}`;
+                const weekday = rawDate.toLocaleDateString(locale, { weekday: "long" });
+                const fullDate = period == "week"
+                    ? t("statisticPage.export.weekDateLabel", { weekday, day, month, year })
+                    : t("statisticPage.chart.tooltip.dateValue", { day, month, year });
                 if (activeChart == "time") {
                     const h = Math.floor(value);
                     const m = Math.round((value - h) * 60);
                     const text = m > 0 ? `${h}h${m}p` : `${h}h`;
                     return `
                     <div style="padding:8px 12px;">
-                        <b>Ngày:</b> ${fullDate}<br/>
-                        <b>Thời gian học:</b> ${text}
+                        <b>${t("statisticPage.chart.tooltip.date")}:</b> ${fullDate}<br/>
+                        <b>${t("statisticPage.chart.tooltip.studyTime")}:</b> ${text}
                     </div>`;
                 }
                 return `
                 <div style="padding:8px 12px;">
-                    <b>Ngày:</b> ${fullDate}<br/>
-                    <b>Kinh nghiệm:</b> ${value.toLocaleString()} KN
+                    <b>${t("statisticPage.chart.tooltip.date")}:</b> ${fullDate}<br/>
+                    <b>${t("statisticPage.chart.tooltip.experience")}:</b> ${t("statisticPage.values.exp", { value: value.toLocaleString() })}
                 </div>`;
             },
             shadow: true,
@@ -128,7 +131,7 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
         },
         series: [
             {
-                name: activeChart == "time" ? "Thời gian học" : "Điểm kinh nghiệm",
+                name: activeChart == "time" ? t("statisticPage.chart.series.time") : t("statisticPage.chart.series.exp"),
                 data: fullDates.map((date) => {
                     const dateStr = formatDateString(date);
                     const found = chartData.find(item => item.date == dateStr);
@@ -148,25 +151,19 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
                             className={`user-statistic-tab ${activeChart == "time" ? "active" : ""}`}
                             onClick={() => onChartTypeChange("time")}
                         >
-                            <i className="fas fa-clock"></i> Thời Gian Học
+                            <i className="fas fa-clock"></i> {t("statisticPage.chart.tabs.time")}
                         </button>
                         <button
                             className={`user-statistic-tab ${activeChart == "exp" ? "active" : ""}`}
                             onClick={() => onChartTypeChange("exp")}
                         >
-                            <i className="fas fa-trophy"></i> Điểm Kinh Nghiệm
+                            <i className="fas fa-trophy"></i> {t("statisticPage.chart.tabs.exp")}
                         </button>
                     </div>
                     <div className="user-statistic-toolbar-item">
                         <div className="user-statistic-header-row">
                             <h3 className="user-statistic-chart-title">
-                                {activeChart == "time"
-                                    ? period == "week" ? "Thời gian học theo ngày"
-                                    : period == "month" ? "Thời gian học theo tháng"
-                                    : "Thời gian học theo năm"
-                                    : period == "week" ? "Điểm kinh nghiệm theo ngày"
-                                    : period == "month" ? "Điểm kinh nghiệm theo tháng"
-                                    : "Điểm kinh nghiệm theo năm"}
+                                {t(`statisticPage.chart.titles.${activeChart}.${period}`)}
                             </h3>
                             <div className="user-statistic-controls">
                                 <select
@@ -198,13 +195,13 @@ const StatisticChart = ({ activeChart, period, chartData, loading, fullDates, fo
             <div className="user-statistic-chart">
                 {loading ? (
                     <div className="user-statistic-loading">
-                        <i className="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                        <i className="fas fa-spinner fa-spin"></i> {t("statisticPage.loading")}
                     </div>
                 ) : chartData.length == 0 ? (
                     <div className="user-statistic-empty">
                         <i className="fas fa-chart-line fa-3x"></i>
-                        <p>Chưa có dữ liệu</p>
-                        <small>Học mỗi ngày để thấy tiến bộ nhé!</small>
+                        <p>{t("statisticPage.chart.empty.title")}</p>
+                        <small>{t("statisticPage.chart.empty.description")}</small>
                     </div>
                 ) : (
                     <HighchartsReact highcharts={Highcharts} options={chartOptions} />

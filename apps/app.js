@@ -1,12 +1,19 @@
-var express = require("express");
-var app = express();
+const express = require("express");
 const http = require("http");
-const server = http.createServer(app);
-var bodyParser = require("body-parser");
+const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require('dotenv');
-const envFile = process.env.NODE_ENV === 'production' ? '.env.production' : '.env.development';
-dotenv.config({ path: envFile });
+const path = require("path");
+const responseFormatter = require('./src/shared/middleware/responseFormatter');
+const logger = require('./src/shared/utils/logger');
+
+const runtimeEnv = process.env.APP_ENV || process.env.NODE_ENV;
+const envFile = process.env.ENV_FILE || (runtimeEnv === 'production' ? '.env.production' : '.env.development');
+dotenv.config({ path: path.resolve(__dirname, envFile) });
+// const { validateEnv } = require('./src/shared/config/envValidator');
+// validateEnv();
+
 process.on('unhandledRejection', (reason, promise) => {
   console.error('Unhandled Rejection at:', promise, 'Reason:', reason);
 });
@@ -15,100 +22,126 @@ process.on('uncaughtException', (error) => {
   console.error('Uncaught Exception:', error);
 });
 
-const { connectRedis } = require('./util/redisClient');
+const app = express();
+const AWSXRay = require('./src/shared/utils/xray');
+
+if (AWSXRay) {
+  app.use(AWSXRay.express.openSegment('easytalk-backend'));
+}
+
+const server = http.createServer(app);
+app.enable('trust proxy');
+
+function getAllowedClientOrigins() {
+  return (process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")
+    .map(origin => origin.trim())
+    .filter(Boolean)
+    .map(origin => {
+      try {
+        return new URL(origin).origin;
+      } catch {
+        return origin;
+      }
+    });
+}
+
+const { connectRedis } = require('./src/shared/utils/redisClient');
 async function initRedis() {
   try {
-    await connectRedis(5000);
-    console.log('Redis connected successfully');
+    const connected = await connectRedis(5000);
+    if (connected) {
+      logger.info('Redis connected successfully');
+    }
   } catch (err) {
-    console.error(`Redis init failed: ${err.message}`);
-    console.error('Running without Redis cache - fallback to DB (app stable)');
+    logger.error('Redis init failed', { message: err.message });
+    logger.warn('Running without Redis cache - fallback to DB');
   }
 }
 
-initRedis().catch(() => {});
-
-const { initSocket } = require("./util/socket");
-initSocket(server);
-
-// Cho phép tất cả domain (tạm thời)
-app.use(cors());
-
-// Nếu muốn chỉ cho React frontend gọi API thì dùng:
 app.use(cors({
-  origin: "http://localhost:5173"
+  origin(origin, callback) {
+    if (!origin) {
+      return callback(null, true);
+    }
+    if (getAllowedClientOrigins().includes(origin)) {
+      return callback(null, true);
+    }
+    logger.warn(`CORS blocked for origin: ${origin}`);
+    return callback(new Error(`CORS origin not allowed: ${origin}`));
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+  optionsSuccessStatus: 200
 }));
 
-app.use(bodyParser.json({ limit: '50mb' })); 
+app.options('*', cors());
+
+app.use(cookieParser());
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+app.use(responseFormatter);
 
-var controller = require(__dirname  + "/controllers");
-app.use(controller);
-
-var dashboardController = require(__dirname + "/controllers/dashboardcontroller");
-app.use(dashboardController);
-
-var journeyController = require(__dirname + "/controllers/journeycontroller");
-app.use(journeyController);
-
-var gateController = require(__dirname + "/controllers/gatecontroller");
-app.use(gateController);
-
-var stageController = require(__dirname + "/controllers/stagecontroller"); 
-app.use(stageController);
-
-var storyController = require(__dirname + "/controllers/storycontroller");
-app.use(storyController);
-
-var grammarController = require(__dirname + "/controllers/grammarcontroller");
-app.use(grammarController);
-
-var grammarexerciseController = require(__dirname + "/controllers/grammarexercisecontroller");
-app.use(grammarexerciseController);
-
-var pronunciationController = require(__dirname + "/controllers/pronunciationcontroller");
-app.use(pronunciationController);
-
-var pronunciationexerciseController = require(__dirname + "/controllers/pronunciationexercisecontroller");
-app.use(pronunciationexerciseController);
-
-var flashcardController = require(__dirname + "/controllers/flashcardcontroller");
-app.use(flashcardController);
-
-var vocabularyexerciseController = require(__dirname + "/controllers/vocabularyexercisecontroller");
-app.use(vocabularyexerciseController);
-
-var dictationexerciseController = require(__dirname + "/controllers/dictationcontroller");
-app.use(dictationexerciseController);
-
-var userController = require(__dirname + "/controllers/usercontroller");
-app.use(userController);
-
-var chatController = require(__dirname + "/controllers/chatcontroller");
-app.use(chatController);
-
-var writingController = require(__dirname + "/controllers/writingcontroller");
-app.use(writingController);
-
-var reminderController = require(__dirname + "/controllers/remindercontroller");
-app.use(reminderController);
-
-var notificationController = require(__dirname + "/controllers/notificationcontroller");
-app.use(notificationController);
-
-var usersettingController = require(__dirname + "/controllers/usersettingcontroller");
-app.use(usersettingController);
-
-var prizeController = require(__dirname + "/controllers/prizecontroller");
-app.use(prizeController);
-
-var userprogressController = require(__dirname + "/controllers/userprogresscontroller");
-app.use(userprogressController);
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date() });
+});
 
 app.use("/static", express.static(__dirname + "/public"));
 
+const { initSocket } = require('./src/shared/utils/socket');
+const { buildDependencies } = require('./src/bootstrap/dependencies');
+const { registerRoutes } = require('./src/bootstrap/routes');
+let controllers = null;
+let routesInitialized = false;
+
+async function initRealtimeAndRoutes() {
+  if (routesInitialized) return;
+  const io = await initSocket(server, getAllowedClientOrigins());
+  logger.info('Socket.IO initialized');
+  controllers = buildDependencies({ io }).controllers;
+  registerRoutes(app, controllers, { AWSXRay });
+  routesInitialized = true;
+}
+
+async function initBackgroundTasks() {
+  try {
+    const { reminderService } = controllers.reminderController;
+    if (reminderService && reminderService.initReminders) {
+      await reminderService.initReminders();
+      console.log('Reminder cron jobs initialized');
+    }
+  } catch (error) {
+    console.error('Failed to initialize reminder cron jobs:', error);
+  }
+}
+
+async function initCacheWarmUp() {
+  if (process.env.CACHE_WARM_UP_ON_START !== 'true') return;
+  try {
+    const warmed = await controllers.cacheController.warmUpSelectedCache();
+    logger.info('Cache warm-up completed', { warmed });
+  } catch (error) {
+    logger.error('Cache warm-up failed', { message: error.message });
+  }
+}
+
 const PORT = process.env.PORT || 3000;
 
-server.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+async function startServer() {
+  try {
+    await initRedis();
+    await initRealtimeAndRoutes();
+    await initBackgroundTasks();
+    await initCacheWarmUp();
+    server.listen(PORT, () => {
+      logger.info('Server started', { port: PORT });
+    });
+  } catch (error) {
+    logger.error('Failed to start server', { message: error.message });
+    process.exit(1);
+  }
+}
+startServer();
+
+module.exports = app;

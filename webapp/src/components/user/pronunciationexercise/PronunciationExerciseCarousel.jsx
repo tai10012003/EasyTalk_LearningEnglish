@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
-import { PronunciationExerciseService } from "@/services/PronunciationExerciseService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 function buildDetailedAnalysis(correctSentence, transcription) {
     const correctWords = correctSentence
@@ -25,22 +25,33 @@ function buildDetailedAnalysis(correctSentence, transcription) {
     });
 }
 
+function normalizeOptions(options = []) {
+    if (!Array.isArray(options)) return [];
+    return options.map(option => String(option || "").trim()).filter(Boolean);
+}
+
 const PronunciationExerciseCarousel = ({
     questions,
     currentQuestionIndex,
+    onCheckAnswer,
+    onAnalyzePronunciation,
     onAnswerSubmit,
     onQuestionNavigation,
     onSpeakText,
     questionResults,
     isCompleted
 }) => {
+    const { t } = useTranslation();
     const [recordingState, setRecordingState] = useState({});
     const [audioSrc, setAudioSrc] = useState({});
     const [analysisResults, setAnalysisResults] = useState({});
+    const [analyzingState, setAnalyzingState] = useState({});
     const [mediaRecorders, setMediaRecorders] = useState({});
-    const exerciseId = window.location.pathname.split('/').pop();
+    const [checkingState, setCheckingState] = useState({});
     const currentQuestion = questions[currentQuestionIndex];
-    const isQuestionAnswered = questionResults[currentQuestionIndex]?.userAnswer !== "Chưa trả lời";
+    const isQuestionAnswered = questionResults[currentQuestionIndex]?.userAnswer !== t("pronunciationExercisePage.detail.unanswered");
+    const currentAnalysisResult = analysisResults[currentQuestionIndex];
+    const isAnalyzing = Boolean(analyzingState[currentQuestionIndex]);
     const [micError, setMicError] = useState(null);
     const [userAnswers, setUserAnswers] = useState({});
     const [pronunciationAttempts, setPronunciationAttempts] = useState({});
@@ -48,11 +59,11 @@ const PronunciationExerciseCarousel = ({
     const getQuestionTitle = () => {
         switch (currentQuestion.type) {
             case 'multiple-choice':
-                return 'Nghe và chọn đáp án đúng:';
+                return t("pronunciationExercisePage.carousel.questionTypes.multipleChoice");
             case 'pronunciation':
-                return 'Phát âm lại sao cho đúng:';
+                return t("pronunciationExercisePage.carousel.questionTypes.pronunciation");
             default:
-                return 'Câu hỏi:';
+                return t("pronunciationExercisePage.carousel.questionTypes.default");
         }
     };
 
@@ -69,8 +80,8 @@ const PronunciationExerciseCarousel = ({
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Trình duyệt không hỗ trợ ghi âm."
+                title: t("pronunciationExercisePage.carousel.warningTitle"),
+                text: t("pronunciationExercisePage.carousel.recordUnsupported")
             });
             return;
         }
@@ -84,31 +95,40 @@ const PronunciationExerciseCarousel = ({
                 const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                 const audioURL = URL.createObjectURL(audioBlob);
                 setAudioSrc(prev => ({ ...prev, [questionIndex]: audioURL }));
-                const response = await PronunciationExerciseService.analyzePronunciation(
-                    exerciseId,
-                    questionIndex,
-                    audioBlob
-                );
-
-                if (response?.success) {
-                    response.detailedAnalysisWords = buildDetailedAnalysis(
-                        currentQuestion.question,
-                        response.transcription
+                setAnalyzingState(prev => ({ ...prev, [questionIndex]: true }));
+                try {
+                    const response = await onAnalyzePronunciation(
+                        questionIndex,
+                        audioBlob
                     );
+
+                    if (response?.success) {
+                        response.detailedAnalysisWords = buildDetailedAnalysis(
+                            response.correctAnswer || currentQuestion.question,
+                            response.transcription || ""
+                        );
+                    }
+                    setAnalysisResults(prev => ({ ...prev, [questionIndex]: response }));
+                    setPronunciationAttempts(prev => ({
+                        ...prev,
+                        [questionIndex]: (prev[questionIndex] || 0) + 1
+                    }));
+
+                    if (response?.success) {
+                        onAnswerSubmit(questionIndex, response);
+                    }
+                } catch (error) {
+                    setAnalysisResults(prev => ({
+                        ...prev,
+                        [questionIndex]: {
+                            success: false,
+                            message: error.message || t("pronunciationExercisePage.carousel.analyzeFailed")
+                        }
+                    }));
+                } finally {
+                    setAnalyzingState(prev => ({ ...prev, [questionIndex]: false }));
+                    stream.getTracks().forEach(track => track.stop());
                 }
-                setAnalysisResults(prev => ({ ...prev, [questionIndex]: response }));
-                setPronunciationAttempts(prev => ({
-                    ...prev,
-                    [questionIndex]: (prev[questionIndex] || 0) + 1
-                }));
-                const accuracy = Number(response?.accuracy || 0);
-                const isCorrect = accuracy >= 50;
-                onAnswerSubmit(
-                    questionIndex,
-                    response?.transcription || "Không rõ",
-                    isCorrect,
-                    accuracy
-                );
             };
             setMicError(null);
             mediaRecorder.start();
@@ -117,30 +137,42 @@ const PronunciationExerciseCarousel = ({
         } catch (err) {
             console.error(err);
             if (err.name == "NotAllowedError") {
-                setMicError("Bạn đã chặn quyền micro. Vui lòng bật lại trong trình duyệt.");
+                setMicError(t("pronunciationExercisePage.carousel.micBlocked"));
             } else if (err.name == "NotFoundError") {
-                setMicError("Không tìm thấy thiết bị micro. Hãy kiểm tra lại máy của bạn.");
+                setMicError(t("pronunciationExercisePage.carousel.micNotFound"));
             } else {
-                setMicError("Không thể truy cập micro: " + err.message);
+                setMicError(t("pronunciationExercisePage.carousel.micAccessFailed", { message: err.message }));
             }
         }
-    }, [currentQuestionIndex, exerciseId, mediaRecorders, recordingState, currentQuestion]);
+    }, [currentQuestionIndex, mediaRecorders, recordingState, currentQuestion, onAnalyzePronunciation, onAnswerSubmit, t]);
 
-    const handleMultipleChoiceSubmit = useCallback(() => {
+    const handleMultipleChoiceSubmit = useCallback(async () => {
         const questionIndex = currentQuestionIndex;
         const selectedInput = document.querySelector(`input[name="answer-${questionIndex}"]:checked`);
         if (!selectedInput) {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Vui lòng chọn một đáp án."
+                title: t("pronunciationExercisePage.carousel.warningTitle"),
+                text: t("pronunciationExercisePage.carousel.answerRequired")
             });
             return;
         }
         const userAnswer = selectedInput.value;
-        const isCorrect = userAnswer == currentQuestion.correctAnswer;
-        onAnswerSubmit(questionIndex, userAnswer, isCorrect);
-    }, [currentQuestionIndex, currentQuestion, onAnswerSubmit]);
+        try {
+            setCheckingState(prev => ({ ...prev, [questionIndex]: true }));
+            const result = await onCheckAnswer(questionIndex, userAnswer);
+            onAnswerSubmit(questionIndex, result);
+        } catch (error) {
+            console.error("Error checking pronunciation exercise answer:", error);
+            Swal.fire({
+                icon: "error",
+                title: t("pronunciationExercisePage.detail.errorTitle"),
+                text: error.message || t("pronunciationExercisePage.carousel.checkFailed")
+            });
+        } finally {
+            setCheckingState(prev => ({ ...prev, [questionIndex]: false }));
+        }
+    }, [currentQuestionIndex, onCheckAnswer, onAnswerSubmit, t]);
 
     const handleAnswerChange = useCallback((value) => {
         setUserAnswers(prev => ({
@@ -177,8 +209,7 @@ const PronunciationExerciseCarousel = ({
                                 )}
                             </h5>
                             <div className="exercise-question-form">
-                                {currentQuestion.options
-                                .filter(option => option.trim() !== "")
+                                {normalizeOptions(currentQuestion.options)
                                 .map((option, optIndex) => (
                                     <div key={optIndex} className="exercise-form-check">
                                         <input
@@ -193,7 +224,7 @@ const PronunciationExerciseCarousel = ({
                                         />
                                         <label
                                             className={`exercise-form-check-label ${
-                                                isQuestionAnswered && currentQuestion.correctAnswer == option
+                                                isQuestionAnswered && questionResults[currentQuestionIndex].correctAnswer == option
                                                     ? 'exercise-correct-answer'
                                                     : isQuestionAnswered && questionResults[currentQuestionIndex].userAnswer == option
                                                     ? 'exercise-incorrect-answer'
@@ -210,8 +241,9 @@ const PronunciationExerciseCarousel = ({
                                         type="button"
                                         className="exercise-submit-answer mt-4 mb-4"
                                         onClick={handleMultipleChoiceSubmit}
+                                        disabled={Boolean(checkingState[currentQuestionIndex])}
                                     >
-                                        <i className="fas fa-check me-2"></i> Kiểm tra
+                                        <i className="fas fa-check me-2"></i> {checkingState[currentQuestionIndex] ? t("pronunciationExercisePage.carousel.checking") : t("pronunciationExercisePage.carousel.check")}
                                     </button>
                                 )}
                             </div>
@@ -233,15 +265,16 @@ const PronunciationExerciseCarousel = ({
                             </h5>
                             {(pronunciationAttempts[currentQuestionIndex] || 0) >= 3 ? (
                                 <p style={{ color: "red", marginTop: "10px", fontWeight: "bold" }}>
-                                    Bạn đã hết số lần phát âm cho câu này (3 lần).
+                                    {t("pronunciationExercisePage.carousel.maxAttempts")}
                                 </p>
                             ) : (
                                 <button
                                     type="button"
                                     className="btn btn_1"
                                     onClick={handleRecordToggle}
+                                    disabled={isAnalyzing || isCompleted}
                                 >
-                                    {recordingState[currentQuestionIndex] ? 'Dừng ghi âm' : 'Ghi âm'}
+                                    {recordingState[currentQuestionIndex] ? t("pronunciationExercisePage.carousel.stopRecording") : isAnalyzing ? t("pronunciationExercisePage.carousel.analyzing") : t("pronunciationExercisePage.carousel.record")}
                                 </button>
                             )}
                             {micError && (
@@ -255,44 +288,60 @@ const PronunciationExerciseCarousel = ({
                                 </div>
                             )}
 
-                            {analysisResults[currentQuestionIndex]?.success && (
+                            {isAnalyzing && (
+                                <div className="exercise-explanation mt-4">
+                                    <p><strong>{t("pronunciationExercisePage.carousel.analyzingPronunciation")}</strong></p>
+                                </div>
+                            )}
+
+                            {currentAnalysisResult && !currentAnalysisResult.success && !isAnalyzing && (
+                                <div className="exercise-explanation mt-4">
+                                    <p>
+                                        <strong>{t("pronunciationExercisePage.carousel.analysisUnavailable")}</strong>
+                                        <br />
+                                        {currentAnalysisResult.message || t("pronunciationExercisePage.carousel.recordAgain")}
+                                    </p>
+                                </div>
+                            )}
+
+                            {currentAnalysisResult?.success && (
                                 <div className="exercise-explanation mt-4">
                                     <h5>
-                                        Độ chính xác:{' '}
+                                        {t("pronunciationExercisePage.carousel.accuracy")}:{' '}
                                         <span
                                             style={{
                                                 color:
-                                                    Number(analysisResults[currentQuestionIndex].accuracy || 0) >= 75
+                                                    Number(currentAnalysisResult.accuracy || 0) >= 75
                                                         ? 'green'
-                                                        : Number(analysisResults[currentQuestionIndex].accuracy || 0) >= 50
+                                                        : Number(currentAnalysisResult.accuracy || 0) >= 50
                                                         ? 'orange'
                                                         : 'red'
                                             }}
                                         >
-                                            {Number(analysisResults[currentQuestionIndex].accuracy || 0).toFixed(2)}%
+                                            {Number(currentAnalysisResult.accuracy || 0).toFixed(2)}%
                                         </span>
                                     </h5>
 
                                     <p
                                         style={{
                                             color:
-                                                Number(analysisResults[currentQuestionIndex].accuracy || 0) < 50
+                                                Number(currentAnalysisResult.accuracy || 0) < 50
                                                     ? 'red'
-                                                    : Number(analysisResults[currentQuestionIndex].accuracy || 0) < 75
+                                                    : Number(currentAnalysisResult.accuracy || 0) < 75
                                                     ? 'orange'
                                                     : 'green'
                                         }}
                                     >
-                                        {analysisResults[currentQuestionIndex].message}
+                                        {currentAnalysisResult.message || t("pronunciationExercisePage.carousel.analyzed")}
                                     </p>
 
                                     <p style={{ marginTop: '15px' }}>
-                                        <strong>Kết quả phân tích:</strong> "{analysisResults[currentQuestionIndex].transcription}"
-                                    </p>
+                                    <strong>{t("pronunciationExercisePage.carousel.analysisResult")}:</strong> "{currentAnalysisResult.transcription}"
+                                </p>
 
                                     <p>
-                                        <strong>Chi tiết phát âm: </strong>
-                                        {(analysisResults[currentQuestionIndex].detailedAnalysisWords || []).map((word, idx) => (
+                                        <strong>{t("pronunciationExercisePage.carousel.pronunciationDetail")}: </strong>
+                                        {(currentAnalysisResult.detailedAnalysisWords || []).map((word, idx) => (
                                             <span key={idx} style={{ marginRight: "12px" }}>
                                             {word.isCorrect ? (
                                                 <span style={{ color: "green", fontWeight: "bold" }}>{word.correct}</span>
@@ -317,15 +366,15 @@ const PronunciationExerciseCarousel = ({
                         <div className="exercise-explanation mt-4">
                             {questionResults[currentQuestionIndex].isCorrect ? (
                                 <p>
-                                    <strong>Bạn đã trả lời đúng.</strong>
+                                    <strong>{t("pronunciationExercisePage.carousel.correct")}</strong>
                                     <br />
-                                    Giải thích: {questionResults[currentQuestionIndex].explanation}
+                                    {t("pronunciationExercisePage.carousel.explanation")}: {questionResults[currentQuestionIndex].explanation}
                                 </p>
                             ) : (
                                 <p>
-                                    <strong>Bạn đã trả lời sai.</strong> Đáp án đúng: <strong>{currentQuestion.correctAnswer}</strong>
+                                    <strong>{t("pronunciationExercisePage.carousel.incorrect")}</strong> {t("pronunciationExercisePage.carousel.correctAnswer")}: <strong>{questionResults[currentQuestionIndex].correctAnswer}</strong>
                                     <br />
-                                    Giải thích: {questionResults[currentQuestionIndex].explanation}
+                                    {t("pronunciationExercisePage.carousel.explanation")}: {questionResults[currentQuestionIndex].explanation}
                                 </p>
                             )}
                         </div>
@@ -338,7 +387,7 @@ const PronunciationExerciseCarousel = ({
                             style={{ marginRight: '20px' }} 
                             onClick={handlePrev}
                         >
-                            <i className="fas fa-arrow-left"></i> Quay lại
+                            <i className="fas fa-arrow-left"></i> {t("pronunciationExercisePage.carousel.back")}
                         </button>
                     )}
                     {currentQuestionIndex < questions.length - 1 && (
@@ -347,7 +396,7 @@ const PronunciationExerciseCarousel = ({
                             onClick={handleNext}
                             style={{ marginLeft: currentQuestionIndex === 0 ? 'auto' : '0' }}
                         >
-                            <i className="fas fa-arrow-right"></i> Tiếp theo
+                            <i className="fas fa-arrow-right"></i> {t("pronunciationExercisePage.carousel.next")}
                         </button>
                     )}
                 </div>

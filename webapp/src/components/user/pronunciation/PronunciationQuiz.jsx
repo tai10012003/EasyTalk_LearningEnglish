@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { isAnswerCorrect } from '@/utils/englishTextNormalizer';
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 function PronunciationQuiz({ quizzes, onComplete }) {
+    const { t } = useTranslation();
     // Hàm shuffle chuẩn Fisher–Yates
     const shuffleArray = (array) => {
         const arr = [...array];
@@ -28,8 +30,8 @@ function PronunciationQuiz({ quizzes, onComplete }) {
         if (answers.some(a => a.trim() == "")) {
             Swal.fire({ 
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Vui lòng trả lời hết các câu hỏi trước khi kiểm tra!"
+                title: t("pronunciationPage.quiz.warningTitle"),
+                text: t("pronunciationPage.quiz.warningText")
             });
             return;
         }
@@ -43,7 +45,7 @@ function PronunciationQuiz({ quizzes, onComplete }) {
 
     return (
         <div className="lesson-quiz-container">
-            <h4>Bài tập phát âm</h4>
+            <h4>{t("pronunciationPage.quiz.title")}</h4>
             {shuffledQuizzes.map((quiz, idx) => (
                 <div key={idx} className="mb-4">
                 <p className="lesson-quiz-question">{idx + 1}. {quiz.question}</p>
@@ -92,19 +94,19 @@ function PronunciationQuiz({ quizzes, onComplete }) {
                                 : "incorrect"
                             }`}
                             >
-                            Giải thích đáp án: {quiz.explanation}
+                            {t("pronunciationPage.quiz.explanationPrefix")} {quiz.explanation}
                         </div>
                     )}
                 </div>
             ))}
             {!checked && !finished && (
                 <button className="btn_1 mt_4" onClick={handleCheck}>
-                <i className="fas fa-check"></i> Kiểm tra
+                <i className="fas fa-check"></i> {t("pronunciationPage.quiz.check")}
                 </button>
             )}
             {checked && !finished && (
                 <button className="btn_1 mt_4" onClick={handleFinish}>
-                    Hoàn thành
+                    {t("pronunciationPage.quiz.finish")}
                 </button>
             )}
         </div>

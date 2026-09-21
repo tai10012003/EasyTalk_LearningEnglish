@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import AddReminder from "@/components/user/reminder/AddReminder.jsx";
 import UpdateReminder from "@/components/user/reminder/UpdateReminder.jsx";
 import ReminderCard from "@/components/user/reminder/ReminderCard.jsx";
@@ -7,6 +8,7 @@ import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import Swal from "sweetalert2";
 
 function Reminder() {
+    const { t, i18n } = useTranslation();
     const [reminders, setReminders] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
@@ -18,7 +20,7 @@ function Reminder() {
     const limit = 6;
 
     useEffect(() => {
-        document.title = "Nhắc nhở học tập - EasyTalk";
+        document.title = t("reminderPage.documentTitle");
         ReminderService.resetAlertFlag();
         const fetchData = async () => {
             setIsLoading(true);
@@ -32,13 +34,13 @@ function Reminder() {
                 setReminders([]);
                 setCurrentPage(1);
                 setTotalPages(1);
-                Swal.fire({ icon: "error", title: "Lỗi", text: "Không thể tải nhắc nhở." });
+                Swal.fire({ icon: "error", title: t("reminderPage.alert.errorTitle"), text: t("reminderPage.alert.loadFailed") });
             } finally {
                 setIsLoading(false);
             }
         };
         fetchData();
-    }, [currentPage]);
+    }, [currentPage, t, i18n.language]);
 
     const handleCreated = () => {
         setCurrentPage(1);
@@ -67,7 +69,7 @@ function Reminder() {
             setReminders([]);
             setCurrentPage(1);
             setTotalPages(1);
-            Swal.fire({ icon: "error", title: "Lỗi", text: "Không thể tải nhắc nhở." });
+            Swal.fire({ icon: "error", title: t("reminderPage.alert.errorTitle"), text: t("reminderPage.alert.loadFailed") });
         } finally {
             setIsLoading(false);
         }
@@ -84,7 +86,7 @@ function Reminder() {
             pages.push(
                 <li className="page-item" key="prev">
                     <button className="page-link" onClick={() => setCurrentPage(currentPage - 1)}>
-                        Previous
+                        {t("reminderPage.pagination.previous")}
                     </button>
                 </li>
             );
@@ -104,7 +106,7 @@ function Reminder() {
             pages.push(
                 <li className="page-item" key="next">
                     <button className="page-link" onClick={() => setCurrentPage(currentPage + 1)}>
-                        Next
+                        {t("reminderPage.pagination.next")}
                     </button>
                 </li>
             );
@@ -116,7 +118,7 @@ function Reminder() {
         <>
             <div className="lesson-container">
                 <div className="hero-mini">
-                    <h3 className="hero-title">NHẮC NHỞ HỌC TẬP CỦA BẠN
+                    <h3 className="hero-title">{t("reminderPage.title")}
                     <i
                         className="fas fa-question-circle help-icon"
                         style={{ cursor: "pointer" }}
@@ -126,7 +128,7 @@ function Reminder() {
                 <div className="container">
                     <div className="lesson-list">
                         <button className="btn_1" onClick={() => setShowAdd(true)}>
-                            <i className="fas fa-plus"></i> Thêm nhắc nhở
+                            <i className="fas fa-plus"></i> {t("reminderPage.actions.add")}
                         </button>
                     </div>
                     {reminders.length > 0 ? (
@@ -138,7 +140,7 @@ function Reminder() {
                             </div>
                         </div>
                     ) : (
-                        <p className="text-center no-stories">Chưa có nhắc nhở nào. Hãy thêm nhắc nhở để hệ thống gửi email nhắc bạn</p>
+                        <p className="text-center no-stories">{t("reminderPage.empty")}</p>
                     )}
                     <nav aria-label="Page navigation">
                         <ul className="pagination justify-content-center" id="pagination-controls">
@@ -161,30 +163,30 @@ function Reminder() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="custom-modal-header">
-                            <h5>Hướng Dẫn Sử Dụng Nhắc Nhở Học Tập</h5>
+                            <h5>{t("reminderPage.guide.title")}</h5>
                             <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                                 &times;
                             </button>
                         </div>
                         <div className="custom-modal-body">
-                            <p>Phần Nhắc nhở giúp bạn quản lý lịch học và nhận email thông báo đúng thời gian.</p>
-                            <p><strong>Các chức năng chính:</strong></p>
+                            <p>{t("reminderPage.guide.intro")}</p>
+                            <p><strong>{t("reminderPage.guide.featuresTitle")}</strong></p>
                             <ul>
-                                <li><strong>Thêm nhắc nhở:</strong> Nhấn nút <strong>Thêm nhắc nhở</strong> để tạo mới, nhập email, thời gian và tần suất (Hàng ngày, Hàng tuần, Hàng tháng).</li>
-                                <li><strong>Chỉnh sửa nhắc nhở:</strong> Nhấn biểu tượng <i className="fas fa-edit"></i> trên card nhắc nhở để cập nhật thông tin.</li>
-                                <li><strong>Xóa nhắc nhở:</strong> Nhấn biểu tượng <i className="fas fa-trash"></i> trên card nhắc nhở để xóa nhắc nhở không cần thiết.</li>
-                                <li><strong>Danh sách nhắc nhở:</strong> Xem tất cả nhắc nhở đã tạo và kiểm tra email, thời gian, tần suất.</li>
+                                <li><Trans i18nKey="reminderPage.guide.add" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="reminderPage.guide.edit" components={{ strong: <strong />, icon: <i className="fas fa-edit" /> }} /></li>
+                                <li><Trans i18nKey="reminderPage.guide.delete" components={{ strong: <strong />, icon: <i className="fas fa-trash" /> }} /></li>
+                                <li><Trans i18nKey="reminderPage.guide.list" components={{ strong: <strong /> }} /></li>
                             </ul>
-                            <p><strong>Lưu ý:</strong></p>
+                            <p><strong>{t("reminderPage.guide.noteTitle")}</strong></p>
                             <ul>
-                                <li>Nhắc nhở sẽ gửi email đúng thời gian và tần suất bạn đã chọn.</li>
-                                <li>Có thể xóa hoặc chỉnh sửa bất kỳ nhắc nhở nào nếu thông tin không còn phù hợp.</li>
-                                <li>Hãy đảm bảo email nhập đúng để nhận thông báo.</li>
+                                <li>{t("reminderPage.guide.noteEmailTime")}</li>
+                                <li>{t("reminderPage.guide.noteEditDelete")}</li>
+                                <li>{t("reminderPage.guide.noteCorrectEmail")}</li>
                             </ul>
-                            <p>🎯 Sử dụng nhắc nhở để duy trì thói quen học tập hiệu quả!</p>
+                            <p>{t("reminderPage.guide.closing")}</p>
                         </div>
                         <div className="custom-modal-footer">
-                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>{t("reminderPage.common.close")}</button>
                         </div>
                     </div>
                 </div>

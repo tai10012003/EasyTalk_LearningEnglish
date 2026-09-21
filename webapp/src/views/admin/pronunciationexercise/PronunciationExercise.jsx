@@ -4,7 +4,7 @@ import { PronunciationExerciseService } from "@/services/PronunciationExerciseSe
 
 function PronunciationExercise() {
     const fetchPronunciationExercise = async (page = 1) => {
-        const data = await PronunciationExerciseService.fetchPronunciationExercise(page, 6);
+        const data = await PronunciationExerciseService.fetchPronunciationExercise(page, 6, { admin: true });
         return {
             lessons: data.data || [],
             currentPage: data.currentPage,
@@ -25,6 +25,7 @@ function PronunciationExercise() {
                 dataKey="lessons"
                 addUrl="/admin/pronunciation-exercise/add"
                 updateUrl="/admin/pronunciation-exercise/update"
+                translateUrl="/admin/pronunciation-exercise/translate"
             />
         </div>
     );

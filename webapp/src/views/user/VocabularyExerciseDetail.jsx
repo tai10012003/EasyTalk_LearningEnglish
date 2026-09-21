@@ -8,8 +8,10 @@ import VocabularyExerciseCarousel from "@/components/user/vocabularyexercise/Voc
 import VocabularyExerciseResultScreen from "@/components/user/vocabularyexercise/VocabularyExerciseResultScreen.jsx";
 import VocabularyExerciseHistory from "@/components/user/vocabularyexercise/VocabularyExerciseHistory.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const VocabularyExerciseDetail = () => {
+    const { t, i18n } = useTranslation();
     const { slug } = useParams();
     const [exerciseId, setExerciseId] = useState(null);
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
@@ -24,6 +26,9 @@ const VocabularyExerciseDetail = () => {
     const [showResult, setShowResult] = useState(false);
     const [exerciseTitle, setExerciseTitle] = useState("");
     const [timer, setTimer] = useState(null);
+    const [attemptId, setAttemptId] = useState(null);
+    const [isStartingAttempt, setIsStartingAttempt] = useState(false);
+    const [isFinishingAttempt, setIsFinishingAttempt] = useState(false);
     const allowNavigationRef = React.useRef(false);
     const [exerciseCompleted, setExerciseCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -33,13 +38,7 @@ const VocabularyExerciseDetail = () => {
     const lastInteractionRef = useRef(Date.now());
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
-
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
+    const hasFinishedAttemptRef = useRef(false);
 
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
@@ -54,6 +53,13 @@ const VocabularyExerciseDetail = () => {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -83,11 +89,11 @@ const VocabularyExerciseDetail = () => {
             if (!allowNavigationRef.current && hasStarted && !exerciseCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện từ vựng. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("vocabularyExercisePage.detail.leaveWarningTitle"),
+                    text: t("vocabularyExercisePage.detail.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("vocabularyExercisePage.detail.leaveConfirm"),
+                    cancelButtonText: t("vocabularyExercisePage.detail.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -105,7 +111,7 @@ const VocabularyExerciseDetail = () => {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, hasStarted, exerciseCompleted]);
+    }, [navigator, hasStarted, exerciseCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -122,7 +128,7 @@ const VocabularyExerciseDetail = () => {
     }, [exerciseCompleted, hasStarted]);
 
     useEffect(() => {
-        document.title = "Chi tiết luyện tập từ vựng - EasyTalk";
+        document.title = t("vocabularyExercisePage.detail.documentTitle");
         const fetchExerciseData = async () => {
             try {
                 setIsLoading(true);
@@ -130,13 +136,13 @@ const VocabularyExerciseDetail = () => {
                 if (data && data.questions && data.questions.length > 0) {
                     setExerciseId(data._id);
                     setQuestions(data.questions);
-                    setExerciseTitle(data.title || "Bài luyện tập từ vựng");
+                    setExerciseTitle(data.title || t("vocabularyExercisePage.detail.defaultTitle"));
                     const initialResults = data.questions.map(question => ({
                         question: question.question,
-                        userAnswer: "Chưa trả lời",
-                        correctAnswer: question.correctAnswer,
+                        userAnswer: t("vocabularyExercisePage.detail.unanswered"),
+                        correctAnswer: null,
                         isCorrect: false,
-                        explanation: question.explanation,
+                        explanation: null,
                         questionType: question.type
                     }));
                     setQuestionResults(initialResults);
@@ -152,7 +158,105 @@ const VocabularyExerciseDetail = () => {
         if (slug) {
             fetchExerciseData();
         }
-    }, [slug]);
+    }, [slug, t, i18n.language]);
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
+    };
+
+    const handleStartExercise = async () => {
+        if (!exerciseId) return;
+        try {
+            setIsStartingAttempt(true);
+            const attempt = await VocabularyExerciseService.startVocabularyExerciseAttempt(exerciseId);
+            setAttemptId(attempt.attemptId);
+            if (Array.isArray(attempt.questions) && attempt.questions.length > 0) {
+                setQuestions(attempt.questions);
+                setQuestionResults(attempt.questions.map(question => ({
+                    question: question.question,
+                    userAnswer: t("vocabularyExercisePage.detail.unanswered"),
+                    correctAnswer: null,
+                    isCorrect: false,
+                    explanation: null,
+                    questionType: question.type
+                })));
+                setCurrentQuestionIndex(0);
+            }
+            setTimeRemaining(selectedDuration);
+            setHasStarted(true);
+        } catch (error) {
+            console.error("Error starting vocabulary exercise attempt:", error);
+            Swal.fire({
+                icon: "error",
+                title: t("vocabularyExercisePage.detail.errorTitle"),
+                text: error.message || t("vocabularyExercisePage.detail.startError")
+            });
+        } finally {
+            setIsStartingAttempt(false);
+        }
+    };
+
+    const handleCheckAnswer = useCallback(async (questionIndex, userAnswer) => {
+        if (!attemptId) {
+            throw new Error("Attempt has not been started.");
+        }
+        return await VocabularyExerciseService.checkVocabularyExerciseQuestion(attemptId, questionIndex, userAnswer);
+    }, [attemptId]);
+
+    const handleAnswerSubmit = useCallback((questionIndex, result) => {
+        setQuestionResults(prev => {
+            const newResults = [...prev];
+            newResults[questionIndex] = {
+                ...newResults[questionIndex],
+                userAnswer: result.userAnswer || t("vocabularyExercisePage.detail.noAnswer"),
+                correctAnswer: result.correctAnswer,
+                isCorrect: result.isCorrect,
+                explanation: result.explanation
+            };
+            return newResults;
+        });
+        if (typeof result.correctCount === "number") {
+            setCorrectAnswers(result.correctCount);
+        } else if (result.isCorrect) {
+            setCorrectAnswers(prev => prev + 1);
+        }
+    }, [t]);
+
+    const handleQuestionNavigation = useCallback((index) => {
+        setCurrentQuestionIndex(index);
+    }, []);
+
+    const handleSubmitQuiz = useCallback(async () => {
+        if (timer) {
+            clearInterval(timer);
+        }
+        if (attemptId && !hasFinishedAttemptRef.current) {
+            try {
+                setIsFinishingAttempt(true);
+                const summary = await VocabularyExerciseService.finishVocabularyExerciseAttempt(attemptId);
+                if (typeof summary.correctCount === "number") {
+                    setCorrectAnswers(summary.correctCount);
+                } else if (typeof summary.correctAnswers === "number") {
+                    setCorrectAnswers(summary.correctAnswers);
+                }
+                hasFinishedAttemptRef.current = true;
+            } catch (error) {
+                console.error("Error finishing vocabulary exercise attempt:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: t("vocabularyExercisePage.detail.errorTitle"),
+                    text: error.message || t("vocabularyExercisePage.detail.submitError")
+                });
+                return;
+            } finally {
+                setIsFinishingAttempt(false);
+            }
+        }
+        setIsCompleted(true);
+        setShowResult(true);
+    }, [timer, attemptId, t]);
 
     useEffect(() => {
         if (!isCompleted && hasStarted && questions.length > 0) {
@@ -173,40 +277,7 @@ const VocabularyExerciseDetail = () => {
                 }
             };
         }
-    }, [isCompleted, hasStarted, questions]);
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
-    };
-
-    const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect) => {
-        setQuestionResults(prev => {
-            const newResults = [...prev];
-            newResults[questionIndex] = {
-                ...newResults[questionIndex],
-                userAnswer: userAnswer || "Không trả lời",
-                isCorrect: isCorrect
-            };
-            return newResults;
-        });
-        if (isCorrect) {
-            setCorrectAnswers(prev => prev + 1);
-        }
-    }, []);
-
-    const handleQuestionNavigation = useCallback((index) => {
-        setCurrentQuestionIndex(index);
-    }, []);
-
-    const handleSubmitQuiz = useCallback(() => {
-        if (timer) {
-            clearInterval(timer);
-        }
-        setIsCompleted(true);
-        setShowResult(true);
-    }, [timer]);
+    }, [isCompleted, hasStarted, questions.length, handleSubmitQuiz]);
 
     const handleShowHistory = useCallback(() => {
         setShowHistory(true);
@@ -216,25 +287,6 @@ const VocabularyExerciseDetail = () => {
         setShowHistory(false);
     }, []);
 
-    const handleRestart = useCallback(() => {
-        setTimeRemaining(selectedDuration);
-        setCorrectAnswers(0);
-        setCurrentQuestionIndex(0);
-        setIsCompleted(false);
-        setShowHistory(false);
-        setShowResult(false);
-        setHasStarted(false);
-        const resetResults = questions.map(question => ({
-            question: question.question,
-            userAnswer: "Chưa trả lời",
-            correctAnswer: question.correctAnswer,
-            isCorrect: false,
-            explanation: question.explanation,
-            questionType: question.type
-        }));
-        setQuestionResults(resetResults);
-    }, [questions, selectedDuration]);
-
     const speakText = useCallback((text) => {
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
@@ -243,11 +295,11 @@ const VocabularyExerciseDetail = () => {
         } else {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+                title: t("vocabularyExercisePage.detail.warningTitle"),
+                text: t("vocabularyExercisePage.detail.speechUnsupported")
             });
         }
-    }, []);
+    }, [t]);
 
     const handleComplete = async () => {
         try {
@@ -266,9 +318,9 @@ const VocabularyExerciseDetail = () => {
             setExerciseCompleted(true);
             Swal.fire({
                 icon: "success",
-                title: "Hoàn thành!",
-                text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập từ vựng. Bài luyện tập từ vựng tiếp theo đã được mở khóa.",
-                confirmButtonText: "Quay lại danh sách bài luyện tập từ vựng",
+                title: t("vocabularyExercisePage.detail.completeTitle"),
+                text: t("vocabularyExercisePage.detail.completeText"),
+                confirmButtonText: t("vocabularyExercisePage.detail.completeConfirm"),
             }).then(() => {
                 window.location.href = "/vocabulary-exercise";
             });
@@ -276,8 +328,8 @@ const VocabularyExerciseDetail = () => {
             console.error("Error completing vocabulary exercise:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                title: t("vocabularyExercisePage.detail.errorTitle"),
+                text: t("vocabularyExercisePage.detail.errorText")
             });
         }
     };
@@ -288,7 +340,7 @@ const VocabularyExerciseDetail = () => {
         return (
             <div className="exercise-container">
                 <div className="exercise-no-questions">
-                    <p>Không có câu hỏi nào trong bài tập này.</p>
+                    <p>{t("vocabularyExercisePage.detail.noQuestions")}</p>
                 </div>
             </div>
         );
@@ -300,26 +352,26 @@ const VocabularyExerciseDetail = () => {
                 <div className="exercise-card-start">
                     <h3 className="exercise-title">{exerciseTitle}</h3>
                     <div className="exercise-time-setup">
-                        <label className="exercise-label">Chọn thời gian làm bài:</label>
+                        <label className="exercise-label">{t("vocabularyExercisePage.detail.chooseTime")}</label>
                         <select
                             className="form-control exercise-select"
                             value={selectedDuration}
                             onChange={(e) => setSelectedDuration(parseInt(e.target.value))}
                         >
-                            <option value={10 * 60}>10 phút</option>
-                            <option value={20 * 60}>20 phút</option>
-                            <option value={30 * 60}>30 phút</option>
-                            <option value={40 * 60}>40 phút</option>
+                            <option value={10 * 60}>{t("vocabularyExercisePage.detail.minutes", { count: 10 })}</option>
+                            <option value={20 * 60}>{t("vocabularyExercisePage.detail.minutes", { count: 20 })}</option>
+                            <option value={30 * 60}>{t("vocabularyExercisePage.detail.minutes", { count: 30 })}</option>
+                            <option value={40 * 60}>{t("vocabularyExercisePage.detail.minutes", { count: 40 })}</option>
                         </select>
                     </div>
                     <button
                         className="btn_1 mt-4"
                         onClick={() => {
-                            setTimeRemaining(selectedDuration);
-                            setHasStarted(true);
+                            handleStartExercise();
                         }}
+                        disabled={isStartingAttempt}
                     >
-                        <i className="fas fa-play"></i> Bắt đầu
+                        <i className="fas fa-play"></i> {isStartingAttempt ? t("vocabularyExercisePage.detail.loading") : t("vocabularyExercisePage.detail.start")}
                     </button>
                 </div>
             </div>
@@ -341,6 +393,7 @@ const VocabularyExerciseDetail = () => {
                             <VocabularyExerciseCarousel
                                 questions={questions}
                                 currentQuestionIndex={currentQuestionIndex}
+                                onCheckAnswer={handleCheckAnswer}
                                 onAnswerSubmit={handleAnswerSubmit}
                                 onQuestionNavigation={handleQuestionNavigation}
                                 onSpeakText={speakText}
@@ -365,6 +418,7 @@ const VocabularyExerciseDetail = () => {
                         onShowHistory={handleShowHistory}
                         selectedDuration={selectedDuration}
                         answeredCount={answeredCount}
+                        isSubmitting={isFinishingAttempt}
                     />
                 </div>
             </div>

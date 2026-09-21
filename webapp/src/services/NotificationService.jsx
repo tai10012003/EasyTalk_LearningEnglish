@@ -2,30 +2,56 @@ import { AuthService } from "./AuthService.jsx";
 import Swal from "sweetalert2";
 const API_URL = import.meta.env.VITE_API_URL;
 let hasShownAlert = false;
+let userNotificationsCache = null;
+const USER_NOTIFICATIONS_CACHE_TTL = 10000;
+
+function invalidateUserNotificationsCache() {
+    userNotificationsCache = null;
+}
+
+function getCachedUserNotifications(fetcher) {
+    const now = Date.now();
+    if (userNotificationsCache && userNotificationsCache.expiresAt > now) {
+        return userNotificationsCache.promise;
+    }
+
+    const promise = fetcher().catch((error) => {
+        invalidateUserNotificationsCache();
+        throw error;
+    });
+    userNotificationsCache = {
+        promise,
+        expiresAt: now + USER_NOTIFICATIONS_CACHE_TTL
+    };
+    return promise;
+}
 
 export const NotificationService = {
     async fetchUserNotifications() {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/notification/api/notifications`, {
-                method: "GET",
-            });
-            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
-            hasShownAlert = false;
-            console.log("User notifications fetched successfully:", data);
-            return data.notifications || [];
-        } catch (error) {
-            console.error("Error fetching user notifications:", error.message);
-            if (!hasShownAlert) {
-                hasShownAlert = true;
-                Swal.fire({
-                    icon: "error",
-                    title: "Lỗi",
-                    text: "Không thể tải danh sách thông báo. Vui lòng kiểm tra kết nối server.",
+        return getCachedUserNotifications(async () => {
+            try {
+                const res = await AuthService.fetchWithAuth(`${API_URL}/notification/api/notifications`, {
+                    method: "GET",
                 });
+                if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                const responseData = await res.json();
+                const data = responseData.data;
+                hasShownAlert = false;
+                console.log("User notifications fetched successfully:", data);
+                return data.notifications || [];
+            } catch (error) {
+                console.error("Error fetching user notifications:", error.message);
+                if (!hasShownAlert) {
+                    hasShownAlert = true;
+                    Swal.fire({
+                        icon: "error",
+                        title: "Lỗi",
+                        text: "Không thể tải danh sách thông báo. Vui lòng kiểm tra kết nối server.",
+                    });
+                }
+                return [];
             }
-            return [];
-        }
+        });
     },
 
     async fetchAllNotifications() {
@@ -34,7 +60,8 @@ export const NotificationService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             console.log("All notifications fetched successfully:", data);
             return data.notifications || [];
@@ -62,7 +89,9 @@ export const NotificationService = {
                 const errorData = await res.json();
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            invalidateUserNotificationsCache();
             return data;
         } catch (error) {
             console.error("Error creating notification:", error);
@@ -76,7 +105,9 @@ export const NotificationService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            invalidateUserNotificationsCache();
             return data;
         } catch (error) {
             console.error("Error deleting notification:", error);
@@ -90,7 +121,9 @@ export const NotificationService = {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (error) {
             console.error("Error getting notification detail:", error);
             return null;
@@ -103,7 +136,10 @@ export const NotificationService = {
                 method: "PUT",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            invalidateUserNotificationsCache();
+            return await data;
         } catch (error) {
             console.error("Error marking notification as read:", error);
             throw error;
@@ -116,7 +152,10 @@ export const NotificationService = {
                 method: "PUT",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            invalidateUserNotificationsCache();
+            return await data;
         } catch (error) {
             console.error("Error marking notification as read:", error);
             throw error;
@@ -129,7 +168,10 @@ export const NotificationService = {
                 method: "PUT",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            invalidateUserNotificationsCache();
+            return await data;
         } catch (error) {
             console.error("Error marking all notifications as read:", error);
             throw error;

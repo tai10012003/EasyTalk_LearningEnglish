@@ -1,6 +1,8 @@
 import React from 'react';
+import { useTranslation } from "react-i18next";
 
 const PronunciationExerciseHistory = ({ show, onClose, questionResults }) => {
+    const { t } = useTranslation();
     if (!show) return null;
 
     const renderResult = (result, index) => {
@@ -10,27 +12,27 @@ const PronunciationExerciseHistory = ({ show, onClose, questionResults }) => {
             let color = "";
 
             if (accuracy >= 80) {
-                statusText = "Phát âm tốt";
+                statusText = t("pronunciationExercisePage.history.pronunciationGood");
                 color = "green";
             } else if (accuracy >= 50) {
-                statusText = "Phát âm trung bình";
+                statusText = t("pronunciationExercisePage.history.pronunciationAverage");
                 color = "orange";
             } else {
-                statusText = "Phát âm tệ";
+                statusText = t("pronunciationExercisePage.history.pronunciationPoor");
                 color = "red";
             }
 
             return (
                 <div key={index} className="exercise-history-item">
-                    <h6><strong>Câu {index + 1}: {result.question}</strong></h6>
+                    <h6><strong>{t("pronunciationExercisePage.history.question", { number: index + 1 })}: {result.question}</strong></h6>
                     <p>
-                        <strong>Phát âm của bạn:</strong> {accuracy.toFixed(2)}%
+                        <strong>{t("pronunciationExercisePage.history.yourPronunciation")}:</strong> {accuracy.toFixed(2)}%
                     </p>
                     <p>
-                        <strong>Đáp án phát âm:</strong> {result.correctAnswer}
+                        <strong>{t("pronunciationExercisePage.history.pronunciationAnswer")}:</strong> {result.correctAnswer}
                     </p>
                     <p>
-                        <strong>Kết quả:</strong>{" "}
+                        <strong>{t("pronunciationExercisePage.history.result")}:</strong>{" "}
                         <span style={{ color, fontWeight: "bold" }}>{statusText}</span>
                     </p>
                     {index < questionResults.length - 1 && <hr />}
@@ -39,23 +41,23 @@ const PronunciationExerciseHistory = ({ show, onClose, questionResults }) => {
         }
         return (
             <div key={index} className="exercise-history-item">
-                <h6><strong>Câu {index + 1}: {result.question}</strong></h6>
+                <h6><strong>{t("pronunciationExercisePage.history.question", { number: index + 1 })}: {result.question}</strong></h6>
                 <p>
-                    <strong>Đáp án của bạn:</strong> {result.userAnswer}
+                    <strong>{t("pronunciationExercisePage.history.yourAnswer")}:</strong> {result.userAnswer}
                 </p>
                 <p>
-                    <strong>Đáp án đúng:</strong> {result.correctAnswer}
+                    <strong>{t("pronunciationExercisePage.history.correctAnswer")}:</strong> {result.correctAnswer}
                 </p>
                 <p>
-                    <strong>Kết quả:</strong>{" "}
+                    <strong>{t("pronunciationExercisePage.history.result")}:</strong>{" "}
                     {result.isCorrect ? (
-                        <span style={{ color: "green", fontWeight: "bold" }}>✓ Đúng</span>
+                        <span style={{ color: "green", fontWeight: "bold" }}>{t("pronunciationExercisePage.history.correct")}</span>
                     ) : (
-                        <span style={{ color: "red", fontWeight: "bold" }}>✗ Sai</span>
+                        <span style={{ color: "red", fontWeight: "bold" }}>{t("pronunciationExercisePage.history.incorrect")}</span>
                     )}
                 </p>
                 <p>
-                    <strong>Giải thích:</strong> {result.explanation}
+                    <strong>{t("pronunciationExercisePage.history.explanation")}:</strong> {result.explanation}
                 </p>
                 {index < questionResults.length - 1 && <hr />}
             </div>
@@ -69,7 +71,7 @@ const PronunciationExerciseHistory = ({ show, onClose, questionResults }) => {
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="custom-modal-header">
-                    <h5>LỊCH SỬ LÀM BÀI LUYỆN TẬP PHÁT ÂM</h5>
+                    <h5>{t("pronunciationExercisePage.history.title")}</h5>
                     <button className="close-btn" onClick={onClose}>
                         &times;
                     </button>
@@ -78,7 +80,7 @@ const PronunciationExerciseHistory = ({ show, onClose, questionResults }) => {
                 <div className="custom-modal-body">
                     <div id="exercise-historyContent">
                         {questionResults.length == 0 ? (
-                            <p>Không có dữ liệu lịch sử.</p>
+                            <p>{t("pronunciationExercisePage.history.empty")}</p>
                         ) : (
                             questionResults.map(renderResult)
                         )}
@@ -87,7 +89,7 @@ const PronunciationExerciseHistory = ({ show, onClose, questionResults }) => {
 
                 <div className="custom-modal-footer">
                     <button className="footer-btn" onClick={onClose}>
-                        Đóng
+                        {t("pronunciationExercisePage.common.close")}
                     </button>
                 </div>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 
-function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
+function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl, translateUrl = "" }) {
     const [lessons, setLessons] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
@@ -41,7 +41,7 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa bài học "${title}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa bài học "${title}" thất bại!`, 'error');
                 }
             }
@@ -160,6 +160,14 @@ function LessonList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }
                                                 >
                                                     Sửa
                                                 </a>
+                                                {translateUrl && (
+                                                    <a
+                                                        href={`${translateUrl}/${lesson._id}`}
+                                                        className="admin-lesson-btn-translate"
+                                                    >
+                                                        Dịch EN
+                                                    </a>
+                                                )}
                                                 <button
                                                     className="admin-lesson-btn-delete"
                                                     onClick={() => handleDelete(lesson._id, lesson.title)}

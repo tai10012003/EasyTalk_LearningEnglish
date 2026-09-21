@@ -1,30 +1,40 @@
 import Dashboard from "@/views/admin/Dashboard";
 import Journey from "@/views/admin/Journey";
+import TranslateJourney from "@/views/admin/journey/TranslateJourney";
 import Gate from "@/views/admin/Gate";
+import TranslateGate from "@/views/admin/gate/TranslateGate";
 import Stage from "@/views/admin/stage/Stage";
 import AddStage from "@/views/admin/stage/AddStagePage";
 import UpdateStage from "@/views/admin/stage/UpdateStagePage"
+import TranslateStage from "@/views/admin/stage/TranslateStage";
 import Grammar from "@/views/admin/grammar/Grammar";
 import AddGrammar from "@/views/admin/grammar/AddGrammar";
 import UpdateGrammar from "@/views/admin/grammar/UpdateGrammar"
+import TranslateGrammar from "@/views/admin/grammar/TranslateGrammar";
 import Pronunciation from "@/views/admin/pronunciation/Pronunciation";
 import AddPronunciation from "@/views/admin/pronunciation/AddPronunciation";
 import UpdatePronunciation from "@/views/admin/pronunciation/UpdatePronunciation"
+import TranslatePronunciation from "@/views/admin/pronunciation/TranslatePronunciation";
 import Story from "@/views/admin/story/Story";
 import AddStory from "@/views/admin/story/AddStoryPage";
 import UpdateStory from "@/views/admin/story/UpdateStoryPage"
+import TranslateStory from "@/views/admin/story/TranslateStory";
 import GrammarExercise from "@/views/admin/grammarexercise/GrammarExercise";
 import AddGrammarExercise from "@/views/admin/grammarexercise/AddGrammarExercise";
 import UpdateGrammarExercise from "@/views/admin/grammarexercise/UpdateGrammarExercise";
+import TranslateGrammarExercise from "@/views/admin/grammarexercise/TranslateGrammarExercise";
 import VocabularyExercise from "@/views/admin/vocabularyexercise/VocabularyExercise";
 import AddVocabularyExercise from "@/views/admin/vocabularyexercise/AddVocabularyExercise";
 import UpdateVocabularyExercise from "@/views/admin/vocabularyexercise/UpdateVocabularyExercise";
+import TranslateVocabularyExercise from "@/views/admin/vocabularyexercise/TranslateVocabularyExercise";
 import PronunciationExercise from "@/views/admin/pronunciationexercise/PronunciationExercise";
 import AddPronunciationExercise from "@/views/admin/pronunciationexercise/AddPronunciationExercise";
 import UpdatePronunciationExercise from "@/views/admin/pronunciationexercise/UpdatePronunciationExercise";
+import TranslatePronunciationExercise from "@/views/admin/pronunciationexercise/TranslatePronunciationExercise";
 import DictationExercise from "@/views/admin/dictation/DictationExercise";
 import AddDictationExercise from "@/views/admin/dictation/AddDictationExercise";
 import UpdateDictationExercise from "@/views/admin/dictation/UpdateDictationExercise";
+import TranslateDictationExercise from "@/views/admin/dictation/TranslateDictationExercise";
 import User from "@/views/admin/user/User";
 import AddUser from "@/views/admin/user/AddUserPage";
 import UpdateUser from "@/views/admin/user/UpdateUserPage";
@@ -32,6 +42,7 @@ import Notification from "@/views/admin/Notification";
 import Prize from "@/views/admin/prize/Prize";
 import AddPrize from "@/views/admin/prize/AddPrizePage";
 import UpdatePrize from "@/views/admin/prize/UpdatePrizePage";
+import TranslatePrize from "@/views/admin/prize/TranslatePrize";
 import UserProgress from "@/views/admin/userprogress/UserProgress";
 import UserProgressDetail from "@/views/admin/userprogress/UserProgressDetailPage"
 import NotFound from "@/views/admin/NotFound.jsx";
@@ -55,10 +66,26 @@ const AdminRoute = [
         ),
     },
     {
+        path: "journey/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateJourney />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "gate",
         element: (
             <PrivateRoute roles={["admin"]}>
                 <Gate />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "gate/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateGate />
             </PrivateRoute>
         ),
     },
@@ -87,6 +114,14 @@ const AdminRoute = [
         ),
     },
     {
+        path: "stage/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateStage />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "grammar",
         element: (
             <PrivateRoute roles={["admin"]}>
@@ -107,6 +142,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateGrammar />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "grammar/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateGrammar />
             </PrivateRoute>
         ),
     },
@@ -135,6 +178,14 @@ const AdminRoute = [
         ),
     },
     {
+        path: "pronunciation/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslatePronunciation />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "story",
         element: (
             <PrivateRoute roles={["admin"]}>
@@ -155,6 +206,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateStory />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "story/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateStory />
             </PrivateRoute>
         ),
     },
@@ -183,6 +242,14 @@ const AdminRoute = [
         ),
     },
     {
+        path: "grammar-exercise/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateGrammarExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "vocabulary-exercise",
         element: (
             <PrivateRoute roles={["admin"]}>
@@ -207,10 +274,26 @@ const AdminRoute = [
         ),
     },
     {
+        path: "vocabulary-exercise/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateVocabularyExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
         path: "pronunciation-exercise",
         element: (
             <PrivateRoute roles={["admin"]}>
                 <PronunciationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "pronunciation-exercise/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslatePronunciationExercise />
             </PrivateRoute>
         ),
     },
@@ -251,6 +334,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdateDictationExercise />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "dictation-exercise/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslateDictationExercise />
             </PrivateRoute>
         ),
     },
@@ -307,6 +398,14 @@ const AdminRoute = [
         element: (
             <PrivateRoute roles={["admin"]}>
                 <UpdatePrize />
+            </PrivateRoute>
+        ),
+    },
+    {
+        path: "prize/translate/:id",
+        element: (
+            <PrivateRoute roles={["admin"]}>
+                <TranslatePrize />
             </PrivateRoute>
         ),
     },

@@ -18,14 +18,21 @@ import FlashCard from "@/views/user/FlashCard.jsx";
 import FlashCardReview from "@/views/user/FlashCardReview.jsx";
 import GrammarExercise from "@/views/user/GrammarExercise.jsx";
 import GrammarExerciseDetail from "@/views/user/GrammarExerciseDetail.jsx";
+import GrammarExerciseAttemptHistory from "@/views/user/GrammarExerciseAttemptHistory.jsx";
+import GrammarExerciseAttemptHistoryDetail from "@/views/user/GrammarExerciseAttemptHistoryDetail.jsx";
 import VocabularyExercise from "@/views/user/VocabularyExercise.jsx";
 import VocabularyExerciseDetail from "@/views/user/VocabularyExerciseDetail.jsx";
+import VocabularyExerciseAttemptHistory from "@/views/user/VocabularyExerciseAttemptHistory.jsx";
+import VocabularyExerciseAttemptHistoryDetail from "@/views/user/VocabularyExerciseAttemptHistoryDetail.jsx";
 import PronunciationExercise from "@/views/user/PronunciationExercise.jsx";
 import PronunciationExerciseDetail from "@/views/user/PronunciationExerciseDetail.jsx";
+import PronunciationExerciseAttemptHistory from "@/views/user/PronunciationExerciseAttemptHistory.jsx";
+import PronunciationExerciseAttemptHistoryDetail from "@/views/user/PronunciationExerciseAttemptHistoryDetail.jsx";
 import DictationExercise from "@/views/user/DictationExercise.jsx";
 import DictationExerciseDetail from "@/views/user/DictationExerciseDetail.jsx";
 import ChatAI from "@/views/user/ChatAI.jsx";
 import WritingAI from "@/views/user/WritingAI.jsx";
+import Coach from "@/views/user/Coach.jsx";
 import LeaderBoard from "@/views/user/LeaderBoard.jsx";
 import Statistic from "@/views/user/Statistic.jsx";
 import UserStreak from "@/views/user/UserStreak.jsx";
@@ -148,6 +155,22 @@ const UserRoute = [
         ),
     },
     {
+        path: "/grammar-exercise/history",
+        element: (
+        <PrivateRoute>
+            <GrammarExerciseAttemptHistory />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/grammar-exercise/history/:attemptId",
+        element: (
+        <PrivateRoute>
+            <GrammarExerciseAttemptHistoryDetail />
+        </PrivateRoute>
+        ),
+    },
+    {
         path: "/grammar-exercise/:slug",
         element: (
         <PrivateRoute>
@@ -164,6 +187,22 @@ const UserRoute = [
         ),
     },
     {
+        path: "/vocabulary-exercise/history",
+        element: (
+        <PrivateRoute>
+            <VocabularyExerciseAttemptHistory />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/vocabulary-exercise/history/:attemptId",
+        element: (
+        <PrivateRoute>
+            <VocabularyExerciseAttemptHistoryDetail />
+        </PrivateRoute>
+        ),
+    },
+    {
         path: "/vocabulary-exercise/:slug",
         element: (
         <PrivateRoute>
@@ -176,6 +215,22 @@ const UserRoute = [
         element: (
         <PrivateRoute>
             <PronunciationExercise />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/pronunciation-exercise/history",
+        element: (
+        <PrivateRoute>
+            <PronunciationExerciseAttemptHistory />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/pronunciation-exercise/history/:attemptId",
+        element: (
+        <PrivateRoute>
+            <PronunciationExerciseAttemptHistoryDetail />
         </PrivateRoute>
         ),
     },
@@ -216,6 +271,14 @@ const UserRoute = [
         element: (
         <PrivateRoute>
             <WritingAI />
+        </PrivateRoute>
+        ),
+    },
+    {
+        path: "/coach",
+        element: (
+        <PrivateRoute>
+            <Coach />
         </PrivateRoute>
         ),
     },

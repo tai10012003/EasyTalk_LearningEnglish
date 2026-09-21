@@ -4,7 +4,7 @@ import { GrammarExerciseService } from "@/services/GrammarExerciseService.jsx";
 
 function GrammarExercise() {
     const fetchGrammarExercise = async (page = 1) => {
-        const data = await GrammarExerciseService.fetchGrammarExercise(page, 6);
+        const data = await GrammarExerciseService.fetchGrammarExercise(page, 6, { admin: true });
         return {
             lessons: data.data || [],
             currentPage: data.currentPage,
@@ -25,6 +25,7 @@ function GrammarExercise() {
                 dataKey="lessons"
                 addUrl="/admin/grammar-exercise/add"
                 updateUrl="/admin/grammar-exercise/update"
+                translateUrl="/admin/grammar-exercise/translate"
             />
         </div>
     );

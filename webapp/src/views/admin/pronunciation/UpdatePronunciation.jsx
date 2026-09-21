@@ -59,7 +59,8 @@ const UpdatePronunciation = () => {
                 const res = await AuthService.fetchWithAuth(`${import.meta.env.VITE_API_URL}/pronunciation/api/${id}`, {
                     method: "GET",
                 });
-                const data = await res.json();
+                const responseData = await res.json();
+                const data = responseData.data;
                 setPronunciation(data);
             } catch (err) {
                 console.error("Error fetching pronunciation:", err);
@@ -71,8 +72,8 @@ const UpdatePronunciation = () => {
     useEffect(() => {
         const fetchPronunciations = async () => {
             try {
-                const data = await PronunciationService.fetchPronunciations(1, 10000);
-                setExistingPronunciations(data.pronunciations || []);
+                const data = await PronunciationService.fetchPronunciations(1, 10000, { admin: true });
+                setExistingPronunciations(data.data.pronunciations || []);
             } catch (err) {
                 console.error("Error fetching pronunciations:", err);
             }

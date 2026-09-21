@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const getVietnamDate = (date) => {
     const vnDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Ho_Chi_Minh" }));
@@ -9,6 +10,7 @@ const getVietnamDate = (date) => {
 };
 
 const FlashCardGraph = ({ dailyReviews }) => {
+    const { t } = useTranslation();
     const [isModalOpen, setIsModalOpen] = useState(false);
     const today = new Date();
 
@@ -26,7 +28,7 @@ const FlashCardGraph = ({ dailyReviews }) => {
         weekStartDate.setDate(startDate.getDate() + week * 7);
         const month = weekStartDate.getMonth();
         const year = weekStartDate.getFullYear();
-        const monthNames = ['Th1', 'Th2', 'Th3', 'Th4', 'Th5', 'Th6', 'Th7', 'Th8', 'Th9', 'Th10', 'Th11', 'Th12'];
+        const monthNames = t("flashcardPage.graph.months", { returnObjects: true });
         if (month !== lastMonth) {
             const label = `${monthNames[month]}/${year.toString().slice(-2)}`;
             monthLabels.push(label);
@@ -35,7 +37,7 @@ const FlashCardGraph = ({ dailyReviews }) => {
         }
     }
 
-    const visibleDayLabels = ['T2', '', 'T4', '', 'T6', '', 'CN'];
+    const visibleDayLabels = t("flashcardPage.graph.days", { returnObjects: true });
     const labels = visibleDayLabels.map((label, idx) => (
         <div key={idx} className="flashcard-contrib-day-label">{label}</div>
     ));
@@ -65,7 +67,11 @@ const FlashCardGraph = ({ dailyReviews }) => {
                     key={`${week}-${row}`}
                     className={`flashcard-contrib-square ${dateStr === todayStr ? 'today' : ''}`}
                     style={{ backgroundColor: color }}
-                    title={`${dateStr}: ${count} lần ôn tập ${dateStr === todayStr ? ' (Hôm nay)' : ''}`}
+                    title={t("flashcardPage.graph.reviewCount", {
+                        date: dateStr,
+                        count,
+                        today: dateStr === todayStr ? t("flashcardPage.graph.todaySuffix") : ""
+                    })}
                 />
             );
         }
@@ -81,7 +87,7 @@ const FlashCardGraph = ({ dailyReviews }) => {
                 key={level}
                 className="flashcard-contrib-legend-sample"
                 style={{ backgroundColor: color }}
-                title={`${sampleCount} lần`}
+                title={t("flashcardPage.graph.sampleTitle", { count: sampleCount })}
             />
         );
     });
@@ -106,15 +112,15 @@ const FlashCardGraph = ({ dailyReviews }) => {
                 ))}
             </div>
             <div className="flashcard-contrib-legend">
-                <span>Ít</span>
+                <span>{t("flashcardPage.graph.less")}</span>
                 <div className="flashcard-contrib-legend-samples">{legendSamples}</div>
-                <span>Nhiều</span>
+                <span>{t("flashcardPage.graph.more")}</span>
             </div>
             <div className="flashcard-contrib-legend-today">
                 <div className="flashcard-contrib-legend-today-sample"></div>
-                <span>Hôm nay</span>
+                <span>{t("flashcardPage.graph.today")}</span>
             </div>
-            <a onClick={() => setIsModalOpen(true)} className="flashcard-contrib-footer">Tìm hiểu cách chúng tôi tính đóng góp</a>
+            <a onClick={() => setIsModalOpen(true)} className="flashcard-contrib-footer">{t("flashcardPage.graph.footer")}</a>
             {isModalOpen && (
                 <div className="custom-modal-overlay" onClick={() => setIsModalOpen(false)}>
                     <div
@@ -122,36 +128,36 @@ const FlashCardGraph = ({ dailyReviews }) => {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="custom-modal-header">
-                            <h5>Cách tính đóng góp ôn tập Flashcard</h5>
+                            <h5>{t("flashcardPage.graph.title")}</h5>
                             <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                                 &times;
                             </button>
                         </div>
                         <div className="custom-modal-body">
-                            <p>Đồ thị đóng góp hiển thị lịch sử ôn tập flashcard của bạn trong 52 tuần qua. Mỗi ô vuông đại diện cho một ngày, và màu sắc thể hiện số lần bạn đã đánh giá độ khó của flashcard trong ngày đó.</p>
+                            <p>{t("flashcardPage.graph.intro")}</p>
                             <p>
-                                <strong>Cách tính:</strong>
+                                <strong>{t("flashcardPage.graph.howTitle")}</strong>
                             </p>
                             <ul>
-                                <li>Mỗi lần bạn chọn "Dễ", "Thường" hoặc "Khó" cho một flashcard trong phần review của danh sách flashcard do bạn tạo, hệ thống sẽ ghi nhận 1 lần ôn tập cho ngày hôm đó.</li>
-                                <li>Chỉ ghi nhận khi bạn ôn tập flashcard của chính mình (trong tab "Dành cho bạn"). Ôn tập flashcard của người khác (tab "Khám phá") không được tính vào đồ thị.</li>
-                                <li>Màu sắc của ô vuông dựa trên số lần ôn tập so với ngày có nhiều nhất trong khoảng thời gian hiển thị:</li>
+                                <li>{t("flashcardPage.graph.rule1")}</li>
+                                <li>{t("flashcardPage.graph.rule2")}</li>
+                                <li>{t("flashcardPage.graph.rule3")}</li>
                                 <ul>
-                                    <li>0 lần: Xám nhạt</li>
-                                    <li>Càng gần số lần nhiều nhất: Màu xanh càng đậm (tối)</li>
-                                    <li>Ví dụ: Nếu ngày nhiều nhất là 100 lần, thì 100 lần = xanh tối nhất, 50 lần = xanh trung bình, và giảm dần.</li>
+                                    <li>{t("flashcardPage.graph.color0")}</li>
+                                    <li>{t("flashcardPage.graph.colorHigh")}</li>
+                                    <li>{t("flashcardPage.graph.colorExample")}</li>
                                 </ul>
                             </ul>
-                            <p><strong>Lưu ý:</strong></p>
+                            <p><strong>{t("flashcardPage.graph.noteTitle")}</strong></p>
                             <ul>
-                                <li>Đồ thị được cập nhật hàng ngày dựa trên múi giờ Asia/Ho_Chi_Minh.</li>
-                                <li>Tuần bắt đầu từ thứ Hai (T2) và kết thúc vào Chủ Nhật (CN).</li>
-                                <li>Nhãn tháng hiển thị để giúp bạn định hướng thời gian. Màu sắc thay đổi tương đối dựa trên dữ liệu hiện tại.</li>
+                                <li>{t("flashcardPage.graph.note1")}</li>
+                                <li>{t("flashcardPage.graph.note2")}</li>
+                                <li>{t("flashcardPage.graph.note3")}</li>
                             </ul>
-                            <p>🎉 Hãy duy trì thói quen ôn tập để đồ thị của bạn ngày càng "xanh" hơn!</p>
+                            <p>{t("flashcardPage.graph.closing")}</p>
                         </div>
                         <div className="custom-modal-footer">
-                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>{t("flashcardPage.graph.close")}</button>
                         </div>
                     </div>
                 </div>

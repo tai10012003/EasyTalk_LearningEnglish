@@ -1,20 +1,27 @@
 const API_URL = import.meta.env.VITE_API_URL;
 import { AuthService } from './AuthService.jsx';
+import Swal from "sweetalert2";
 let hasShownAlert = false;
+
+const getLanguageQuery = () => {
+    const language = localStorage.getItem("language");
+    return language === "en" ? "&lang=en" : "";
+};
 
 export const PrizeService = {
     async getAllPrizes() {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/prize/api/prizes`, {
+            const langQuery = getLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/prize/api/prizes${langQuery}`, {
                 method: "GET",
             });
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.message || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
             hasShownAlert = false;
-            return data.prizes || [];
+            return responseData.prizes || responseData.data?.prizes || responseData.data || [];
         } catch (err) {
             console.error("Error fetching prizes:", err);
             if (!hasShownAlert) {
@@ -31,19 +38,24 @@ export const PrizeService = {
         }
     },
 
-    async fetchPrizes(page = 1, limit = 12) {
+    async fetchPrizes(page = 1, limit = 12, { includeLanguage = false } = {}) {
         try {
-            let query = `?page=${page}&limit=${limit}`;
+            let query = `?page=${page}&limit=${limit}${includeLanguage ? getLanguageQuery() : ""}`;
             const res = await AuthService.fetchWithAuth(`${API_URL}/prize/api/prize-list${query}`, {
                 method: 'GET',
             });
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
             hasShownAlert = false;
-            console.log('Fetch success:', data);
-            return data;
+            const prizes = responseData.data?.prizes || responseData.prizes || responseData.data || [];
+            const meta = responseData.meta || responseData.data?.meta || {};
+            return {
+                data: prizes,
+                currentPage: meta.currentPage || responseData.data?.currentPage || responseData.currentPage || page,
+                totalPages: meta.totalPages || responseData.data?.totalPages || responseData.totalPages || 1,
+            };
         } catch (error) {
             console.error("Error fetching prizes:", error.message);
             if (!hasShownAlert) {
@@ -58,13 +70,29 @@ export const PrizeService = {
         }
     },
 
+    async getPrizeById(id, { includeLanguage = false } = {}) {
+        try {
+            const langQuery = includeLanguage ? getLanguageQuery().replace("&", "?") : "";
+            const res = await AuthService.fetchWithAuth(`${API_URL}/prize/api/${id}${langQuery}`, {
+                method: "GET",
+            });
+            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+            const responseData = await res.json();
+            return responseData.data || responseData;
+        } catch (err) {
+            console.error("Error fetching prize:", err);
+            throw err;
+        }
+    },
+
     async checkAndUnlockPrizes() {
         try {
             const res = await AuthService.fetchWithAuth(`${API_URL}/prize/check-prize`, {
                 method: "POST",
             });
             if (!res.ok) throw new Error("Check prize failed");
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             if (data.newPrizes?.length > 0) {
                 const names = data.newPrizes.map(p => p.name).join(", ");
                 Swal.fire({
@@ -87,7 +115,9 @@ export const PrizeService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding prize:", err);
             throw err;
@@ -101,7 +131,9 @@ export const PrizeService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating prize:", err);
             throw err;
@@ -114,7 +146,9 @@ export const PrizeService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting prize:", err);
             throw err;

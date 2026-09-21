@@ -1,0 +1,268 @@
+const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
+const GrammarRepository = require('../repositories/grammarRepository');
+const { invalidateGrammarCache } = require('../utils/cacheHelper');
+const { Grammar } = require('../models/grammar');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
+
+class GrammarService {
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new GrammarRepository();
+        if (!options.imageService) {
+            throw new Error("GrammarService requires imageService");
+        }
+        this.imageService = options.imageService;
+        this.cache = options.cacheService || cache;
+        this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
+    }
+
+    getUserProgressService() {
+        if (!this.userProgressService) {
+            throw new Error("GrammarService requires userProgressService");
+        }
+        return this.userProgressService;
+    }
+
+    async getGrammarList(page = 1, limit = 12, search = "", role = "user", lang = "vi") {
+        const cacheKey = cacheNs.listKey('grammar', { page, limit, search, role });
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammar', role), cacheNs.listTags('grammar')), async () => {
+            const skip = (page - 1) * limit;
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
+            }
+            if (search) filter.title = { $regex: search, $options: "i" };
+            const { grammars, total } = await this.repository.findAll(filter, skip, limit);
+            return { grammars, totalGrammars: total };
+        });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                grammars: await this.englishTranslationService.applyTranslations("grammar", result.grammars, lang)
+            };
+        }
+        return result;
+    }
+
+    async getGrammar(id) {
+        return await this.cache.getOrSet(cacheNs.itemKey('grammar', id), withTags(policies.contentDetail('grammar'), cacheNs.itemTags('grammar', id)), async () => {
+            return await this.repository.findById(id);
+        });
+    }
+
+    async getGrammarBySlug(slug) {
+        return await this.cache.getOrSet(cacheNs.slugKey('grammar', slug), withTags(policies.contentDetail('grammar'), cacheNs.itemTags('grammar', null, slug)), async () => {
+            return await this.repository.findBySlug(slug);
+        });
+    }
+
+    async getLocalizedGrammarBySlug(slug, lang = "vi") {
+        const grammar = await this.getGrammarBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("grammar", grammar, lang);
+        }
+        return grammar;
+    }
+
+    async _getOrCreateUserProgress(userId) {
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstGrammarPage = await this.getGrammarList(1, 1);
+            const firstGrammar = (firstGrammarPage && firstGrammarPage.grammars && firstGrammarPage.grammars[0]) ? firstGrammarPage.grammars[0] : null;
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { grammar: firstGrammar ? firstGrammar._id : null }});
+        } else if (!Array.isArray(userProgress.unlockedGrammars) || userProgress.unlockedGrammars.length === 0) {
+            const firstGrammarPage = await this.getGrammarList(1, 1);
+            const firstGrammar = firstGrammarPage?.grammars?.[0] || null;
+            if (firstGrammar?._id) {
+                userProgress.unlockedGrammars = [firstGrammar._id];
+                await userProgressService.updateUserProgress(userProgress);
+                userProgress = await userProgressService.getUserProgressByUserId(userId);
+            }
+        }
+        return userProgress;
+    }
+
+    async getGrammarDetails(userId, grammarId, lang = "vi") {
+        const grammar = await this.getGrammar(grammarId);
+        if (!grammar) {
+            return { status: 404, data: { message: "Grammar not found" } };
+        }
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
+        if (!isUnlocked) {
+            return { status: 403, data: { success: false, message: "This grammar is locked for you. Please complete previous grammars first." } };
+        }
+        const localizedGrammar = lang === "en" && this.englishTranslationService
+            ? await this.englishTranslationService.applyTranslationToItem("grammar", grammar, lang)
+            : grammar;
+        return { status: 200, data: { success: true, data: { grammar: localizedGrammar } } };
+    }
+
+    async getGrammarDetailsBySlug(userId, slug, lang = "vi") {
+        const grammar = await this.getGrammarBySlug(slug);
+        if (!grammar) {
+            return { status: 404, data: { success: false, message: "Grammar not found" } };
+        }
+        return await this.getGrammarDetails(userId, grammar._id, lang);
+    }
+
+    _buildRoadmapItem(grammar, unlockedIds, studyStats) {
+        const id = grammar._id.toString();
+        const stats = studyStats[id] || {};
+        const quizzes = Array.isArray(grammar.quizzes) ? grammar.quizzes : [];
+        return {
+            _id: grammar._id,
+            title: grammar.title,
+            description: grammar.description,
+            category: grammar.category,
+            level: grammar.level,
+            images: grammar.images,
+            slug: grammar.slug,
+            sort: grammar.sort,
+            quizCount: grammar.quizCount ?? quizzes.length,
+            isUnlocked: unlockedIds.has(id),
+            isCurrent: false,
+            studyCount: stats.studyCount || 0,
+            firstStudiedAt: stats.firstStudiedAt || null,
+            lastStudiedAt: stats.lastStudiedAt || null
+        };
+    }
+
+    async _getRoadmapBaseData() {
+        const cacheKey = cacheNs.key('grammar', 'roadmap', { query: { role: 'user' } });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('grammar', 'user'), cacheNs.listTags('grammar')), async () => {
+            const filter = { display: true };
+            if (typeof this.repository.findRoadmapItems === "function") {
+                const { grammars, total } = await this.repository.findRoadmapItems(filter);
+                return { grammars, totalGrammars: total };
+            }
+            return await this.getGrammarList(1, 10000, "", "user");
+        });
+    }
+
+    async getGrammarRoadmap(userId, lang = "vi") {
+        const result = await this._getRoadmapBaseData();
+        let grammars = result.grammars || [];
+        const totalGrammars = result.total ?? result.totalGrammars ?? grammars.length;
+        if (lang === "en" && this.englishTranslationService) {
+            grammars = await this.englishTranslationService.applyTranslations("grammar", grammars, lang);
+        }
+        const userProgress = await this._getOrCreateUserProgress(userId);
+        const unlockedIds = new Set((userProgress.unlockedGrammars || []).map(id => id.toString()));
+        const studyStats = userProgress.grammarStudyStats || {};
+        const items = grammars.map(grammar => this._buildRoadmapItem(grammar, unlockedIds, studyStats));
+        const unlockedCount = items.filter(item => item.isUnlocked).length;
+        const currentIndex = items.map(item => item.isUnlocked).lastIndexOf(true);
+        if (currentIndex >= 0) {
+            items[currentIndex].isCurrent = true;
+        }
+        return {
+            status: 200,
+            data: {
+                success: true,
+                data: {
+                    items,
+                    progress: {
+                        unlockedCount,
+                        totalCount: totalGrammars,
+                        percent: totalGrammars > 0 ? Math.round((unlockedCount / totalGrammars) * 100) : 0
+                    }
+                }
+            }
+        };
+    }
+
+    async completeGrammar(userId, grammarId) {
+        const grammar = await this.getGrammar(grammarId);
+        if (!grammar) {
+            return { status: 404, data: { success: false, message: "Grammar not found" } };
+        }
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isGrammarUnlocked = (userProgress.unlockedGrammars || []).some(s => s.toString() == grammarId.toString());
+        if (!isGrammarUnlocked) {
+            return { status: 403, data: { success: false, message: "You cannot complete a locked grammar." } };
+        }
+        const { nextItem: nextGrammar, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: grammar,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextGrammar.bind(userProgressService),
+            unlockedField: "unlockedGrammars"
+        });
+        await userProgressService.recordGrammarStudy(userId, grammarId);
+        const latestProgress = await userProgressService.getUserProgressByUserId(userId);
+        const grammarStats = latestProgress?.grammarStudyStats?.[grammarId.toString()] || {};
+        return {
+            status: 200,
+            data: {
+                success: true,
+                message: nextGrammar ? "Grammar completed. Next grammar unlocked." : "Grammar completed. You have finished all grammars.",
+                userProgress: latestProgress || completedProgress,
+                studyStats: {
+                    studyCount: grammarStats.studyCount || 0,
+                    firstStudiedAt: grammarStats.firstStudiedAt || null,
+                    lastStudiedAt: grammarStats.lastStudiedAt || null
+                }
+            }
+        };
+    }
+
+    async insertGrammar(grammarData, file = null) {
+        let imageUrl = null;
+        if (file) {
+            const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'grammar');
+            imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
+        } else if (grammarData.images) {
+            imageUrl = grammarData.images;
+        }
+        const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
+        const result = await this.repository.insert(document);
+        await invalidateGrammarCache({ id: result.insertedId, slug: document.slug });
+        return { status: 201, data: { message: "Bài học ngữ pháp đã được thêm thành công !", result } };
+    }
+
+    async updateGrammar(id, grammarData, file = null) {
+        const existing = await this.getGrammar(id);
+        if (!existing) return { status: 404, data: { message: "Bài học ngữ pháp không tìm thấy." } };
+        let imageUrl = existing.images || grammarData.images || "";
+        if (file) {
+            const existingPublicId = existing.images ? this.imageService.extractPublicIdFromUrl(existing.images) : null;
+            if (existingPublicId) {
+                imageUrl = await this.imageService.uploadReplacementImage(file, existingPublicId);
+            } else {
+                const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'grammar');
+                imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
+            }
+        }
+        const document = Grammar.buildDocument({ ...grammarData, images: imageUrl });
+        delete document.createdAt;
+        document.updatedAt = new Date();
+        const result = await this.repository.update(id, document);
+        await invalidateGrammarCache({ id, slugs: [existing.slug, document.slug] });
+        return { status: 200, data: { message: "Bài học ngữ pháp đã được cập nhật thành công !", result } };
+    }
+
+    async deleteGrammar(id) {
+        const existing = await this.getGrammar(id);
+        if (!existing) return { status: 404, data: { message: "Bài học ngữ pháp không tìm thấy." } };
+        if (existing.images) {
+            const publicId = this.imageService.extractPublicIdFromUrl(existing.images);
+            if (publicId) await this.imageService.deleteImage(publicId);
+        }
+        await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("grammar", id);
+        }
+        await invalidateGrammarCache({ id, slug: existing.slug });
+        return { status: 200, data: { message: "Bài học ngữ pháp đã xóa thành công !" } };
+    }
+}
+
+module.exports = GrammarService;

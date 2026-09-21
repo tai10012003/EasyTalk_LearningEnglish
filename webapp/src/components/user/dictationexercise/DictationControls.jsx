@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 function DictationControls({
     playSentence,
@@ -17,6 +18,7 @@ function DictationControls({
     setRepeatCount,
     currentSentence,
 }) {
+    const { t } = useTranslation();
     const [skipTimer, setSkipTimer] = useState(20);
     const [canSkip, setCanSkip] = useState(false);
     const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -73,19 +75,13 @@ function DictationControls({
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [playSentence, hotkey]);
 
-    useEffect(() => {
-        if (showNext && currentSentence) {
-            fetchVietnameseTranslation(currentSentence);
-        }
-    }, [showNext, currentSentence]);
-
-    const fetchVietnameseTranslation = async (sentence) => {
+    const fetchVietnameseTranslation = useCallback(async (sentence) => {
         if (!sentence || sentence.trim() === "") {
-            setVietnameseTranslation("Không có nội dung để dịch");
+            setVietnameseTranslation(t("dictationExercisePage.controls.noTranslationContent"));
             return;
         }
         try {
-            let cleanedSentence = sentence.replace(/\?/g, "? ").replace(/\!/g, "! ").replace(/\./g, ". ").replace(/\,/g, ", ").replace(/\;/g, "; ").replace(/\:/g, ": ").replace(/\s+/g, " ").trim();
+            let cleanedSentence = sentence.replace(/\?/g, "? ").replace(/!/g, "! ").replace(/\./g, ". ").replace(/,/g, ", ").replace(/;/g, "; ").replace(/:/g, ": ").replace(/\s+/g, " ").trim();
             if (cleanedSentence.length > 400) {
                 cleanedSentence = cleanedSentence.substring(0, 400) + "...";
             }
@@ -98,15 +94,21 @@ function DictationControls({
             const data = await response.json();
             if (data && data[0] && data[0][0] && data[0][0][0]) {
                 const translatedText = data[0].map(item => item[0]).join("").trim();
-                setVietnameseTranslation(translatedText || "Không thể dịch câu này");
+                setVietnameseTranslation(translatedText || t("dictationExercisePage.controls.translationUnavailable"));
             } else {
-                setVietnameseTranslation("Không thể dịch câu này");
+                setVietnameseTranslation(t("dictationExercisePage.controls.translationUnavailable"));
             }
         } catch (error) {
             console.error("Error fetching translation:", error);
-            setVietnameseTranslation("Lỗi dịch (kiểm tra kết nối mạng)");
+            setVietnameseTranslation(t("dictationExercisePage.controls.translationError"));
         }
-    };
+    }, [t]);
+
+    useEffect(() => {
+        if (showNext && currentSentence) {
+            fetchVietnameseTranslation(currentSentence);
+        }
+    }, [showNext, currentSentence, fetchVietnameseTranslation]);
 
     const fetchWordDefinition = async (word) => {
         if (wordDefinitions[word]) return;
@@ -156,8 +158,8 @@ function DictationControls({
         setShowSettingsModal(false);
         Swal.fire({
             icon: "success",
-            title: "Lưu thành công!",
-            text: "Cài đặt của bạn đã được áp dụng.",
+            title: t("dictationExercisePage.controls.saveSuccessTitle"),
+            text: t("dictationExercisePage.controls.saveSuccessText"),
             confirmButtonText: "OK",
             timer: 2000
         });
@@ -206,7 +208,7 @@ function DictationControls({
                     <button 
                         id="dictation-audio" 
                         onClick={() => playSentence(1)}
-                        title={`Bấm ${hotkey} để phát lại câu`}
+                        title={t("dictationExercisePage.controls.replayTitle", { hotkey })}
                     >
                         <i className="fas fa-volume-up"></i>
                     </button>
@@ -214,7 +216,7 @@ function DictationControls({
                         htmlFor="dictation-speedControl"
                         className="dictation-speed-label"
                     >
-                        Tốc độ âm thanh:
+                        {t("dictationExercisePage.controls.audioSpeed")}
                     </label>
                     <input
                         type="range"
@@ -230,7 +232,7 @@ function DictationControls({
                 <button 
                     id="dictation-settings-button"
                     onClick={() => setShowSettingsModal(true)}
-                    title="Cài đặt"
+                    title={t("dictationExercisePage.controls.settings")}
                 >
                     <i className="fas fa-cog"></i>
                 </button>
@@ -240,7 +242,7 @@ function DictationControls({
                 value={userInput}
                 onChange={(e) => setUserInput(e.target.value)}
                 onKeyDown={handleKeyDownInTextarea}
-                placeholder="Nhập lại nội dung bạn nghe được..."
+                placeholder={t("dictationExercisePage.controls.inputPlaceholder")}
                 rows="3"
             />
             {!result ? (
@@ -251,14 +253,14 @@ function DictationControls({
             {showNext && currentSentence && (
                 <div className="dictation-meaning-card">
                     <div className="dictation-card-title">
-                        <i className="fas fa-book"></i> Nghĩa của câu
+                        <i className="fas fa-book"></i> {t("dictationExercisePage.controls.sentenceMeaning")}
                     </div>
                     <div className="dictation-card-content">
                         <div className="dictation-english-sentence">
                             {renderSentenceWithTooltips()}
                         </div>
                         <div className="dictation-vietnamese-translation">
-                            <i className="fas fa-language"></i> {vietnameseTranslation || "Đang dịch..."}
+                            <i className="fas fa-language"></i> {vietnameseTranslation || t("dictationExercisePage.controls.translating")}
                         </div>
                     </div>
                 </div>
@@ -266,7 +268,7 @@ function DictationControls({
             {!showNext ? (
                 <>
                     <button id="dictation-checkButton" onClick={checkDictation}>
-                        <i className="fas fa-check me-2"></i> Kiểm tra
+                        <i className="fas fa-check me-2"></i> {t("dictationExercisePage.controls.check")}
                     </button>
                     <button id="dictation-skipButton" onClick={skipSentence} disabled={!canSkip}
                         style={{
@@ -275,19 +277,19 @@ function DictationControls({
                         }}
                     >
                         <i className="fa-solid fa-forward-step"></i>
-                        {canSkip ? 'Bỏ qua' : `Bỏ qua (${skipTimer}s)`}
+                        {canSkip ? t("dictationExercisePage.controls.skip") : t("dictationExercisePage.controls.skipCountdown", { seconds: skipTimer })}
                     </button>
                 </>
             ) : (
                 <button id="dictation-nextButton" onClick={nextSentence}>
-                    <i className="fas fa-arrow-right"></i> Tiếp theo
+                    <i className="fas fa-arrow-right"></i> {t("dictationExercisePage.controls.next")}
                 </button>
             )}
             {showSettingsModal && (
                 <div className="dictation-modal-overlay" onClick={() => setShowSettingsModal(false)}>
                     <div className="dictation-modal-content" onClick={(e) => e.stopPropagation()}>
                         <div className="dictation-modal-header">
-                            <h3>Cài đặt</h3>
+                            <h3>{t("dictationExercisePage.controls.settings")}</h3>
                             <button 
                                 className="dictation-modal-close"
                                 onClick={() => setShowSettingsModal(false)}
@@ -298,23 +300,23 @@ function DictationControls({
                         <div className="dictation-modal-body">
                             <div className="dictation-setting-item">
                                 <label htmlFor="dictation-repeat-select">
-                                    Số lần phát sau khi qua câu mới:
+                                    {t("dictationExercisePage.controls.repeatAfterNext")}
                                 </label>
                                 <select 
                                     id="dictation-repeat-select"
                                     value={tempRepeatCount}
                                     onChange={(e) => setTempRepeatCount(Number(e.target.value))}
                                 >
-                                    <option value={1}>1 lần</option>
-                                    <option value={2}>2 lần</option>
-                                    <option value={3}>3 lần</option>
-                                    <option value={4}>4 lần</option>
-                                    <option value={5}>5 lần</option>
+                                    <option value={1}>{t("dictationExercisePage.controls.repeatCount", { count: 1 })}</option>
+                                    <option value={2}>{t("dictationExercisePage.controls.repeatCount", { count: 2 })}</option>
+                                    <option value={3}>{t("dictationExercisePage.controls.repeatCount", { count: 3 })}</option>
+                                    <option value={4}>{t("dictationExercisePage.controls.repeatCount", { count: 4 })}</option>
+                                    <option value={5}>{t("dictationExercisePage.controls.repeatCount", { count: 5 })}</option>
                                 </select>
                             </div>
                             <div className="dictation-setting-item">
                                 <label htmlFor="dictation-hotkey-select">
-                                    Phím tắt phát lại:
+                                    {t("dictationExercisePage.controls.replayHotkey")}
                                 </label>
                                 <select 
                                     id="dictation-hotkey-select"
@@ -332,7 +334,7 @@ function DictationControls({
                                 className="dictation-modal-save"
                                 onClick={saveSettings}
                             >
-                                Lưu cài đặt
+                                {t("dictationExercisePage.controls.saveSettings")}
                             </button>
                         </div>
                     </div>

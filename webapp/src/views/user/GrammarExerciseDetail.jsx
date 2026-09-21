@@ -8,8 +8,10 @@ import GrammarExerciseCarousel from "@/components/user/grammarexercise/GrammarEx
 import GrammarExerciseResultScreen from "@/components/user/grammarexercise/GrammarExerciseResultScreen.jsx";
 import GrammarExerciseHistory from "@/components/user/grammarexercise/GrammarExerciseHistory.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const GrammarExerciseDetail = () => {
+    const { t, i18n } = useTranslation();
     const { slug } = useParams();
     const [exerciseId, setExerciseId] = useState(null);
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
@@ -24,6 +26,9 @@ const GrammarExerciseDetail = () => {
     const [showResult, setShowResult] = useState(false);
     const [exerciseTitle, setExerciseTitle] = useState("");
     const [timer, setTimer] = useState(null);
+    const [attemptId, setAttemptId] = useState(null);
+    const [isStartingAttempt, setIsStartingAttempt] = useState(false);
+    const [isFinishingAttempt, setIsFinishingAttempt] = useState(false);
     const allowNavigationRef = React.useRef(false);
     const [exerciseCompleted, setExerciseCompleted] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
@@ -33,13 +38,7 @@ const GrammarExerciseDetail = () => {
     const lastInteractionRef = useRef(Date.now());
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
-
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
+    const hasFinishedAttemptRef = useRef(false);
 
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
@@ -54,6 +53,13 @@ const GrammarExerciseDetail = () => {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -83,11 +89,11 @@ const GrammarExerciseDetail = () => {
             if (!allowNavigationRef.current && hasStarted && !exerciseCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện ngữ pháp. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("grammarExercisePage.detail.leaveWarningTitle"),
+                    text: t("grammarExercisePage.detail.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("grammarExercisePage.detail.leaveConfirm"),
+                    cancelButtonText: t("grammarExercisePage.detail.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -105,7 +111,7 @@ const GrammarExerciseDetail = () => {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, hasStarted, exerciseCompleted]);
+    }, [navigator, hasStarted, exerciseCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -122,7 +128,7 @@ const GrammarExerciseDetail = () => {
     }, [exerciseCompleted, hasStarted]);
 
     useEffect(() => {
-        document.title = "Chi tiết luyện tập ngữ pháp - EasyTalk";
+        document.title = t("grammarExercisePage.detail.documentTitle");
         const fetchExerciseData = async () => {
             try {
                 setIsLoading(true);
@@ -130,13 +136,13 @@ const GrammarExerciseDetail = () => {
                 if (data && data.questions && data.questions.length > 0) {
                     setExerciseId(data._id);
                     setQuestions(data.questions);
-                    setExerciseTitle(data.title || "Bài luyện tập ngữ pháp");
+                    setExerciseTitle(data.title || t("grammarExercisePage.detail.defaultTitle"));
                     const initialResults = data.questions.map(question => ({
                         question: question.question,
-                        userAnswer: "Chưa trả lời",
-                        correctAnswer: question.correctAnswer,
+                        userAnswer: t("grammarExercisePage.detail.unanswered"),
+                        correctAnswer: null,
                         isCorrect: false,
-                        explanation: question.explanation,
+                        explanation: null,
                         questionType: question.type
                     }));
                     setQuestionResults(initialResults);
@@ -152,7 +158,105 @@ const GrammarExerciseDetail = () => {
         if (slug) {
             fetchExerciseData();
         }
-    }, [slug]);
+    }, [slug, t, i18n.language]);
+
+    const formatTime = (seconds) => {
+        const minutes = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
+    };
+
+    const handleStartExercise = async () => {
+        if (!exerciseId) return;
+        try {
+            setIsStartingAttempt(true);
+            const attempt = await GrammarExerciseService.startGrammarExerciseAttempt(exerciseId);
+            setAttemptId(attempt.attemptId);
+            if (Array.isArray(attempt.questions) && attempt.questions.length > 0) {
+                setQuestions(attempt.questions);
+                setQuestionResults(attempt.questions.map(question => ({
+                    question: question.question,
+                    userAnswer: t("grammarExercisePage.detail.unanswered"),
+                    correctAnswer: null,
+                    isCorrect: false,
+                    explanation: null,
+                    questionType: question.type
+                })));
+                setCurrentQuestionIndex(0);
+            }
+            setTimeRemaining(selectedDuration);
+            setHasStarted(true);
+        } catch (error) {
+            console.error("Error starting grammar exercise attempt:", error);
+            Swal.fire({
+                icon: "error",
+                title: t("grammarExercisePage.detail.errorTitle"),
+                text: error.message || t("grammarExercisePage.detail.errorText")
+            });
+        } finally {
+            setIsStartingAttempt(false);
+        }
+    };
+
+    const handleCheckAnswer = useCallback(async (questionIndex, userAnswer) => {
+        if (!attemptId) {
+            throw new Error("Attempt has not been started.");
+        }
+        return await GrammarExerciseService.checkGrammarExerciseQuestion(attemptId, questionIndex, userAnswer);
+    }, [attemptId]);
+
+    const handleAnswerSubmit = useCallback((questionIndex, result) => {
+        setQuestionResults(prev => {
+            const newResults = [...prev];
+            newResults[questionIndex] = {
+                ...newResults[questionIndex],
+                userAnswer: result.userAnswer || t("grammarExercisePage.detail.noAnswer"),
+                correctAnswer: result.correctAnswer,
+                isCorrect: result.isCorrect,
+                explanation: result.explanation
+            };
+            return newResults;
+        });
+        if (typeof result.correctCount === "number") {
+            setCorrectAnswers(result.correctCount);
+        } else if (result.isCorrect) {
+            setCorrectAnswers(prev => prev + 1);
+        }
+    }, [t]);
+
+    const handleQuestionNavigation = useCallback((index) => {
+        setCurrentQuestionIndex(index);
+    }, []);
+
+    const handleSubmitQuiz = useCallback(async () => {
+        if (timer) {
+            clearInterval(timer);
+        }
+        if (attemptId && !hasFinishedAttemptRef.current) {
+            try {
+                setIsFinishingAttempt(true);
+                const summary = await GrammarExerciseService.finishGrammarExerciseAttempt(attemptId);
+                if (typeof summary.correctCount === "number") {
+                    setCorrectAnswers(summary.correctCount);
+                } else if (typeof summary.correctAnswers === "number") {
+                    setCorrectAnswers(summary.correctAnswers);
+                }
+                hasFinishedAttemptRef.current = true;
+            } catch (error) {
+                console.error("Error finishing grammar exercise attempt:", error);
+                Swal.fire({
+                    icon: "error",
+                    title: t("grammarExercisePage.detail.errorTitle"),
+                    text: error.message || t("grammarExercisePage.detail.errorText")
+                });
+                return;
+            } finally {
+                setIsFinishingAttempt(false);
+            }
+        }
+        setIsCompleted(true);
+        setShowResult(true);
+    }, [timer, attemptId, t]);
 
     useEffect(() => {
         if (!isCompleted && hasStarted && questions.length > 0) {
@@ -173,40 +277,7 @@ const GrammarExerciseDetail = () => {
                 }
             };
         }
-    }, [isCompleted, hasStarted, questions]);
-
-    const formatTime = (seconds) => {
-        const minutes = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${minutes}:${secs < 10 ? '0' + secs : secs}`;
-    };
-
-    const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect) => {
-        setQuestionResults(prev => {
-            const newResults = [...prev];
-            newResults[questionIndex] = {
-                ...newResults[questionIndex],
-                userAnswer: userAnswer || "Không trả lời",
-                isCorrect: isCorrect
-            };
-            return newResults;
-        });
-        if (isCorrect) {
-            setCorrectAnswers(prev => prev + 1);
-        }
-    }, []);
-
-    const handleQuestionNavigation = useCallback((index) => {
-        setCurrentQuestionIndex(index);
-    }, []);
-
-    const handleSubmitQuiz = useCallback(() => {
-        if (timer) {
-            clearInterval(timer);
-        }
-        setIsCompleted(true);
-        setShowResult(true);
-    }, [timer]);
+    }, [isCompleted, hasStarted, questions.length, handleSubmitQuiz]);
 
     const handleShowHistory = useCallback(() => {
         setShowHistory(true);
@@ -216,25 +287,6 @@ const GrammarExerciseDetail = () => {
         setShowHistory(false);
     }, []);
 
-    const handleRestart = useCallback(() => {
-        setTimeRemaining(selectedDuration);
-        setCorrectAnswers(0);
-        setCurrentQuestionIndex(0);
-        setIsCompleted(false);
-        setShowHistory(false);
-        setShowResult(false);
-        setHasStarted(false);
-        const resetResults = questions.map(question => ({
-            question: question.question,
-            userAnswer: "Chưa trả lời",
-            correctAnswer: question.correctAnswer,
-            isCorrect: false,
-            explanation: question.explanation,
-            questionType: question.type
-        }));
-        setQuestionResults(resetResults);
-    }, [questions, selectedDuration]);
-
     const speakText = useCallback((text) => {
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
@@ -243,11 +295,11 @@ const GrammarExerciseDetail = () => {
         } else {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+                title: t("grammarExercisePage.detail.warningTitle"),
+                text: t("grammarExercisePage.detail.speechUnsupported")
             });
         }
-    }, []);
+    }, [t]);
 
     const handleComplete = async () => {
         try {
@@ -266,9 +318,9 @@ const GrammarExerciseDetail = () => {
             setExerciseCompleted(true);
             Swal.fire({
                 icon: "success",
-                title: "Hoàn thành!",
-                text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập ngữ pháp. Bài luyện tập ngữ pháp tiếp theo đã được mở khóa.",
-                confirmButtonText: "Quay lại danh sách bài luyện tập ngữ pháp",
+                title: t("grammarExercisePage.detail.completeTitle"),
+                text: t("grammarExercisePage.detail.completeText"),
+                confirmButtonText: t("grammarExercisePage.detail.completeConfirm"),
             }).then(() => {
                 window.location.href = "/grammar-exercise";
             });
@@ -276,8 +328,8 @@ const GrammarExerciseDetail = () => {
             console.error("Error completing grammar exercise:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                title: t("grammarExercisePage.detail.errorTitle"),
+                text: t("grammarExercisePage.detail.errorText")
             });
         }
     };
@@ -288,7 +340,7 @@ const GrammarExerciseDetail = () => {
         return (
             <div className="exercise-container">
                 <div className="exercise-no-questions">
-                    <p>Không có câu hỏi nào trong bài tập này.</p>
+                    <p>{t("grammarExercisePage.detail.noQuestions")}</p>
                 </div>
             </div>
         );
@@ -300,26 +352,26 @@ const GrammarExerciseDetail = () => {
                 <div className="exercise-card-start">
                     <h3 className="exercise-title">{exerciseTitle}</h3>
                     <div className="exercise-time-setup">
-                        <label className="exercise-label">Chọn thời gian làm bài:</label>
+                        <label className="exercise-label">{t("grammarExercisePage.detail.chooseTime")}</label>
                         <select
                             className="form-control exercise-select"
                             value={selectedDuration}
                             onChange={(e) => setSelectedDuration(parseInt(e.target.value))}
                         >
-                            <option value={10 * 60}>10 phút</option>
-                            <option value={20 * 60}>20 phút</option>
-                            <option value={30 * 60}>30 phút</option>
-                            <option value={40 * 60}>40 phút</option>
+                            <option value={10 * 60}>{t("grammarExercisePage.detail.minutes", { count: 10 })}</option>
+                            <option value={20 * 60}>{t("grammarExercisePage.detail.minutes", { count: 20 })}</option>
+                            <option value={30 * 60}>{t("grammarExercisePage.detail.minutes", { count: 30 })}</option>
+                            <option value={40 * 60}>{t("grammarExercisePage.detail.minutes", { count: 40 })}</option>
                         </select>
                     </div>
                     <button
                         className="btn_1 mt-4"
                         onClick={() => {
-                            setTimeRemaining(selectedDuration);
-                            setHasStarted(true);
+                            handleStartExercise();
                         }}
+                        disabled={isStartingAttempt}
                     >
-                        <i className="fas fa-play"></i> Bắt đầu
+                        <i className="fas fa-play"></i> {isStartingAttempt ? t("common.loading", { defaultValue: "Đang tải..." }) : t("grammarExercisePage.detail.start")}
                     </button>
                 </div>
             </div>
@@ -341,6 +393,7 @@ const GrammarExerciseDetail = () => {
                             <GrammarExerciseCarousel
                                 questions={questions}
                                 currentQuestionIndex={currentQuestionIndex}
+                                onCheckAnswer={handleCheckAnswer}
                                 onAnswerSubmit={handleAnswerSubmit}
                                 onQuestionNavigation={handleQuestionNavigation}
                                 onSpeakText={speakText}
@@ -365,6 +418,7 @@ const GrammarExerciseDetail = () => {
                         onShowHistory={handleShowHistory}
                         selectedDuration={selectedDuration}
                         answeredCount={answeredCount}
+                        isSubmitting={isFinishingAttempt}
                     />
                 </div>
             </div>

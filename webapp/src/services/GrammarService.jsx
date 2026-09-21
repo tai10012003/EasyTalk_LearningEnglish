@@ -3,11 +3,23 @@ import Swal from "sweetalert2";
 const API_URL = import.meta.env.VITE_API_URL;
 
 let hasShownAlert = false;
+
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
+function unwrapResponseData(responseData) {
+    if (!responseData || typeof responseData !== "object") return responseData;
+    return responseData.data || responseData;
+}
+
 export const GrammarService = {
     async fetchGrammars(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar-list${query}`, {
                 method: 'GET',
             });
@@ -15,7 +27,8 @@ export const GrammarService = {
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -33,14 +46,39 @@ export const GrammarService = {
         }
     },
 
+    async fetchGrammarRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return unwrapResponseData(responseData);
+    },
+
+    async getGrammar(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return unwrapResponseData(responseData);
+    },
+
     async getGrammarBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/slug/${encodeURIComponent(slug)}`, {
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/slug/${encodeURIComponent(slug)}${langQuery}`, {
                 method: "GET",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
-            return data;
+            const responseData = await res.json();
+            const data = unwrapResponseData(responseData);
+            return data?.grammar ? { grammar: data.grammar } : data;
         } catch (err) {
             console.error("Error fetching grammar by slug:", err);
             return null;
@@ -48,52 +86,45 @@ export const GrammarService = {
     },
 
     async getGrammarDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/${id}${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data?.grammar ? { grammar: data.grammar } : data;
     },
 
     async completeGrammar(grammarId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/complete/${grammarId}`, {
-                method: "POST",
-            });
+        const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/grammar/complete/${grammarId}`, {
+            method: "POST",
+        });
 
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = unwrapResponseData(responseData);
+        return data;
     },
 
     async addGrammar(formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/add`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/add`, {
                 method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding grammar:", err);
             throw err;
@@ -102,16 +133,14 @@ export const GrammarService = {
 
     async updateGrammar(id, formData) {
         try {
-            const token = localStorage.getItem("token");
-            const res = await fetch(`${API_URL}/grammar/api/update/${id}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/grammar/api/update/${id}`, {
                 method: "PUT",
-                headers: {
-                    "Authorization": `Bearer ${token}`,
-                },
                 body: formData,
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating grammar:", err);
             throw err;
@@ -124,7 +153,9 @@ export const GrammarService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting grammar:", err);
             throw err;

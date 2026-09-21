@@ -47,7 +47,7 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa cổng "${title}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa cổng "${title}" thất bại!`, 'error');
                 }
             }
@@ -147,6 +147,12 @@ function GateList({ fetchData, deleteItem, title, dataKey }) {
                                                     className="admin-gate-btn-edit"
                                                 >
                                                     Sửa
+                                                </a>
+                                                <a
+                                                    href={`/admin/gate/translate/${gate._id}`}
+                                                    className="admin-gate-btn-edit"
+                                                >
+                                                    Dịch EN
                                                 </a>
                                                 <button
                                                     className="admin-gate-btn-delete"

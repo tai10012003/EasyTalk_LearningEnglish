@@ -1,8 +1,11 @@
 import React, { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, isPrizeUnlocked, getPrizesByType, username = null }) => {
+    const { t, i18n } = useTranslation();
     const isOwnStats = !username;
-    const title = isOwnStats ? "Giải thưởng của bạn" : `Giải thưởng của ${username}`;
+    const title = isOwnStats ? t("statisticPage.prizes.ownTitle") : t("statisticPage.prizes.userTitle", { username });
+    const locale = i18n.language === "en" ? "en-US" : "vi-VN";
     const [showModal, setShowModal] = useState(false);
     const [modalType, setModalType] = useState("");
     const [modalTitle, setModalTitle] = useState("");
@@ -22,29 +25,29 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                 return {
                     period: p.period,
                     periodDisplay: formatPeriodDisplay(p.period),
-                    name: prizeDetail?.name || "Quán Quân",
+                    name: prizeDetail?.name || t("statisticPage.prizes.champion.defaultName"),
                     diamondAwards: prizeDetail?.diamondAwards || 0,
                     iconClass: prizeDetail?.iconClass || 'fas fa-crown',
-                    unlockedAt: p.unlockedAt ? new Date(p.unlockedAt).toLocaleDateString("vi-VN") : "N/A",
+                    unlockedAt: p.unlockedAt ? new Date(p.unlockedAt).toLocaleDateString(locale) : "N/A",
                 };
             })
             .sort((a, b) => b.period.localeCompare(a.period));
     };
 
     const formatPeriodDisplay = (period) => {
-        if (!period) return "Không xác định";
+        if (!period) return t("statisticPage.common.unknown");
         if (period.includes('-W')) {
             const match = period.match(/(\d{4})-W(\d{2})/);
             if (match) {
                 const year = match[1];
                 const week = parseInt(match[2], 10);
-                return `Tuần ${week} - ${year}`;
+                return t("statisticPage.prizes.history.weekPeriod", { week, year });
             }
         } else if (/^\d{4}-\d{2}$/.test(period)) {
             const [year, month] = period.split('-');
-            return `Tháng ${parseInt(month, 10)} - ${year}`;
+            return t("statisticPage.prizes.history.monthPeriod", { month: parseInt(month, 10), year });
         } else if (/^\d{4}$/.test(period)) {
-            return `Năm ${period}`;
+            return t("statisticPage.prizes.history.yearPeriod", { year: period });
         }
         return period;
     };
@@ -66,29 +69,29 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
             <h3 className="user-statistic-info-title">{title}</h3>
             {prizesLoading ? (
                 <div className="user-statistic-prize-loading">
-                    <i className="fas fa-spinner fa-spin"></i> Đang tải giải thưởng...
+                    <i className="fas fa-spinner fa-spin"></i> {t("statisticPage.prizes.loading")}
                 </div>
             ) : (
                 <>
                     <div className="user-statistic-prize-section">
                         <h4 className="user-statistic-prize-section-title">
-                            <i className="fas fa-fire"></i> Tuần Hoàn Hảo
+                            <i className="fas fa-fire"></i> {t("statisticPage.prizes.perfectStreak.title")}
                             {isOwnStats && (
                                 <div className="user-statistic-prize-info-icon">
                                     <i className="fas fa-info-circle"></i>
                                     <div className="user-statistic-prize-tooltip">
-                                        <strong>Cách đạt được:</strong>
-                                        <p>Học liên tục mỗi ngày không nghỉ để tích lũy streak hoàn hảo. Mỗi cấp độ yêu cầu số ngày streak khác nhau:</p>
+                                        <strong>{t("statisticPage.prizes.howToEarn")}</strong>
+                                        <p>{t("statisticPage.prizes.perfectStreak.description")}</p>
                                         <ul>
-                                            <li>Cấp 1: 7 ngày liên tiếp</li>
-                                            <li>Cấp 2: 14 ngày liên tiếp</li>
-                                            <li>Cấp 3: 30 ngày liên tiếp</li>
+                                            <li>{t("statisticPage.prizes.perfectStreak.level1")}</li>
+                                            <li>{t("statisticPage.prizes.perfectStreak.level2")}</li>
+                                            <li>{t("statisticPage.prizes.perfectStreak.level3")}</li>
                                             <li>...</li>
-                                            <li>Cấp 10: 365 ngày liên tiếp (1 năm hoàn hảo)</li>
+                                            <li>{t("statisticPage.prizes.perfectStreak.level10")}</li>
                                         </ul>
                                         <p className="user-statistic-prize-tooltip-note">
                                             <i className="fas fa-exclamation-triangle"></i> 
-                                            Chỉ cần nghỉ 1 ngày, bạn sẽ mất chuỗi hoàn hảo đó! Hãy cố gắng giữ vững chuỗi streak nhé!
+                                            {t("statisticPage.prizes.perfectStreak.note")}
                                         </p>
                                     </div>
                                 </div>
@@ -101,7 +104,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                     <div 
                                         key={prize._id} 
                                         className={`user-statistic-prize-item ${unlocked ? 'unlocked' : 'locked'}`}
-                                        title={unlocked ? `Đã đạt được: ${prize.name}` : `Chưa đạt: ${prize.name} (Cần ${prize.requirement.streakDays} ngày streak)`}
+                                        title={unlocked ? t("statisticPage.prizes.tooltip.unlocked", { name: prize.name }) : t("statisticPage.prizes.tooltip.lockedStreak", { name: prize.name, days: prize.requirement.streakDays })}
                                     >
                                         <div className="user-statistic-prize-icon">
                                             <i className={prize.iconClass}></i>
@@ -109,10 +112,10 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                         <div className="user-statistic-prize-info">
                                             <div className="user-statistic-prize-name">{prize.name}</div>
                                             <div className="user-statistic-prize-requirement">
-                                                {prize.requirement.streakDays} ngày
+                                                {t("statisticPage.values.days", { count: prize.requirement.streakDays })}
                                             </div>
                                             <div className="user-statistic-prize-awards">
-                                                Nhận: {prize.diamondAwards} KC
+                                                {t("statisticPage.prizes.receiveDiamondsShort", { count: prize.diamondAwards })}
                                             </div>
                                         </div>
                                         {unlocked && (
@@ -127,30 +130,30 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                     </div>
                     <div className="user-statistic-prize-section">
                         <h4 className="user-statistic-prize-section-title">
-                            <i className="fas fa-graduation-cap"></i> Vị Thần Kiến Thức
+                            <i className="fas fa-graduation-cap"></i> {t("statisticPage.prizes.knowledgeGod.title")}
                             {isOwnStats && (
                                 <div className="user-statistic-prize-info-icon">
                                     <i className="fas fa-info-circle"></i>
                                     <div className="user-statistic-prize-tooltip">
-                                        <strong>Cách đạt được:</strong>
-                                        <p>Tích lũy điểm kinh nghiệm (KN) bằng cách:</p>
+                                        <strong>{t("statisticPage.prizes.howToEarn")}</strong>
+                                        <p>{t("statisticPage.prizes.knowledgeGod.description")}</p>
                                         <ul>
-                                            <li>Hoàn thành bài học hàng ngày</li>
-                                            <li>Làm bài tập và luyện tập</li>
-                                            <li>Đạt mục tiêu flashcard mỗi ngày</li>
-                                            <li>Mở khóa huy hiệu tháng</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.source1")}</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.source2")}</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.source3")}</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.source4")}</li>
                                         </ul>
-                                        <p>Mỗi cấp độ yêu cầu tổng KN tích lũy:</p>
+                                        <p>{t("statisticPage.prizes.knowledgeGod.requirementIntro")}</p>
                                         <ul>
-                                            <li>Cấp 1: 500 KN</li>
-                                            <li>Cấp 2: 1,500 KN</li>
-                                            <li>Cấp 3: 5,000 KN</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.level1")}</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.level2")}</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.level3")}</li>
                                             <li>...</li>
-                                            <li>Cấp 10: 100,000 KN</li>
+                                            <li>{t("statisticPage.prizes.knowledgeGod.level10")}</li>
                                         </ul>
                                         <p className="user-statistic-prize-tooltip-tip">
                                             <i className="fas fa-lightbulb"></i> 
-                                            Học đều đặn mỗi ngày để tích lũy KN nhanh hơn!
+                                            {t("statisticPage.prizes.knowledgeGod.tip")}
                                         </p>
                                     </div>
                                 </div>
@@ -163,7 +166,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                     <div 
                                         key={prize._id} 
                                         className={`user-statistic-prize-item ${unlocked ? 'unlocked' : 'locked'}`}
-                                        title={unlocked ? `Đã đạt được: ${prize.name}` : `Chưa đạt: ${prize.name} (Cần ${prize.requirement.xp.toLocaleString()} KN)`}
+                                        title={unlocked ? t("statisticPage.prizes.tooltip.unlocked", { name: prize.name }) : t("statisticPage.prizes.tooltip.lockedExp", { name: prize.name, value: prize.requirement.xp.toLocaleString() })}
                                     >
                                         <div className="user-statistic-prize-icon">
                                             <i className={prize.iconClass}></i>
@@ -171,10 +174,10 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                         <div className="user-statistic-prize-info">
                                             <div className="user-statistic-prize-name">{prize.name}</div>
                                             <div className="user-statistic-prize-requirement">
-                                                {prize.requirement.xp.toLocaleString()} KN
+                                                {t("statisticPage.values.exp", { value: prize.requirement.xp.toLocaleString() })}
                                             </div>
                                             <div className="user-statistic-prize-awards">
-                                                Nhận: {prize.diamondAwards} KC
+                                                {t("statisticPage.prizes.receiveDiamondsShort", { count: prize.diamondAwards })}
                                             </div>
                                         </div>
                                         {unlocked && (
@@ -189,41 +192,41 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                     </div>
                     <div className="user-statistic-prize-section">
                         <h4 className="user-statistic-prize-section-title">
-                            <i className="fas fa-crown"></i> Quán Quân Bảng Xếp Hạng
+                            <i className="fas fa-crown"></i> {t("statisticPage.prizes.champion.title")}
                             {isOwnStats && (
                                 <div className="user-statistic-prize-info-icon">
                                     <i className="fas fa-info-circle"></i>
                                     <div className="user-statistic-prize-tooltip champion-tooltip">
-                                        <strong>Cách đạt được:</strong>
-                                        <p>Giành vị trí Top 1 trên bảng xếp hạng vào cuối kỳ. Có 3 loại giải thưởng:</p>
+                                        <strong>{t("statisticPage.prizes.howToEarn")}</strong>
+                                        <p>{t("statisticPage.prizes.champion.description")}</p>
                                         <div className="user-statistic-prize-tooltip-champion-section">
                                             <div className="user-statistic-prize-tooltip-champion-item">
                                                 <i className="fas fa-star"></i>
                                                 <div>
-                                                    <strong>Quán Quân Tuần:</strong>
-                                                    <p>Đạt rank 1 vào cuối tuần (Chủ nhật) trên bảng xếp hạng KN hoặc Thời gian học</p>
-                                                    <p>Nhận 100 kim cương</p>
+                                                    <strong>{t("statisticPage.prizes.champion.weekTitle")}</strong>
+                                                    <p>{t("statisticPage.prizes.champion.weekDescription")}</p>
+                                                    <p>{t("statisticPage.prizes.receiveDiamonds", { count: 100 })}</p>
                                                 </div>
                                             </div>
                                             <div className="user-statistic-prize-tooltip-champion-item">
                                                 <i className="fas fa-medal"></i>
                                                 <div>
-                                                    <strong>Quán Quân Tháng:</strong>
-                                                    <p>Đạt rank 1 vào cuối tháng trên bảng xếp hạng KN hoặc Thời gian học</p>
-                                                    <p>Nhận 500 kim cương</p>
+                                                    <strong>{t("statisticPage.prizes.champion.monthTitle")}</strong>
+                                                    <p>{t("statisticPage.prizes.champion.monthDescription")}</p>
+                                                    <p>{t("statisticPage.prizes.receiveDiamonds", { count: 500 })}</p>
                                                 </div>
                                             </div>
                                             <div className="user-statistic-prize-tooltip-champion-item">
                                                 <i className="fas fa-crown"></i>
                                                 <div>
-                                                    <strong>Quán Quân Năm:</strong>
-                                                    <p>Đạt rank 1 vào cuối năm trên bảng xếp hạng KN hoặc Thời gian học</p>
-                                                    <p>Nhận 6500 kim cương</p>
+                                                    <strong>{t("statisticPage.prizes.champion.yearTitle")}</strong>
+                                                    <p>{t("statisticPage.prizes.champion.yearDescription")}</p>
+                                                    <p>{t("statisticPage.prizes.receiveDiamonds", { count: 6500 })}</p>
                                                 </div>
                                             </div>
                                         </div>
                                         <p className="user-statistic-prize-tooltip-note champion-note">
-                                            Mỗi giải đạt được đều danh giá và phần thưởng xứng đáng! Cạnh tranh gay gắt để giành danh hiệu cao quý này!
+                                            {t("statisticPage.prizes.champion.note")}
                                         </p>
                                     </div>
                                 </div>
@@ -236,7 +239,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                     <div 
                                         key={prize._id} 
                                         className={`user-statistic-prize-champion ${unlocked ? 'unlocked' : 'locked'}`}
-                                        title={unlocked ? `Đã đạt được: ${prize.name}` : `Chưa đạt: ${prize.name}`}
+                                        title={unlocked ? t("statisticPage.prizes.tooltip.unlocked", { name: prize.name }) : t("statisticPage.prizes.tooltip.locked", { name: prize.name })}
                                     >
                                         <div className="user-statistic-prize-champion-icon">
                                             <i className={prize.iconClass}></i>
@@ -244,10 +247,10 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                         <div className="user-statistic-prize-champion-name">{prize.name}</div>
                                         <div className="user-statistic-prize-champion-count">{championStats.week}</div>
                                         <div className="user-statistic-prize-awards">
-                                            Nhận: {prize.diamondAwards} KC
+                                            {t("statisticPage.prizes.receiveDiamondsShort", { count: prize.diamondAwards })}
                                         </div>
-                                        <button onClick={() => openModal("champion_week", "Lịch sử Quán quân Tuần")} className="user-statistic-prize-champion-button">
-                                            Xem chi tiết →
+                                        <button onClick={() => openModal("champion_week", t("statisticPage.prizes.history.weekTitle"))} className="user-statistic-prize-champion-button">
+                                            {t("statisticPage.prizes.viewDetails")}
                                         </button>
                                         {unlocked && (
                                             <div className="user-statistic-prize-champion-badge">
@@ -263,7 +266,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                     <div 
                                         key={prize._id} 
                                         className={`user-statistic-prize-champion ${unlocked ? 'unlocked' : 'locked'}`}
-                                        title={unlocked ? `Đã đạt được: ${prize.name}` : `Chưa đạt: ${prize.name}`}
+                                        title={unlocked ? t("statisticPage.prizes.tooltip.unlocked", { name: prize.name }) : t("statisticPage.prizes.tooltip.locked", { name: prize.name })}
                                     >
                                         <div className="user-statistic-prize-champion-icon">
                                             <i className={prize.iconClass}></i>
@@ -271,10 +274,10 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                         <div className="user-statistic-prize-champion-name">{prize.name}</div>
                                         <div className="user-statistic-prize-champion-count">{championStats.month}</div>
                                         <div className="user-statistic-prize-awards">
-                                            Nhận: {prize.diamondAwards} KC
+                                            {t("statisticPage.prizes.receiveDiamondsShort", { count: prize.diamondAwards })}
                                         </div>
-                                        <button onClick={() => openModal("champion_month", "Lịch sử Quán quân Tháng")} className="user-statistic-prize-champion-button">
-                                            Xem chi tiết →
+                                        <button onClick={() => openModal("champion_month", t("statisticPage.prizes.history.monthTitle"))} className="user-statistic-prize-champion-button">
+                                            {t("statisticPage.prizes.viewDetails")}
                                         </button>
                                         {unlocked && (
                                             <div className="user-statistic-prize-champion-badge">
@@ -290,7 +293,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                     <div 
                                         key={prize._id} 
                                         className={`user-statistic-prize-champion ${unlocked ? 'unlocked' : 'locked'}`}
-                                        title={unlocked ? `Đã đạt được: ${prize.name}` : `Chưa đạt: ${prize.name}`}
+                                        title={unlocked ? t("statisticPage.prizes.tooltip.unlocked", { name: prize.name }) : t("statisticPage.prizes.tooltip.locked", { name: prize.name })}
                                     >
                                         <div className="user-statistic-prize-champion-icon">
                                             <i className={prize.iconClass}></i>
@@ -298,10 +301,10 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                         <div className="user-statistic-prize-champion-name">{prize.name}</div>
                                         <div className="user-statistic-prize-champion-count">{championStats.year}</div>
                                         <div className="user-statistic-prize-awards">
-                                            Nhận: {prize.diamondAwards} KC
+                                            {t("statisticPage.prizes.receiveDiamondsShort", { count: prize.diamondAwards })}
                                         </div>
-                                        <button onClick={() => openModal("champion_year", "Lịch sử Quán quân Năm")} className="user-statistic-prize-champion-button">
-                                            Xem chi tiết →
+                                        <button onClick={() => openModal("champion_year", t("statisticPage.prizes.history.yearTitle"))} className="user-statistic-prize-champion-button">
+                                            {t("statisticPage.prizes.viewDetails")}
                                         </button>
                                         {unlocked && (
                                             <div className="user-statistic-prize-champion-badge">
@@ -327,7 +330,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                         <div className="user-statistic-modal-body">
                             {getChampionHistory(modalType).length === 0 ? (
                                 <p className="text-center text-gray-500 py-8">
-                                    Chưa có danh hiệu nào trong hạng mục này
+                                    {t("statisticPage.prizes.history.empty")}
                                 </p>
                             ) : (
                                 <div className="user-statistic-card-list">
@@ -339,13 +342,13 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                                             <div className="user-statistic-card-info">
                                                 <div className="font-bold text-lg">{item.name}</div>
                                                 <div className="text-sm opacity-80">
-                                                    Kỳ: <strong>{item.periodDisplay}</strong>
+                                                    {t("statisticPage.prizes.history.period")}: <strong>{item.periodDisplay}</strong>
                                                 </div>
                                                 <div className="text-sm">
-                                                    Nhận thưởng: <strong>{item.diamondAwards} kim cương</strong>
+                                                    {t("statisticPage.prizes.history.reward")}: <strong>{t("statisticPage.prizes.diamonds", { count: item.diamondAwards })}</strong>
                                                 </div>
                                                 <div className="text-xs text-gray-500 mt-1">
-                                                    Ngày nhận: {item.unlockedAt}
+                                                    {t("statisticPage.prizes.history.receivedDate")}: {item.unlockedAt}
                                                 </div>
                                             </div>
                                         </div>
@@ -355,7 +358,7 @@ const StatisticPrizes = ({ prizesLoading, allPrizes, userPrizes, championStats, 
                         </div>
                         <div className="user-statistic-modal-footer">
                             <button onClick={closeModal} className="user-statistic-modal-btn">
-                                Đóng
+                                {t("statisticPage.common.close")}
                             </button>
                         </div>
                     </div>

@@ -1,13 +1,18 @@
-import React, { useState, useEffect, useRef, useContext } from "react";
+import React, { useState, useEffect, useRef, useContext, useCallback } from "react";
+import { Trans, useTranslation } from "react-i18next";
 import { UNSAFE_NavigationContext } from "react-router-dom";
 import { WritingAIService } from "@/services/WritingAIService.jsx";
+import { LearningAgentService } from "@/services/LearningAgentService.jsx";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import WritingAIInput from "@/components/user/writingAI/WritingAIInput.jsx";
 import WritingAIResult from "@/components/user/writingAI/WritingAIResult.jsx";
 import Swal from "sweetalert2";
 
 function WritingAI() {
+    const { t, i18n } = useTranslation();
     const [topic, setTopic] = useState("");
+    const [writingModes, setWritingModes] = useState([]);
+    const [selectedMode, setSelectedMode] = useState(null);
     const [userText, setUserText] = useState("");
     const [analysisResult, setAnalysisResult] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,21 +22,60 @@ function WritingAI() {
     const allowNavigationRef = useRef(false);
     const hasStarted = userText.trim().length > 0 && !analysisResult;
 
-    useEffect(() => {
-        document.title = "Luyện viết với AI - EasyTalk";
-        fetchTopic();
+    const pickModeTopic = useCallback((mode) => {
+        const topics = mode?.config?.topicSuggestions || [];
+        if (!topics.length) return null;
+        return topics[Math.floor(Math.random() * topics.length)];
     }, []);
 
-    const fetchTopic = async () => {
-        setIsLoading(true);
+    const fetchTopic = useCallback(async (showLoading = true) => {
+        if (showLoading) setIsLoading(true);
         try {
             const generatedTopic = await WritingAIService.getRandomTopic();
             setTopic(generatedTopic);
         } catch (err) {
             console.error("Error fetching topic:", err);
-            setTopic("Không thể lấy đề bài. Vui lòng thử lại.");
+            setTopic(t("writingAIPage.alert.topicFailed"));
+        } finally {
+            if (showLoading) setIsLoading(false);
+        }
+    }, [t]);
+
+    const loadWritingSetup = useCallback(async () => {
+        setIsLoading(true);
+        try {
+            const modes = await LearningAgentService.getModes("writing");
+            setWritingModes(modes);
+            const firstMode = modes[0] || null;
+            setSelectedMode(firstMode);
+            const modeTopic = pickModeTopic(firstMode);
+            if (modeTopic) {
+                setTopic(modeTopic);
+            } else {
+                await fetchTopic(false);
+            }
+        } catch (err) {
+            console.error("Error loading writing modes:", err);
+            await fetchTopic(false);
         } finally {
             setIsLoading(false);
+        }
+    }, [fetchTopic, pickModeTopic]);
+
+    useEffect(() => {
+        document.title = t("writingAIPage.documentTitle");
+        loadWritingSetup();
+    }, [loadWritingSetup, t, i18n.language]);
+
+    const handleModeSelect = (mode) => {
+        setSelectedMode(mode);
+        setAnalysisResult(null);
+        setUserText("");
+        const modeTopic = pickModeTopic(mode);
+        if (modeTopic) {
+            setTopic(modeTopic);
+        } else {
+            fetchTopic(false);
         }
     };
 
@@ -40,26 +84,27 @@ function WritingAI() {
         if (!trimmedText)
             return Swal.fire({
                 icon: "warning",
-                title: "Chú ý",
-                text: "Vui lòng nhập bài viết trước khi nộp!",
+                title: t("writingAIPage.alert.noticeTitle"),
+                text: t("writingAIPage.alert.emptyText"),
             });
-        if (trimmedText.length < 200) {
+        const minCharacters = selectedMode?.config?.minCharacters || 200;
+        if (trimmedText.length < minCharacters) {
             return Swal.fire({
                 icon: "warning",
-                title: "Chú ý",
-                text: "Bài viết của bạn phải ít nhất 200 ký tự mới được phép nộp bài!",
+                title: t("writingAIPage.alert.noticeTitle"),
+                text: t("writingAIPage.alert.minCharacters", { count: minCharacters }),
             });
         }
         setIsSubmitting(true);
         try {
-            const result = await WritingAIService.analyzeWriting(trimmedText);
+            const result = await WritingAIService.analyzeWriting(trimmedText, selectedMode?.key || null);
             setAnalysisResult(result);
         } catch (err) {
             console.error("Error analyzing writing:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Không thể phân tích bài viết. Vui lòng thử lại.",
+                title: t("writingAIPage.alert.errorTitle"),
+                text: t("writingAIPage.alert.analyzeFailed"),
             });
         } finally {
             setIsSubmitting(false);
@@ -69,7 +114,12 @@ function WritingAI() {
     const handleReset = async () => {
         setUserText("");
         setAnalysisResult(null);
-        fetchTopic();
+        const modeTopic = pickModeTopic(selectedMode);
+        if (modeTopic) {
+            setTopic(modeTopic);
+        } else {
+            fetchTopic();
+        }
     };
 
     useEffect(() => {
@@ -80,11 +130,11 @@ function WritingAI() {
             if (!allowNavigationRef.current && hasStarted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang viết bài. Nếu rời trang, nội dung sẽ bị mất. Bạn có chắc muốn rời đi?",
+                    title: t("writingAIPage.alert.warningTitle"),
+                    text: t("writingAIPage.alert.leaveText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("writingAIPage.alert.leaveConfirm"),
+                    cancelButtonText: t("writingAIPage.alert.stayCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -102,7 +152,7 @@ function WritingAI() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, hasStarted]);
+    }, [navigator, hasStarted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -122,15 +172,39 @@ function WritingAI() {
 
     return (
         <>
-            <div className="container writingai-container">
+            <div className="container writingai-container" data-coach-target="agent-task-writing-workspace">
                 <div className="writingai-header text-center mb-3">
-                    <h3>Luyện Viết Với AI - Thực Hành Tiếng Anh
+                    <h3>{selectedMode?.title ? t("writingAIPage.header.modeTitle", { title: selectedMode.title }) : t("writingAIPage.header.defaultTitle")}
                     <i
                         className="fas fa-question-circle help-icon"
                         style={{ cursor: "pointer" }}
                         onClick={() => setIsModalOpen(true)}
                     ></i>
                     </h3>
+                    {selectedMode?.description && <p className="agent-mode-subtitle">{selectedMode.description}</p>}
+                </div>
+
+                <div className="agent-mode-grid writing-mode-grid">
+                    {writingModes.map((mode) => (
+                        <button
+                            key={mode.key}
+                            className={`agent-mode-card ${selectedMode?.key === mode.key ? "active" : ""}`}
+                            onClick={() => handleModeSelect(mode)}
+                            disabled={isSubmitting}
+                        >
+                            <div className="agent-mode-card-top">
+                                <span>{t("writingAIPage.modeCard.minutes", { count: mode.estimatedMinutes || 10 })}</span>
+                                {mode.recommendedScore > 0 && <strong>{t("writingAIPage.modeCard.recommended")}</strong>}
+                            </div>
+                            <h4>{mode.title}</h4>
+                            <p>{mode.description}</p>
+                            <div className="agent-mode-skills">
+                                {(mode.skillFocus || []).slice(0, 3).map((skill) => (
+                                    <span key={skill}>{skill}</span>
+                                ))}
+                            </div>
+                        </button>
+                    ))}
                 </div>
 
                 <WritingAIInput
@@ -152,32 +226,32 @@ function WritingAI() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         <div className="custom-modal-header">
-                            <h5>Hướng Dẫn Luyện Viết Với AI</h5>
+                            <h5>{t("writingAIPage.guide.title")}</h5>
                             <button className="close-btn" onClick={() => setIsModalOpen(false)}>
                                 &times;
                             </button>
                         </div>
                         <div className="custom-modal-body">
-                            <p>Trong luyện viết AI, bạn sẽ nhận được một đề bài ngắn gọn do AI tạo ra để thực hành viết tiếng Anh.</p>
+                            <p>{t("writingAIPage.guide.intro")}</p>
                             <p>
-                                <strong>Các bước thực hiện:</strong>
+                                <strong>{t("writingAIPage.guide.stepsTitle")}</strong>
                             </p>
                             <ul>
-                                <li><strong>Viết bài:</strong> Nhập bài viết của bạn vào ô text bên dưới đề bài.</li>
-                                <li><strong>Nộp bài:</strong> Nhấn nút <strong>Nộp bài</strong> để AI phân tích bài viết của bạn.</li>
-                                <li><strong>Phân tích:</strong> AI sẽ đánh giá ngữ pháp, từ vựng, cấu trúc câu, và cung cấp phiên bản đã cải thiện cùng các gợi ý sửa.</li>
-                                <li><strong>Điểm tổng quan:</strong> AI sẽ đưa ra điểm đánh giá tổng thể cho bài viết của bạn.</li>
-                                <li><strong>Tiếp tục:</strong> Sau khi nhận phản hồi, nhấn nút <strong>Tiếp tục làm bài</strong> để nhận đề bài mới và luyện tiếp.</li>
+                                <li><Trans i18nKey="writingAIPage.guide.stepWrite" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="writingAIPage.guide.stepSubmit" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="writingAIPage.guide.stepAnalyze" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="writingAIPage.guide.stepScore" components={{ strong: <strong /> }} /></li>
+                                <li><Trans i18nKey="writingAIPage.guide.stepContinue" components={{ strong: <strong /> }} /></li>
                             </ul>
-                            <p><strong>Lưu ý:</strong></p>
+                            <p><strong>{t("writingAIPage.guide.noteTitle")}</strong></p>
                             <ul>
-                                <li>Hãy viết hết khả năng của bạn trước khi nộp bài.</li>
-                                <li>Đọc kỹ các gợi ý của AI và thử áp dụng chúng cho bài viết tiếp theo để cải thiện kỹ năng.</li>
+                                <li>{t("writingAIPage.guide.noteWrite")}</li>
+                                <li>{t("writingAIPage.guide.noteApply")}</li>
                             </ul>
-                            <p>✍️ Chúc bạn luyện viết hiệu quả và tiến bộ mỗi ngày!</p>
+                            <p>{t("writingAIPage.guide.closing")}</p>
                         </div>
                         <div className="custom-modal-footer">
-                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>Đóng</button>
+                            <button className="footer-btn" onClick={() => setIsModalOpen(false)}>{t("writingAIPage.common.close")}</button>
                         </div>
                     </div>
                 </div>

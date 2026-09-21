@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import UserRoute from "@/routes/UserRoute";
 import AdminRoute from "@/routes/AdminRoute";
@@ -6,6 +6,7 @@ import UserLayout from "@/layouts/UserLayout.jsx";
 import AdminLayout from "@/layouts/AdminLayout.jsx";
 import Login from "@/views/Login.jsx";
 import Register from "@/views/Register.jsx";
+import { AuthService } from "@/services/AuthService.jsx";
 
 function AppRoutes() {
   const authRoutes = [
@@ -43,6 +44,15 @@ function AppRoutes() {
 }
 
 function App() {
+  const [isBootstrapped, setIsBootstrapped] = useState(false);
+  useEffect(() => {
+    AuthService.bootstrapSession().finally(() => {
+      setIsBootstrapped(true);
+    });
+  }, []);
+  if (!isBootstrapped) {
+    return null;
+  }
   return (
     <Router>
       <AppRoutes />

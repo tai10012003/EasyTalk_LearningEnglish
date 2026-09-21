@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const PronunciationExerciseSidebar = ({
         timeRemaining,
@@ -11,22 +12,24 @@ const PronunciationExerciseSidebar = ({
         onSubmitQuiz,
         onQuestionNavigation,
         onShowHistory,
-        selectedDuration
+        selectedDuration,
+        isSubmitting = false
     }) => {
+        const { t } = useTranslation();
         const handleSubmitClick = useCallback(() => {
             Swal.fire({
-                title: 'Xác nhận',
-                text: 'Bạn có chắc chắn muốn nộp bài?',
+                title: t("pronunciationExercisePage.sidebar.confirmTitle"),
+                text: t("pronunciationExercisePage.sidebar.confirmText"),
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Đồng ý',
-                cancelButtonText: 'Hủy'
+                confirmButtonText: t("pronunciationExercisePage.sidebar.confirm"),
+                cancelButtonText: t("pronunciationExercisePage.sidebar.cancel")
             }).then((result) => {
                 if (result.isConfirmed) {
                     onSubmitQuiz();
                 }
             });
-        }, [onSubmitQuiz]);
+        }, [onSubmitQuiz, t]);
 
         const getCompletedTime = () => {
             const timeTaken = selectedDuration - timeRemaining;
@@ -37,7 +40,7 @@ const PronunciationExerciseSidebar = ({
 
         const getQuestionButtonColor = (index) => {
         const result = questionResults[index];
-        if (!result || result.userAnswer == "Chưa trả lời") {
+        if (!result || result.userAnswer == t("pronunciationExercisePage.detail.unanswered")) {
             return {};
         }
 
@@ -53,7 +56,7 @@ const PronunciationExerciseSidebar = ({
             {!isCompleted ? (
                 <>
                     <div className="exercise-time-remaining text-center">
-                        <span id="exercise-timeLabel">Thời gian còn lại: </span>
+                        <span id="exercise-timeLabel">{t("pronunciationExercisePage.sidebar.timeRemaining")} </span>
                         <span id="exercise-time">{formatTime(timeRemaining)}</span>
                     </div>
                     
@@ -62,11 +65,12 @@ const PronunciationExerciseSidebar = ({
                         className="btn_1 mb-4"
                         style ={{ width: '100%' }}
                         onClick={handleSubmitClick}
+                        disabled={isSubmitting}
                     >
-                        <i className="fas fa-paper-plane"></i> Nộp bài
+                        <i className="fas fa-paper-plane"></i> {isSubmitting ? t("pronunciationExercisePage.sidebar.submitting") : t("pronunciationExercisePage.sidebar.submit")}
                     </button>
                     
-                    <h5 id="exercise-questionListTitle">Danh sách câu hỏi:</h5>
+                    <h5 id="exercise-questionListTitle">{t("pronunciationExercisePage.sidebar.questionList")}</h5>
                     
                     <div className="exercise-question-list mt-3" id="exercise-question-list">
                         {questions.map((_, index) => (
@@ -86,13 +90,13 @@ const PronunciationExerciseSidebar = ({
                 </>
             ) : (
                 <div id="exercise-completed-info" className="text-center">
-                    <h4>Thời gian đã làm: <span id="exercise-completedTime">{getCompletedTime()}</span></h4>
+                    <h4>{t("pronunciationExercisePage.sidebar.completedTime")} <span id="exercise-completedTime">{getCompletedTime()}</span></h4>
                     <button
                         className="btn btn-secondary mt-3"
                         id="exercise-viewHistoryBtn"
                         onClick={onShowHistory}
                     >
-                        Xem lịch sử
+                        {t("pronunciationExercisePage.sidebar.viewHistory")}
                     </button>
                 </div>
             )}

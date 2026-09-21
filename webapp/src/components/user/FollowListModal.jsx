@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
 import { AuthService } from "@/services/AuthService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged }) => {
+    const { t } = useTranslation();
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const currentUserId = AuthService.getCurrentUser()?.id;
 
-    const fetchList = async () => {
+    const fetchList = useCallback(async () => {
         if (!userId) return;
         setLoading(true);
         try {
@@ -50,33 +52,33 @@ const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged 
         } finally {
             setLoading(false);
         }
-    };
+    }, [userId, type, currentUserId]);
 
     const handleToggleFollow = async (targetUserId, targetUsername, currentlyFollowing) => {
         if (!currentUserId) {
-            Swal.fire("Lỗi", "Bạn cần đăng nhập để thực hiện thao tác này.", "info");
+            Swal.fire(t("statisticPage.alert.errorTitle"), t("statisticPage.followModal.loginRequired"), "info");
             return;
         }
         if (currentUserId.toString() === targetUserId.toString()) {
-            Swal.fire("Oops!", "Bạn không thể theo dõi chính mình!", "info");
+            Swal.fire("Oops!", t("statisticPage.followModal.selfFollow"), "info");
             return;
         }
         try {
             if (currentlyFollowing) {
                 const result = await Swal.fire({
-                    title: "Hủy theo dõi?",
-                    text: `Bạn có chắc muốn hủy theo dõi ${targetUsername}?`,
+                    title: t("statisticPage.followModal.unfollowConfirmTitle"),
+                    text: t("statisticPage.followModal.unfollowConfirmText", { username: targetUsername }),
                     icon: "question",
                     showCancelButton: true,
-                    confirmButtonText: "Hủy theo dõi",
-                    cancelButtonText: "Giữ lại",
+                    confirmButtonText: t("statisticPage.followModal.unfollow"),
+                    cancelButtonText: t("statisticPage.followModal.keep"),
                     confirmButtonColor: "#d33",
                 });
                 if (!result.isConfirmed) return;
                 const response = await UserProgressService.unfollowUser(targetUserId);
                 onFollowChanged?.();
                 if (response?.alreadyUnfollowed) {
-                    Swal.fire("Thông báo", "Bạn đã hủy theo dõi từ trước rồi!", "info");
+                    Swal.fire(t("statisticPage.followModal.noticeTitle"), t("statisticPage.followModal.alreadyUnfollowed"), "info");
                     setUsers(prev =>
                         prev.map(u => u._id.toString() === targetUserId.toString() ? { ...u, isFollowedByCurrentUser: false } : u)
                     );
@@ -84,13 +86,13 @@ const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged 
                     setUsers(prev =>
                         prev.map(u => u._id.toString() === targetUserId.toString() ? { ...u, isFollowedByCurrentUser: false } : u)
                     );
-                    Swal.fire("Đã hủy!", `Bạn đã hủy theo dõi ${targetUsername}`, "success");
+                    Swal.fire(t("statisticPage.followModal.unfollowedTitle"), t("statisticPage.followModal.unfollowedText", { username: targetUsername }), "success");
                 }
             } else {
                 const response = await UserProgressService.followUser(targetUserId);
                 onFollowChanged?.();
                 if (response?.alreadyFollowing) {
-                    Swal.fire("Thông báo", `Bạn đã theo dõi ${targetUsername} từ trước rồi!`, "info");
+                    Swal.fire(t("statisticPage.followModal.noticeTitle"), t("statisticPage.followModal.alreadyFollowing", { username: targetUsername }), "info");
                     setUsers(prev =>
                         prev.map(u => u._id.toString() === targetUserId.toString() ? { ...u, isFollowedByCurrentUser: true } : u)
                     );
@@ -98,20 +100,20 @@ const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged 
                     setUsers(prev =>
                         prev.map(u => u._id.toString() === targetUserId.toString() ? { ...u, isFollowedByCurrentUser: true } : u)
                     );
-                    Swal.fire("Thành công!", `Bạn đã theo dõi ${targetUsername}! Cùng cố lên nào!`,"success");
+                    Swal.fire(t("statisticPage.followModal.successTitle"), t("statisticPage.followModal.followedText", { username: targetUsername }), "success");
                 }
             }
         } catch (err) {
             console.error("Lỗi thao tác follow:", err);
-            Swal.fire("Lỗi", "Không thể thực hiện thao tác", "error");
+            Swal.fire(t("statisticPage.alert.errorTitle"), t("statisticPage.followModal.actionFailed"), "error");
         }
     };
 
     useEffect(() => {
         fetchList();
-    }, [userId, type]);
+    }, [fetchList]);
 
-    const title = type === "followers" ? "Người theo dõi" : "Người đang theo dõi";
+    const title = type === "followers" ? t("statisticPage.followModal.followersTitle") : t("statisticPage.followModal.followingTitle");
 
     return (
         <div className="user-statistic-modal-overlay" onClick={onClose}>
@@ -127,7 +129,7 @@ const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged 
                         </div>
                     ) : users.length === 0 ? (
                         <p className="text-center text-gray-500 py-12 text-lg">
-                            Chưa có {type === "followers" ? "người theo dõi" : "người nào đang theo dõi"}
+                            {type === "followers" ? t("statisticPage.followModal.emptyFollowers") : t("statisticPage.followModal.emptyFollowing")}
                         </p>
                     ) : (
                         <div className="user-statistic-card-list">
@@ -171,7 +173,7 @@ const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged 
                                                     e.target.style.backgroundColor = isFollowing ? "#fa4c4cff" : "#6366f1";
                                                 }}
                                             >
-                                                {isFollowing ? "Hủy theo dõi" : "Theo dõi"}
+                                                {isFollowing ? t("statisticPage.followModal.unfollow") : t("statisticPage.followModal.follow")}
                                             </button>
                                         )}
                                     </div>
@@ -182,7 +184,7 @@ const FollowListModal = ({ userId, type = "followers", onClose, onFollowChanged 
                 </div>
                 <div className="user-statistic-modal-footer">
                     <button onClick={onClose} className="user-statistic-modal-btn">
-                        Đóng
+                        {t("statisticPage.common.close")}
                     </button>
                 </div>
             </div>

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { FlashCardService } from "@/services/FlashCardService.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
+  const { t } = useTranslation();
   const [word, setWord] = useState("");
   const [meaning, setMeaning] = useState("");
   const [pos, setPos] = useState("");
@@ -14,7 +16,7 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!word.trim() || !meaning.trim() || !exampleSentence.trim()) {
-      Swal.fire("⚠️ Thiếu thông tin", "Vui lòng nhập đầy đủ thông tin bắt buộc!", "warning");
+      Swal.fire(t("flashcardPage.form.missingTitle"), t("flashcardPage.form.missingRequired"), "warning");
       return;
     }
     setLoading(true);
@@ -28,7 +30,7 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
       if (image) formData.append("image", image);
       const data = await FlashCardService.createFlashcard(listId, formData);
       if (data.success) {
-        await Swal.fire("🎉 Thành công", "Tạo flashcard thành công!", "success");
+        await Swal.fire(t("flashcardPage.form.successTitle"), t("flashcardPage.form.createCardSuccess"), "success");
         setWord("");
         setMeaning("");
         setPos("");
@@ -38,10 +40,10 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
         onCreated();
         onClose();
       } else {
-        Swal.fire("❌ Lỗi", data.message || "Có lỗi xảy ra.", "error");
+        Swal.fire(t("flashcardPage.form.errorTitle"), data.message || t("flashcardPage.form.genericError"), "error");
       }
     } catch (error) {
-      Swal.fire("❌ Lỗi", "Lỗi khi tạo flashcard: " + error.message, "error");
+      Swal.fire(t("flashcardPage.form.errorTitle"), t("flashcardPage.form.createCardError", { message: error.message }), "error");
     }
     setLoading(false);
   };
@@ -52,7 +54,7 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
     <div className="custom-modal-overlay" onClick={onClose}>
       <div className="custom-modal" onClick={(e) => e.stopPropagation()}>
         <div className="custom-modal-header">
-          <h5>THÊM TỪ VỰNG MỚI</h5>
+          <h5>{t("flashcardPage.form.createCardTitle")}</h5>
           <button className="close-btn" onClick={onClose}>
             ×
           </button>
@@ -60,69 +62,69 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
         <form onSubmit={handleSubmit}>
           <div className="custom-modal-body">
             <div className="mb-3">
-              <label className="form-label">Từ vựng:</label>
+              <label className="form-label">{t("flashcardPage.form.word")}</label>
               <input
                 type="text"
                 className="form-control"
                 value={word}
                 onChange={(e) => setWord(e.target.value)}
-                placeholder="Nhập từ vựng"
+                placeholder={t("flashcardPage.form.wordPlaceholder")}
                 required
               />
             </div>
             <div className="mb-3">
-              <label className="form-label">Định nghĩa:</label>
+              <label className="form-label">{t("flashcardPage.form.meaning")}</label>
               <input
                 type="text"
                 className="form-control"
                 value={meaning}
                 onChange={(e) => setMeaning(e.target.value)}
-                placeholder="Nhập định nghĩa"
+                placeholder={t("flashcardPage.form.meaningPlaceholder")}
                 required
               />
             </div>
             <div className="row">
               <div className="col-md-6">
                 <div className="mb-3">
-                  <label className="form-label">Từ loại:</label>
+                  <label className="form-label">{t("flashcardPage.form.pos")}</label>
                   <input
                     type="text"
                     className="form-control"
                     value={pos}
                     onChange={(e) => setPos(e.target.value)}
-                    placeholder="Nhập từ loại (VD: noun, verb)"
+                    placeholder={t("flashcardPage.form.posPlaceholder")}
                   />
                 </div>
               </div>
               <div className="col-md-6">
                 <div className="mb-3">
-                  <label className="form-label">Phát âm:</label>
+                  <label className="form-label">{t("flashcardPage.form.pronunciation")}</label>
                   <input
                     type="text"
                     className="form-control"
                     value={pronunciation}
                     onChange={(e) => setPronunciation(e.target.value)}
-                    placeholder="Nhập phát âm (VD: /ˈæp.əl/)"
+                    placeholder={t("flashcardPage.form.pronunciationPlaceholder")}
                   />
                 </div>
               </div>
             </div>
             <div className="mb-3">
-              <label className="form-label">Ví dụ:</label>
+              <label className="form-label">{t("flashcardPage.form.example")}</label>
               <textarea
                 className="form-control"
                 value={exampleSentence}
                 onChange={(e) => setExampleSentence(e.target.value)}
-                placeholder="Thêm ví dụ"
+                placeholder={t("flashcardPage.form.examplePlaceholder")}
                 rows={4}
                 maxLength={500}
                 required
               />
-              <small className="text-muted">{exampleSentence.length}/500 ký tự</small>
+              <small className="text-muted">{t("flashcardPage.form.charCount", { count: exampleSentence.length })}</small>
             </div>
             <div className="mb-3">
               <label className="form-label">
-                <i className="bi bi-card-image"></i> Hình ảnh (tuỳ chọn):
+                <i className="bi bi-card-image"></i> {t("flashcardPage.form.imageOptional")}
               </label>
               <input
                 type="file"
@@ -141,10 +143,10 @@ const CreateFlashCard = ({ isOpen, onClose, listId, onCreated }) => {
             }}
           >
             <button type="button" className="footer-btn" onClick={onClose} disabled={loading}>
-              <i className="fas fa-times"></i>Đóng
+              <i className="fas fa-times"></i>{t("flashcardPage.form.close")}
             </button>
             <button type="submit" className="footer-btn" disabled={loading}>
-              <i className="fas fa-save"></i>{loading ? "Đang lưu..." : "Lưu"}
+              <i className="fas fa-save"></i>{loading ? t("flashcardPage.form.saving") : t("flashcardPage.form.save")}
             </button>
           </div>
         </form>

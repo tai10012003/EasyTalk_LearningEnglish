@@ -3,19 +3,35 @@ import { AuthService } from './AuthService.jsx';
 import Swal from "sweetalert2";
 let hasShownAlert = false;
 
+const getCurrentLanguageQuery = () => {
+    const language = localStorage.getItem("language") || "vi";
+    return language === "en" ? "&lang=en" : "";
+};
+
+function paginatedResponse(responseData, page) {
+    const items = Array.isArray(responseData?.data) ? responseData.data : responseData?.data?.data || [];
+    const meta = responseData?.meta || responseData?.data || responseData || {};
+    return {
+        data: items,
+        currentPage: meta.currentPage || page,
+        totalPages: meta.totalPages || 1,
+    };
+}
+
 export const PronunciationExerciseService = {
     async fetchPronunciationExercise(page = 1, limit = 12, filters = {}) {
         try {
             let query = `?page=${page}&limit=${limit}`;
             if (filters.search) query += `&search=${encodeURIComponent(filters.search)}`;
+            if (!filters.admin) query += getCurrentLanguageQuery();
             const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises${query}`, {
                 method: 'GET',
             });
-
             if (!res.ok) {
                 throw new Error(`HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = paginatedResponse(responseData, page);
             hasShownAlert = false;
             console.log('Fetch success:', data);
             return data;
@@ -35,9 +51,11 @@ export const PronunciationExerciseService = {
 
     async getPronunciationExerciseBySlug(slug) {
         try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}`);
+            const langQuery = getCurrentLanguageQuery().replace("&", "?");
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/slug/${slug}${langQuery}`);
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data?.pronunciationExercise || responseData.data || responseData;
             return data;
         } catch (err) {
             console.error(err);
@@ -45,57 +63,177 @@ export const PronunciationExerciseService = {
         }
     },
 
+    async fetchPronunciationExerciseRoadmap() {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/roadmap${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async startPronunciationExerciseAttempt(pronunciationExerciseId) {
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${pronunciationExerciseId}/attempts${langQuery}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async checkPronunciationExerciseQuestion(attemptId, questionIndex, answer) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}/questions/${questionIndex}/check`, {
+            method: "POST",
+            body: JSON.stringify({ answer }),
+        });
+        const responseData = await res.json();
+        if (!res.ok) {
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        return responseData.data || responseData;
+    },
+
+    async analyzePronunciationAttemptQuestion(attemptId, questionIndex, audioBlob) {
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.wav');
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}/questions/${questionIndex}/analyze`, {
+                method: 'POST',
+                body: formData,
+            });
+            const responseData = await res.json();
+            if (!res.ok) {
+                throw new Error(responseData?.message || responseData?.error || `HTTP error! Status: ${res.status}`);
+            }
+            return responseData.data || responseData;
+        } catch (err) {
+            console.error("Error analyzing audio:", err);
+            return { success: false, message: err.message || "Lỗi khi phân tích giọng nói." };
+        }
+    },
+
+    async finishPronunciationExerciseAttempt(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}/finish`, {
+            method: "POST",
+        });
+        const responseData = await res.json();
+        if (!res.ok) {
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        return responseData.data || responseData;
+    },
+
+    async fetchPronunciationExerciseAttemptHistory(page = 1, limit = 10) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/history?page=${page}&limit=${limit}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async getPronunciationExerciseAttemptDetail(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        const responseData = await res.json();
+        return responseData.data || responseData;
+    },
+
+    async deletePronunciationExerciseAttemptHistory(attemptId) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/attempts/${attemptId}`, {
+            method: "DELETE",
+        });
+        const responseData = await res.json();
+        if (!res.ok) {
+            const err = new Error(responseData.message || `HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
+        }
+        return responseData.data || responseData;
+    },
+
     async analyzePronunciation(exerciseId, questionIndex, audioBlob) {
         try {
             const formData = new FormData();
             formData.append('audio', audioBlob, 'recording.wav');
 
-            const res = await fetch(`${API_URL}/pronunciation-exercise/analyze/${exerciseId}/${questionIndex}`, {
+            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/analyze/${exerciseId}/${questionIndex}`, {
                 method: 'POST',
                 body: formData,
             });
 
-            if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            const data = await res.json();
+            const responseData = await res.json();
+            if (!res.ok) {
+                throw new Error(responseData?.message || responseData?.error || `HTTP error! Status: ${res.status}`);
+            }
+            const data = responseData.data || responseData;
             return data;
         } catch (err) {
             console.error("Error analyzing audio:", err);
-            return { success: false, message: "Lỗi khi phân tích giọng nói." };
+            return { success: false, message: err.message || "Lỗi khi phân tích giọng nói." };
         }
     },
 
     async getPronunciationExerciseDetail(id) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${id}`, {
-                method: "GET",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        const langQuery = getCurrentLanguageQuery().replace("&", "?");
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/${id}${langQuery}`, {
+            method: "GET",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = responseData.data || responseData;
+        return data;
+    },
+
+    async getPronunciationExerciseAdmin(id) {
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/${id}`, {
+            method: "GET",
+        });
+        if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+        const responseData = await res.json();
+        return responseData.data || responseData;
     },
 
     async completePronunciationExercise(pronunciationexerciseId) {
-        try {
-            const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/complete/${pronunciationexerciseId}`, {
-                method: "POST",
-            });
-            if (!res.ok) {
-                const err = new Error(`HTTP error! Status: ${res.status}`);
-                err.status = res.status;
-                throw err;
-            }
-            const data = await res.json();
-            return data;
-        } catch (error) {
-            throw error;
+        const res = await AuthService.fetchWithAuth(`${API_URL}/pronunciation-exercise/api/pronunciation-exercises/complete/${pronunciationexerciseId}`, {
+            method: "POST",
+        });
+        if (!res.ok) {
+            const err = new Error(`HTTP error! Status: ${res.status}`);
+            err.status = res.status;
+            throw err;
         }
+        const responseData = await res.json();
+        const data = responseData.data || responseData;
+        return data;
     },
 
     resetAlertFlag() {
@@ -109,7 +247,9 @@ export const PronunciationExerciseService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error adding pronunciation:", err);
             throw err;
@@ -123,7 +263,9 @@ export const PronunciationExerciseService = {
                 body: JSON.stringify(formData),
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error updating pronunciation:", err);
             throw err;
@@ -136,7 +278,9 @@ export const PronunciationExerciseService = {
                 method: "DELETE",
             });
             if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-            return await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
+            return await data;
         } catch (err) {
             console.error("Error deleting pronunciation:", err);
             throw err;

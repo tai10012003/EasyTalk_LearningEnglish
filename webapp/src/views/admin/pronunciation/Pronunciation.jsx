@@ -4,11 +4,11 @@ import { PronunciationService } from "@/services/PronunciationService.jsx";
 
 function Pronunciation() {
     const fetchPronunciations = async (page = 1) => {
-        const data = await PronunciationService.fetchPronunciations(page, 6);
+        const data = await PronunciationService.fetchPronunciations(page, 6, { admin: true });
         return {
-            lessons: data.pronunciations || [],
-            currentPage: data.currentPage,
-            totalPages: data.totalPages,
+            lessons: data.data.pronunciations || [],
+            currentPage: data.data.currentPage,
+            totalPages: data.data.totalPages,
         };
     };
 
@@ -25,6 +25,7 @@ function Pronunciation() {
                 dataKey="lessons"
                 addUrl="/admin/pronunciation/add"
                 updateUrl="/admin/pronunciation/update"
+                translateUrl="/admin/pronunciation/translate"
             />
         </div>
     );

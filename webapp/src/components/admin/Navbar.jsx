@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 const parseJwt = (token) => {
     try {
         return JSON.parse(atob(token.split('.')[1]));
-    } catch (e) {
+    } catch {
         return null;
     }
 };
@@ -21,9 +21,8 @@ function Navbar() {
     const [username, setUsername] = useState("Admin");
     useEffect(() => {
         const checkAndRefreshToken = async () => {
-          const token = localStorage.getItem("token");
-          const refreshToken = localStorage.getItem("refreshToken");
-          if (token && refreshToken) {
+          const token = AuthService.getAccessToken();
+          if (token) {
             if (isTokenExpired(token)) {
               try {
                 await AuthService.refreshToken();
@@ -34,7 +33,7 @@ function Navbar() {
                 return;
               }
             }
-            const currentToken = localStorage.getItem("token");
+            const currentToken = AuthService.getAccessToken();
             const decoded = parseJwt(currentToken);
             if (decoded && decoded.username) {
               setUsername(decoded.username);

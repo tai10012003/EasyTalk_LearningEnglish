@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
-function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl }) {
+function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl, translateUrl }) {
     const [prizes, setPrizes] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
 
-    const loadData = async (page = 1) => {
+    const loadData = useCallback(async (page = 1) => {
         setLoading(true);
         try {
             const data = await fetchData(page);
-            setPrizes(data[dataKey] || []);
-            setCurrentPage(data.currentPage);
-            setTotalPages(data.totalPages);
+            const items = Array.isArray(data) ? data : data[dataKey] || data.data || [];
+            setPrizes(items);
+            setCurrentPage(data.currentPage || page);
+            setTotalPages(data.totalPages || 1);
         } catch (err) {
             console.error(err);
             setPrizes([]);
@@ -21,11 +22,11 @@ function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
         } finally {
             setLoading(false);
         }
-    };
+    }, [dataKey, fetchData]);
 
     useEffect(() => {
         loadData(currentPage);
-    }, [currentPage]);
+    }, [currentPage, loadData]);
 
     const handleDelete = async (id, name) => {
         Swal.fire({
@@ -41,7 +42,7 @@ function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa luyện tập "${name}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa luyện tập "${name}" thất bại!`, 'error');
                 }
             }
@@ -142,6 +143,14 @@ function PrizeList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                                 >
                                                     Sửa
                                                 </a>
+                                                {translateUrl && (
+                                                    <a
+                                                        href={`${translateUrl}/${prize._id}`}
+                                                        className="admin-prize-btn-edit"
+                                                    >
+                                                        Dịch EN
+                                                    </a>
+                                                )}
                                                 <button
                                                     className="admin-prize-btn-delete"
                                                     onClick={() => handleDelete(prize._id, prize.name)}

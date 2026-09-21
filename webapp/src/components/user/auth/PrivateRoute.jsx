@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Navigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import { AuthService } from "@/services/AuthService.jsx";
 
 const PrivateRoute = ({ children, roles = [] }) => {
-    const token = localStorage.getItem("token");
+    const token = AuthService.getAccessToken();
     const [hasAlertShown, setHasAlertShown] = useState(false);
     const role = localStorage.getItem("role");
 

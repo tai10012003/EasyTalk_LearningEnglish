@@ -40,7 +40,7 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                     await deleteItem(id);
                     Swal.fire('Thành công!', `Xóa chặng "${title}" thành công!`, 'success');
                     loadData(currentPage);
-                } catch (err) {
+                } catch {
                     Swal.fire('Thất bại!', `Xóa chặng "${title}" thất bại!`, 'error');
                 }
             }
@@ -134,6 +134,12 @@ function StageList({ fetchData, deleteItem, title, dataKey, addUrl, updateUrl })
                                                     className="admin-exercise-btn-edit"
                                                 >
                                                     Sửa
+                                                </a>
+                                                <a
+                                                    href={`/admin/stage/translate/${stage._id}`}
+                                                    className="admin-exercise-btn-edit"
+                                                >
+                                                    Dịch EN
                                                 </a>
                                                 <button
                                                     className="admin-exercise-btn-delete"

@@ -1,4 +1,5 @@
 import React from "react";
+import { useTranslation } from "react-i18next";
 
 function DictationFullScript({
     fullScript,
@@ -8,9 +9,10 @@ function DictationFullScript({
     fullScriptSpeed,
     updateFullScriptSpeed,
     }) {
+    const { t } = useTranslation();
     return (
         <div className="full-script-container">
-            <h3>ĐẦY ĐỦ AUDIO VÀ SCRIPT</h3>
+            <h3>{t("dictationExercisePage.fullScript.title")}</h3>
             <div>
                 <button onClick={playFullScript} id="playFullScriptButton">
                     <i className="fas fa-volume-up"></i>
@@ -19,7 +21,7 @@ function DictationFullScript({
                     htmlFor="fullScriptSpeedControl"
                     style={{ fontWeight: "bold", fontSize: "17px", margin: "0 10px" }}
                     >
-                    Tốc độ âm thanh:
+                    {t("dictationExercisePage.controls.audioSpeed")}
                 </label>
                 <input
                     type="range"
@@ -34,7 +36,7 @@ function DictationFullScript({
             </div>
 
             <button onClick={toggleScript} id="toggleScriptButton">
-                {showScript ? "Ẩn script" : "Hiện script"}
+                {showScript ? t("dictationExercisePage.fullScript.hideScript") : t("dictationExercisePage.fullScript.showScript")}
             </button>
             {showScript && (
                 <div id="fullScriptText" dangerouslySetInnerHTML={{ __html: fullScript }} />

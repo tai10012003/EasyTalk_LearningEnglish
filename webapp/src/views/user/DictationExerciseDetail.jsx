@@ -1,18 +1,19 @@
 import React, { useEffect, useState, useRef, useCallback  } from "react";
 import Swal from "sweetalert2";
-import { useParams, useNavigate, UNSAFE_NavigationContext } from "react-router-dom";
+import { useParams, UNSAFE_NavigationContext } from "react-router-dom";
 import LoadingScreen from "@/components/user/LoadingScreen.jsx";
 import DictationControls from "@/components/user/dictationexercise/DictationControls.jsx";
 import DictationComplete from "@/components/user/dictationexercise/DictationComplete.jsx";
 import DictationFullScript from "@/components/user/dictationexercise/DictationFullScript.jsx";
 import { DictationExerciseService } from "@/services/DictationExerciseService.jsx";
 import { UserProgressService } from "@/services/UserProgressService.jsx";
+import { useTranslation } from "react-i18next";
 
 function DictationExerciseDetail() {
+    const { t, i18n } = useTranslation();
     const { slug } = useParams();
     const [exerciseId, setExerciseId] = useState(null);
     const { navigator } = React.useContext(UNSAFE_NavigationContext);
-    const navigate = useNavigate();
     const [title, setTitle] = useState("");
     const [sentences, setSentences] = useState([]);
     const [currentIndex, setCurrentIndex] = useState(0);
@@ -35,13 +36,6 @@ function DictationExerciseDetail() {
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
 
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
-
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
         intervalRef.current = setInterval(() => {
@@ -55,6 +49,13 @@ function DictationExerciseDetail() {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -77,19 +78,34 @@ function DictationExerciseDetail() {
     }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
-        document.title = "Chi tiết bài nghe chép chính tả - EasyTalk";
+        document.title = t("dictationExercisePage.detail.documentTitle");
         async function fetchDictation() {
             setIsLoading(true);
             try {
-                const data = await DictationExerciseService.getDictationExerciseBySlug(slug);
-                if (data.success) {
-                    setExerciseId(data.data._id);
-                    setTitle(data.data.title);
-                    const sentencesArr = data.data.content.split(". ").map((s) => s.trim()).filter((s) => s.length > 0).map((s) => (s.endsWith(".") ? s : s + "."));
+                const dictationExercise = await DictationExerciseService.getDictationExerciseBySlug(slug);
+                const content = typeof dictationExercise?.content === "string" ? dictationExercise.content : "";
+                if (dictationExercise?._id && content.trim()) {
+                    setExerciseId(dictationExercise._id);
+                    setTitle(dictationExercise.title || "");
+                    const sentencesArr = content.split(/(?<=[.!?])\s+/).map((s) => s.trim()).filter(Boolean).map((s) => /[.!?]$/.test(s) ? s : `${s}.`);
                     setSentences(sentencesArr);
                     setFullScript(sentencesArr.join("<br>"));
                     setCurrentIndex(0);
+                    setUserInput("");
+                    setResult("");
+                    setCurrentSentenceDisplay("");
+                    setShowNext(false);
+                    setShowActions(false);
                     setHasStarted(true);
+                } else {
+                    setSentences([]);
+                    setFullScript("");
+                    setHasStarted(false);
+                    Swal.fire({
+                        icon: "error",
+                        title: t("dictationExercisePage.detail.errorTitle"),
+                        text: t("dictationExercisePage.detail.notFound")
+                    });
                 }
             } catch (err) {
                 console.error("Error fetching dictation:", err);
@@ -98,17 +114,11 @@ function DictationExerciseDetail() {
             }
         }
         fetchDictation();
-    }, [slug]);
+    }, [slug, t, i18n.language]);
 
-    const removePunctuation = (text) => text.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()]/g, "").replace(/\s{2,}/g, " ");
+    const removePunctuation = (text) => text.replace(/[.,/#!$%&*;:{}=_`~()-]/g, "").replace(/\s{2,}/g, " ");
 
-    useEffect(() => {
-        if (sentences.length > 0) {
-            playSentence(repeatCount, sentences[currentIndex]);
-        }
-    }, [currentIndex, sentences, playSpeed, repeatCount]);
-
-    const playSentence = (repeats = 1, sentenceText) => {
+    const playSentence = useCallback((repeats = 1, sentenceText) => {
         speechSynthesis.cancel();
         const sentence = sentenceText || sentences[currentIndex];
         let count = 0;
@@ -123,7 +133,13 @@ function DictationExerciseDetail() {
             }
         }
         if (sentence) speak();
-    };
+    }, [currentIndex, playSpeed, sentences]);
+
+    useEffect(() => {
+        if (sentences.length > 0) {
+            playSentence(repeatCount, sentences[currentIndex]);
+        }
+    }, [currentIndex, sentences, playSpeed, repeatCount, playSentence]);
 
     const checkDictation = () => {
         const correctSentence = removePunctuation(
@@ -154,14 +170,14 @@ function DictationExerciseDetail() {
         if (userWords.join(" ") == correctSentence) {
             setResult(
                 <p style={{ color: "green" }}>
-                    Câu chính xác: {sentences[currentIndex]}
+                    {t("dictationExercisePage.detail.correctSentence")}: {sentences[currentIndex]}
                 </p>
             );
             setShowNext(true);
         } else {
             setResult(
                 <p style={{ color: "black" }}>
-                    Đáp án hiện tại: {maskedSentence.trim()}
+                    {t("dictationExercisePage.detail.currentAnswer")}: {maskedSentence.trim()}
                 </p>
             );
         }
@@ -171,7 +187,7 @@ function DictationExerciseDetail() {
         setUserInput(sentences[currentIndex]);
         setResult(
             <p style={{ color: "green" }}>
-                Câu chính xác: {sentences[currentIndex]}
+                {t("dictationExercisePage.detail.correctSentence")}: {sentences[currentIndex]}
             </p>
         );
         setShowNext(true);
@@ -185,11 +201,11 @@ function DictationExerciseDetail() {
             if (!allowNavigationRef.current && hasStarted && !exerciseCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện nghe. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("dictationExercisePage.detail.leaveWarningTitle"),
+                    text: t("dictationExercisePage.detail.leaveWarningText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("dictationExercisePage.detail.leaveConfirm"),
+                    cancelButtonText: t("dictationExercisePage.detail.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -207,7 +223,7 @@ function DictationExerciseDetail() {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, hasStarted, exerciseCompleted]);
+    }, [navigator, hasStarted, exerciseCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -234,7 +250,7 @@ function DictationExerciseDetail() {
         } else {
             setResult(
                 <p className="completion-message">
-                    Bạn đã hoàn thành bài luyện nghe chép chính tả !
+                    {t("dictationExercisePage.detail.finishedInline")}
                 </p>
             );
             setShowActions(true);
@@ -258,9 +274,9 @@ function DictationExerciseDetail() {
             setExerciseCompleted(true);
             Swal.fire({
                 icon: "success",
-                title: "Hoàn thành!",
-                text: "Chúc mừng! Bạn đã hoàn thành bài luyện tập nghe chính tả. Bài luyện tập nghe chính tả tiếp theo đã được mở khóa.",
-                confirmButtonText: "Quay lại danh sách bài luyện tập nghe chính tả",
+                title: t("dictationExercisePage.detail.completeTitle"),
+                text: t("dictationExercisePage.detail.completeText"),
+                confirmButtonText: t("dictationExercisePage.detail.completeConfirm"),
             }).then(() => {
                 window.location.href = "/dictation-exercise";
             });
@@ -268,8 +284,8 @@ function DictationExerciseDetail() {
             console.error("Error completing dictation exercise:", err);
             Swal.fire({
                 icon: "error",
-                title: "Lỗi",
-                text: "Có lỗi xảy ra khi cập nhật tiến độ."
+                title: t("dictationExercisePage.detail.errorTitle"),
+                text: t("dictationExercisePage.detail.errorText")
             });
         }
     }
@@ -282,7 +298,7 @@ function DictationExerciseDetail() {
                 <>
                     <div className="dictation-learning">
                         <div className="section_tittle">
-                            <h3>Chủ đề: {title}</h3>
+                            <h3>{t("dictationExercisePage.detail.topic", { title })}</h3>
                         </div>
                         <DictationControls
                             playSentence={playSentence}

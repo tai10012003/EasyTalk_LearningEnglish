@@ -1,0 +1,269 @@
+const cache = require('../../../shared/utils/cacheService');
+const cacheNs = require('../../../shared/utils/cacheNamespaces');
+const { policies, withTags } = require('../../../shared/utils/cachePolicies');
+const StoryRepository = require('../repositories/storyRepository');
+const { invalidateStoryCache } = require('../utils/cacheHelper');
+const { Story } = require('../model/story');
+const { completeLearningProgression } = require('../../../shared/utils/learningProgression');
+
+class StoryService {
+    constructor(deps = {}) {
+        const options = typeof deps.findAll === 'function' ? { repository: deps } : deps;
+        this.repository = options.repository || new StoryRepository();
+        if (!options.imageService) {
+            throw new Error("StoryService requires imageService");
+        }
+        this.imageService = options.imageService;
+        this.cache = options.cacheService || cache;
+        this.userProgressService = options.userProgressService || null;
+        this.englishTranslationService = options.englishTranslationService || null;
+    }
+
+    getUserProgressService() {
+        if (!this.userProgressService) {
+            throw new Error("StoryService requires userProgressService");
+        }
+        return this.userProgressService;
+    }
+
+    async getStoryList(page = 1, limit = 12, category = "", level = "", search = "", role = "user", lang = "vi") {
+        const cacheKey = cacheNs.listKey('story', { page, limit, category, level, search, role });
+        const result = await this.cache.getOrSet(cacheKey, withTags(policies.contentList('story', role), cacheNs.listTags('story')), async () => {
+            const skip = (page - 1) * limit;
+            const filter = {};
+            if (role !== "admin") {
+                filter.display = true;
+            }
+            if (category) filter.category = category;
+            if (level) filter.level = level;
+            if (search) filter.title = { $regex: search, $options: "i" };
+            const { stories, total } = await this.repository.findAll(filter, skip, limit);
+            return { stories, totalStory: total };
+        });
+        if (lang === "en" && this.englishTranslationService && role !== "admin") {
+            return {
+                ...result,
+                stories: await this.englishTranslationService.applyTranslations("story", result.stories, lang)
+            };
+        }
+        return result;
+    }
+
+    async getStory(id) {
+        return await this.cache.getOrSet(cacheNs.itemKey('story', id), withTags(policies.contentDetail('story'), cacheNs.itemTags('story', id)), async () => {
+            return await this.repository.findById(id);
+        });
+    }
+
+    async getStoryBySlug(slug) {
+        return await this.cache.getOrSet(cacheNs.slugKey('story', slug), withTags(policies.contentDetail('story'), cacheNs.itemTags('story', null, slug)), async () => {
+            return await this.repository.findBySlug(slug);
+        });
+    }
+
+    async getLocalizedStoryBySlug(slug, lang = "vi") {
+        const story = await this.getStoryBySlug(slug);
+        if (lang === "en" && this.englishTranslationService) {
+            return await this.englishTranslationService.applyTranslationToItem("story", story, lang);
+        }
+        return story;
+    }
+
+    async _getOrCreateUserProgress(userId) {
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await userProgressService.getUserProgressByUserId(userId);
+        if (!userProgress) {
+            const firstStoryPage = await this.getStoryList(1, 1);
+            const firstStory = firstStoryPage?.stories?.[0] || null;
+            userProgress = await userProgressService.createUserProgress(userId, { initialUnlocks: { story: firstStory?._id || null }});
+        } else if (!Array.isArray(userProgress.unlockedStories) || userProgress.unlockedStories.length === 0) {
+            const firstStoryPage = await this.getStoryList(1, 1);
+            const firstStory = firstStoryPage?.stories?.[0] || null;
+            if (firstStory?._id) {
+                userProgress.unlockedStories = [firstStory._id];
+                await userProgressService.updateUserProgress(userProgress);
+                userProgress = await userProgressService.getUserProgressByUserId(userId);
+            }
+        }
+        return userProgress;
+    }
+
+    async getStoryDetails(userId, storyId, lang = "vi") {
+        const story = await this.getStory(storyId);
+        if (!story) {
+            return { status: 404, data: { success: false, message: "Story not found" } };
+        }
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
+        if (!isUnlocked) {
+            return { status: 403, data: { success: false, message: "This story is locked for you. Please complete previous stories first." } };
+        }
+        const localizedStory = lang === "en" && this.englishTranslationService
+            ? await this.englishTranslationService.applyTranslationToItem("story", story, lang)
+            : story;
+        return { status: 200, data: { success: true, data: { story: localizedStory } } };
+    }
+
+    async getStoryDetailsBySlug(userId, slug, lang = "vi") {
+        const story = await this.getStoryBySlug(slug);
+        if (!story) {
+            return { status: 404, data: { success: false, message: "Story not found" } };
+        }
+        return await this.getStoryDetails(userId, story._id, lang);
+    }
+
+    _buildRoadmapItem(story, unlockedIds, studyStats) {
+        const id = story._id.toString();
+        const stats = studyStats[id] || {};
+        const content = Array.isArray(story.content) ? story.content : [];
+        return {
+            _id: story._id,
+            title: story.title,
+            description: story.description,
+            image: story.image,
+            level: story.level,
+            category: story.category,
+            slug: story.slug,
+            sort: story.sort,
+            sentenceCount: story.sentenceCount ?? content.length,
+            quizCount: story.quizCount ?? content.filter(sentence => sentence?.quiz).length,
+            isUnlocked: unlockedIds.has(id),
+            isCurrent: false,
+            studyCount: stats.studyCount || 0,
+            firstStudiedAt: stats.firstStudiedAt || null,
+            lastStudiedAt: stats.lastStudiedAt || null
+        };
+    }
+
+    async _getRoadmapBaseData() {
+        const cacheKey = cacheNs.key('story', 'roadmap', { query: { role: 'user' } });
+        return await this.cache.getOrSet(cacheKey, withTags(policies.contentList('story', 'user'), cacheNs.listTags('story')), async () => {
+            const filter = { display: true };
+            if (typeof this.repository.findRoadmapItems === "function") {
+                const { stories, total } = await this.repository.findRoadmapItems(filter);
+                return { stories, totalStory: total };
+            }
+            return await this.getStoryList(1, 10000, "", "", "", "user");
+        });
+    }
+
+    async getStoryRoadmap(userId, lang = "vi") {
+        const result = await this._getRoadmapBaseData();
+        let stories = result.stories || [];
+        const totalStory = result.total ?? result.totalStory ?? stories.length;
+        if (lang === "en" && this.englishTranslationService) {
+            stories = await this.englishTranslationService.applyTranslations("story", stories, lang);
+        }
+        const userProgress = await this._getOrCreateUserProgress(userId);
+        const unlockedIds = new Set((userProgress.unlockedStories || []).map(id => id.toString()));
+        const studyStats = userProgress.storyStudyStats || {};
+        const items = stories.map(story => this._buildRoadmapItem(story, unlockedIds, studyStats));
+        const unlockedCount = items.filter(item => item.isUnlocked).length;
+        const currentIndex = items.map(item => item.isUnlocked).lastIndexOf(true);
+        if (currentIndex >= 0) {
+            items[currentIndex].isCurrent = true;
+        }
+        return {
+            status: 200,
+            data: {
+                success: true,
+                data: {
+                    items,
+                    progress: {
+                        unlockedCount,
+                        totalCount: totalStory,
+                        percent: totalStory > 0 ? Math.round((unlockedCount / totalStory) * 100) : 0
+                    }
+                }
+            }
+        };
+    }
+
+    async completeStory(userId, storyId) {
+        const story = await this.getStory(storyId);
+        if (!story) return { status: 404, data: { success: false, message: "Story not found" } };
+        const userProgressService = this.getUserProgressService();
+        let userProgress = await this._getOrCreateUserProgress(userId);
+        const isStoryUnlocked = (userProgress.unlockedStories || []).some(s => s.toString() == storyId.toString());
+        if (!isStoryUnlocked) return { status: 403, data: { success: false, message: "You cannot complete a locked story." } };
+        const { nextItem: nextStory, userProgress: completedProgress } = await completeLearningProgression({
+            repository: this.repository,
+            currentItem: story,
+            userId,
+            userProgress,
+            userProgressService,
+            unlockNext: userProgressService.unlockNextStory.bind(userProgressService),
+            unlockedField: "unlockedStories"
+        });
+        await userProgressService.recordStoryStudy(userId, storyId);
+        const latestProgress = await userProgressService.getUserProgressByUserId(userId);
+        const storyStats = latestProgress?.storyStudyStats?.[storyId.toString()] || {};
+        return {
+            status: 200,
+            data: {
+                success: true,
+                message: nextStory ? "Story completed. Next story unlocked." : "Story completed. You have finished all stories.",
+                userProgress: latestProgress || completedProgress,
+                studyStats: {
+                    studyCount: storyStats.studyCount || 0,
+                    firstStudiedAt: storyStats.firstStudiedAt || null,
+                    lastStudiedAt: storyStats.lastStudiedAt || null
+                }
+            }
+        };
+    }
+
+    async insertStory(storyData, file = null) {
+        let imageUrl = null;
+        if (file) {
+            const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'story');
+            imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
+        } else if (storyData.image) {
+            imageUrl = storyData.image;
+        }
+        const document = Story.buildDocument({ ...storyData, image: imageUrl });
+        const result = await this.repository.insert(document);
+        await invalidateStoryCache({ id: result.insertedId, slug: document.slug });
+        return { status: 201, data: { success: true, message: "Câu chuyện đã được thêm thành công!", result } };
+    }
+
+    async updateStory(id, storyData, file = null) {
+        const existing = await this.getStory(id);
+        if (!existing) return { status: 404, data: { success: false, message: "Câu chuyện không tìm thấy." } };
+        let imageUrl = existing.image || storyData.image || "";
+        if (file) {
+            const existingPublicId = existing.image ? this.imageService.extractPublicIdFromUrl(existing.image) : null;
+            if (existingPublicId) {
+                imageUrl = await this.imageService.uploadReplacementImage(file, existingPublicId);
+            } else {
+                const publicIdBase = await this.imageService.getNextPublicId(this.repository, 'story');
+                imageUrl = await this.imageService.uploadNewImage(file, publicIdBase);
+            }
+        }
+        const document = Story.buildDocument({ ...storyData, image: imageUrl });
+        delete document.createdAt;
+        document.updatedAt = new Date();
+        const result = await this.repository.update(id, document);
+        await invalidateStoryCache({ id, slugs: [existing.slug, document.slug] });
+        return { status: 200, data: { success: true, message: "Câu chuyện đã được cập nhật thành công!", result } };
+    }
+
+    async deleteStory(id) {
+        const existing = await this.getStory(id);
+        if (!existing) return { status: 404, data: { success: false, message: "Câu chuyện không tìm thấy." } };
+        if (existing.image) {
+            const publicId = this.imageService.extractPublicIdFromUrl(existing.image);
+            if (publicId) {
+                await this.imageService.deleteImage(publicId);
+            }
+        }
+        await this.repository.delete(id);
+        if (this.englishTranslationService) {
+            await this.englishTranslationService.deleteTranslation("story", id);
+        }
+        await invalidateStoryCache({ id, slug: existing.slug });
+        return { status: 200, data: { success: true, message: "Câu chuyện đã xóa thành công!" } };
+    }
+}
+
+module.exports = StoryService;

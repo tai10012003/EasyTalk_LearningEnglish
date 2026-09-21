@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, Link, useLocation } from 'react-router-dom';
 import { useTranslation } from "react-i18next";
+import { useDispatch, useSelector } from 'react-redux';
 import Swal from 'sweetalert2';
-import { io } from "socket.io-client";
 import { UserProgressService } from '@/services/UserProgressService.jsx';
 import { AuthService } from '@/services/AuthService.jsx';
 import { NotificationService } from '@/services/NotificationService.jsx';
+import { SocketService } from '@/services/SocketService.jsx';
+import { setLanguage } from '@/store/language/languageSlice';
 import logo from '@/assets/images/logo.png';
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -13,7 +15,7 @@ const API_URL = import.meta.env.VITE_API_URL;
 const parseJwt = (token) => {
   try {
     return JSON.parse(atob(token.split('.')[1]));
-  } catch (e) {
+  } catch {
     return null;
   }
 };
@@ -25,15 +27,18 @@ const isTokenExpired = (token) => {
 
 function Menu() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [socket, setSocket] = useState(null);
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
+  const dispatch = useDispatch();
+  const currentLanguage = useSelector((state) => state.language.current);
   const [username, setUsername] = useState('User');
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState({
     lessons: false,
     practice: false,
+    more: false,
     login: false,
+    language: false,
   });
   const [streakData, setStreakData] = useState({ streak: 0 });
   const [leaderData, setLeaderData] = useState({ experiencePoints: 0 });
@@ -54,42 +59,41 @@ function Menu() {
     '/communicate',
     '/writing',
   ];
+  const coachRoutes = ['/coach'];
+  const moreRoutes = ['/leaderboard', '/statistic'];
+  const languages = [
+    { value: 'vi', label: 'Tiếng Việt', shortLabel: 'VI' },
+    { value: 'en', label: 'English', shortLabel: 'EN' },
+  ];
+  const selectedLanguage = languages.find((lang) => lang.value === currentLanguage) || languages[0];
   const isLessonsActive = lessonRoutes.some((p) => location.pathname == p);
   const isPracticeActive = practiceRoutes.some((p) => location.pathname == p);
+  const isCoachActive = coachRoutes.some((p) => location.pathname == p);
+  const isMoreActive = moreRoutes.some((p) => location.pathname == p);
   const isMobile = window.innerWidth <= 991;
   const showLessons = isMobile ? dropdownOpen.lessons : (dropdownOpen.lessons || isLessonsActive);
   const showPractice = isMobile ? dropdownOpen.practice : (dropdownOpen.practice || isPracticeActive);
+  const showMore = isMobile ? dropdownOpen.more : (dropdownOpen.more || isMoreActive);
 
   useEffect(() => {
     if (!isLoggedIn) return;
-    console.log("🔹 Initializing socket...");
-    const newSocket = io(API_URL, { transports: ['websocket', 'polling'] });
-    setSocket(newSocket);
-    newSocket.on("connect", () => {
-      const token = localStorage.getItem("token");
-      const decoded = parseJwt(token);
-      if (decoded && decoded.id) {
-        newSocket.emit("register", decoded.id);
-      }
-    });
-    newSocket.on("connect_error", (err) => console.error("❌ Socket connect error:", err));
-    newSocket.on("disconnect", (reason) => console.log("⚠️ Socket disconnected:", reason));
-    newSocket.on("new-notification", (notif) => {
+
+    const unsubscribeNotifications = SocketService.subscribeToNotifications((notif) => {
       setNotifications(prev => [notif, ...prev]);
       setUnreadCount(prev => prev + 1);
     });
+    SocketService.connect();
+
     return () => {
-      console.log("🔹 Disconnecting socket...");
-      newSocket.disconnect();
-      setSocket(null);
+      unsubscribeNotifications();
+      SocketService.disconnect();
     };
   }, [isLoggedIn]);
 
   useEffect(() => {
     const checkAndRefreshToken = async () => {
-      const token = localStorage.getItem("token");
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (token && refreshToken) {
+      const token = AuthService.getAccessToken();
+      if (token) {
         if (isTokenExpired(token)) {
           try {
             await AuthService.refreshToken();
@@ -100,7 +104,7 @@ function Menu() {
             return;
           }
         }
-        const currentToken = localStorage.getItem("token");
+        const currentToken = AuthService.getAccessToken();
         const decoded = parseJwt(currentToken);
         if (decoded && decoded.username) {
           setIsLoggedIn(true);
@@ -268,6 +272,9 @@ function Menu() {
       if (!e.target.closest('.notification-wrapper')) {
         setShowNotificationDropdown(false);
       }
+      if (!e.target.closest('.language-switcher')) {
+        setDropdownOpen((prev) => ({ ...prev, language: false }));
+      }
     };
     document.addEventListener('click', handleClickOutside);
     return () => document.removeEventListener('click', handleClickOutside);
@@ -312,7 +319,12 @@ function Menu() {
 
   const handleLinkClick = () => {
     setMenuOpen(false);
-    setDropdownOpen({ lessons: false, practice: false, login: false });
+    setDropdownOpen({ lessons: false, practice: false, more: false, login: false, language: false });
+  };
+
+  const handleLanguageChange = (language) => {
+    dispatch(setLanguage(language));
+    setDropdownOpen((prev) => ({ ...prev, language: false }));
   };
 
   return (
@@ -325,6 +337,37 @@ function Menu() {
                 {t("header.topbar.marquee")}
               </span>
             </div>
+          </div>
+          <div className={`language-switcher ${dropdownOpen.language ? 'show' : ''}`}>
+            <button
+              type="button"
+              className="language-switcher-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleDropdown('language');
+              }}
+              aria-expanded={dropdownOpen.language}
+              aria-label="Change language"
+            >
+              <i className="fas fa-globe"></i>
+              <span>{selectedLanguage.shortLabel}</span>
+              <i className="fas fa-chevron-down"></i>
+            </button>
+            {dropdownOpen.language && (
+              <div className="language-switcher-menu">
+                {languages.map((lang) => (
+                  <button
+                    key={lang.value}
+                    type="button"
+                    className={`language-switcher-item ${currentLanguage === lang.value ? 'active' : ''}`}
+                    onClick={() => handleLanguageChange(lang.value)}
+                  >
+                    <span className="language-switcher-code">{lang.shortLabel}</span>
+                    <span>{lang.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           {isLoggedIn && (
             <div className="top-bar-right d-flex align-items-center">
@@ -483,6 +526,17 @@ function Menu() {
                         <i className="fas fa-road me-2"></i>{t("header.menu.journey")}
                       </NavLink>
                     </li>
+                    {isLoggedIn && (
+                      <li className="nav-item">
+                        <NavLink
+                          className={() => `nav-link ${isCoachActive ? 'active' : ''}`}
+                          to="/coach"
+                          onClick={handleLinkClick}
+                        >
+                          <i className="fas fa-brain me-2"></i>AI COACH
+                        </NavLink>
+                      </li>
+                    )}
                     <li className={`nav-item dropdown ${showLessons ? 'show' : ''}`}>
                       <a
                         className={`nav-link dropdown-toggle ${isLessonsActive ? 'active' : ''}`}
@@ -606,23 +660,34 @@ function Menu() {
                         BÀI VIẾT
                       </NavLink>
                     </li> */}
-                    <li className="nav-item">
-                      <NavLink
-                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                        to="/leaderboard"
-                        onClick={handleLinkClick}
+                    <li className={`nav-item dropdown ${showMore ? 'show' : ''}`}>
+                      <a
+                        className={`nav-link dropdown-toggle ${isMoreActive ? 'active' : ''}`}
+                        onClick={() => toggleDropdown('more')}
+                        role="button"
+                        aria-expanded={showMore}
                       >
-                        <i className="fas fa-trophy me-2"></i>{t("header.menu.leaderboard")}
-                      </NavLink>
-                    </li>
-                    <li className="nav-item">
-                      <NavLink
-                        className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                        to="/statistic"
-                        onClick={handleLinkClick}
+                        <i className="fas fa-ellipsis-h me-2"></i> {t("header.menu.other")}
+                      </a>
+                      <div
+                        className={`dropdown-menu ${showMore ? 'show' : ''}`}
+                        aria-labelledby="navbarDropdownMore"
                       >
-                        <i className="fas fa-chart-line me-2"></i>{t("header.menu.statistics")}
-                      </NavLink>
+                        <NavLink
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
+                          to="/leaderboard"
+                          onClick={handleLinkClick}
+                        >
+                          <i className="fas fa-trophy me-2"></i>{t("header.menu.submenu_other.leaderboard")}
+                        </NavLink>
+                        <NavLink
+                          className={({ isActive }) => `dropdown-item ${isActive ? 'active' : ''}`}
+                          to="/statistic"
+                          onClick={handleLinkClick}
+                        >
+                          <i className="fas fa-chart-line me-2"></i>{t("header.menu.submenu_other.statistics")}
+                        </NavLink>
+                      </div>
                     </li>
                     {/* <li className="nav-item">
                       <NavLink
@@ -646,7 +711,7 @@ function Menu() {
                         role="button"
                         aria-expanded={dropdownOpen.login}
                       >
-                        <i className="fas fa-user-circle me-2"></i>{isLoggedIn ? username : "Đăng nhập"}
+                        <i className="fas fa-user-circle me-2"></i>{isLoggedIn ? username : t("header.menu.login")}
                       </a>
                       {isLoggedIn && (
                         <div

@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+  backend:
+    image: taidepzai/backend_learningenglish:latest
+    container_name: backend
+    ports:
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      - REDIS_HOST=redis
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  frontend:
+    image: taidepzai/frontend_learningenglish:latest
+    container_name: frontend
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - backend
+    volumes:
+      - /etc/letsencrypt:/etc/letsencrypt:ro
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    env_file:
+      - .env
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      sh -c 'redis-server
+      --requirepass "$$REDIS_PASSWORD"
+      --maxmemory "$${REDIS_MAXMEMORY:-256mb}"
+      --maxmemory-policy "$${REDIS_MAXMEMORY_POLICY:-allkeys-lru}"
+      --appendonly "$${REDIS_APPENDONLY:-no}"
+      --save "$${REDIS_SAVE_SECONDS:-}"'
+    mem_limit: ${REDIS_CONTAINER_MEMORY_LIMIT:-384m}
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$${REDIS_PASSWORD}\" ping | grep PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app-network
+
+volumes:
+  redis_data:
+
+networks:
+  app-network:
+    driver: bridge

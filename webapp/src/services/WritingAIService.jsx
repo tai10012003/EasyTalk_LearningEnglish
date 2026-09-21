@@ -13,7 +13,8 @@ export const WritingAIService = {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data.topic;
         } catch (error) {
@@ -30,20 +31,21 @@ export const WritingAIService = {
         }
     },
 
-    async analyzeWriting(userText) {
+    async analyzeWriting(userText, mode = null) {
         try {
             if (!userText || userText.trim() == "") {
                 throw new Error("Vui lòng nhập bài viết của bạn.");
             }
             const res = await AuthService.fetchWithAuth(`${API_URL}/writing/api/analyze`, {
                 method: "POST",
-                body: JSON.stringify({ text: userText }),
+                body: JSON.stringify({ text: userText, mode }),
             });
             if (!res.ok) {
                 const errorData = await res.json();
                 throw new Error(errorData.error || `HTTP error! Status: ${res.status}`);
             }
-            const data = await res.json();
+            const responseData = await res.json();
+            const data = responseData.data;
             hasShownAlert = false;
             return data;
         } catch (error) {

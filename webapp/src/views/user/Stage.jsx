@@ -7,8 +7,10 @@ import StageCarousel from "@/components/user/stage/StageCarousel.jsx";
 import StageResultScreen from "@/components/user/stage/StageResultScreen.jsx";
 import StageHistory from "@/components/user/stage/StageHistory.jsx";
 import Swal from "sweetalert2";
+import { useTranslation } from "react-i18next";
 
 const Stage = () => {
+    const { t, i18n } = useTranslation();
     const { id } = useParams();
     const { navigator } = useContext(UNSAFE_NavigationContext);
     const allowNavigationRef = useRef(false);
@@ -19,20 +21,11 @@ const Stage = () => {
     const [isCompleted, setIsCompleted] = useState(false);
     const [showResult, setShowResult] = useState(false);
     const [showHistory, setShowHistory] = useState(false);
-    const [stageTitle, setStageTitle] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [hasStarted, setHasStarted] = useState(false);
     const [activeTime, setActiveTime] = useState(0);
     const lastInteractionRef = useRef(Date.now());
     const intervalRef = useRef(null);
     const hasRecordedRef = useRef(false);
-
-    const handleUserInteraction = useCallback(() => {
-        lastInteractionRef.current = Date.now();
-        if (!intervalRef.current) {
-            startActiveTimer();
-        }
-    }, []);
 
     const startActiveTimer = useCallback(() => {
         if (intervalRef.current) return;
@@ -47,6 +40,13 @@ const Stage = () => {
             }
         }, 1000);
     }, []);
+
+    const handleUserInteraction = useCallback(() => {
+        lastInteractionRef.current = Date.now();
+        if (!intervalRef.current) {
+            startActiveTimer();
+        }
+    }, [startActiveTimer]);
 
     useEffect(() => {
         const events = [
@@ -69,17 +69,16 @@ const Stage = () => {
     }, [handleUserInteraction, startActiveTimer]);
 
     useEffect(() => {
-        document.title = "Chặng hành trình - EasyTalk";
+        document.title = t("journeyPage.stage.documentTitle");
         const fetchStageData = async () => {
             try {
                 setIsLoading(true);
                 const data = await StageService.getStage(id);
                 if (data && data.stage && data.stage.questions && data.stage.questions.length > 0) {
                     setQuestions(data.stage.questions);
-                    setStageTitle(data.stage.title || "Bài học");
                     const initialResults = data.stage.questions.map(q => ({
                         question: q.question,
-                        userAnswer: "Chưa trả lời",
+                        userAnswer: t("journeyPage.stage.unanswered"),
                         correctAnswer: q.correctAnswer,
                         isCorrect: false,
                         explanation: q.explanation,
@@ -97,21 +96,20 @@ const Stage = () => {
         };
 
         if (id) fetchStageData();
-    }, [id]);
+    }, [id, t, i18n.language]);
 
     const handleAnswerSubmit = useCallback((questionIndex, userAnswer, isCorrect) => {
-        setHasStarted(true);
         setQuestionResults(prev => {
             const newResults = [...prev];
             newResults[questionIndex] = {
                 ...newResults[questionIndex],
-                userAnswer: userAnswer || "Không trả lời",
+                userAnswer: userAnswer || t("journeyPage.stage.noAnswer"),
                 isCorrect: isCorrect
             };
             return newResults;
         });
         if (isCorrect) setCorrectAnswers(prev => prev + 1);
-    }, []);
+    }, [t]);
 
     const handleQuestionNavigation = useCallback((index) => {
         setCurrentQuestionIndex(index);
@@ -173,11 +171,11 @@ const Stage = () => {
         } else {
             Swal.fire({
                 icon: "warning",
-                title: "Cảnh báo",
-                text: "Trình duyệt của bạn không hỗ trợ Speech Synthesis."
+                title: t("journeyPage.stage.alert.warningTitle"),
+                text: t("journeyPage.stage.alert.speechUnsupported")
             });
         }
-    }, []);
+    }, [t]);
 
     useEffect(() => {
         if (!navigator || isCompleted) return;
@@ -187,11 +185,11 @@ const Stage = () => {
             if (!allowNavigationRef.current && !isCompleted) {
                 const result = await Swal.fire({
                     icon: "warning",
-                    title: "Cảnh báo",
-                    text: "Bạn đang làm bài luyện tập. Nếu rời trang, tiến trình sẽ không được lưu. Bạn có chắc muốn rời đi?",
+                    title: t("journeyPage.stage.alert.warningTitle"),
+                    text: t("journeyPage.stage.alert.leaveText"),
                     showCancelButton: true,
-                    confirmButtonText: "Rời đi",
-                    cancelButtonText: "Ở lại",
+                    confirmButtonText: t("journeyPage.stage.alert.leaveConfirm"),
+                    cancelButtonText: t("journeyPage.stage.alert.leaveCancel"),
                     confirmButtonColor: "#d33",
                     cancelButtonColor: "#3085d6",
                 });
@@ -209,7 +207,7 @@ const Stage = () => {
             navigator.push = originalPush;
             navigator.replace = originalReplace;
         };
-    }, [navigator, isCompleted]);
+    }, [navigator, isCompleted, t]);
 
     useEffect(() => {
         const handleBeforeUnload = (e) => {
@@ -229,7 +227,7 @@ const Stage = () => {
         return (
             <div className="exercise-container">
                 <div className="exercise-no-questions">
-                    <p>Không có câu hỏi nào trong stage này.</p>
+                    <p>{t("journeyPage.stage.noQuestions")}</p>
                 </div>
             </div>
         );
